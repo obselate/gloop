@@ -1,0 +1,16 @@
+.goo/
+artifacts/
+bin/
+obj/
+*.user
+.vs/
+.vscode/
+*.lscache
+AGENTS.md
+docs/
+tests/
+assets/gloop.prompt.txt
+deps/nuget/README.md
+scripts/benchmark*
+scripts/benchmarks/
+scripts/create_preview_fixture.py

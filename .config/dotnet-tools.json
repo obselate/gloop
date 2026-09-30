@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "gslint": {
+      "version": "0.1.0-g44e43c0",
+      "commands": ["gslint"],
+      "rollForward": false
+    }
+  }
+}

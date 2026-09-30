@@ -1,0 +1,24 @@
+<Project Sdk="Gsharp.NET.Sdk/0.4.1094-g99735b0667">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>gloop</RootNamespace>
+    <AssemblyName>gloop</AssemblyName>
+    <Version>0.5.0</Version>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAot>true</PublishAot>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="src/**/*.gs" />
+    <EmbeddedResource Include="src/Resources/ThirdPartyNotices.txt" LogicalName="gloop.ThirdPartyNotices.txt" />
+    <EmbeddedResource Include="assets/gloop.png" LogicalName="gloop.Icon.png" />
+    <PackageReference Include="Goo" Version="[0.7.9]" />
+    <PackageReference Include="Goo.Animations" Version="[0.2.5]" />
+    <PackageReference Include="Goo.Svg" Version="[0.7.9]" />
+    <PackageReference Include="Goo.Widgets" Version="[0.2.12]" />
+  </ItemGroup>
+</Project>
