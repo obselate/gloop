@@ -560,17 +560,18 @@ partial class BrowserView : Cell {
         } else {
             secondList
         }
-        let header = List[Blob]()
-        header.Add(
-            Container{
-                FlexGrow: 1,
-                FlexBasis: 0,
-                MinWidth: 0,
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                Gap: 10,
+        let summary = Container{
+            FlexGrow: 1,
+            FlexBasis: 0,
+            MinWidth: 0,
+            FlexDirection: FlexDirection.Row,
+            AlignItems: AlignItems.Center,
+            Gap: 10,
+        }
+        if chooser == nil {
+            summary.Children.Add(
                 Ui.Label(
-                    chooser != nil ? ChooserTitle(): FolderName(pane.DirectoryPath),
+                    FolderName(pane.DirectoryPath),
                     p.Text,
                     if Model.Split {
                         15
@@ -578,20 +579,24 @@ partial class BrowserView : Cell {
                         18
                     },
                     600
-                ),
-                Ui.Label(
-                    if pane.Loading {
-                        "Reading folder…"
-                    } else if pane.VisibleEntries.Count == 1 {
-                        "1 item"
-                    } else {
-                        pane.VisibleEntries.Count.ToString() + " items"
-                    },
-                    p.Muted,
-                    11
-                ),
-            }
+                )
+            )
+        }
+        summary.Children.Add(
+            Ui.Label(
+                if pane.Loading {
+                    "Reading folder…"
+                } else if pane.VisibleEntries.Count == 1 {
+                    "1 item"
+                } else {
+                    pane.VisibleEntries.Count.ToString() + " items"
+                },
+                p.Muted,
+                11
+            )
         )
+        let header = List[Blob]()
+        header.Add(summary)
         if !Model.Split && availableWidth >= 560 {
             header.Add(
                 Cell.Mount[FilterFieldInput, FilterField](
@@ -668,7 +673,7 @@ partial class BrowserView : Cell {
             OnFocus: (_) -> Model.SetActive(index),
             Container{
                 Key: "pane-header",
-                Height: 44,
+                Height: chooser != nil ? 36: 44,
                 FlexShrink: 0,
                 Padding: Edges{Left: 12, Right: 10},
                 Gap: 8,

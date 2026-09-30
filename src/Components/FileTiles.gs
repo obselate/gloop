@@ -193,6 +193,7 @@ open class FileTiles : Cell[FileTableInput] {
                 Height: 34,
                 FontSize: 13,
                 Color: p.Text,
+                TextAlign: TextAlign.Center,
                 TextWrap: TextWrap.Wrap,
                 TextTrimming: TextTrimming.Ellipsis,
                 TextMaxLines: 2,
