@@ -929,12 +929,16 @@ partial class BrowserView : Cell {
     )
 
     private func FolderName(path string) string {
-        if path == "/" {
+        var directory = path
+        while directory.Length > 1 && Path.EndsInDirectorySeparator(directory) {
+            directory = Path.TrimEndingDirectorySeparator(directory)
+        }
+        if directory == "/" {
             return "File system"
         }
-        if path == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) {
+        if directory == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) {
             return "Home"
         }
-        return Path.GetFileName(path)
+        return Path.GetFileName(directory)
     }
 }
