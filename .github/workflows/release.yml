@@ -33,7 +33,7 @@ jobs:
           test "$(git cat-file -t "refs/tags/$GITHUB_REF_NAME")" = tag
           test "$(git rev-parse "refs/tags/$GITHUB_REF_NAME^{}")" = "$GITHUB_SHA"
           test "$GITHUB_SHA" = "$(git rev-parse origin/main)"
-          rg -Fx '*.gs text eol=lf linguist-language=C#' .gitattributes
+          test "$(git check-attr linguist-language -- src/Program.gs)" = 'src/Program.gs: linguist-language: C#'
       - name: Install NativeAOT prerequisites
         run: |
           sudo apt-get update
