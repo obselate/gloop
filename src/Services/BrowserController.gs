@@ -16,6 +16,8 @@ class BrowserController {
     internal var PreviewImage ImageSource?
     internal var Status string
     internal var Busy bool
+    internal var SelectFirstEntry bool = true
+    internal var EntryFilter Func[FileEntry, bool]?
 
     private let window Window
     private let settings AppSettings
@@ -397,6 +399,17 @@ class BrowserController {
         Notify()
     }
 
+    internal func SetEntryFilter(value Func[FileEntry, bool]?) {
+        EntryFilter = value
+        for index in 0 ... 2 {
+            let pane = Pane(index)
+            if pane.Entries.Count > 0 {
+                RequestView(index, SelectionPath(pane))
+            }
+        }
+        Notify()
+    }
+
     internal func SetFilter(value string) {
         let pane = ActivePane()
         if pane.Filter == value {
@@ -682,6 +695,7 @@ class BrowserController {
                 Generation: pane.ViewGeneration,
                 Entries: pane.Entries,
                 Filter: pane.Filter,
+                EntryFilter: EntryFilter,
                 Column: pane.SortColumn,
                 Descending: pane.Descending,
                 SelectedPath: selectedPath,
@@ -729,7 +743,7 @@ class BrowserController {
         for path in selected {
             pane.SelectedPaths.Remove(path)
         }
-        if pane.SelectedPaths.Count == 0 && pane.SelectionAnchorPath == "" && pane.Selected >= 0 {
+        if SelectFirstEntry && pane.SelectedPaths.Count == 0 && pane.SelectionAnchorPath == "" && pane.Selected >= 0 {
             pane.SelectedPaths.Add(entries[pane.Selected].FullPath)
         }
         if pane.SelectionAnchorPath == "" || !visiblePaths.Contains(pane.SelectionAnchorPath) {

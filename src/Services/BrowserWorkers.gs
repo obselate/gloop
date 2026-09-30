@@ -259,11 +259,16 @@ func browserViewWorker(window Window, controller BrowserController, queue ViewWo
         var visible = List[FileEntry]()
         var error = ""
         try {
-            if request.Filter == "" {
+            if request.Filter == "" && request.EntryFilter == nil {
                 visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
             } else {
                 let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
                 for entry in request.Entries {
+                    if let entryFilter = request.EntryFilter {
+                        if !entryFilter(entry) {
+                            continue
+                        }
+                    }
                     let matches = if wildcard {
                         FileSystemName.MatchesSimpleExpression(request.Filter.AsSpan(), entry.Name.AsSpan(), true)
                     } else {

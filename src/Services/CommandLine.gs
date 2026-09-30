@@ -9,8 +9,18 @@ internal class CommandLine {
             let options = LaunchOptions()
             var path = ""
             var positional = false
+            var pendingOption = ""
             for arg in args {
-                if !positional && arg == "--" {
+                if pendingOption != "" {
+                    if pendingOption == "--chooser-request" {
+                        options.ChooserRequestPath = arg
+                    } else {
+                        options.ChooserResultPath = arg
+                    }
+                    pendingOption = ""
+                } else if !positional && (arg == "--chooser-request" || arg == "--chooser-result") {
+                    pendingOption = arg
+                } else if !positional && arg == "--" {
                     positional = true
                 } else if !positional && (arg == "--help" || arg == "-h") {
                     options.Help = true
@@ -22,6 +32,14 @@ internal class CommandLine {
                     options.InstallDesktop = true
                 } else if !positional && arg == "--set-default" {
                     options.SetDefault = true
+                } else if !positional && arg == "--install-portal" {
+                    options.InstallPortal = true
+                } else if !positional && arg == "--portal" {
+                    options.Portal = true
+                } else if !positional && arg == "--set-default-chooser" {
+                    options.SetDefaultChooser = true
+                } else if !positional && arg == "--restore-default-chooser" {
+                    options.RestoreDefaultChooser = true
                 } else if !positional && arg == "--hidden" {
                     options.ShowHidden = true
                 } else if !positional && arg.StartsWith("-") {
@@ -34,7 +52,23 @@ internal class CommandLine {
                     path = arg
                 }
             }
-            if options.Help || options.Version || options.Licenses || options.InstallDesktop || options.SetDefault {
+            if pendingOption != "" {
+                options.Error = "Expected a path after " + pendingOption
+                return options
+            }
+            if (options.ChooserRequestPath == "") != (options.ChooserResultPath == "") {
+                options.Error = "Chooser mode requires --chooser-request and --chooser-result"
+                return options
+            }
+            if options.Portal ||
+                options.Help ||
+                options.Version ||
+                options.Licenses ||
+                options.InstallDesktop ||
+                options.SetDefault ||
+                options.InstallPortal ||
+                options.SetDefaultChooser ||
+                options.RestoreDefaultChooser {
                 return options
             }
             try {
@@ -53,7 +87,7 @@ internal class CommandLine {
             return options
         }
 
-        internal func Usage() string -> "Usage: gloop [--hidden] [path]\n       gloop --help\n       gloop --version\n       gloop --licenses\n       gloop --install-desktop\n       gloop --set-default"
+        internal func Usage() string -> "Usage: gloop [--hidden] [path]\n       gloop --help\n       gloop --version\n       gloop --licenses\n       gloop --install-desktop\n       gloop --set-default\n       gloop --install-portal\n       gloop --set-default-chooser\n       gloop --restore-default-chooser"
 
         internal func AppVersion() string -> typeof(CommandLine).Assembly.GetName().Version?.ToString(3) ?? "0.0.0"
 

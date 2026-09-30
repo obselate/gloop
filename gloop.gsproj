@@ -22,6 +22,7 @@
     <Compile Include="src/**/*.gs" />
     <EmbeddedResource Include="src/Resources/ThirdPartyNotices.txt" LogicalName="gloop.ThirdPartyNotices.txt" />
     <EmbeddedResource Include="assets/gloop.png" LogicalName="gloop.Icon.png" />
+    <PackageReference Include="Tmds.DBus.Protocol" Version="[0.95.1]" />
     <PackageReference Include="Goo" Version="[0.7.9]" />
     <PackageReference Include="Goo.Animations" Version="[0.2.5]" />
     <PackageReference Include="Goo.Svg" Version="[0.7.9]" />

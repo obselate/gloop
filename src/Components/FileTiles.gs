@@ -81,7 +81,7 @@ open class FileTiles : Cell[FileTableInput] {
             MinWidth: 0,
             Focusable: true,
             TabStop: true,
-            AutoFocus: value.Active,
+            AutoFocus: value.AutoFocus,
             OnKeyDown: value.OnKey,
             OnTextInput: value.OnText,
             KeyBindings: value.Keys,
@@ -103,7 +103,7 @@ open class FileTiles : Cell[FileTableInput] {
             },
         }
         if pane.VisibleEntries.Count == 0 {
-            root.Children.Add(FileTable.Empty(pane, p))
+            root.Children.Add(FileTable.Empty(pane, p, value.Choosing, value.DirectoriesOnly))
             return root
         }
         let grid = Virtual(

@@ -65,7 +65,17 @@ partial class BrowserView {
     private func ContextMenu() Blob {
         let items = List[MenuItem]()
         let count = Model.SelectedCount()
-        if count > 0 {
+        if chooser != nil {
+            if count > 0 {
+                items.Add(ContextMenuItem("Open", "Open", "open_in_new", count != 1))
+                items.Add(MenuItem{Id: "open-separator", Separator: true})
+            }
+            items.Add(ContextMenuItem("NewFolder", "New folder", "create_new_folder"))
+            items.Add(ContextMenuItem("Refresh", "Refresh", "refresh"))
+            items.Add(
+                ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden)
+            )
+        } else if count > 0 {
             items.Add(ContextMenuItem("Open", "Open", "open_in_new", count != 1))
             items.Add(MenuItem{Id: "open-separator", Separator: true})
             items.Add(ContextMenuItem("Cut", "Cut", "content_cut"))
@@ -97,7 +107,15 @@ partial class BrowserView {
                 OnDismiss: CloseContextMenu,
                 OnActivate: action -> {
                     CloseContextMenu()
-                    Host.Post(() -> Invoke(action))
+                    Host.Post(
+                        () -> {
+                            if chooser != nil && action == "Open" {
+                                OpenBrowserSelection(true)
+                            } else {
+                                Invoke(action)
+                            }
+                        }
+                    )
                 },
             }
         )

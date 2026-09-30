@@ -22,11 +22,30 @@ func Main(args[]string) int32 {
         Console.Write(CommandLine.LicenseText())
         return 0
     }
-    if launch.InstallDesktop || launch.SetDefault {
+    if launch.Portal {
+        return FileChooserPortal.Run()
+    }
+    if launch.InstallDesktop ||
+        launch.SetDefault ||
+        launch.InstallPortal ||
+        launch.SetDefaultChooser ||
+        launch
+        .RestoreDefaultChooser {
         try {
-            Console.WriteLine(DesktopIntegration.Install())
+            if !launch.RestoreDefaultChooser {
+                Console.WriteLine(DesktopIntegration.Install())
+            }
             if launch.SetDefault {
                 Console.WriteLine(DesktopIntegration.SetDefault())
+            }
+            if launch.InstallPortal || launch.SetDefaultChooser {
+                Console.WriteLine(PortalIntegration.Install())
+            }
+            if launch.SetDefaultChooser {
+                Console.WriteLine(PortalIntegration.SetDefault())
+            }
+            if launch.RestoreDefaultChooser {
+                Console.WriteLine(PortalIntegration.RestoreDefault())
             }
             return 0
         } catch (e Exception) {
@@ -34,31 +53,51 @@ func Main(args[]string) int32 {
             return 1
         }
     }
+    if launch.ChooserRequestPath != "" {
+        try {
+            launch.ChooserRequest = PortalChooserCodec.ReadRequest(launch.ChooserRequestPath)
+        } catch (e Exception) {
+            Console.Error.WriteLine("Could not load chooser request: " + e.Message)
+            return 2
+        }
+    }
     let service = SettingsService.Default()
     let loaded = service.Load()
+    let settings = launch.ChooserRequest != nil ? loaded.Settings.Clone(): loaded.Settings
+    if launch.ChooserRequest != nil {
+        settings.SplitView = false
+    }
     if launch.ShowHidden {
-        loaded.Settings.ShowHidden = true
+        settings.ShowHidden = true
     }
     Window.ConfigureApplication("Gloop", CommandLine.AppVersion(), "io.github.obselate.gloop")
-    let view = BrowserView(loaded.Settings, service, launch, loaded.Error)
+    let view = BrowserView(settings, service, launch, loaded.Error)
     let window = Window{
-        Title: launch.DirectoryPath,
+        Title: launch.ChooserRequest?.Title ?? launch.DirectoryPath,
         IconPng: AppIcon.Bytes(),
         Decorated: false,
-        NativeFileDropEnabled: true,
+        NativeFileDropEnabled: launch.ChooserRequest == nil,
         Width: 1180,
         Height: 760,
         MinWidth: 600,
         MinHeight: 400,
         Root: view,
         OnClosing: () -> view.CloseSafely(),
-        Background: Color.Parse(loaded.Settings.Theme.Background),
+        Background: Color.Parse(settings.Theme.Background),
     }
     view.Attach(window)
     try {
         window.Run()
     } finally {
         view.Shutdown()
+    }
+    if launch.ChooserRequest != nil {
+        try {
+            PortalChooserCodec.WriteResult(launch.ChooserResultPath, view.ChooserResult)
+        } catch (e Exception) {
+            Console.Error.WriteLine("Could not write chooser result: " + e.Message)
+            return 2
+        }
     }
     return 0
 }

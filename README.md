@@ -11,8 +11,18 @@ One executable. No .NET runtime or extra application packages to install.
 
 Run `./gloop --install-desktop` to install it in `~/.local/bin` and add the
 application launcher and icon. Run `./gloop --set-default` to also make Gloop
-the default application for opening folders. Save and extraction destination
-dialogs use the calling application's file chooser or desktop portal.
+the default application for opening folders.
+System package installations reuse their installed launcher and executable.
+
+Use `gloop --set-default-chooser` to install and select Gloop for portal open
+and save dialogs. User installation requires xdg-desktop-portal 1.20.1 or newer.
+Use `gloop --install-portal` to register the chooser without selecting it.
+Other portal preferences are preserved. Restart `xdg-desktop-portal` after
+changing its preference. Native KDE Qt applications
+can opt into portal dialogs, for example `PLASMA_INTEGRATION_USE_PORTAL=1 haruna`.
+Use `gloop --restore-default-chooser` to restore the previous chooser preference.
+The chooser supports local files. MIME filters match filename patterns from
+the installed desktop MIME database.
 
 ## Features
 

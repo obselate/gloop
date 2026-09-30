@@ -16,16 +16,12 @@ internal class DesktopIntegration {
             }
             let source = Environment.ProcessPath
             ?? throw InvalidOperationException("Cannot locate the running executable")
+            if SystemBinary() != "" {
+                return "Using the system installation at " + source
+            }
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let binary = Path.Combine(home, ".local", "bin", "gloop")
-            let configuredDataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME") ?? ""
-            let dataHome = if !String.IsNullOrEmpty(configuredDataHome) && Path.IsPathFullyQualified(
-                configuredDataHome
-            ) {
-                configuredDataHome
-            } else {
-                Path.Combine(home, ".local", "share")
-            }
+            let dataHome = UserDirectory("XDG_DATA_HOME", ".local/share")
             let icon = Path.Combine(dataHome, "icons", "hicolor", "512x512", "apps", AppId + ".png")
             let desktop = Path.Combine(dataHome, "applications", AppId + ".desktop")
 
@@ -59,12 +55,74 @@ internal class DesktopIntegration {
         }
 
         internal func SetDefault() string {
+            Directory.CreateDirectory(UserDirectory("XDG_CONFIG_HOME", ".config"))
             RunTool("xdg-mime", []string{"default", AppId + ".desktop", "inode/directory"}, true)
             let result = RunTool("xdg-mime", []string{"query", "default", "inode/directory"}, true)
             if result.Trim() != AppId + ".desktop" {
                 throw InvalidOperationException("The desktop did not select Gloop as the default folder handler")
             }
             return "Gloop is the default application for opening folders. Save and extraction destination dialogs use the application's file chooser."
+        }
+
+        internal func UserDirectory(variable string, fallback string) string {
+            let configured = Environment.GetEnvironmentVariable(variable) ?? ""
+            return Path.IsPathFullyQualified(configured) ? configured:
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fallback)
+        }
+
+        internal func SystemBinary() string {
+            let binary = Environment.ProcessPath ?? ""
+            if binary != "/usr/bin/gloop" && binary != "/usr/local/bin/gloop" {
+                return ""
+            }
+            let desktop = Path.Combine(SystemData(binary), "applications", AppId + ".desktop")
+            let expected = binary + " %f"
+            if EntryValue(desktop, "Desktop Entry", "Type") != "Application" ||
+                EntryValue(desktop, "Desktop Entry", "Exec") != expected {
+                throw InvalidOperationException(
+                    "The system launcher does not match " +
+                        binary +
+                        ". Reinstall the Gloop package to restore " +
+                        desktop
+                )
+            }
+            let userDesktop = Path.Combine(
+                UserDirectory("XDG_DATA_HOME", ".local/share"),
+                "applications",
+                AppId + ".desktop"
+            )
+            if File.Exists(userDesktop) && EntryValue(userDesktop, "Desktop Entry", "Exec") != expected {
+                throw InvalidOperationException(
+                    "A user launcher overrides the system package. Back up and remove " +
+                        userDesktop +
+                        ", then rerun " +
+                        binary +
+                        " with this option"
+                )
+            }
+            return binary
+        }
+
+        internal func SystemData(binary string) string -> binary == "/usr/bin/gloop" ? "/usr/share": "/usr/local/share"
+
+        internal func EntryValue(path string, section string, key string) string {
+            if !File.Exists(path) {
+                return ""
+            }
+            var active = false
+            var value = ""
+            for line in File.ReadLines(path) {
+                let trimmed = line.Trim()
+                if trimmed.StartsWith('[') {
+                    active = trimmed == "[" + section + "]"
+                } else if active {
+                    let separator = trimmed.IndexOf('=')
+                    if separator >= 0 && trimmed.Substring(0, separator).Trim() == key {
+                        value = trimmed.Substring(separator + 1).Trim()
+                    }
+                }
+            }
+            return value
         }
 
         private func DesktopEntry(binary string) string ->
@@ -122,7 +180,7 @@ internal class DesktopIntegration {
             }
         }
 
-        private func RunTool(tool string, arguments[]string, required bool) string {
+        internal func RunTool(tool string, arguments[]string, required bool) string {
             try {
                 let start = ProcessStartInfo(tool)
                 start.UseShellExecute = false
@@ -153,13 +211,11 @@ internal class DesktopIntegration {
             }
         }
 
-        private func QuotedExec(path string) string {
-            let escaped = path
-                .Replace("\\", "\\\\")
-                .Replace("\"", "\\\"")
-                .Replace("$", "\\$")
-                .Replace("`", "\\`")
-                .Replace("%", "%%")
+        internal func QuotedExec(path string, fieldCodes bool = true) string {
+            var escaped = path.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("$", "\\$").Replace("`", "\\`")
+            if fieldCodes {
+                escaped = escaped.Replace("%", "%%")
+            }
             if path.IndexOfAny(" \t\n\r\"'\\><~|&;$*?#()`".ToCharArray()) < 0 {
                 return escaped
             }

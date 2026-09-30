@@ -53,6 +53,12 @@
         "resolved": "10.0.12",
         "contentHash": "xi+BDjFpW+Sb+MHFHaH6Y/gV9I8BluFwRXc1QyCdoZbIK26eNiBeFuMTe/FMwc33G1wdHCyDg7CVTmb8OdQrMQ=="
       },
+      "Tmds.DBus.Protocol": {
+        "type": "Direct",
+        "requested": "[0.95.1, 0.95.1]",
+        "resolved": "0.95.1",
+        "contentHash": "IbGhqZAqqgB/DkT70+lAk4MNv95tZtsTMFQ+S3uGy0aTfOkGVeFjeNJsX8dBI/3+CPnO5XW6lRQKGeFEgHElKw=="
+      },
       "Hexa.NET.SDL3": {
         "type": "Transitive",
         "resolved": "1.2.17",
