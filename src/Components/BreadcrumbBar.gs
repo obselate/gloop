@@ -58,7 +58,11 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             FlexShrink: 0,
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
-            Gap: 2,
+            Gap: if value.Width >= 200 {
+                2
+            } else {
+                0
+            },
             Container{
                 FlexGrow: 1,
                 FlexBasis: 0,
@@ -78,7 +82,11 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                     Children: segments.ToArray(),
                 },
             },
-            Ui.Tool("edit", "Edit location", value.Edit, value.Window, p),
+            if value.Width >= 200 {
+                Ui.Tool("edit", "Edit location", value.Edit, value.Window, p)
+            } else {
+                Container{}
+            },
         }
     }
 
@@ -91,7 +99,14 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let button = Button{
             Handle: handle,
             Height: 30,
-            MaxWidth: Math.Min(200, value.Width - 32),
+            MaxWidth: Math.Min(
+                200,
+                value.Width - if value.Width >= 200 {
+                    32
+                } else {
+                    0
+                }
+            ),
             FlexShrink: 0,
             Padding: Edges{Left: 5, Right: 5},
             AlignItems: AlignItems.Center,
