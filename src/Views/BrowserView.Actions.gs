@@ -16,6 +16,14 @@ partial class BrowserView {
             e.Modifiers.Shift,
             e.Modifiers.Super
         )
+        if contextMenuOpen {
+            if action == "Dismiss" {
+                CloseContextMenu()
+                e.PreventDefault()
+                e.StopPropagation()
+            }
+            return
+        }
         if action == "" {
             return
         }
@@ -65,6 +73,9 @@ partial class BrowserView {
     }
 
     private func Invoke(action string) {
+        if chooser != nil && !ChooserActionAllowed(action) {
+            return
+        }
         notice = ""
         switch action {
             case "MoveUp" {
@@ -89,7 +100,10 @@ partial class BrowserView {
                 Model.MoveSelection(PageSize())
             }
             case "Open" {
-                Model.OpenSelected()
+                OpenBrowserSelection()
+            }
+            case "ContextMenu" or "ContextMenuAlternate" {
+                OpenKeyboardContextMenu()
             }
             case "Parent" {
                 Model.Parent()
@@ -155,7 +169,9 @@ partial class BrowserView {
                 Model.OpenTerminal()
             }
             case "SelectAll" {
-                Model.SelectAll()
+                if ChooserAllowsMultiple() {
+                    Model.SelectAll()
+                }
             }
             case "ToggleSelection" {
                 Model.ToggleFocusedSelection()
@@ -196,6 +212,10 @@ partial class BrowserView {
             }
             case "Dismiss" {
                 if Host.PlatformInput.CancelDrag() {
+                    return
+                }
+                if chooser != nil {
+                    CancelChooser()
                     return
                 }
                 if locationEditing {
@@ -263,6 +283,9 @@ partial class BrowserView {
     }
 
     private func MoveFiles(action string, ctrl bool, shift bool) {
+        let multiple = ChooserAllowsMultiple()
+        let control = ctrl && multiple
+        let extend = shift && multiple
         let tiles = settings.ViewMode == "tiles"
         let columns = if tiles {
             TileColumns(Model.ActiveIndex)
@@ -272,38 +295,39 @@ partial class BrowserView {
         switch action {
             case "MoveUp" {
                 if !tiles || Model.ActivePane().Selected >= columns {
-                    Model.MoveSelection(-columns, ctrl, shift)
+                    Model.MoveSelection(-columns, control, extend)
                 }
             }
             case "MoveDown" {
                 let pane = Model.ActivePane()
                 if !tiles || pane.Selected / columns < (pane.VisibleEntries.Count - 1) / columns {
-                    Model.MoveSelection(columns, ctrl, shift)
+                    Model.MoveSelection(columns, control, extend)
                 }
             }
             case "MoveLeft" {
                 if tiles {
-                    Model.MoveSelection(-1, ctrl, shift)
+                    Model.MoveSelection(-1, control, extend)
                 }
             }
             case "MoveRight" {
                 if tiles {
-                    Model.MoveSelection(1, ctrl, shift)
+                    Model.MoveSelection(1, control, extend)
                 }
             }
             case "MoveFirst" {
-                Model.MoveTo(0, ctrl, shift)
+                Model.MoveTo(0, control, extend)
             }
             case "MoveLast" {
-                Model.MoveTo(Model.ActivePane().VisibleEntries.Count - 1, ctrl, shift)
+                Model.MoveTo(Model.ActivePane().VisibleEntries.Count - 1, control, extend)
             }
             case "PageUp" {
-                Model.MoveSelection(-PageSize(), ctrl, shift)
+                Model.MoveSelection(-PageSize(), control, extend)
             }
             case "PageDown" {
-                Model.MoveSelection(PageSize(), ctrl, shift)
+                Model.MoveSelection(PageSize(), control, extend)
             }
         }
+        ChooserSelectionChanged()
         Rebuild()
     }
 
@@ -417,6 +441,9 @@ partial class BrowserView {
     }
 
     private func SavePreferences() {
+        if chooser != nil {
+            return
+        }
         notice = ""
         let error = settingsWriter?.Save(settings) ?? ""
         if error != "" {
@@ -474,6 +501,9 @@ partial class BrowserView {
     }
 
     private func OpenPreferences() {
+        if chooser != nil {
+            return
+        }
         preferenceInputs.Clear()
         preferenceTab = "Appearance"
         themeColorRole = "Background"
@@ -492,6 +522,11 @@ partial class BrowserView {
     }
 
     private func SubmitDialog() {
+        if dialog == "Replace file" {
+            CloseDialog()
+            AcceptChooser(true)
+            return
+        }
         if dialog == "New folder" {
             Model.CreateFolder(dialogValue)
         } else if dialog == "Rename" {

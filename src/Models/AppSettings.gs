@@ -107,6 +107,8 @@ internal class AppSettings {
         Keybindings["PageUp"] = "PageUp"
         Keybindings["PageDown"] = "PageDown"
         Keybindings["Open"] = "Enter"
+        Keybindings["ContextMenu"] = "Shift+F10"
+        Keybindings["ContextMenuAlternate"] = "Menu"
         Keybindings["SelectAll"] = "Ctrl+A"
         Keybindings["ToggleSelection"] = "Ctrl+Space"
         Keybindings["OpenTerminal"] = "F4"

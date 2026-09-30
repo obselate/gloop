@@ -13,6 +13,9 @@ internal data struct FileTableInput {
     var Tiles bool
     var WordWrap bool
     var Active bool
+    var AutoFocus bool
+    var Choosing bool
+    var DirectoriesOnly bool
     var FocusHandle ElementHandle
     var ViewportHandle ElementHandle
     var OnKey Action[KeyEvent]
@@ -25,6 +28,7 @@ internal data struct FileTableInput {
     var DropTarget Func[string, DropTarget]
     var DropPath string
     var OnClear Action
+    var OnContextMenu Action[int32, Point]
     var Thumbnails ThumbnailService
     var OnOpen Action
     var OnSort Action[string]
@@ -81,7 +85,7 @@ open class FileTable : Cell[FileTableInput] {
                 ScrollbarVisibilityX: ScrollbarVisibility.Auto,
                 ScrollbarY: Ui.ScrollbarStyle(p, 8),
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                EmptyContent: Empty(pane, p),
+                EmptyContent: Empty(pane, p, value.Choosing, value.DirectoriesOnly),
                 Selection: DataGridSelection.Multiple,
                 SelectedIds: selected,
                 ActiveRowId: if pane.Selected >= 0 && pane.Selected < pane.VisibleEntries.Count {
@@ -127,7 +131,7 @@ open class FileTable : Cell[FileTableInput] {
                     root.OutlineWidth = value.DropPath == pane.DirectoryPath ? 1: 0
                     root.OutlineColor = p.Accent
                     root.OutlineOffset = -1
-                    root.AutoFocus = value.Active
+                    root.AutoFocus = value.AutoFocus
                     root.KeyBindings = value.Keys
                     root.OnPointerDown = e -> {
                         if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild
@@ -135,6 +139,7 @@ open class FileTable : Cell[FileTableInput] {
                             value.OnClear()
                         }
                     }
+                    root.OnPointerUp = e -> FileTransferUi.BackgroundContextMenu(e, value, clicks)
                     return root
                 },
                 CreateHeader: (_, column, _) -> Container{
@@ -261,21 +266,28 @@ open class FileTable : Cell[FileTableInput] {
     }
 
     shared {
-        internal func Empty(pane BrowserPane, p Palette) Blob {
+        internal func Empty(pane BrowserPane, p Palette, choosing bool = false, directoriesOnly bool = false) Blob {
             if pane.Loading {
                 return Ui.Empty("hourglass_empty", "Opening folder", "Reading the directory…", p)
             }
             if pane.Error != "" {
                 return Ui.Empty("folder_off", "Unable to open folder", pane.Error, p)
             }
+            let empty = pane.Filter == "" && (!choosing || pane.Entries.Count == 0)
             return Ui.Empty(
                 "folder_open",
-                if pane.Filter == "" {
+                if empty {
                     "This folder is empty"
+                } else if directoriesOnly {
+                    "No matching folders"
                 } else {
                     "No matching files"
                 },
-                if pane.Filter == "" {
+                if choosing && (empty || (directoriesOnly && pane.Filter == "")) {
+                    "Create a folder here."
+                } else if choosing && pane.Filter == "" {
+                    "Choose another folder or file type."
+                } else if pane.Filter == "" {
                     "Create a folder or paste files here."
                 } else {
                     "Try a different name or clear the filter."

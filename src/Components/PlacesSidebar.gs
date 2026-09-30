@@ -18,7 +18,8 @@ class PlacesSidebar {
             window Window,
             p Palette,
             drop Func[string, DropTarget]? = nil,
-            dropPath string = ""
+            dropPath string = "",
+            showPreferences bool = true
         ) Blob {
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let places = List[Blob]()
@@ -43,7 +44,7 @@ class PlacesSidebar {
                 places.Add(
                     Container{
                         Padding: Edges{Left: 12, Right: 8, Bottom: 6},
-                        Ui.Label(bookmarkKey + " to add a folder", p.Muted, 11),
+                        Ui.Label(bookmarkKey == "" ? "No bookmarks": bookmarkKey + " to add a folder", p.Muted, 11),
                     }
                 )
             }
@@ -73,11 +74,15 @@ class PlacesSidebar {
                     ScrollbarVisibilityY: ScrollbarVisibility.Always,
                     Children: places.ToArray()
                 },
-                Container{
-                    Height: 44,
-                    FlexShrink: 0,
-                    JustifyContent: JustifyContent.Center,
-                    Place("settings", "Preferences", "", "not-selected", (_) -> settings(), p),
+                if showPreferences {
+                    Container{
+                        Height: 44,
+                        FlexShrink: 0,
+                        JustifyContent: JustifyContent.Center,
+                        Place("settings", "Preferences", "", "not-selected", (_) -> settings(), p),
+                    }
+                } else {
+                    Container{}
                 },
             }
         }

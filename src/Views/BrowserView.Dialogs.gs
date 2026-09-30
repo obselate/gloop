@@ -35,6 +35,11 @@ partial class BrowserView {
             contents.Add(
                 Text{Content: "You can restore these items from your desktop's Trash.", FontSize: 12, Color: p.Muted}
             )
+        } else if dialog == "Replace file" {
+            contents.Add(
+                Text{Content: "A file already exists at this location. Replace it?", FontSize: 14, Color: p.Text}
+            )
+            contents.Add(Text{Content: dialogValue, FontSize: 12, Color: p.Muted, TextWrap: TextWrap.Wrap})
         } else {
             contents.Add(
                 TextEntry{
@@ -78,6 +83,8 @@ partial class BrowserView {
                 Ui.ActionButton(
                     if dialog == "Move to Trash" {
                         "Move to Trash"
+                    } else if dialog == "Replace file" {
+                        "Replace"
                     } else if dialog == "New folder" {
                         "Create folder"
                     } else if dialog == "Open location" {
@@ -472,6 +479,12 @@ partial class BrowserView {
     }
 
     private func ActionLabel(action string) string {
+        if action == "ContextMenu" {
+            return "Open context menu"
+        }
+        if action == "ContextMenuAlternate" {
+            return "Open context menu (alternate)"
+        }
         let result = System.Text.StringBuilder()
         for index in 0 ... action.Length {
             if index > 0 && Char.IsUpper(action[index]) {

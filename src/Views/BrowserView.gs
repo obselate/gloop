@@ -78,7 +78,10 @@ partial class BrowserView : Cell {
         }
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
-                let textEntry = dialog != "Preferences" && dialog != "Move to Trash" && dialog != "Bookmarks"
+                let textEntry = dialog != "Preferences" &&
+                    dialog != "Move to Trash" &&
+                    dialog != "Bookmarks" &&
+                    dialog != "Replace file"
                 focusScope = dialogHandle.BeginFocusScope(
                     FocusScopeOptions{
                         Modal: true,
@@ -118,18 +121,25 @@ partial class BrowserView : Cell {
         value.SmoothScrolling = settings.SmoothScrolling
         browser = BrowserController(value, settings, () -> Changed())
         thumbnails = ThumbnailService(value)
-        settingsWriter = SettingsWriter(
-            value,
-            settingsService,
-            error -> {
-                notice = error
-                if dialog == "Preferences" {
-                    dialogError = error
+        if launch.ChooserRequest == nil {
+            settingsWriter = SettingsWriter(
+                value,
+                settingsService,
+                error -> {
+                    notice = error
+                    if dialog == "Preferences" {
+                        dialogError = error
+                    }
+                    Rebuild()
                 }
-                Rebuild()
-            }
-        )
-        Model.Start(launch.DirectoryPath, launch.SelectedPath)
+            )
+        }
+        if let request = launch.ChooserRequest {
+            let picker = AttachChooser(request)
+            Model.Start(picker.InitialDirectory, picker.InitialSelectedPath)
+        } else {
+            Model.Start(launch.DirectoryPath, launch.SelectedPath)
+        }
     }
 
     internal func Shutdown() {
@@ -202,7 +212,17 @@ partial class BrowserView : Cell {
 
     private func Changed() {
         if window != nil {
-            Host.Title = Model.ActivePane().DirectoryPath
+            Host.Title = ChooserTitle()
+        }
+        if let picker = chooser {
+            let pane = Model.ActivePane()
+            if !pane.Loading && chooserDirectory != pane.DirectoryPath {
+                chooserDirectory = pane.DirectoryPath
+                chooserError = ""
+                if picker.Request.Directory || picker.SavingMany {
+                    Model.ClearSelection()
+                }
+            }
         }
         Rebuild()
         for index in 0 ... 2 {
@@ -325,11 +345,12 @@ partial class BrowserView : Cell {
                     },
                     () -> OpenPreferences(),
                     settings.Bookmarks,
-                    settings.Keybindings["ToggleBookmark"],
+                    chooser == nil ? settings.Keybindings["ToggleBookmark"]: "",
                     Host,
                     p,
                     destination -> FileDropTarget(destination),
-                    dropPath
+                    dropPath,
+                    chooser == nil
                 )
             } else {
                 nil
@@ -357,10 +378,11 @@ partial class BrowserView : Cell {
         chrome.Key = "window-bar"
         children.Add(chrome)
         children.Add(main)
-        children.Add(StatusBar())
+        children.Add(chooser != nil ? ChooserBar(): StatusBar())
         if dialog != "" {
             children.Add(Dialog())
         }
+        children.Add(ContextMenu())
         return Container{
             Handle: rootHandle,
             Width: Percent(100),
@@ -475,29 +497,37 @@ partial class BrowserView : Cell {
                 FlexShrink: 0,
                 Gap: 3,
                 bookmarkNavigation,
-                Ui.Tool(
-                    "bookmark",
-                    if settings.IsBookmarked(pane.DirectoryPath) {
-                        "Remove bookmark"
-                    } else {
-                        "Bookmark this folder"
-                    },
-                    () -> Invoke("ToggleBookmark"),
-                    Host,
-                    p,
-                    settings.IsBookmarked(pane.DirectoryPath)
-                ),
+                if chooser == nil {
+                    Ui.Tool(
+                        "bookmark",
+                        if settings.IsBookmarked(pane.DirectoryPath) {
+                            "Remove bookmark"
+                        } else {
+                            "Bookmark this folder"
+                        },
+                        () -> Invoke("ToggleBookmark"),
+                        Host,
+                        p,
+                        settings.IsBookmarked(pane.DirectoryPath)
+                    )
+                } else {
+                    Container{}
+                },
                 Ui.Tool("refresh", "Refresh", () -> Model.Refresh(), Host, p),
                 Container{Width: 6},
                 Ui.Tool("visibility", "Toggle preview", () -> Invoke("TogglePreview"), Host, p, Model.PreviewVisible),
-                Ui.Tool(
-                    "splitscreen_vertical_add",
-                    "Toggle split view",
-                    () -> Invoke("ToggleSplit"),
-                    Host,
-                    p,
-                    Model.Split
-                ),
+                if chooser == nil {
+                    Ui.Tool(
+                        "splitscreen_vertical_add",
+                        "Toggle split view",
+                        () -> Invoke("ToggleSplit"),
+                        Host,
+                        p,
+                        Model.Split
+                    )
+                } else {
+                    Container{}
+                },
                 Ui.Tool(
                     "visibility_off",
                     "Toggle hidden files",
@@ -530,15 +560,16 @@ partial class BrowserView : Cell {
         } else {
             secondList
         }
-        let header = List[Blob]()
-        header.Add(
-            Container{
-                FlexGrow: 1,
-                FlexBasis: 0,
-                MinWidth: 0,
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                Gap: 10,
+        let summary = Container{
+            FlexGrow: 1,
+            FlexBasis: 0,
+            MinWidth: 0,
+            FlexDirection: FlexDirection.Row,
+            AlignItems: AlignItems.Center,
+            Gap: 10,
+        }
+        if chooser == nil {
+            summary.Children.Add(
                 Ui.Label(
                     FolderName(pane.DirectoryPath),
                     p.Text,
@@ -548,20 +579,24 @@ partial class BrowserView : Cell {
                         18
                     },
                     600
-                ),
-                Ui.Label(
-                    if pane.Loading {
-                        "Reading folder…"
-                    } else if pane.VisibleEntries.Count == 1 {
-                        "1 item"
-                    } else {
-                        pane.VisibleEntries.Count.ToString() + " items"
-                    },
-                    p.Muted,
-                    11
-                ),
-            }
+                )
+            )
+        }
+        summary.Children.Add(
+            Ui.Label(
+                if pane.Loading {
+                    "Reading folder…"
+                } else if pane.VisibleEntries.Count == 1 {
+                    "1 item"
+                } else {
+                    pane.VisibleEntries.Count.ToString() + " items"
+                },
+                p.Muted,
+                11
+            )
         )
+        let header = List[Blob]()
+        header.Add(summary)
         if !Model.Split && availableWidth >= 560 {
             header.Add(
                 Cell.Mount[FilterFieldInput, FilterField](
@@ -608,18 +643,20 @@ partial class BrowserView : Cell {
                 settings.ViewMode == "tiles"
             )
         )
-        header.Add(
-            Ui.Tool(
-                "terminal",
-                "Open terminal",
-                () -> {
-                    Model.SetActive(index)
-                    Invoke("OpenTerminal")
-                },
-                Host,
-                p
+        if chooser == nil {
+            header.Add(
+                Ui.Tool(
+                    "terminal",
+                    "Open terminal",
+                    () -> {
+                        Model.SetActive(index)
+                        Invoke("OpenTerminal")
+                    },
+                    Host,
+                    p
+                )
             )
-        )
+        }
         return Container{
             Key: "pane-" + index.ToString(),
             FlexGrow: 1,
@@ -636,7 +673,7 @@ partial class BrowserView : Cell {
             OnFocus: (_) -> Model.SetActive(index),
             Container{
                 Key: "pane-header",
-                Height: 44,
+                Height: chooser != nil ? 36: 44,
                 FlexShrink: 0,
                 Padding: Edges{Left: 12, Right: 10},
                 Gap: 8,
@@ -655,6 +692,9 @@ partial class BrowserView : Cell {
                     Compact: compact,
                     Tiles: settings.ViewMode == "tiles",
                     Active: active,
+                    AutoFocus: active && !(chooser?.Saving ?? false),
+                    Choosing: chooser != nil,
+                    DirectoriesOnly: (chooser?.Request.Directory ?? false) || (chooser?.SavingMany ?? false),
                     ViewportHandle: handle,
                     FocusHandle: if index == 0 {
                         firstFocus
@@ -688,10 +728,15 @@ partial class BrowserView : Cell {
                     },
                     OnSelect: (row, ctrl, shift) -> {
                         Model.SetActive(index)
-                        Model.Select(row, ctrl, shift)
+                        let multiple = ChooserAllowsMultiple()
+                        Model.Select(row, ctrl && multiple, shift && multiple)
+                        ChooserSelectionChanged()
                         FocusFiles()
                     },
                     OnDrag: path -> {
+                        if chooser != nil {
+                            return nil
+                        }
                         Model.SetActive(index)
                         return Model.CreateFileDrag(index, path)
                     },
@@ -707,9 +752,10 @@ partial class BrowserView : Cell {
                         Model.ClearSelection()
                         FocusFiles()
                     },
+                    OnContextMenu: (row, point) -> OpenContextMenu(index, row, point),
                     OnOpen: () -> {
                         Model.SetActive(index)
-                        Model.OpenSelected()
+                        OpenBrowserSelection(true)
                     },
                     OnSort: column -> {
                         Model.SetActive(index)
@@ -888,12 +934,16 @@ partial class BrowserView : Cell {
     )
 
     private func FolderName(path string) string {
-        if path == "/" {
+        var directory = path
+        while directory.Length > 1 && Path.EndsInDirectorySeparator(directory) {
+            directory = Path.TrimEndingDirectorySeparator(directory)
+        }
+        if directory == "/" {
             return "File system"
         }
-        if path == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) {
+        if directory == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) {
             return "Home"
         }
-        return Path.GetFileName(path)
+        return Path.GetFileName(directory)
     }
 }
