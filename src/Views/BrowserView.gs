@@ -79,6 +79,7 @@ partial class BrowserView : Cell {
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
                 let textEntry = dialog != "Preferences" &&
+                    dialog != "Desktop setup" &&
                     dialog != "Move to Trash" &&
                     dialog != "Bookmarks" &&
                     dialog != "Replace file"
@@ -87,6 +88,8 @@ partial class BrowserView : Cell {
                         Modal: true,
                         InitialFocus: if textEntry {
                             dialogInput
+                        } else if dialog == "Desktop setup" {
+                            setupChoiceHandle
                         } else {
                             dialogHandle
                         },
@@ -139,17 +142,23 @@ partial class BrowserView : Cell {
             Model.Start(picker.InitialDirectory, picker.InitialSelectedPath)
         } else {
             Model.Start(launch.DirectoryPath, launch.SelectedPath)
+            if launch.Setup || FirstRunSetup.ShouldOffer() {
+                OpenSetup()
+            }
         }
     }
 
     internal func Shutdown() {
+        if let done = setupCompletion {
+            <-done
+        }
         CommitPreferenceBindings()
         settingsWriter?.Dispose()
         browser?.Dispose()
         thumbnails?.Dispose()
     }
 
-    internal func CloseSafely() bool -> Model.CloseSafely()
+    internal func CloseSafely() bool -> !setupBusy && Model.CloseSafely()
 
     private prop firstFocus ElementHandle {
         get -> if settings.ViewMode == "tiles" {

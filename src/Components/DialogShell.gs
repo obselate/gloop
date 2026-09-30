@@ -16,7 +16,8 @@ class DialogShell {
             window Window,
             p Palette,
             width float64 = 420,
-            compact bool = false
+            compact bool = false,
+            dismissDisabled bool = false
         ) Blob -> Container{
             Key: "dialog-overlay",
             Position: PositionType.Absolute,
@@ -56,7 +57,7 @@ class DialogShell {
                     AlignItems: AlignItems.Center,
                     Ui.Label(stringTitle, p.Text, 16, 600),
                     Container{FlexGrow: 1},
-                    Ui.Tool("close", "Close dialog", dismiss, window, p),
+                    Ui.Tool("close", "Close dialog", dismiss, window, p, disabled: dismissDisabled),
                 },
                 content,
                 actions,

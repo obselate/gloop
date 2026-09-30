@@ -132,8 +132,15 @@ class Ui {
             ),
         }
 
-        internal func ActionButton(label string, action Action, p Palette, primary bool = false) Blob {
+        internal func ActionButton(
+            label string,
+            action Action,
+            p Palette,
+            primary bool = false,
+            handle ElementHandle? = nil
+        ) Blob {
             let button = Button{
+                Handle: handle,
                 Height: 34,
                 Padding: Edges{Left: 14, Right: 14},
                 BorderRadius: 6,

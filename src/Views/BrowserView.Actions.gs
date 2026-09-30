@@ -512,6 +512,9 @@ partial class BrowserView {
     }
 
     private func CloseDialog() {
+        if setupBusy {
+            return
+        }
         CommitPreferenceBindings()
         focusScope?.Dispose()
         focusScope = nil
