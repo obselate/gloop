@@ -2,55 +2,25 @@
 
 A keyboard-first file manager for Linux and Wayland. Built with G# and Goo.
 
-## Quick start
+## Install
 
 ### AUR
 
-Install [gloop-bin from AUR](https://aur.archlinux.org/packages/gloop-bin) with 
+Install [gloop-bin](https://aur.archlinux.org/packages/gloop-bin) with your AUR helper:
 
 ```sh
 yay -S gloop-bin
 ```
-or
-```
-paru -S gloop-bin
-```
 
-See the [package instructions](packaging/aur/gloop-bin/README.md) for manual installation
-and migration from a portable install.
+Or use `paru -S gloop-bin`. See the [Arch installation guide](packaging/aur/gloop-bin/README.md)
+for manual installation or migration from a portable install.
 
-### Official Release
+### Download
 
 Download the [Linux release](https://github.com/obselate/gloop/releases/latest),
-extract it, and run `./gloop`.
+extract it, and run `./gloop`. No .NET runtime is needed.
 
-Run `./gloop --install-desktop` to install gloop in `~/.local/bin`
-This will add the application launcher, icon, and AppStream metadata. 
-
-Run `./gloop --set-default` to also make Gloop the default application for opening folders.
-
-Use `gloop --set-default-chooser` to install and select Gloop for portal open
-and save dialogs. User installation requires xdg-desktop-portal 1.20.1 or newer.
-
-Use `gloop --install-portal` to register the chooser without selecting it.
-Other portal preferences are preserved. The selection also installs
-
-`~/.config/environment.d/90-gloop-chooser.conf` with KDE and GTK 3 portal
-opt-ins for desktop sessions that import the systemd user environment, including
-current KDE Plasma. Log out and log in, then restart applications. Your Qt
-platform theme and GTK debug settings are preserved. Current GTK 4 uses available
-portals. Older GTK 4 versions and desktops without systemd may need manual
-session configuration.
-Use `gloop --restore-default-chooser` to restore the previous chooser preference.
-This also removes Gloop's environment opt-ins and retains other later edits.
-The chooser supports local files. MIME filters match filename patterns from
-the installed desktop MIME database.
-
-Applications must use standard portal-capable dialogs. Ark's Open Archive
-dialog can use Gloop, but its extraction dialog embeds its own KDE browser.
-Ark's option to open the destination after extraction uses the default folder
-application selected by `gloop --set-default`. Applications with custom dialogs
-or their own portal settings need application-specific support.
+Run `./gloop --help` for optional desktop integration and folder or file dialog defaults.
 
 ## Features
 
@@ -65,14 +35,14 @@ or their own portal settings need application-specific support.
 Copy works across filesystems. Cross-filesystem move and Trash report an error
 and preserve the source. Remote filesystems are not implemented.
 
-## Platforms
+## Requirements
 
-Linux x86-64 with glibc 2.39 or newer, a native Wayland session, and Vulkan 1.3
-drivers. The same release works across compatible Linux distributions.
+Linux x86-64, glibc 2.39 or newer, Wayland, and Vulkan 1.3 drivers.
+Tested on KDE Plasma.
 
 ## Build from source
 
-See [BUILD.md](BUILD.md) for prerequisites and source build commands.
+To compile Gloop yourself, follow the [source build guide](BUILD.md).
 
 ## Performance
 
@@ -147,10 +117,9 @@ The tables identify the measured versions. These are historical results.
 
 </details>
 
-## Further reading
+## Links
 
 - [Downloads and release notes](https://github.com/obselate/gloop/releases)
-- [Arch Linux package recipe](packaging/aur/gloop-bin/README.md)
 - [Goo UI framework](https://github.com/obselate/goo)
 - [Report an issue](https://github.com/obselate/gloop/issues)
 - [MIT license](LICENSE)
