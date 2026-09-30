@@ -472,6 +472,12 @@ partial class BrowserView {
     }
 
     private func ActionLabel(action string) string {
+        if action == "ContextMenu" {
+            return "Open context menu"
+        }
+        if action == "ContextMenuAlternate" {
+            return "Open context menu (alternate)"
+        }
         let result = System.Text.StringBuilder()
         for index in 0 ... action.Length {
             if index > 0 && Char.IsUpper(action[index]) {

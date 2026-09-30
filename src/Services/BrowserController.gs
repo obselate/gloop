@@ -447,6 +447,10 @@ class BrowserController {
         Notify()
     }
 
+    internal prop HasClipboard bool {
+        get -> clipboardPaths.Count > 0
+    }
+
     internal func Paste() {
         let destination = ActivePane().DirectoryPath
         if clipboardPaths.Count == 0 || destination == "" {

@@ -22,9 +22,12 @@ func Main(args[]string) int32 {
         Console.Write(CommandLine.LicenseText())
         return 0
     }
-    if launch.InstallDesktop {
+    if launch.InstallDesktop || launch.SetDefault {
         try {
             Console.WriteLine(DesktopIntegration.Install())
+            if launch.SetDefault {
+                Console.WriteLine(DesktopIntegration.SetDefault())
+            }
             return 0
         } catch (e Exception) {
             Console.Error.WriteLine("Desktop installation failed: " + e.Message)

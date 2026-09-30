@@ -16,6 +16,14 @@ partial class BrowserView {
             e.Modifiers.Shift,
             e.Modifiers.Super
         )
+        if contextMenuOpen {
+            if action == "Dismiss" {
+                CloseContextMenu()
+                e.PreventDefault()
+                e.StopPropagation()
+            }
+            return
+        }
         if action == "" {
             return
         }
@@ -90,6 +98,9 @@ partial class BrowserView {
             }
             case "Open" {
                 Model.OpenSelected()
+            }
+            case "ContextMenu" or "ContextMenuAlternate" {
+                OpenKeyboardContextMenu()
             }
             case "Parent" {
                 Model.Parent()

@@ -361,6 +361,7 @@ partial class BrowserView : Cell {
         if dialog != "" {
             children.Add(Dialog())
         }
+        children.Add(ContextMenu())
         return Container{
             Handle: rootHandle,
             Width: Percent(100),
@@ -707,6 +708,7 @@ partial class BrowserView : Cell {
                         Model.ClearSelection()
                         FocusFiles()
                     },
+                    OnContextMenu: (row, point) -> OpenContextMenu(index, row, point),
                     OnOpen: () -> {
                         Model.SetActive(index)
                         Model.OpenSelected()

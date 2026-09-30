@@ -25,6 +25,7 @@ internal data struct FileTableInput {
     var DropTarget Func[string, DropTarget]
     var DropPath string
     var OnClear Action
+    var OnContextMenu Action[int32, Point]
     var Thumbnails ThumbnailService
     var OnOpen Action
     var OnSort Action[string]
@@ -135,6 +136,7 @@ open class FileTable : Cell[FileTableInput] {
                             value.OnClear()
                         }
                     }
+                    root.OnPointerUp = e -> FileTransferUi.BackgroundContextMenu(e, value, clicks)
                     return root
                 },
                 CreateHeader: (_, column, _) -> Container{

@@ -36,6 +36,14 @@ class FileTransferUi {
         internal func Bind(root Container, entry FileEntry, value FileTableInput, clicks FileClickState) Container {
             let onPointerUp = root.OnPointerUp
             root.OnPointerUp = e -> {
+                if e.Button == PointerButton.Secondary {
+                    clicks.Count = 0
+                    clicks.Path = ""
+                    e.PreventDefault()
+                    e.StopPropagation()
+                    value.OnContextMenu(value.Pane.VisibleEntries.IndexOf(entry), e.WindowPosition)
+                    return
+                }
                 if e.Button == PointerButton.Primary {
                     clicks.Count = e.ClickCount
                     clicks.Path = entry.FullPath
@@ -61,6 +69,17 @@ class FileTransferUi {
                 root.OutlineOffset = -1
             }
             return root
+        }
+
+        internal func BackgroundContextMenu(e PointerEvent, value FileTableInput, clicks FileClickState) {
+            if e.Button != PointerButton.Secondary || e.IsFromInteractiveChild {
+                return
+            }
+            clicks.Count = 0
+            clicks.Path = ""
+            e.PreventDefault()
+            e.StopPropagation()
+            value.OnContextMenu(-1, e.WindowPosition)
         }
     }
 }

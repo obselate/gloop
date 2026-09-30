@@ -95,6 +95,7 @@ open class FileTiles : Cell[FileTableInput] {
                     value.OnClear()
                 }
             },
+            OnPointerUp: e -> FileTransferUi.BackgroundContextMenu(e, value, clicks),
             Accessibility: Accessibility{
                 Role: AccessibilityRole.List,
                 Name: "Files in " + pane.DirectoryPath,

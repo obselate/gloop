@@ -9,6 +9,11 @@ extract it, and run `./gloop`.
 
 One executable. No .NET runtime or extra application packages to install.
 
+Run `./gloop --install-desktop` to install it in `~/.local/bin` and add the
+application launcher and icon. Run `./gloop --set-default` to also make Gloop
+the default application for opening folders. Save and extraction destination
+dialogs use the calling application's file chooser or desktop portal.
+
 ## Features
 
 | Feature | Includes |
