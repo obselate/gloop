@@ -130,7 +130,13 @@ partial class BrowserView {
                         setupChooserChanged = setupChooserChanged || (step == 2 && accept)
                     }
                     Rebuild()
-                    setupChoiceHandle.Focus()
+                    Host.Post(
+                        () -> {
+                            if dialog == "Desktop setup" && !setupBusy {
+                                setupChoiceHandle.Focus()
+                            }
+                        }
+                    )
                 }
             )
         } finally {
