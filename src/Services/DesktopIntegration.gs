@@ -24,10 +24,12 @@ internal class DesktopIntegration {
             let dataHome = UserDirectory("XDG_DATA_HOME", ".local/share")
             let icon = Path.Combine(dataHome, "icons", "hicolor", "512x512", "apps", AppId + ".png")
             let desktop = Path.Combine(dataHome, "applications", AppId + ".desktop")
+            let metainfo = Path.Combine(dataHome, "metainfo", AppId + ".metainfo.xml")
 
             Directory.CreateDirectory(Path.GetDirectoryName(binary) ?? "")
             Directory.CreateDirectory(Path.GetDirectoryName(icon) ?? "")
             Directory.CreateDirectory(Path.GetDirectoryName(desktop) ?? "")
+            Directory.CreateDirectory(Path.GetDirectoryName(metainfo) ?? "")
             if !String.Equals(Path.GetFullPath(source), Path.GetFullPath(binary), StringComparison.Ordinal) {
                 let temporary = binary + ".new"
                 File.Copy(source, temporary, true)
@@ -42,6 +44,10 @@ internal class DesktopIntegration {
             File.WriteAllBytes(icon, AppIcon.Bytes())
             let entry = DesktopEntry(binary)
             File.WriteAllText(desktop, entry)
+            using let metadata = typeof(DesktopIntegration).Assembly.GetManifestResourceStream("gloop.Metainfo.xml")
+            ?? throw InvalidOperationException("Embedded Gloop metadata is missing")
+            using let reader = StreamReader(metadata)
+            File.WriteAllText(metainfo, reader.ReadToEnd())
             let legacy = Path.Combine(dataHome, "applications", "gloop.desktop")
             if File.Exists(legacy) {
                 let lines = File.ReadAllLines(legacy)

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.obselate.gloop</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Gloop</name>
+  <summary>Browse and manage local files</summary>
+  <description>
+    <p>Gloop is a keyboard-first file manager for Linux and Wayland. Browse local
+    files in list or tile views, preview images and text, and navigate with
+    bookmarks and optional split panes.</p>
+    <p>Create folders, rename files, copy, move, and send files to Trash.
+    Customize the theme and keyboard shortcuts in Preferences.</p>
+  </description>
+  <developer id="io.github.obselate">
+    <name>Obselate</name>
+  </developer>
+  <launchable type="desktop-id">io.github.obselate.gloop.desktop</launchable>
+  <icon type="stock">io.github.obselate.gloop</icon>
+  <categories>
+    <category>System</category>
+    <category>FileTools</category>
+    <category>FileManager</category>
+  </categories>
+  <url type="homepage">https://github.com/obselate/gloop</url>
+  <url type="bugtracker">https://github.com/obselate/gloop/issues</url>
+  <url type="vcs-browser">https://github.com/obselate/gloop</url>
+  <releases>
+    <release version="0.5.3" date="2026-09-30">
+      <url>https://github.com/obselate/gloop/releases/tag/v0.5.3</url>
+    </release>
+  </releases>
+</component>
