@@ -19,17 +19,17 @@ internal data struct BreadcrumbInput {
 
 open class BreadcrumbBar : Cell[BreadcrumbInput] {
     private var path string = ""
-    private var expanded bool
+    private var width float64
     private let handles Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle](StringComparer.Ordinal)
 
     protected override func Build(value BreadcrumbInput) Blob {
         let p = value.Palette
-        let changed = path != value.Path || expanded != (value.Width >= 200)
+        let changed = path != value.Path || width != value.Width
         if changed {
             path = value.Path
-            expanded = value.Width >= 200
+            width = value.Width
         }
-        if value.Width < 132 {
+        if value.Width < 200 {
             let button = Button{
                 Width: value.Width,
                 Height: 34,
@@ -63,8 +63,6 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 destination = Path.Combine(destination, name)
                 segments.Add(Segment(name, destination, value, destination == value.Path))
             }
-        } else if value.Width >= 132 {
-            segments.Add(Ui.Label(value.Path == "/" ? "/": Path.GetFileName(value.Path), p.Text, 12))
         }
         if changed && value.Width >= 200 && handles.TryGetValue(value.Path, out var current) {
             value.Window.Post(() -> current.ScrollIntoView())
@@ -118,7 +116,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let button = Button{
             Handle: handle,
             Height: 30,
-            MaxWidth: 200,
+            MaxWidth: Math.Min(200, value.Width - 64),
             FlexShrink: 0,
             Padding: Edges{Left: 5, Right: 5},
             AlignItems: AlignItems.Center,

@@ -7,6 +7,7 @@ import System
 import System.Collections.Generic
 
 internal data struct FileTableInput {
+    var Host Window
     var Pane BrowserPane
     var Compact bool
     var Tiles bool
@@ -90,7 +91,7 @@ open class FileTable : Cell[FileTableInput] {
                 },
                 OnSelectionRequest: (id, ctrl, shift) -> {
                     if indices.TryGetValue(id, out var index) {
-                        value.OnSelect(index, ctrl, shift)
+                        FileTransferUi.Select(pane.VisibleEntries[index], index, value, clicks, ctrl, shift)
                     }
                 },
                 SortColumnId: pane.SortColumn,

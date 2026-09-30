@@ -643,6 +643,7 @@ partial class BrowserView : Cell {
             Cell.Mount[FileTableInput, FileTable](
                 "table-" + index.ToString(),
                 FileTableInput{
+                    Host: Host,
                     WordWrap: settings.PreviewWordWrap,
                     Pane: pane,
                     Compact: compact,
