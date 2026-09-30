@@ -14,7 +14,6 @@ internal data struct BreadcrumbInput {
     var Palette Palette
     var Navigate Action[string]
     var Edit Action
-    var Parents Action
 }
 
 open class BreadcrumbBar : Cell[BreadcrumbInput] {
@@ -29,42 +28,19 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             path = value.Path
             width = value.Width
         }
-        if value.Width < 200 {
-            let button = Button{
-                Width: value.Width,
-                Height: 34,
-                MinWidth: 0,
-                Padding: 4,
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                Gap: 4,
-                BackgroundColor: Color.Transparent,
-                BorderRadius: 4,
-                Hover: Style{BackgroundColor: p.Surface},
-                Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent, OutlineOffset: -1},
-                OnClick: value.Parents,
-                Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: "Parent folders"},
-                Ui.Icon("folder_open", p.Muted, 14),
-                Ui.Label(value.Path == "/" ? "/": Path.GetFileName(value.Path), p.Text, 12),
-            }
-            WidgetKeyBindings.BindActivation(button)
-            return button
-        }
         let segments = List[Blob]()
-        if value.Width >= 200 {
-            var destination = "/"
-            segments.Add(Segment("/", destination, value, value.Path == "/"))
-            for name in value.Path.Split('/', StringSplitOptions.RemoveEmptyEntries) {
-                if destination != "/" {
-                    let separator = Ui.Label("/", p.Muted, 12)
-                    separator.Key = "separator:" + destination
-                    segments.Add(separator)
-                }
-                destination = Path.Combine(destination, name)
-                segments.Add(Segment(name, destination, value, destination == value.Path))
+        var destination = "/"
+        segments.Add(Segment("/", destination, value, value.Path == "/"))
+        for name in value.Path.Split('/', StringSplitOptions.RemoveEmptyEntries) {
+            if destination != "/" {
+                let separator = Ui.Label("/", p.Muted, 12)
+                separator.Key = "separator:" + destination
+                segments.Add(separator)
             }
+            destination = Path.Combine(destination, name)
+            segments.Add(Segment(name, destination, value, destination == value.Path))
         }
-        if changed && value.Width >= 200 && handles.TryGetValue(value.Path, out var current) {
+        if changed && handles.TryGetValue(value.Path, out var current) {
             value.Window.Post(() -> current.ScrollIntoView())
         }
         let retained = List[string](handles.Keys)
@@ -82,8 +58,11 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             FlexShrink: 0,
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
-            Gap: 2,
-            Ui.Tool("more_horiz", "Parent folders", value.Parents, value.Window, p),
+            Gap: if value.Width >= 200 {
+                2
+            } else {
+                0
+            },
             Container{
                 FlexGrow: 1,
                 FlexBasis: 0,
@@ -103,7 +82,11 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                     Children: segments.ToArray(),
                 },
             },
-            Ui.Tool("edit", "Edit location", value.Edit, value.Window, p),
+            if value.Width >= 200 {
+                Ui.Tool("edit", "Edit location", value.Edit, value.Window, p)
+            } else {
+                Container{}
+            },
         }
     }
 
@@ -116,7 +99,14 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let button = Button{
             Handle: handle,
             Height: 30,
-            MaxWidth: Math.Min(200, value.Width - 64),
+            MaxWidth: Math.Min(
+                200,
+                value.Width - if value.Width >= 200 {
+                    32
+                } else {
+                    0
+                }
+            ),
             FlexShrink: 0,
             Padding: Edges{Left: 5, Right: 5},
             AlignItems: AlignItems.Center,

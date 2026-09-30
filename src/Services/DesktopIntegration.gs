@@ -71,6 +71,9 @@ internal class DesktopIntegration {
                 .Replace("$", "\\$")
                 .Replace("`", "\\`")
                 .Replace("%", "%%")
+            if path.IndexOfAny(" \t\n\r\"'\\><~|&;$*?#()`".ToCharArray()) < 0 {
+                return escaped
+            }
             return "\"" + escaped.Replace("\\", "\\\\") + "\""
         }
     }

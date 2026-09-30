@@ -78,11 +78,18 @@ partial class BrowserView : Cell {
         }
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
-                focusScope = dialogHandle.BeginFocusScope(FocusScopeOptions{Modal: true})
-                if dialog != "Preferences" &&
-                    dialog != "Move to Trash" &&
-                    dialog != "Bookmarks" &&
-                    dialog != "Parent folders" {
+                let textEntry = dialog != "Preferences" && dialog != "Move to Trash" && dialog != "Bookmarks"
+                focusScope = dialogHandle.BeginFocusScope(
+                    FocusScopeOptions{
+                        Modal: true,
+                        InitialFocus: if textEntry {
+                            dialogInput
+                        } else {
+                            dialogHandle
+                        },
+                    }
+                )
+                if textEntry {
                     dialogInput.Focus()
                     if dialog == "Rename" || dialog == "Filter files" || dialog == "Open location" {
                         Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
@@ -399,7 +406,6 @@ partial class BrowserView : Cell {
                     FocusFiles()
                 },
                 Edit: () -> EditLocation(),
-                Parents: () -> OpenDialog("Parent folders", ""),
             }
         )
         if locationEditing {
