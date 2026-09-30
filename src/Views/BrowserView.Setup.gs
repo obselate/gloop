@@ -59,7 +59,7 @@ partial class BrowserView {
         if setupStep < 3 {
             let no = Ui.ActionButton("No", () -> AnswerSetup(false), p, handle: setupChoiceHandle)
             no.Disabled = setupBusy
-            let yes = Ui.ActionButton(
+            let yes = DialogButton(
                 dialogError == "" ? "Yes": "Try again",
                 () -> AnswerSetup(dialogError == "" || setupAccepted),
                 p,

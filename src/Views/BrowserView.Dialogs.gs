@@ -11,6 +11,16 @@ import System.Globalization
 import System.IO
 
 partial class BrowserView {
+    private let dialogButtons Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle]()
+
+    private func DialogButton(label string, action Action, p Palette, primary bool = false) Blob {
+        if !dialogButtons.TryGetValue(label, out var handle) {
+            handle = ElementHandle()
+            dialogButtons[label] = handle
+        }
+        return Ui.ActionButton(label, action, p, primary, handle)
+    }
+
     private func Dialog() Blob {
         let p = palette
         if dialog == "Desktop setup" {
@@ -20,7 +30,7 @@ partial class BrowserView {
             return DialogShell.Build(
                 dialog,
                 BookmarkChoices(),
-                Container{FlexDirection: FlexDirection.Row, Gap: 8, Ui.ActionButton("Close", () -> CloseDialog(), p)},
+                Container{FlexDirection: FlexDirection.Row, Gap: 8, DialogButton("Close", () -> CloseDialog(), p)},
                 dialogHandle,
                 () -> CloseDialog(),
                 HandleKey,
@@ -78,17 +88,17 @@ partial class BrowserView {
         }
         let buttons = List[Blob]()
         if dialog == "Preferences" {
-            buttons.Add(Ui.ActionButton("Reset " + preferenceTab.ToLowerInvariant(), () -> ResetPreferencesTab(), p))
+            buttons.Add(DialogButton("Reset " + preferenceTab.ToLowerInvariant(), () -> ResetPreferencesTab(), p))
             buttons.Add(Container{FlexGrow: 1})
-            let close = Ui.ActionButton("Close", () -> CloseDialog(), p)
+            let close = DialogButton("Close", () -> CloseDialog(), p)
             close.Accessibility = Accessibility{Role: AccessibilityRole.Button, Name: "Close preferences"}
             buttons.Add(close)
         } else {
-            buttons.Add(Ui.ActionButton("Cancel", () -> CloseDialog(), p))
+            buttons.Add(DialogButton("Cancel", () -> CloseDialog(), p))
         }
         if dialog != "Preferences" {
             buttons.Add(
-                Ui.ActionButton(
+                DialogButton(
                     if dialog == "Move to Trash" {
                         "Move to Trash"
                     } else if dialog == "Replace file" {
@@ -155,7 +165,7 @@ partial class BrowserView {
                 )
             }
         } else if preferenceTab == "Behavior" {
-            rows.Add(Ui.ActionButton("Desktop setup", () -> OpenSetup(), p))
+            rows.Add(DialogButton("Desktop setup", () -> OpenSetup(), p))
             rows.Add(
                 PreferenceToggle.Build(
                     "Smooth scrolling",
@@ -325,7 +335,7 @@ partial class BrowserView {
         let tabs = Container{FlexDirection: FlexDirection.Row, Gap: 6}
         for name in[]string{"Shortcuts", "Behavior", "Appearance"} {
             let tab = name
-            let button = Ui.ActionButton(
+            let button = DialogButton(
                 tab,
                 () -> {
                     CommitPreferenceBindings()
