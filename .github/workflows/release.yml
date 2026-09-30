@@ -39,8 +39,6 @@ jobs:
           sudo apt-get install -y clang zlib1g-dev binutils file ripgrep git python3
       - run: bash scripts/verify.sh
       - run: bash scripts/publish.sh Size
-        env:
-          GLOOP_MAX_GLIBC: "2.39"
       - name: Package and verify release archive
         run: |
           set -euo pipefail
@@ -53,6 +51,7 @@ jobs:
           tar -xzf artifacts/release/gloop-linux-x64.tar.gz -C "$check_dir"
           test "$(find "$check_dir" -maxdepth 1 -type f | wc -l)" -eq 1
           cmp artifacts/dist/Size/gloop "$check_dir/gloop"
+          test -x "$check_dir/gloop"
           test "$("$check_dir/gloop" --version)" = "gloop ${GITHUB_REF_NAME#v}"
           test -n "$("$check_dir/gloop" --licenses)"
       - name: Create draft release
@@ -61,7 +60,9 @@ jobs:
         run: |
           set -euo pipefail
           notes_file="$RUNNER_TEMP/gloop-release-notes.md"
-          printf 'Linux x64 NativeAOT build. Requires Wayland and Vulkan.\n' > "$notes_file"
+          required_glibc="$(readelf --version-info artifacts/dist/Size/gloop | sed -nE 's/.*Name: GLIBC_([0-9]+\.[0-9]+).*/\1/p' | sort -Vu | tail -n 1)"
+          test -n "$required_glibc"
+          printf 'Linux x86-64 NativeAOT build. Requires glibc %s or newer, Wayland, and Vulkan.\n' "$required_glibc" > "$notes_file"
           gh release create "$GITHUB_REF_NAME" \
             artifacts/release/gloop-linux-x64.tar.gz artifacts/release/SHA256SUMS \
             --draft --title "$GITHUB_REF_NAME" --notes-file "$notes_file" --verify-tag

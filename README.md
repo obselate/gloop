@@ -1,58 +1,68 @@
 # <img src="assets/gloop.png" width="48" height="48" alt=""> Gloop
 
-**0.5.0**
-
 A keyboard-first file manager for Linux and Wayland. Built with G# and Goo.
 
-## Install on Linux
+## Quick start
 
-The first Linux binary release is pending verification. [Build from source](#build-from-source)
-until it is available on the [releases page](https://github.com/obselate/gloop/releases).
+Download the [Linux release](https://github.com/obselate/gloop/releases/latest),
+extract it, and run `./gloop`.
 
-Linux x64 releases contain one executable and require glibc 2.39 or newer,
-Wayland, and Vulkan drivers. No .NET runtime is needed. Run
-`./gloop --install-desktop` to install the executable and application menu entry.
-Use `gloop --licenses` to read the embedded license notices.
-
-## Build from source
-
-Install [.NET SDK 10.0.401](https://dotnet.microsoft.com/en-us/download/dotnet/10.0),
-Git, Clang, zlib development headers, binutils, file, and ripgrep.
-On Ubuntu 24.04, the native prerequisites are:
-
-```sh
-sudo apt install git clang zlib1g-dev binutils file ripgrep
-git clone https://github.com/obselate/gloop.git
-cd gloop
-bash scripts/verify.sh
-bash scripts/publish.sh
-./artifacts/dist/Size/gloop ~/Documents
-```
-
-The build fetches the pinned public G# compiler and restores locked NuGet
-packages. No sibling repositories are needed. For development, use
-`dotnet run --project gloop.gsproj -- ~/Documents` after verification.
-Publish on Ubuntu 24.04 for the release glibc baseline. Linux x64 releases
-use NativeAOT with Size optimization and are built from annotated
-`v<Version>` tags on `main`. [MIT license](LICENSE).
+One executable. No .NET runtime or extra application packages to install.
 
 ## Features
 
-- List and tile views with image thumbnails, sorting, and filename filters.
-- Mouse and keyboard multi-selection, filename prefix selection, and rebindable shortcuts.
-- Image and text previews with syntax highlighting. Toggle with Space.
-- Optional split browsing. Toggle with Ctrl+S.
-- Create folders, rename, copy, move, Trash, and drag files between panes or applications.
-- Folder bookmarks, terminal launch with F4, theme presets, and saved preferences.
+| Feature | Includes |
+| --- | --- |
+| Browse | List and tile views, thumbnails, sorting, filename filters, and clickable paths. |
+| Preview | Whole images and text, with word wrap, line numbers, and code highlighting. |
+| Work with files | Multi-select, create folders, rename, copy, move, Trash, and drag between folders or apps. |
+| Navigate | Bookmarks, optional split panes, and a terminal in the current folder. |
+| Customize | Theme presets, an OKLCH color wheel, rebindable shortcuts, and settings that apply immediately. |
 
 Copy works across filesystems. Cross-filesystem move and Trash report an error
 and preserve the source. Remote filesystems are not implemented.
 
+## Platforms
+
+Linux x86-64 with glibc 2.39 or newer, a native Wayland session, and Vulkan 1.3
+drivers. The same release works across compatible Linux distributions.
+
+## Build from source
+
+<details>
+<summary>Developer setup and commands</summary>
+
+Install [.NET SDK 10.0.401](https://dotnet.microsoft.com/en-us/download/dotnet/10.0),
+Git, Clang, zlib development headers, binutils, file, and ripgrep.
+
+```sh
+git clone https://github.com/obselate/gloop.git
+cd gloop
+bash scripts/verify.sh
+dotnet run
+```
+
+The verification script fetches the pinned public G# compiler and restores
+locked NuGet packages. No sibling repositories are needed.
+
+To build the single-file NativeAOT executable on Ubuntu 24.04:
+
+```sh
+bash scripts/publish.sh
+```
+
+The executable is written to `artifacts/dist/Size/gloop`.
+
+</details>
+
 ## Performance
+
+<details>
+<summary>Recorded benchmarks and hardware</summary>
 
 Measured on an AMD Ryzen 7 3700X, NVIDIA RTX 3080, 64 GiB RAM, Btrfs,
 and CachyOS Linux 7.2.7. These are warm-cache measurements on a shared host.
-The tables identify the measured versions, rather than predicting 0.5.0 results.
+The tables identify the measured versions. These are historical results.
 
 **Gloop 0.4.0 memory:** NativeAOT Size, Goo 0.7.8, private KWin Wayland,
 1180x760 window. Median of three fresh launches per zero-byte-file fixture,
@@ -114,3 +124,12 @@ These measure individual stages, not complete UI interactions.
 Directory results are medians of 14 samples, with each process's first
 iteration discarded. DataGrid results compare Goo Widgets 0.2.8 and 0.2.9,
 with 60 builds per case after three warmups in each of three processes.
+
+</details>
+
+## Further reading
+
+- [Downloads and release notes](https://github.com/obselate/gloop/releases)
+- [Goo UI framework](https://github.com/obselate/goo)
+- [Report an issue](https://github.com/obselate/gloop/issues)
+- [MIT license](LICENSE)

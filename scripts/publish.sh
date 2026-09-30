@@ -31,6 +31,7 @@ elapsed="$(( ($(date +%s%N) - start) / 1000000 ))"
 binary="$output/gloop"
 [[ -x "$binary" ]] || { printf 'NativeAOT executable is missing: %s\n' "$binary" >&2; exit 1; }
 file "$binary" | rg -q 'ELF 64-bit.*executable|ELF 64-bit.*pie executable'
+readelf -h "$binary" | rg -q 'Machine:.*Advanced Micro Devices X86-64'
 mapfile -t required_libraries < <(
   readelf -d "$binary" | sed -nE 's/.*Shared library: \[([^]]+)\].*/\1/p'
 )

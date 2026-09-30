@@ -163,8 +163,11 @@ open class FileTiles : Cell[FileTableInput] {
                     value.FocusHandle.Focus()
                 }
             },
-            OnClick: () -> value.OnSelect(
+            OnClick: () -> FileTransferUi.Select(
+                entry,
                 indices[entry.FullPath],
+                value,
+                clicks,
                 clickModifiers.Ctrl || clickModifiers.Super,
                 clickModifiers.Shift
             ),
