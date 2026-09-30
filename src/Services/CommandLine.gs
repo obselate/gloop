@@ -28,6 +28,8 @@ internal class CommandLine {
                     options.Version = true
                 } else if !positional && arg == "--licenses" {
                     options.Licenses = true
+                } else if !positional && arg == "--setup" {
+                    options.Setup = true
                 } else if !positional && arg == "--install-desktop" {
                     options.InstallDesktop = true
                 } else if !positional && arg == "--set-default" {
@@ -87,7 +89,7 @@ internal class CommandLine {
             return options
         }
 
-        internal func Usage() string -> "Usage: gloop [--hidden] [path]\n       gloop --help\n       gloop --version\n       gloop --licenses\n       gloop --install-desktop\n       gloop --set-default\n       gloop --install-portal\n       gloop --set-default-chooser\n       gloop --restore-default-chooser"
+        internal func Usage() string -> "Usage: gloop [--hidden] [path]\n       gloop --setup\n       gloop --help\n       gloop --version\n       gloop --licenses\n       gloop --install-desktop\n       gloop --set-default\n       gloop --install-portal\n       gloop --set-default-chooser\n       gloop --restore-default-chooser"
 
         internal func AppVersion() string -> typeof(CommandLine).Assembly.GetName().Version?.ToString(3) ?? "0.0.0"
 

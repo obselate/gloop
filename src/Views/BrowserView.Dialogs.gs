@@ -13,6 +13,9 @@ import System.IO
 partial class BrowserView {
     private func Dialog() Blob {
         let p = palette
+        if dialog == "Desktop setup" {
+            return SetupDialog()
+        }
         if dialog == "Bookmarks" {
             return DialogShell.Build(
                 dialog,
@@ -151,6 +154,7 @@ partial class BrowserView {
                 )
             }
         } else if preferenceTab == "Behavior" {
+            rows.Add(Ui.ActionButton("Desktop setup", () -> OpenSetup(), p))
             rows.Add(
                 PreferenceToggle.Build(
                     "Smooth scrolling",
