@@ -344,8 +344,12 @@ partial class BrowserView : Cell {
             workspace,
         }
         var bookmarkDrop Func[int32, DropTarget]? = nil
+        var bookmarkMenu Action[string, Point]? = nil
+        var bookmarkMenuKey Action[string, KeyEvent, Point]? = nil
         if chooser == nil {
             bookmarkDrop = index -> BookmarkDropTarget(index)
+            bookmarkMenu = OpenBookmarkContextMenu
+            bookmarkMenuKey = OpenBookmarkKeyboardContextMenu
         }
         let main = Splitter(
             "places-split",
@@ -365,7 +369,9 @@ partial class BrowserView : Cell {
                     dropPath,
                     chooser == nil,
                     bookmarkDrop,
-                    bookmarkDropIndex
+                    bookmarkDropIndex,
+                    bookmarkMenu,
+                    bookmarkMenuKey
                 )
             } else {
                 nil
