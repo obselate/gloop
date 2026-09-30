@@ -21,7 +21,8 @@ if [[ ! -f "$feed_dir/Gsharp.NET.Sdk.$gsharp_version.nupkg" ]]; then
     dotnet restore "$gsharp_dir/GSharp.sln" --locked-mode --configfile "$gsharp_dir/nuget.config"
     dotnet pack "$gsharp_dir/src/Sdk/Gsharp.NET.Sdk/Gsharp.NET.Sdk.csproj" \
         --configuration Release --no-restore \
-        -p:GeneratePackageOnBuild=false --output "$feed_dir"
+        -p:GeneratePackageOnBuild=false -p:PublicRelease=false \
+        --output "$feed_dir"
     [[ -f "$feed_dir/Gsharp.NET.Sdk.$gsharp_version.nupkg" ]]
 fi
 
