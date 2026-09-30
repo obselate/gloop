@@ -1,0 +1,2 @@
+Hand-authored vector source: assets/gloop.svg.
+Regenerate the embedded 512x512 icon with: resvg -w 512 -h 512 assets/gloop.svg assets/gloop.png

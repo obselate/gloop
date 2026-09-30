@@ -13,27 +13,11 @@ import System.IO
 partial class BrowserView {
     private func Dialog() Blob {
         let p = palette
-        if dialog == "Bookmarks" || dialog == "Parent folders" {
+        if dialog == "Bookmarks" {
             return DialogShell.Build(
                 dialog,
-                dialog == "Bookmarks" ? BookmarkChoices(): ParentChoices(),
-                Container{
-                    FlexDirection: FlexDirection.Row,
-                    Gap: 8,
-                    if dialog == "Parent folders" {
-                        Ui.ActionButton(
-                            "Edit location",
-                            () -> {
-                                CloseDialog()
-                                EditLocation()
-                            },
-                            p
-                        )
-                    } else {
-                        Container{}
-                    },
-                    Ui.ActionButton("Close", () -> CloseDialog(), p),
-                },
+                BookmarkChoices(),
+                Container{FlexDirection: FlexDirection.Row, Gap: 8, Ui.ActionButton("Close", () -> CloseDialog(), p)},
                 dialogHandle,
                 () -> CloseDialog(),
                 HandleKey,
@@ -400,49 +384,6 @@ partial class BrowserView {
                 Padding: Edges{Right: 12},
                 Children: rows.ToArray()
             },
-        }
-    }
-
-    private func ParentChoices() Blob {
-        let p = palette
-        let current = Model.ActivePane().DirectoryPath
-        let paths = List[string]()
-        var path = current
-        while path != "" {
-            paths.Add(path)
-            path = Path.GetDirectoryName(path) ?? ""
-        }
-        paths.Reverse()
-        let rows = List[Blob]()
-        for destination in paths {
-            rows.Add(
-                PlacesSidebar.Bookmark(
-                    destination,
-                    destination,
-                    current,
-                    selected -> {
-                        CloseDialog()
-                        Model.Navigate(selected)
-                        FocusFiles()
-                    },
-                    Host,
-                    p,
-                    PortalPlacement.Bottom,
-                    nil,
-                    "",
-                    "folder_open"
-                )
-            )
-        }
-        return Container{
-            Height: Math.Min(paths.Count * 34, Math.Clamp(height * .88 - 150, 80, 360)),
-            MinHeight: 0,
-            OverflowY: Overflow.Scroll,
-            ScrollbarY: Ui.ScrollbarStyle(p),
-            ScrollbarVisibilityY: ScrollbarVisibility.Always,
-            Padding: Edges{Right: 12},
-            Gap: 4,
-            Children: rows.ToArray(),
         }
     }
 
