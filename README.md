@@ -17,12 +17,23 @@ System package installations reuse their installed launcher and executable.
 Use `gloop --set-default-chooser` to install and select Gloop for portal open
 and save dialogs. User installation requires xdg-desktop-portal 1.20.1 or newer.
 Use `gloop --install-portal` to register the chooser without selecting it.
-Other portal preferences are preserved. Restart `xdg-desktop-portal` after
-changing its preference. Native KDE Qt applications
-can opt into portal dialogs, for example `PLASMA_INTEGRATION_USE_PORTAL=1 haruna`.
+Other portal preferences are preserved. The selection also installs
+`~/.config/environment.d/90-gloop-chooser.conf` with KDE and GTK 3 portal
+opt-ins for desktop sessions that import the systemd user environment, including
+current KDE Plasma. Log out and log in, then restart applications. Your Qt
+platform theme and GTK debug settings are preserved. Current GTK 4 uses available
+portals. Older GTK 4 versions and desktops without systemd may need manual
+session configuration.
 Use `gloop --restore-default-chooser` to restore the previous chooser preference.
+This also removes Gloop's environment opt-ins and retains other later edits.
 The chooser supports local files. MIME filters match filename patterns from
 the installed desktop MIME database.
+
+Applications must use standard portal-capable dialogs. Ark's Open Archive
+dialog can use Gloop, but its extraction dialog embeds its own KDE browser.
+Ark's option to open the destination after extraction uses the default folder
+application selected by `gloop --set-default`. Applications with custom dialogs
+or their own portal settings need application-specific support.
 
 ## Features
 

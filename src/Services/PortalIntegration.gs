@@ -10,6 +10,7 @@ internal class PortalIntegration {
         private const BusName string = "org.freedesktop.impl.portal.desktop.gloop"
         private const BackupSuffix string = ".gloop-chooser-backup"
         private const CreatedSuffix string = ".gloop-chooser-created"
+        private const ChooserEnvironment string = "PLASMA_INTEGRATION_USE_PORTAL=1\nGTK_USE_PORTAL=1\n"
 
         internal func Install() string {
             let systemBinary = DesktopIntegration.SystemBinary()
@@ -44,6 +45,14 @@ internal class PortalIntegration {
                 RequireUserBackendSupport()
             }
             let configHome = DesktopIntegration.UserDirectory("XDG_CONFIG_HOME", ".config")
+            let environment = EnvironmentPath(configHome)
+            if File.Exists(environment) && File.ReadAllText(environment) != ChooserEnvironment {
+                throw InvalidOperationException(
+                    "A different environment file already exists. Back up and move " +
+                        environment +
+                        ", then rerun this option"
+                )
+            }
             let names = ConfigNames()
             let target = ExistingConfig(configHome, names)
             let destination = target == "" ? Path.Combine(configHome, "xdg-desktop-portal", names[0]): target
@@ -61,7 +70,13 @@ internal class PortalIntegration {
                 }
             }
             File.WriteAllText(destination, Preference(original, "gloop"))
-            return "Gloop is selected for portal file choosers. Restart xdg-desktop-portal to apply it. For Haruna, launch with PLASMA_INTEGRATION_USE_PORTAL=1."
+            if !File.Exists(environment) {
+                Directory.CreateDirectory(Path.GetDirectoryName(environment) ?? "")
+                File.WriteAllText(environment, ChooserEnvironment)
+                File.WriteAllText(environment + CreatedSuffix, "")
+            }
+            DesktopIntegration.RunTool("systemctl", []string{"--user", "daemon-reload"}, false)
+            return "Gloop is selected for portal file choosers. Log out and log in, then restart applications to enable standard KDE and GTK choosers. Custom application dialogs keep their own browser."
         }
 
         internal func RestoreDefault() string {
@@ -82,9 +97,43 @@ internal class PortalIntegration {
                 }
                 File.Delete(backup)
                 File.Delete(destination + CreatedSuffix)
-                return "Restored the previous file chooser preference. Restart xdg-desktop-portal to apply it."
+                let environmentNotice = RestoreEnvironment(configHome)
+                DesktopIntegration.RunTool("systemctl", []string{"--user", "daemon-reload"}, false)
+                return "Restored the previous file chooser preference. Log out and log in, then restart applications to apply it." +
+                    environmentNotice
             }
             throw InvalidOperationException("No saved Gloop file chooser preference was found for this desktop")
+        }
+
+        private func EnvironmentPath(configHome string) string -> Path.Combine(
+            configHome,
+            "environment.d/90-gloop-chooser.conf"
+        )
+
+        private func RestoreEnvironment(configHome string) string {
+            let path = EnvironmentPath(configHome)
+            if !File.Exists(path + CreatedSuffix) {
+                return ""
+            }
+            var notice = ""
+            if File.Exists(path) {
+                let current = File.ReadAllText(path)
+                if current == ChooserEnvironment {
+                    File.Delete(path)
+                } else {
+                    let lines = List[string]()
+                    for line in current.Split('\n') {
+                        let assignment = line.TrimEnd('\r')
+                        if assignment != "PLASMA_INTEGRATION_USE_PORTAL=1" && assignment != "GTK_USE_PORTAL=1" {
+                            lines.Add(line)
+                        }
+                    }
+                    File.WriteAllText(path, String.Join("\n", lines))
+                    notice = " Other edits in " + path + " were kept."
+                }
+            }
+            File.Delete(path + CreatedSuffix)
+            return notice
         }
 
         private func ConfigNames() List[string] {
