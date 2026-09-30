@@ -6,18 +6,13 @@ A keyboard-first file manager for Linux and Wayland. Built with G# and Goo.
 
 ## Install on Linux
 
-[Download the latest Linux x64 release](https://github.com/obselate/gloop/releases/latest), or run:
+The first Linux binary release is pending verification. [Build from source](#build-from-source)
+until it is available on the [releases page](https://github.com/obselate/gloop/releases).
 
-```sh
-curl -fLO https://github.com/obselate/gloop/releases/latest/download/gloop-linux-x64.tar.gz
-tar -xzf gloop-linux-x64.tar.gz
-./gloop --install-desktop
-```
-
-Open Gloop from your application menu or run `~/.local/bin/gloop ~/Documents`.
-The archive contains one executable. Requires glibc 2.39 or newer, Wayland,
-and Vulkan drivers. No .NET runtime is needed. Release downloads include
-`SHA256SUMS`. Use `gloop --licenses` to read the embedded third-party notices.
+Linux x64 releases contain one executable and require glibc 2.39 or newer,
+Wayland, and Vulkan drivers. No .NET runtime is needed. Run
+`./gloop --install-desktop` to install the executable and application menu entry.
+Use `gloop --licenses` to read the embedded license notices.
 
 ## Build from source
 
