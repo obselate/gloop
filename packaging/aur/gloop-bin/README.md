@@ -28,6 +28,10 @@ runtime dependencies through pacman. `vulkan-driver` lets pacman use the install
 hardware driver or ask for a provider. `xdg-desktop-portal` is optional for normal
 browsing and required to use Gloop as a portal chooser.
 
+Install the built package with `sudo pacman -U gloop-bin-0.6.0-1-x86_64.pkg.tar.zst`
+from the build directory. Read the migration steps below first if you used the
+portable installer.
+
 Before publishing, validate the desktop and AppStream files, compare the packaged
 executable with the release bytes, and exercise actual package installation,
 upgrade, removal and Wayland startup. CLI checks alone do not verify rendering.
@@ -46,7 +50,7 @@ release sources to AUR.
 
 For a new published Gloop release, update `pkgver`, reset `pkgrel` to 1, verify
 the immutable release and tag assets, and replace their checksums. Increment
-`pkgrel` for packaging-only changes. Rebuild, regenerate `.SRCINFO` and repeat
+`pkgrel` for packaging-only changes. Rebuild, regenerate the maintained recipe's `.SRCINFO` and repeat
 the relevant package checks. Update local registration checksums if they change.
 
 ## Migrate a portable installation
