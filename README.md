@@ -4,25 +4,37 @@ A keyboard-first file manager for Linux and Wayland. Built with G# and Goo.
 
 ## Quick start
 
-On Arch Linux, install [gloop-bin from AUR](https://aur.archlinux.org/packages/gloop-bin)
-with `yay -S gloop-bin` or `paru -S gloop-bin`. See the
-[package instructions](packaging/aur/gloop-bin/README.md) for manual installation
+### AUR
+
+Install [gloop-bin from AUR](https://aur.archlinux.org/packages/gloop-bin) with 
+
+```sh
+yay -S gloop-bin
+```
+or
+```
+paru -S gloop-bin
+```
+
+See the [package instructions](packaging/aur/gloop-bin/README.md) for manual installation
 and migration from a portable install.
+
+### Official Release
 
 Download the [Linux release](https://github.com/obselate/gloop/releases/latest),
 extract it, and run `./gloop`.
 
-One executable. No .NET runtime or extra application packages to install.
+Run `./gloop --install-desktop` to install gloop in `~/.local/bin`
+This will add the application launcher, icon, and AppStream metadata. 
 
-Run `./gloop --install-desktop` to install it in `~/.local/bin` and add the
-application launcher, icon, and AppStream metadata. Run `./gloop --set-default` to also make Gloop
-the default application for opening folders.
-System package installations reuse their installed launcher and executable.
+Run `./gloop --set-default` to also make Gloop the default application for opening folders.
 
 Use `gloop --set-default-chooser` to install and select Gloop for portal open
 and save dialogs. User installation requires xdg-desktop-portal 1.20.1 or newer.
+
 Use `gloop --install-portal` to register the chooser without selecting it.
 Other portal preferences are preserved. The selection also installs
+
 `~/.config/environment.d/90-gloop-chooser.conf` with KDE and GTK 3 portal
 opt-ins for desktop sessions that import the systemd user environment, including
 current KDE Plasma. Log out and log in, then restart applications. Your Qt
