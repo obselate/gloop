@@ -9,6 +9,8 @@ internal data struct SidebarLinkInput {
     var Label string
     var Active bool
     var Action Action
+    var OnContextMenu Action[Point]?
+    var OnContextMenuKey Action[KeyEvent, Point]?
     var DropTarget DropTarget?
     var DropActive bool
     var Palette Palette
@@ -38,6 +40,18 @@ open class SidebarLink : Cell[SidebarLinkInput] {
             Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent},
             OnFocus: (_) -> handle.ScrollIntoView(),
             OnClick: value.Action,
+            OnPointerUp: e -> {
+                if e.Button == PointerButton.Secondary && value.OnContextMenu != nil {
+                    e.PreventDefault()
+                    e.StopPropagation()
+                    handle.Focus()
+                    value.OnContextMenu?.Invoke(e.WindowPosition)
+                }
+            },
+            OnKeyDown: e -> {
+                let bounds = handle.ContentBox
+                value.OnContextMenuKey?.Invoke(e, Point{X: bounds.X, Y: bounds.Y + bounds.Height})
+            },
             DropTarget: value.DropTarget,
             OutlineWidth: value.DropActive ? 1: 0,
             OutlineColor: p.Accent,

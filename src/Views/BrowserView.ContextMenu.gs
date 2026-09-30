@@ -8,6 +8,32 @@ import System.Collections.Generic
 partial class BrowserView {
     private var contextMenuOpen bool
     private var contextMenuPoint Point
+    private var contextMenuBookmark string = ""
+
+    private func OpenBookmarkContextMenu(path string, point Point) {
+        if dialog != "" || chooser != nil {
+            return
+        }
+        contextMenuBookmark = path
+        contextMenuPoint = point
+        contextMenuOpen = true
+        Rebuild()
+    }
+
+    private func OpenBookmarkKeyboardContextMenu(path string, e KeyEvent, point Point) {
+        let action = settings.ActionFor(
+            e.Key.ToString(),
+            e.Modifiers.Ctrl,
+            e.Modifiers.Alt,
+            e.Modifiers.Shift,
+            e.Modifiers.Super
+        )
+        if chooser == nil && (action == "ContextMenu" || action == "ContextMenuAlternate") {
+            e.PreventDefault()
+            e.StopPropagation()
+            OpenBookmarkContextMenu(path, point)
+        }
+    }
 
     private func OpenContextMenu(index int32, row int32, point Point) {
         if dialog != "" {
@@ -25,6 +51,7 @@ partial class BrowserView {
             }
         }
         FocusFiles()
+        contextMenuBookmark = ""
         contextMenuPoint = point
         contextMenuOpen = true
         Rebuild()
@@ -50,6 +77,7 @@ partial class BrowserView {
             Y: Math.Clamp(y, bounds.Y, bounds.Y + bounds.Height),
         }
         FocusFiles()
+        contextMenuBookmark = ""
         contextMenuOpen = true
         Rebuild()
     }
@@ -59,13 +87,16 @@ partial class BrowserView {
             return
         }
         contextMenuOpen = false
+        contextMenuBookmark = ""
         Rebuild()
     }
 
     private func ContextMenu() Blob {
         let items = List[MenuItem]()
         let count = Model.SelectedCount()
-        if chooser != nil {
+        if contextMenuBookmark != "" {
+            items.Add(FileContextMenu.Item("RemoveBookmark", "Remove bookmark", "bookmark_remove", "", palette))
+        } else if chooser != nil {
             if count > 0 {
                 items.Add(ContextMenuItem("Open", "Open", "open_in_new", count != 1))
                 items.Add(MenuItem{Id: "open-separator", Separator: true})
@@ -101,15 +132,21 @@ partial class BrowserView {
             "file-context-menu",
             FileContextMenuInput{
                 Open: contextMenuOpen,
+                Name: contextMenuBookmark == "" ? "File context menu": "Bookmark context menu",
                 Point: contextMenuPoint,
                 Items: items.ToArray(),
                 Palette: palette,
                 OnDismiss: CloseContextMenu,
                 OnActivate: action -> {
+                    let bookmark = contextMenuBookmark
                     CloseContextMenu()
                     Host.Post(
                         () -> {
-                            if chooser != nil && action == "Open" {
+                            if action == "RemoveBookmark" {
+                                notice = settingsWriter?.RemoveBookmark(settings, bookmark) ?? ""
+                                FocusFiles()
+                                Rebuild()
+                            } else if chooser != nil && action == "Open" {
                                 OpenBrowserSelection(true)
                             } else {
                                 Invoke(action)

@@ -21,7 +21,9 @@ class PlacesSidebar {
             dropPath string = "",
             showPreferences bool = true,
             bookmarkDrop Func[int32, DropTarget]? = nil,
-            bookmarkDropIndex int32 = -1
+            bookmarkDropIndex int32 = -1,
+            bookmarkMenu Action[string, Point]? = nil,
+            bookmarkMenuKey Action[string, KeyEvent, Point]? = nil
         ) Blob {
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let places = List[Blob]()
@@ -79,8 +81,28 @@ class PlacesSidebar {
                         )
                     )
                 }
+                var openMenu Action[Point]? = nil
+                var openMenuKey Action[KeyEvent, Point]? = nil
+                if let menu = bookmarkMenu {
+                    openMenu = point -> menu(bookmark, point)
+                }
+                if let menuKey = bookmarkMenuKey {
+                    openMenuKey = (e, point) -> menuKey(bookmark, e, point)
+                }
                 saved.Children.Add(
-                    Bookmark(bookmark, name, path, navigate, window, p, PortalPlacement.Right, drop, dropPath)
+                    Bookmark(
+                        bookmark,
+                        name,
+                        path,
+                        navigate,
+                        window,
+                        p,
+                        PortalPlacement.Right,
+                        drop,
+                        dropPath,
+                        contextMenu: openMenu,
+                        contextMenuKey: openMenuKey
+                    )
                 )
             }
             if bookmarks.Count > 0 {
@@ -137,7 +159,9 @@ class PlacesSidebar {
             placement PortalPlacement = PortalPlacement.Right,
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
-            icon string = "bookmark"
+            icon string = "bookmark",
+            contextMenu Action[Point]? = nil,
+            contextMenuKey Action[KeyEvent, Point]? = nil
         ) Blob -> Container{
             FlexShrink: 0,
             Cell.Mount[TooltipInput, Tooltip](
@@ -148,7 +172,7 @@ class PlacesSidebar {
                     Placement: placement,
                     BubbleStyle: Style{BackgroundColor: p.Surface, BorderColor: p.Border, BorderWidth: 1, Padding: 8,},
                     Content: Text{Content: path, Color: p.Text, FontSize: 11, MaxWidth: 320, TextWrap: TextWrap.Wrap,},
-                    Target: Place(icon, label, path, current, navigate, p, drop, dropPath),
+                    Target: Place(icon, label, path, current, navigate, p, drop, dropPath, contextMenu, contextMenuKey),
                 }
             ),
         }
@@ -161,7 +185,9 @@ class PlacesSidebar {
             navigate Action[string],
             p Palette,
             drop Func[string, DropTarget]? = nil,
-            dropPath string = ""
+            dropPath string = "",
+            contextMenu Action[Point]? = nil,
+            contextMenuKey Action[KeyEvent, Point]? = nil
         ) Blob -> Cell
             .Mount[SidebarLinkInput, SidebarLink](
             nil,
@@ -170,6 +196,8 @@ class PlacesSidebar {
                 Label: name,
                 Active: current == destination,
                 Action: () -> navigate(destination),
+                OnContextMenu: contextMenu,
+                OnContextMenuKey: contextMenuKey,
                 DropTarget: drop?.Invoke(destination),
                 DropActive: destination != "" && destination == dropPath,
                 Palette: p,

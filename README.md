@@ -72,31 +72,7 @@ drivers. The same release works across compatible Linux distributions.
 
 ## Build from source
 
-<details>
-<summary>Developer setup and commands</summary>
-
-Install [.NET SDK 10.0.401](https://dotnet.microsoft.com/en-us/download/dotnet/10.0),
-Git, Clang, zlib development headers, binutils, file, and ripgrep.
-
-```sh
-git clone https://github.com/obselate/gloop.git
-cd gloop
-bash scripts/verify.sh
-dotnet run
-```
-
-The verification script fetches the pinned public G# compiler and restores
-locked NuGet packages. No sibling repositories are needed.
-
-To build the single-file NativeAOT executable on Ubuntu 24.04:
-
-```sh
-bash scripts/publish.sh
-```
-
-The executable is written to `artifacts/dist/Size/gloop`.
-
-</details>
+See [BUILD.md](BUILD.md) for prerequisites and source build commands.
 
 ## Performance
 
