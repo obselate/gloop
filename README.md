@@ -156,6 +156,7 @@ with 60 builds per case after three warmups in each of three processes.
 ## Further reading
 
 - [Downloads and release notes](https://github.com/obselate/gloop/releases)
+- [Arch Linux package recipe](packaging/aur/gloop-bin/README.md)
 - [Goo UI framework](https://github.com/obselate/goo)
 - [Report an issue](https://github.com/obselate/gloop/issues)
 - [MIT license](LICENSE)
