@@ -57,8 +57,7 @@ partial class BrowserView {
             (3 - setupFirstStep).ToString(): "Setup complete"
         let actions = Container{FlexDirection: FlexDirection.Row, JustifyContent: JustifyContent.FlexEnd, Gap: 8}
         if setupStep < 3 {
-            let no = Ui.ActionButton("No", () -> AnswerSetup(false), p)
-            no.Handle = setupChoiceHandle
+            let no = Ui.ActionButton("No", () -> AnswerSetup(false), p, handle: setupChoiceHandle)
             no.Disabled = setupBusy
             let yes = Ui.ActionButton(
                 dialogError == "" ? "Yes": "Try again",
@@ -69,8 +68,7 @@ partial class BrowserView {
             yes.Disabled = setupBusy
             actions.Children = []Blob{no, yes}
         } else {
-            let done = Ui.ActionButton("Start browsing", () -> CloseDialog(), p, true)
-            done.Handle = setupChoiceHandle
+            let done = Ui.ActionButton("Start browsing", () -> CloseDialog(), p, true, setupChoiceHandle)
             actions.Children = []Blob{done}
         }
         return DialogShell.Build(
