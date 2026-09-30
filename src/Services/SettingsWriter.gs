@@ -72,6 +72,23 @@ internal class SettingsWriter {
         return ""
     }
 
+    internal func RemoveBookmark(settings AppSettings, path string) string {
+        let normalized = BookmarkPath.Normalize(path)
+        if normalized == "" {
+            return "Bookmark must be an absolute folder path"
+        }
+        let draft = settings.Clone()
+        if !draft.Bookmarks.Remove(normalized) {
+            return ""
+        }
+        let error = Save(draft)
+        if error != "" {
+            return error
+        }
+        settings.ApplyFrom(draft)
+        return ""
+    }
+
     internal func InsertBookmarks(settings AppSettings, paths IReadOnlyList[string], insertionIndex int32) string {
         guard let folders = BookmarkDropService.NormalizePaths(paths) else {
             return "Drop existing local folders to add bookmarks"
