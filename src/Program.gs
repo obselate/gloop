@@ -72,10 +72,13 @@ func Main(args[]string) int32 {
     }
     Window.ConfigureApplication("Gloop", CommandLine.AppVersion(), "io.github.obselate.gloop")
     let view = BrowserView(settings, service, launch, loaded.Error)
+    let parent = launch.ChooserRequest?.ParentWindow ?? ""
     let window = Window{
         Title: launch.ChooserRequest?.Title ?? launch.DirectoryPath,
         IconPng: AppIcon.Bytes(),
         Decorated: false,
+        ForeignParentHandle: parent,
+        Modal: (launch.ChooserRequest?.Modal ?? false) && parent != "",
         NativeFileDropEnabled: launch.ChooserRequest == nil,
         Width: 1180,
         Height: 760,
