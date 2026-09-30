@@ -10,6 +10,21 @@ chooser D-Bus service, portal descriptor and license notices. It has no install
 hooks and does not select folder or chooser defaults. Pacman's standard desktop
 and icon-cache hooks handle registration.
 
+## Install from AUR
+
+Install [gloop-bin](https://aur.archlinux.org/packages/gloop-bin) with
+`yay -S gloop-bin` or `paru -S gloop-bin`. Read the migration steps below first
+if you used the portable installer.
+
+To install manually, use a regular user with Arch's `base-devel` and Git installed:
+
+```sh
+git clone https://aur.archlinux.org/gloop-bin.git
+cd gloop-bin
+less PKGBUILD
+makepkg -si
+```
+
 ## Build and check
 
 From the repository root, build in ignored output rather than in this directory:
