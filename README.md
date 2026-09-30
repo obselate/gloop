@@ -4,6 +4,11 @@ A keyboard-first file manager for Linux and Wayland. Built with G# and Goo.
 
 ## Quick start
 
+On Arch Linux, install [gloop-bin from AUR](https://aur.archlinux.org/packages/gloop-bin)
+with `yay -S gloop-bin` or `paru -S gloop-bin`. See the
+[package instructions](packaging/aur/gloop-bin/README.md) for manual installation
+and migration from a portable install.
+
 Download the [Linux release](https://github.com/obselate/gloop/releases/latest),
 extract it, and run `./gloop`.
 
