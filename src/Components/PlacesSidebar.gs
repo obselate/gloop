@@ -19,7 +19,9 @@ class PlacesSidebar {
             p Palette,
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
-            showPreferences bool = true
+            showPreferences bool = true,
+            bookmarkDrop Func[int32, DropTarget]? = nil,
+            bookmarkDropIndex int32 = -1
         ) Blob {
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let places = List[Blob]()
@@ -39,23 +41,61 @@ class PlacesSidebar {
                     places.Add(Place(icon, name, location, path, navigate, p, drop, dropPath))
                 }
             }
-            places.Add(Ui.Section("BOOKMARKS", p))
+            let saved = Container{
+                FlexShrink: 0,
+                DropTarget: bookmarkDrop?.Invoke(bookmarks.Count),
+                Ui.Section("BOOKMARKS", p),
+            }
             if bookmarks.Count == 0 {
-                places.Add(
+                saved.Children.Add(
                     Container{
+                        MinHeight: 32,
                         Padding: Edges{Left: 12, Right: 8, Bottom: 6},
-                        Ui.Label(bookmarkKey == "" ? "No bookmarks": bookmarkKey + " to add a folder", p.Muted, 11),
+                        BackgroundColor: bookmarkDropIndex == 0 ? p.Selection: Color.Transparent,
+                        Accessibility: Accessibility{Name: "Add bookmarks"},
+                        Text{
+                            Content: bookmarkKey == "" ? "No bookmarks": "Drop folders here or " + bookmarkKey,
+                            Color: p.Muted,
+                            FontSize: 11,
+                            TextWrap: TextWrap.Wrap,
+                        },
                     }
                 )
             }
-            for bookmark in bookmarks {
+            for index in 0 ... bookmarks.Count {
+                let bookmark = bookmarks[index]
                 let name = if bookmark == "/" {
                     "File system"
                 } else {
                     Path.GetFileName(bookmark)
                 }
-                places.Add(Bookmark(bookmark, name, path, navigate, window, p, PortalPlacement.Right, drop, dropPath))
+                if let insert = bookmarkDrop {
+                    saved.Children.Add(
+                        DropInsertion.Build(
+                            insert(index),
+                            bookmarkDropIndex == index,
+                            "Insert bookmark at position " + (index + 1).ToString(),
+                            p
+                        )
+                    )
+                }
+                saved.Children.Add(
+                    Bookmark(bookmark, name, path, navigate, window, p, PortalPlacement.Right, drop, dropPath)
+                )
             }
+            if bookmarks.Count > 0 {
+                if let insert = bookmarkDrop {
+                    saved.Children.Add(
+                        DropInsertion.Build(
+                            insert(bookmarks.Count),
+                            bookmarkDropIndex == bookmarks.Count,
+                            "Insert bookmark at position " + (bookmarks.Count + 1).ToString(),
+                            p
+                        )
+                    )
+                }
+            }
+            places.Add(saved)
             places.Add(Ui.Section("THIS COMPUTER", p))
             places.Add(Place("hard_drive", "File system", "/", path, navigate, p, drop, dropPath))
             return Container{

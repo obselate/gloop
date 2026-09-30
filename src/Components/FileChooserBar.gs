@@ -25,6 +25,9 @@ internal data struct FileChooserBarInput {
 }
 
 open class FileChooserBar : Cell[FileChooserBarInput] {
+    private let acceptHandle ElementHandle = ElementHandle()
+    private let cancelHandle ElementHandle = ElementHandle()
+
     protected override func Build(value FileChooserBarInput) Blob {
         let p = value.Palette
         let request = value.Request
@@ -257,7 +260,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
 
     private func ActionButton(label string, action Action, value FileChooserBarInput, primary bool = false) Blob {
         let p = value.Palette
-        let button = Ui.ActionButton(label, action, p, primary)
+        let button = Ui.ActionButton(label, action, p, primary, primary ? acceptHandle: cancelHandle)
         button.MaxWidth = 200
         button.MinWidth = 0
         if button is Button {

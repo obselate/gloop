@@ -343,6 +343,10 @@ partial class BrowserView : Cell {
             MinHeight: 0,
             workspace,
         }
+        var bookmarkDrop Func[int32, DropTarget]? = nil
+        if chooser == nil {
+            bookmarkDrop = index -> BookmarkDropTarget(index)
+        }
         let main = Splitter(
             "places-split",
             if width >= 860 {
@@ -359,7 +363,9 @@ partial class BrowserView : Cell {
                     p,
                     destination -> FileDropTarget(destination),
                     dropPath,
-                    chooser == nil
+                    chooser == nil,
+                    bookmarkDrop,
+                    bookmarkDropIndex
                 )
             } else {
                 nil

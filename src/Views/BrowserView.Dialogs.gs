@@ -11,6 +11,16 @@ import System.Globalization
 import System.IO
 
 partial class BrowserView {
+    private let dialogButtons Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle]()
+
+    private func DialogButton(label string, action Action, p Palette, primary bool = false) Blob {
+        if !dialogButtons.TryGetValue(label, out var handle) {
+            handle = ElementHandle()
+            dialogButtons[label] = handle
+        }
+        return Ui.ActionButton(label, action, p, primary, handle)
+    }
+
     private func Dialog() Blob {
         let p = palette
         if dialog == "Desktop setup" {
@@ -20,7 +30,7 @@ partial class BrowserView {
             return DialogShell.Build(
                 dialog,
                 BookmarkChoices(),
-                Container{FlexDirection: FlexDirection.Row, Gap: 8, Ui.ActionButton("Close", () -> CloseDialog(), p)},
+                Container{FlexDirection: FlexDirection.Row, Gap: 8, DialogButton("Close", () -> CloseDialog(), p)},
                 dialogHandle,
                 () -> CloseDialog(),
                 HandleKey,
@@ -70,20 +80,25 @@ partial class BrowserView {
         if dialogError != "" {
             contents.Add(Text{Content: dialogError, Color: p.Error, FontSize: 12})
         }
-        let content = Container{MinHeight: 0, Gap: 14, Children: contents.ToArray()}
+        let content = Container{
+            MinHeight: 0,
+            FlexShrink: dialog == "Preferences" ? 1: 0,
+            Gap: 14,
+            Children: contents.ToArray(),
+        }
         let buttons = List[Blob]()
         if dialog == "Preferences" {
-            buttons.Add(Ui.ActionButton("Reset " + preferenceTab.ToLowerInvariant(), () -> ResetPreferencesTab(), p))
+            buttons.Add(DialogButton("Reset " + preferenceTab.ToLowerInvariant(), () -> ResetPreferencesTab(), p))
             buttons.Add(Container{FlexGrow: 1})
-            let close = Ui.ActionButton("Close", () -> CloseDialog(), p)
+            let close = DialogButton("Close", () -> CloseDialog(), p)
             close.Accessibility = Accessibility{Role: AccessibilityRole.Button, Name: "Close preferences"}
             buttons.Add(close)
         } else {
-            buttons.Add(Ui.ActionButton("Cancel", () -> CloseDialog(), p))
+            buttons.Add(DialogButton("Cancel", () -> CloseDialog(), p))
         }
         if dialog != "Preferences" {
             buttons.Add(
-                Ui.ActionButton(
+                DialogButton(
                     if dialog == "Move to Trash" {
                         "Move to Trash"
                     } else if dialog == "Replace file" {
@@ -118,13 +133,14 @@ partial class BrowserView {
             Host,
             p,
             if dialog == "Preferences" {
-                580
+                Math.Max(360, width * .3)
             } else if dialog == "Open location" {
                 520
             } else {
                 440
             },
-            dialog == "Preferences" && height < 600
+            dialog == "Preferences" && height < 600,
+            maxHeight: dialog == "Preferences" ? 80: 88
         )
     }
 
@@ -132,11 +148,6 @@ partial class BrowserView {
         let p = palette
         let values = settings
         let compact = height < 600
-        let listHeight = if compact {
-            height - 226
-        } else {
-            height - 260
-        }
         let rows = List[Blob]()
         if preferenceTab == "Shortcuts" {
             for pair in values.Keybindings {
@@ -154,7 +165,7 @@ partial class BrowserView {
                 )
             }
         } else if preferenceTab == "Behavior" {
-            rows.Add(Ui.ActionButton("Desktop setup", () -> OpenSetup(), p))
+            rows.Add(DialogButton("Desktop setup", () -> OpenSetup(), p))
             rows.Add(
                 PreferenceToggle.Build(
                     "Smooth scrolling",
@@ -321,47 +332,33 @@ partial class BrowserView {
                 )
             }
         }
+        let tabs = Container{FlexDirection: FlexDirection.Row, Gap: 6}
+        for name in[]string{"Shortcuts", "Behavior", "Appearance"} {
+            let tab = name
+            let button = DialogButton(
+                tab,
+                () -> {
+                    CommitPreferenceBindings()
+                    preferenceTab = tab
+                    Rebuild()
+                },
+                p,
+                preferenceTab == tab
+            )
+            button.FlexGrow = 1
+            button.FlexBasis = 0
+            button.Padding = Edges{Left: 6, Right: 6}
+            tabs.Children.Add(button)
+        }
         return Container{
             MinHeight: 0,
+            FlexShrink: 1,
             Gap: if compact {
                 8
             } else {
                 16
             },
-            Container{
-                FlexDirection: FlexDirection.Row,
-                Gap: 8,
-                Ui.ActionButton(
-                    "Shortcuts",
-                    () -> {
-                        CommitPreferenceBindings()
-                        preferenceTab = "Shortcuts"
-                        Rebuild()
-                    },
-                    p,
-                    preferenceTab == "Shortcuts"
-                ),
-                Ui.ActionButton(
-                    "Behavior",
-                    () -> {
-                        CommitPreferenceBindings()
-                        preferenceTab = "Behavior"
-                        Rebuild()
-                    },
-                    p,
-                    preferenceTab == "Behavior"
-                ),
-                Ui.ActionButton(
-                    "Appearance",
-                    () -> {
-                        CommitPreferenceBindings()
-                        preferenceTab = "Appearance"
-                        Rebuild()
-                    },
-                    p,
-                    preferenceTab == "Appearance"
-                ),
-            },
+            tabs,
             Text{
                 Content: if preferenceTab == "Shortcuts" {
                     "Press Enter or leave the field to apply a shortcut, such as Ctrl+S."
@@ -372,22 +369,11 @@ partial class BrowserView {
                 },
                 Color: p.Muted,
                 FontSize: 12,
+                TextWrap: TextWrap.Wrap,
             },
             Container{
-                Height: Math.Max(
-                    80,
-                    Math.Min(
-                        if preferenceTab == "Behavior" {
-                            220
-                        } else if preferenceTab == "Appearance" {
-                            390
-                        } else {
-                            310
-                        },
-                        listHeight
-                    )
-                ),
                 MinHeight: 0,
+                FlexShrink: 1,
                 OverflowY: Overflow.Scroll,
                 ScrollbarY: Ui.ScrollbarStyle(p),
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
@@ -453,12 +439,17 @@ partial class BrowserView {
             preferenceHandles[label] = handle
         }
         return Container{
-            Height: 38,
+            MinHeight: 38,
             FlexShrink: 0,
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
             Gap: 18,
-            Container{FlexGrow: 1, MinWidth: 0, Ui.Label(label, p.Text, 13)},
+            Container{
+                FlexGrow: 1,
+                FlexBasis: 0,
+                MinWidth: 0,
+                Text{Content: label, Color: p.Text, FontSize: 13, TextWrap: TextWrap.Wrap},
+            },
             TextEntry{
                 Handle: handle,
                 Value: value,

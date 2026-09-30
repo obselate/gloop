@@ -2,6 +2,7 @@ package gloop
 
 import Goo
 import System
+import System.Collections.Generic
 import System.IO
 
 data struct SettingsWriteRequest {
@@ -63,6 +64,29 @@ internal class SettingsWriter {
             }
             draft.Bookmarks.Add(normalized)
         }
+        let error = Save(draft)
+        if error != "" {
+            return error
+        }
+        settings.ApplyFrom(draft)
+        return ""
+    }
+
+    internal func InsertBookmarks(settings AppSettings, paths IReadOnlyList[string], insertionIndex int32) string {
+        guard let folders = BookmarkDropService.NormalizePaths(paths) else {
+            return "Drop existing local folders to add bookmarks"
+        }
+        let originalIndex = Math.Clamp(insertionIndex, 0, settings.Bookmarks.Count)
+        let moved = HashSet[string](folders, StringComparer.Ordinal)
+        var index = originalIndex
+        for i in 0 ... originalIndex {
+            if moved.Contains(settings.Bookmarks[i]) {
+                index--
+            }
+        }
+        let draft = settings.Clone()
+        draft.Bookmarks.RemoveAll(bookmark -> moved.Contains(bookmark))
+        draft.Bookmarks.InsertRange(index, folders)
         let error = Save(draft)
         if error != "" {
             return error
