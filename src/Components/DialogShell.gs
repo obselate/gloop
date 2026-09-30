@@ -17,7 +17,8 @@ class DialogShell {
             p Palette,
             width float64 = 420,
             compact bool = false,
-            dismissDisabled bool = false
+            dismissDisabled bool = false,
+            maxHeight float64 = 88
         ) Blob -> Container{
             Key: "dialog-overlay",
             Position: PositionType.Absolute,
@@ -36,7 +37,7 @@ class DialogShell {
                 MaxWidth: Percent(92),
                 OnKeyDown: keyDown,
                 KeyBindings: keys,
-                MaxHeight: Percent(88),
+                MaxHeight: Percent(maxHeight),
                 Padding: if compact {
                     12
                 } else {
