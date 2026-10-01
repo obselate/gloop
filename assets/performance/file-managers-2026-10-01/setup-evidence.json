@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "scope": "setup_only",
-  "final_cohort": "cohort-final-v4",
+  "final_cohort": "cohort-final-v6",
   "note": "These events preceded measured comparison. They supply no application measurements or ranking. Earlier cohorts are retained as setup evidence and contribute no rows to the final cohort.",
   "source_files": {
     "host_only_baseline": {
@@ -51,6 +51,116 @@
     "v3_history": {
       "path": "artifacts/performance/file-managers-20261001/cohort-final-v3/environment-warmup-invocations.jsonl",
       "sha256": "05c34e4a3b0ad3fea7570c043c2f2679389d58424238be967bf1b1dcd2757db3"
+    },
+    "v4_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v4/raw.jsonl",
+      "sha256": "1589f1aaf526ac16eaab37bc564a27dcd1730105294273f67a6e2419dc86cfe4"
+    },
+    "v4_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v4/environment-warmup-invocations.jsonl",
+      "sha256": "5334ddf7fcddba38448dea0c99cb741dc7db2ee0ce830dbbdd2c48589aeadd87"
+    },
+    "v4_failed_environment": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v4/environment-warmup.json",
+      "sha256": "bcb15a1df28e9d8fb3bf43957b2bad5d701f603c732ca65d7487f31b68f2c5ec"
+    },
+    "preview_probe_v1_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v1/raw.jsonl",
+      "sha256": "82062b1f323b0cb44722a4362f5cb0f102fb9d3b7e65514a58c5c6f4e6091ec0"
+    },
+    "preview_probe_v1_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v1/environment-warmup-invocations.jsonl",
+      "sha256": "c08d761c6c97eeecdfb6d169d7700a807660d915e02cad725c10ceda7ca044da"
+    },
+    "preview_probe_v1_elementary_capture": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v1/captures/elementary-files-preview3png-warmup.png",
+      "sha256": "6e75040b88df37e4ddf8dc63fc2b0e762ea9707ffd34ef19f4e29756d1d84eae"
+    },
+    "preview_probe_v2_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v2/raw.jsonl",
+      "sha256": "25f4bab396bd823e754be0343580c0a85475cdbf84861cd149e4c1257104e616"
+    },
+    "preview_probe_v2_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v2/environment-warmup-invocations.jsonl",
+      "sha256": "a87548066b24920669f626f6182f7ca8423eb3c6f513a68dbe3e73aba2660eb8"
+    },
+    "preview_probe_v2_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v2/inputs/cohort-manifest.json",
+      "sha256": "f77bb8f784274f3779378867cf0e4810ec677911ec05331b585e0283a97a82e3"
+    },
+    "preview_probe_v2_elementary_capture": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v2/captures/elementary-files-preview3png-warmup.png",
+      "sha256": "6dc3ef7f242f57c399bfe229057743a4f1ab8b8820bb390ecfba7369d1b0ca97"
+    },
+    "preview_probe_v3_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v3/raw.jsonl",
+      "sha256": "3e5780292140a5246dcbe2adeba476f631e094a4827498f8a106891bd7a6d514"
+    },
+    "preview_probe_v3_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-preview-input-probe-v3/environment-warmup-invocations.jsonl",
+      "sha256": "c450493fd9f698ffe0c3daa2ab9e2656ef9dd040d8e6867ff6e6f20e4f11c8d2"
+    },
+    "corrected_runner": {
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/corrected-runner-d458.py",
+      "origin_git_revision": "c20030e:scripts/file_manager_cohort.py",
+      "sha256": "d4581703c84097029dc5f8e017b01817fce498844f71b7ffbd7b358ee3d60ce5"
+    },
+    "corrected_adapters": {
+      "path": "artifacts/performance/file-managers-20261001/scenario-adapters.json",
+      "sha256": "241bbe4b66236f966f7567f57b3a7190d227538b9a4c778d88608dcbc2ce14a2"
+    },
+    "corrected_template": {
+      "path": "assets/performance/file-managers-2026-10-01/cohort.template.json",
+      "sha256": "9cf328c7a9c494dcccefa4a40c4177c6f9bf90b641fd5788e70ca586b90939b9"
+    },
+    "v5_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v5/raw.jsonl",
+      "sha256": "17e347bec5dd186fb014aba90c267b8879aae05383056bdbb9e9c40a6bfcbbe2"
+    },
+    "v5_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v5/environment-warmup-invocations.jsonl",
+      "sha256": "c0e6c469032fbec6505a6bc494cc27d41a428aa61aac42d00da6b864146f2862"
+    },
+    "v5_environment": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v5/environment-warmup.json",
+      "sha256": "264abe33284f3db720b52a95d5c93be14fd6d5396813073a92c8efda6b554215"
+    },
+    "terminal_probe_raw": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/raw.jsonl",
+      "sha256": "a6314c57b8903e96465c9c9e61f32f2392c99e69ec2a2282bb9fbaefa163d017"
+    },
+    "terminal_probe_warmup_history": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/environment-warmup-invocations.jsonl",
+      "sha256": "f4d3ecc5d6d3f223a50acf437aea3909ba00ad3589cfb4d5eccf82d2e42d91a5"
+    },
+    "terminal_probe_run_history": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/environment-run-invocations.jsonl",
+      "sha256": "ce904d1a0f0a79b2e093ca46f455d897afec1ee1374dcb1ccdefe92dcfdad819"
+    },
+    "terminal_probe_final_environment": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/environment-run.json",
+      "sha256": "44c7ee3b7ba3326e88a5a7879d95e6222d4cc8d31979eb629654b3ca84832dbc"
+    },
+    "terminal_probe_plan": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/plan.json",
+      "sha256": "327e92fd19ecbab8c16e7c99e3a8d89178993b1ae53d401049a1470c79363326"
+    },
+    "terminal_probe_review": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/review.json",
+      "sha256": "65fcc97ea92d8a8152a2afcefc53218649f035b1c16b0c04e3c988ef5738e654"
+    },
+    "terminal_probe_summary": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/summary.json",
+      "sha256": "6abbb2ac3f4beadde363c7295d41df09eccdd7ad0e5d69899d3d5e7d21167f15"
+    },
+    "terminal_probe_synthetic_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/terminal-slot-e2e-v1/manifest.json",
+      "sha256": "e3565dcc6e3517928009644b42487b7ceb60f90019c6f5e8b1637156c624cf11"
+    },
+    "final_runner": {
+      "path": "scripts/file_manager_cohort.py",
+      "origin_git_revision": "47bd17b:scripts/file_manager_cohort.py",
+      "sha256": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3"
     }
   },
   "events": [
@@ -137,7 +247,7 @@
       "disposition": "The post-record progress print failed after a daemon restart. The invocation remains failed in the genuine history. V3 stopped after its closed Xfe tile warmup at ordinal 50."
     },
     {
-      "id": "fresh_final_cohort",
+      "id": "fresh_v4_attempt",
       "sources": ["v3_recovery_manifest"],
       "facts": {
         "v3_copied_profiles": false,
@@ -146,7 +256,119 @@
         "v2_or_v3_records_imported_to_v4": 0,
         "invocation_output": "Outer stdout and stderr redirected to per-invocation private logs so a detached worker can survive a daemon reader restart"
       },
-      "disposition": "V2 and v3 remain setup evidence only. Final comparison accepts records only from fresh v4."
+      "disposition": "V2 and v3 remained setup evidence. V4 later stopped before measurement because of the preview input failure below."
+    },
+    {
+      "id": "v4_preview_input_failure",
+      "sources": ["v4_raw", "v4_history", "v4_failed_environment"],
+      "facts": {
+        "successful_functional_warmups_before_failure": 55,
+        "failed_warmup_ordinal": 55,
+        "app": "elementary-files",
+        "scenario": "preview3png",
+        "raw_status": "error",
+        "raw_reason": "unexpected window content inset -52",
+        "owned_frame_px": [1180, 760],
+        "preceding_elementary_capture_px": [1232, 812],
+        "inferred_shadow_margin_px_per_side": 26,
+        "invocation_execution_status": "failed",
+        "end_snapshots_present": true,
+        "end_snapshot_errors": [],
+        "provenance_drift": false,
+        "secondary_host_monitor_error": "nvidia-smi pmon did not finish",
+        "measured_launches": 0
+      },
+      "disposition": "The preview click was never sent. The monitor error occurred during early-abort cleanup, while the first 55 warmups had no monitor errors. V4 is setup only."
+    },
+    {
+      "id": "preview_input_correction",
+      "sources": ["preview_probe_v1_raw", "preview_probe_v1_history", "preview_probe_v1_elementary_capture", "preview_probe_v2_raw", "preview_probe_v2_history", "preview_probe_v2_manifest", "preview_probe_v2_elementary_capture", "corrected_runner", "corrected_adapters", "corrected_template"],
+      "facts": {
+        "input_geometry_change": "CaptureActiveWindow excludes shadows for click coordinates; saved benchmark captures are unchanged",
+        "resize_guard": "Wait within the existing 2.6-second input deadline for capture width to match the frame and top inset to be within 0 to 80 pixels",
+        "probe_v1": "All nine raw warmups recorded ok with clean end snapshots, but actual image review found elementary Files click (300,127) selected image-1",
+        "elementary_click_correction": "(300,100) selected image-0 with its visible preview in probe v2",
+        "probe_v2": "First six actual previews selected image-0 and had clean end snapshots; Flea ordinal 6 stopped before an owned active Wayland window appeared",
+        "probe_v2_flea_raw_status": "error",
+        "probe_v2_flea_raw_reason": "no owned active Wayland app window before preview input deadline: None",
+        "probe_v2_flea_first_buffer": null,
+        "probe_v2_flea_registry_events": 3,
+        "probe_v2_flea_oom_kills": 0,
+        "probe_v2_flea_host_monitor_errors": [],
+        "probe_v2_flea_cause": "unknown"
+      },
+      "review": "Primary and independent reviewers checked the actual probe captures. Raw ok status alone did not establish the selected image.",
+      "disposition": "The Flea failure remains in the probe v2 record. No repeated retry loop or application metric replacement was used."
+    },
+    {
+      "id": "preview_input_recheck",
+      "sources": ["preview_probe_v3_raw", "preview_probe_v3_history", "corrected_runner", "preview_probe_v2_manifest"],
+      "facts": {
+        "scope": "Fresh setup-only Flea, Strata, and Gloop preview warmups using the same method and gates",
+        "raw_statuses": ["ok", "ok", "ok"],
+        "actual_selected_image": "image-0 in all three captures, checked by primary and independent reviewers",
+        "genuine_closed_invocations": 3,
+        "end_snapshot_errors": [],
+        "provenance_drift": false,
+        "flea_input_completed_seconds": 1.853673942,
+        "strata_input_completed_seconds": 1.1684,
+        "gloop_post_launch_input_actions": 0
+      },
+      "disposition": "These are functional setup checks, not comparison measurements. Probe v2's Flea error remains preserved."
+    },
+    {
+      "id": "fresh_v5_decision",
+      "sources": ["corrected_runner", "corrected_adapters", "corrected_template", "preview_probe_v2_manifest", "preview_probe_v3_history"],
+      "facts": {
+        "decision": "Run all 59 functional warmups in a wholly fresh v5 cohort before measured launches",
+        "earlier_cohort_records_or_profiles_imported": 0,
+        "candidate_runner_sha256": "d4581703c84097029dc5f8e017b01817fce498844f71b7ffbd7b358ee3d60ce5",
+        "candidate_manifest_sha256": "f77bb8f784274f3779378867cf0e4810ec677911ec05331b585e0283a97a82e3",
+        "candidate_adapter_sha256": "241bbe4b66236f966f7567f57b3a7190d227538b9a4c778d88608dcbc2ce14a2",
+        "candidate_template_sha256": "9cf328c7a9c494dcccefa4a40c4177c6f9bf90b641fd5788e70ca586b90939b9"
+      },
+      "disposition": "V1 through v4 and all preview probes remained setup only. V5 later stopped after 15 clean warmups, before any measured launch."
+    },
+    {
+      "id": "v5_stopped_before_measurement",
+      "sources": ["v5_raw", "v5_history", "v5_environment"],
+      "facts": {
+        "raw_warmup_ordinals": [0, 14],
+        "raw_warmup_rows": 15,
+        "raw_status_counts": {"ok": 15},
+        "genuinely_closed_invocations": 15,
+        "invocation_status": "partial_launch_limit",
+        "end_snapshots_present": true,
+        "end_snapshot_errors": [],
+        "provenance_drift": false,
+        "measured_launches": 0,
+        "records_imported_from_earlier_cohorts": 0
+      },
+      "decision_source": "Benchmark operator review before measurement",
+      "disposition": "V5 was stopped cleanly to add terminal failed-slot handling. A future failed slot is to remain N/A without a replacement launch while the remaining plan continues. The method was then reviewed and checked in the isolated probe below."
+    },
+    {
+      "id": "terminal_slot_controlled_check",
+      "sources": ["terminal_probe_raw", "terminal_probe_warmup_history", "terminal_probe_run_history", "terminal_probe_final_environment", "terminal_probe_plan", "terminal_probe_review", "terminal_probe_summary", "terminal_probe_synthetic_manifest", "final_runner"],
+      "facts": {
+        "scope": "Isolated setup-only Gloop preview regression with a synthetic three-second launcher delay on the first measured slot",
+        "warmup_ordinal_0": "ok",
+        "injected_slot_ordinal_1": "error, accepted false, no discard reason, first-buffer/CPU/memory/GPU telemetry absent",
+        "failed_invocation": "genuine failed end record with complete snapshots, no drift, and no end errors",
+        "terminal_review_acknowledged": true,
+        "later_fixed_slots": "ordinals 2 and 3 each had one accepted attempt and actual image-0 with the whole image visible",
+        "replacement_for_failed_slot": false,
+        "final_execution_status": "complete",
+        "summary_accepted_n": 2,
+        "summary_comparable": false,
+        "summary_metric_medians": null,
+        "excluded_ordinal_preserved": 1,
+        "final_runner_sha256": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3",
+        "regular_cohort_manifest_sha256": "f77bb8f784274f3779378867cf0e4810ec677911ec05331b585e0283a97a82e3",
+        "synthetic_probe_manifest_sha256": "e3565dcc6e3517928009644b42487b7ceb60f90019c6f5e8b1637156c624cf11"
+      },
+      "review": "Primary and independent reviewers checked the actual captures, failed slot, fixed plan, terminal acknowledgement, and complete provenance.",
+      "disposition": "The injected delay is a controlled failure check, not a Gloop performance result. Fresh v6 starts with no earlier records or profiles imported."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
