@@ -50,6 +50,7 @@ class DirectoryWorkQueue {
 class ViewWorkQueue {
     private let gate object = Object()
     private var pending ViewRequest?
+    private var latestGeneration int32 = -1
     private var running bool
     private var closed bool
 
@@ -58,6 +59,7 @@ class ViewWorkQueue {
             if closed {
                 return false
             }
+            latestGeneration = request.Generation
             pending = request
             if running {
                 return false
@@ -82,6 +84,7 @@ class ViewWorkQueue {
     internal func Clear() {
         lock gate {
             pending = nil
+            latestGeneration = -1
         }
     }
 
@@ -89,6 +92,13 @@ class ViewWorkQueue {
         lock gate {
             closed = true
             pending = nil
+            latestGeneration = -1
+        }
+    }
+
+    internal func IsCurrent(generation int32) bool {
+        lock gate {
+            return !closed && latestGeneration == generation
         }
     }
 }
@@ -256,6 +266,9 @@ func browserLoadWorker(window Window, controller BrowserController, queue Direct
 
 func browserViewWorker(window Window, controller BrowserController, queue ViewWorkQueue) {
     while let request = queue.Take() {
+        if !queue.IsCurrent(request.Generation) {
+            continue
+        }
         var visible = List[FileEntry]()
         var error = ""
         try {
@@ -263,7 +276,12 @@ func browserViewWorker(window Window, controller BrowserController, queue ViewWo
                 visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
             } else {
                 let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
+                var count = 0
                 for entry in request.Entries {
+                    if (count & 1023) == 0 && !queue.IsCurrent(request.Generation) {
+                        break
+                    }
+                    count++
                     if let entryFilter = request.EntryFilter {
                         if !entryFilter(entry) {
                             continue
@@ -278,10 +296,15 @@ func browserViewWorker(window Window, controller BrowserController, queue ViewWo
                         visible.Add(entry)
                     }
                 }
-                visible = FileSystemService().Sort(visible, request.Column, request.Descending)
+                if queue.IsCurrent(request.Generation) {
+                    FileSystemService().SortInPlace(visible, request.Column, request.Descending)
+                }
             }
         } catch (failure Exception) {
             error = failure.Message
+        }
+        if !queue.IsCurrent(request.Generation) {
+            continue
         }
         try {
             window.Post(
