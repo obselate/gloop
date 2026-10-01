@@ -1,0 +1,221 @@
+{
+  "recorded_utc": "2026-10-01T23:16:28.708245+00:00",
+  "mode": "warmup",
+  "manifest": "${STAGING}/cohort-manifest.json",
+  "manifest_sha256": "f77bb8f784274f3779378867cf0e4810ec677911ec05331b585e0283a97a82e3",
+  "adapters": null,
+  "adapter_sha256": null,
+  "fixture_root": "${REPO}/artifacts/performance/optimization/fixtures",
+  "fixture_inventory_at_start": {
+    "100": {
+      "count": 100,
+      "bytes": 0,
+      "sha256": "e6bc187d01c0926620fbeb1118c8997d3ddb5a1b52a47d92080bc54199587b41",
+      "nonempty_sha256": {}
+    },
+    "100000": {
+      "count": 100000,
+      "bytes": 0,
+      "sha256": "ef12496ef40c317679333fa284c7835773594c9a209421f283b6d3503abe6936",
+      "nonempty_sha256": {}
+    },
+    "3": {
+      "count": 3,
+      "bytes": 311786,
+      "sha256": "9c7885617cd73c46ccb0f81e8916b6c6b38aeae452908b1862ad566f89667f41",
+      "nonempty_sha256": {
+        "image-0.png": "ec3df6aba16e0f1a44af4b7acb0985295138e618418af883404f3b5d9d15f5b6",
+        "image-1.png": "8e9af76331d553369bf00c823363e3dfa16f7ce9fd36291b4c411b75ad803f60",
+        "image-2.png": "27e80984020ffc6303145f93d36c1e71956343eecce05b33d134ca7c235bd5d9"
+      }
+    }
+  },
+  "source_sha256_at_start": {
+    "file_manager_cohort.py": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3",
+    "file_manager_input.py": "e96c37e06628717de2a436c61f1d244ab425045034a3820d3ebac7346ee34b7f",
+    "file_manager_session.py": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee"
+  },
+  "session_identity": {
+    "kwin_pid": 2141606,
+    "kwin_command": [
+      "kwin_wayland",
+      "--virtual",
+      "--xwayland",
+      "--socket",
+      "${PRIVATE_WAYLAND_SOCKET}",
+      "--width",
+      "1440",
+      "--height",
+      "900",
+      "--scale",
+      "1",
+      "--no-global-shortcuts",
+      "--no-lockscreen"
+    ],
+    "bus_address": "${PRIVATE_DBUS_ADDRESS}",
+    "wayland_display": "${PRIVATE_WAYLAND_SOCKET}"
+  },
+  "session_files_sha256": {
+    "session.json": "0fa47e2b5a1c80fa74f1196a871571e8ee729c49ac41b5eb45d0dea608b1c504",
+    "window-size.js": "51f089c7276d862f1188e13d9943fe2f8593109bd156da3bbdd09d10ccc88a1a"
+  },
+  "wayland_display": "${PRIVATE_WAYLAND_SOCKET}",
+  "compositor_bus": "${PRIVATE_DBUS_ADDRESS}",
+  "host": "Linux ${HOSTNAME} 7.2.7-1-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 24 Sep 2026 10:44:37 +0000 x86_64 GNU/Linux",
+  "nvidia_smi": "NVIDIA GeForce RTX 3080, 615.71.09",
+  "host_package_manager": "pacman",
+  "host_package_inventory_sha256": "934d46bc3dda5404c936135b34ccaa765d9b4bce11c370dec05af5a444c55dc9",
+  "monitor_pids": [],
+  "monitor_comms": [
+    "llama-server"
+  ],
+  "min_gpu_free_mib": 512,
+  "max_global_gpu_util_percent": 50,
+  "host_baseline": "${REPO}/artifacts/performance/file-manager-harness-probe/idle-private-60s-baseline.json",
+  "host_baseline_sha256": "3f8ad4166b8d0974c5ad92467622d9f7354b13e646e491aea04d5859d059cf50",
+  "host_baseline_stats": {
+    "samples": 60,
+    "utilization_min": 8,
+    "utilization_median": 27.5,
+    "utilization_p95": 45,
+    "utilization_max": 57
+  },
+  "order_seed": 20261001,
+  "warmup_extra_seconds": 0,
+  "quiet_seconds": 10,
+  "quiet_timeout_seconds": 45,
+  "quiet_warmup": true,
+  "frame_target": "1180x760 outer KWin frame; ScreenShot2 captures client content",
+  "apps": [
+    {
+      "id": "dolphin",
+      "binary": "${STAGING}/packages/root/usr/bin/dolphin",
+      "sha256": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+      "version": "26.08.1-1.1",
+      "package": "dolphin"
+    },
+    {
+      "id": "nautilus",
+      "binary": "${STAGING}/packages/root/usr/bin/nautilus",
+      "sha256": "56d597e4b4fa18ef6f9d9545d2ba8639f67ebb9b727c8fff1527ce82da03f8ce",
+      "version": "50.3.1-1.1",
+      "package": "nautilus"
+    },
+    {
+      "id": "thunar",
+      "binary": "${STAGING}/packages/root/usr/bin/thunar",
+      "sha256": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+      "version": "4.20.10-1.1",
+      "package": "thunar"
+    },
+    {
+      "id": "caja",
+      "binary": "${STAGING}/packages/root/usr/bin/caja",
+      "sha256": "b1036257b1a63e944aed180702e30e2ae496f61a02d2402a891eccdabbe58814",
+      "version": "1.28.0-4.1",
+      "package": "caja"
+    },
+    {
+      "id": "pcmanfm-qt",
+      "binary": "${STAGING}/packages/root/usr/bin/pcmanfm-qt",
+      "sha256": "b718beb347d356bffe2754237f1899982046b9b30426ca3e4d365ae7a4812ce1",
+      "version": "2.4.1-1.1",
+      "package": "pcmanfm-qt"
+    },
+    {
+      "id": "pcmanfm",
+      "binary": "${STAGING}/packages/root/usr/bin/pcmanfm",
+      "sha256": "0626f3bbde791c0e4b331416108c8f5b1d79fc08bd8352ffe5713e0ee71e2fff",
+      "version": "1.4.0-2.1",
+      "package": "pcmanfm"
+    },
+    {
+      "id": "krusader",
+      "binary": "${STAGING}/packages/root/usr/bin/krusader",
+      "sha256": "4c2ff2c65ed45c645496486c87427587ccb388ddb619ec561a1534841c72df76",
+      "version": "2.9.0-2",
+      "package": "krusader"
+    },
+    {
+      "id": "doublecmd",
+      "binary": "${STAGING}/packages/root/usr/bin/doublecmd",
+      "sha256": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+      "version": "1.2.9-1",
+      "package": "doublecmd-qt6"
+    },
+    {
+      "id": "cosmic-files",
+      "binary": "${STAGING}/packages/root/usr/bin/cosmic-files",
+      "sha256": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+      "version": "1:1.9.0-1.1",
+      "package": "cosmic-files"
+    },
+    {
+      "id": "elementary-files",
+      "binary": "${STAGING}/packages/root/usr/bin/io.elementary.files",
+      "sha256": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+      "version": "7.3.2-2.1",
+      "package": "pantheon-files"
+    },
+    {
+      "id": "nemo",
+      "binary": "/usr/bin/nemo",
+      "sha256": "d90084a66b20ec0e0a4c5b9b3edf6149fbea3445a4e579cbe62be3fca8ff09f0",
+      "version": "6.6.4-1.1",
+      "package": "nemo"
+    },
+    {
+      "id": "flea",
+      "binary": "${STAGING}/packages/root/opt/flea-0.3.7-linux-x86_64/flea",
+      "sha256": "0c6a36f1504d6f3dee04cb2a94501ebfcd0fca6f49cbea047b44a6dae28ceb73",
+      "version": "0.3.7",
+      "package": "official release archive"
+    },
+    {
+      "id": "strata",
+      "binary": "${STAGING}/packages/root/opt/strata-0.20.1-x86_64-unknown-linux-gnu/strata",
+      "sha256": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+      "version": "0.20.1",
+      "package": "official release archive"
+    },
+    {
+      "id": "konqueror",
+      "binary": "${STAGING}/packages/root/usr/bin/konqueror",
+      "sha256": "1c8e9276f4815533578a8e55fc769950fa190dabcf4405fc38fe71d55a902470",
+      "version": "26.08.1-1.1",
+      "package": "konqueror"
+    },
+    {
+      "id": "spacefm",
+      "binary": "${STAGING}/packages/root/usr/bin/spacefm",
+      "sha256": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+      "version": "1.0.6-9",
+      "package": "spacefm"
+    },
+    {
+      "id": "xfe",
+      "binary": "${STAGING}/packages/root/usr/bin/xfe",
+      "sha256": "63d97114333184118ab42549ec12483b9ca0ce1b5b94d62085867cad38a7aecd",
+      "version": "2.0.1-2",
+      "package": "xfe"
+    },
+    {
+      "id": "gloop",
+      "binary": "${STAGING}/packages/root/opt/gloop-0.7.2/gloop",
+      "sha256": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+      "version": "0.7.2",
+      "package": null
+    }
+  ],
+  "method": {
+    "first_buffer": "first non-null wl_buffer attached to an xdg toplevel, client stderr arrival timestamp",
+    "cpu": "owned scope cgroup cpu.stat since exec gate, including idle prewarmed infrastructure; adjusted tick estimate retained separately",
+    "memory": "sum of post-launch process smaps_rollup at approximately five seconds; prewarmed infrastructure excluded",
+    "main_process_vmhwm": "main GUI executable process VmHWM through five seconds",
+    "scope_peak_rss": "maximum sampled simultaneous app process RSS sum through five seconds",
+    "scope_vmhwm_upper_bound": "sum of live process VmHWM, an upper bound rather than true aggregate peak",
+    "gpu": "sum of reported owned NVIDIA graphics or compute processes near five seconds; unknown when none reported",
+    "cpu_3_to_5": "fixed-window scope CPU percentage of one core from three to five seconds; not necessarily idle",
+    "idle": "legacy numeric alias of cpu_3_to_5; only comparable as idle when readiness by three seconds is reviewed"
+  }
+}
