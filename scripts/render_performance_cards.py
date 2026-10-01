@@ -232,16 +232,24 @@ def coverage_card(rows, apps, output):
     save_card(figure, output / 'coverage.png', 'Late window: no five-second capture, validated later. Incomplete cases remain in raw data and have no metric positions.\nLarge-folder validation is at about 20s or 120s. N/A reasons and binary hashes are in the report. Tested versions can differ from current releases.')
 
 
-def publish_card(apps, output):
-    figure = base_card('Publish time / build provenance', 'Publish is toolchain specific. Prebuilt competitor packages do not have a measured source publish time.')
+def publish_card(apps, output, builds=None):
+    figure = base_card('Source build time / fresh compile and link' if builds else 'Publish time / build provenance',
+                       'One observation per application, two CPUs and 8 GiB. Build commands and toolchains are recorded.' if builds else
+                       'Publish is toolchain specific. Prebuilt competitor packages do not have a measured source publish time.')
     axis = figure.add_axes((.09, .19, .82, .64))
     axis.set_axis_off()
     cells = []
     for app in apps:
-        value = app.get('publish_time_s')
-        cells.append([app['name'], f'{value:.3f} s' if value is not None else 'Not measured',
-                      'NativeAOT Size / Ubuntu 24.04' if app['name'] == 'Gloop' else 'Prebuilt package or upstream archive'])
-    table = axis.table(cellText=cells, colLabels=['Application', 'Publish time', 'Artifact source'],
+        record = next((item for item in builds['builds'] if item['id'] == app['id']), {}) if builds else {}
+        value = record.get('compile_link_seconds') if builds else app.get('publish_time_s')
+        if builds and record.get('status') != 'ok':
+            value = None
+        scope = record.get('scope', 'No build observation') if builds else (
+            'NativeAOT Size / Ubuntu 24.04' if app['name'] == 'Gloop' else 'Prebuilt package or upstream archive')
+        cells.append([app['name'], f'{value:.3f} s' if value is not None else 'N/A' if builds else 'Not measured',
+                      textwrap.fill(scope, 74)])
+    table = axis.table(cellText=cells, colLabels=['Application', 'Compile and link' if builds else 'Publish time',
+                                                'Build scope' if builds else 'Artifact source'],
                        colWidths=[.28, .2, .52], bbox=[0, 0, 1, 1], cellLoc='left')
     table.auto_set_font_size(False)
     table.set_fontsize(12)
@@ -253,13 +261,16 @@ def publish_card(apps, output):
         if row == 0 or row > 0 and apps[row - 1]['name'] == 'Gloop':
             cell.get_text().set_weight('bold')
             cell.get_text().set_color(TEXT if row == 0 else GREEN)
-    save_card(figure, output / 'publish_time.png', 'Gloop: prior same-day controlled observation, SDK 10.0.401, two CPUs, 8 GiB. Restore and packaging checks excluded. No cross-toolchain ranking.')
+    save_card(figure, output / 'publish_time.png',
+              'Fresh source compile and link after restore and configuration. One observation, no min/max ranges or metric positions.\nBuild outputs differ from the released runtime binaries. N/A failures and exact toolchains are in source-builds.json.' if builds else
+              'Gloop: prior same-day controlled observation, SDK 10.0.401, two CPUs, 8 GiB. Restore and packaging checks excluded. No cross-toolchain ranking.')
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('summary', type=Path)
     parser.add_argument('manifest', type=Path)
+    parser.add_argument('--build-results', type=Path)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     summary = json.loads(args.summary.read_text())
@@ -275,7 +286,8 @@ def main():
     overview_card(rows, args.output)
     footprint_card(manifest['apps'], args.output)
     coverage_card(rows, manifest['apps'], args.output)
-    publish_card(manifest['apps'], args.output)
+    builds = json.loads(args.build_results.read_text()) if args.build_results else None
+    publish_card(manifest['apps'], args.output, builds)
 
 
 if __name__ == '__main__':
