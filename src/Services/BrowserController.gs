@@ -27,8 +27,15 @@ class BrowserController {
     private let operations OperationWorkQueue
     private let transfers FileTransferService
     private let previews PreviewWorkQueue
-    private var previewCache ImageSourceCache?
     private var previewGeneration int32
+    private var previewWidth int32
+    private var previewHeight int32
+    private var loadedPreviewWidth int32
+    private var loadedPreviewHeight int32
+    private var previewResizeError string = ""
+    private var framebufferWidth int32
+    private var framebufferHeight int32
+    private var previewResizeTimer WindowTimer?
     private var operationCount int32
     private let clipboardPaths List[string]
     private var clipboardCut bool
@@ -66,6 +73,7 @@ class BrowserController {
         operations = OperationWorkQueue()
         transfers = FileTransferService()
         previews = PreviewWorkQueue()
+        window.MetricsChanged += PreviewWindowMetrics
     }
 
     internal func ActivePane() BrowserPane -> Pane(ActiveIndex)
@@ -550,6 +558,9 @@ class BrowserController {
             return
         }
         disposed = true
+        window.MetricsChanged -= PreviewWindowMetrics
+        previewResizeTimer?.Dispose()
+        previewResizeTimer = nil
         closeRequested = false
         transfers.Clear()
         for queue in loads {
@@ -564,11 +575,7 @@ class BrowserController {
         if let source = PreviewImage {
             source.Dispose()
         }
-        if let cache = previewCache {
-            cache.Dispose()
-        }
         PreviewImage = nil
-        previewCache = nil
     }
 
     private func NavigateTo(path string, index int32, mode string, historyIndex int32, selectedPath string) {
@@ -760,16 +767,22 @@ class BrowserController {
     }
 
     private func QueuePreview() {
+        previewResizeTimer?.Dispose()
+        previewResizeTimer = nil
+        if Status == previewResizeError && previewResizeError != "" {
+            Status = ""
+        }
+        previewResizeError = ""
         previewGeneration++
+        previewWidth = 0
+        previewHeight = 0
+        loadedPreviewWidth = 0
+        loadedPreviewHeight = 0
         Preview = PreviewData{Kind: "", Text: "", Path: "", Error: ""}
         if let source = PreviewImage {
             source.Dispose()
         }
-        if let cache = previewCache {
-            cache.Dispose()
-        }
         PreviewImage = nil
-        previewCache = nil
         if !PreviewVisible || disposed {
             previews.Clear()
             return
@@ -779,7 +792,9 @@ class BrowserController {
             return
         }
         Preview = PreviewData{Kind: "loading", Path: entry.FullPath}
-        if previews.Submit(entry.FullPath, previewGeneration) {
+        previewWidth = framebufferWidth > 0 ? framebufferWidth: Math.Max(1, window.Width)
+        previewHeight = framebufferHeight > 0 ? framebufferHeight: Math.Max(1, window.Height)
+        if previews.Submit(entry.FullPath, previewGeneration, previewWidth, previewHeight) {
             let owner = window
             let controller = this
             let queue = previews
@@ -787,20 +802,84 @@ class BrowserController {
         }
     }
 
-    internal func ApplyPreview(generation int32, data PreviewData, source ImageSource?, cache ImageSourceCache?) {
-        if disposed || generation != previewGeneration {
+    private func PreviewWindowMetrics(metrics WindowMetrics) {
+        if metrics.FramebufferWidth <= 0 || metrics.FramebufferHeight <= 0 {
+            return
+        }
+        framebufferWidth = metrics.FramebufferWidth
+        framebufferHeight = metrics.FramebufferHeight
+        if PreviewImage != nil &&
+            Preview.Kind == "image" &&
+            (framebufferWidth > previewWidth || framebufferHeight > previewHeight) {
+            previewResizeTimer?.Dispose()
+            previewResizeTimer = window.SetTimeout(() -> RefreshPreviewBounds(), 180)
+        }
+    }
+
+    private func RefreshPreviewBounds() {
+        previewResizeTimer = nil
+        if disposed ||
+            !PreviewVisible ||
+            PreviewImage == nil ||
+            Preview.Kind != "image" ||
+            (framebufferWidth <= previewWidth && framebufferHeight <= previewHeight) {
+            return
+        }
+        guard let entry = SelectedEntry() else {
+            return
+        }
+        if entry.FullPath != Preview.Path {
+            return
+        }
+        previewGeneration++
+        previewWidth = Math.Max(previewWidth, framebufferWidth)
+        previewHeight = Math.Max(previewHeight, framebufferHeight)
+        if previews.Submit(entry.FullPath, previewGeneration, previewWidth, previewHeight) {
+            let owner = window
+            let controller = this
+            let queue = previews
+            go browserPreview(owner, controller, queue)
+        }
+    }
+
+    internal func ApplyPreview(request PreviewRequest, data PreviewData, source ImageSource?) {
+        if disposed || request.Generation != previewGeneration {
             if let stale = source {
                 stale.Dispose()
             }
-            if let staleCache = cache {
-                staleCache.Dispose()
-            }
             return
+        }
+        if data.Kind == "error" && PreviewImage != nil && Preview.Path == request.Path {
+            previewResizeTimer?.Dispose()
+            previewResizeTimer = nil
+            previewWidth = loadedPreviewWidth
+            previewHeight = loadedPreviewHeight
+            previewResizeError = "Preview resize failed: " + data.Error
+            Status = previewResizeError
+            Notify()
+            return
+        }
+        if let old = PreviewImage {
+            old.Dispose()
+        }
+        if source != nil {
+            loadedPreviewWidth = request.Width
+            loadedPreviewHeight = request.Height
+            if Status == previewResizeError && previewResizeError != "" {
+                Status = ""
+            }
+            previewResizeError = ""
         }
         Preview = data
         PreviewImage = source
-        previewCache = cache
         Notify()
+        if source != nil &&
+            (framebufferWidth > previewWidth || framebufferHeight > previewHeight) &&
+            framebufferWidth > 0 &&
+            framebufferHeight > 0 {
+            previewResizeTimer?.Dispose()
+            previewResizeTimer = window.SetTimeout(() -> RefreshPreviewBounds(), 180)
+        }
     }
 
     private func StartOperation(

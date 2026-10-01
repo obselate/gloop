@@ -161,7 +161,7 @@ class PreviewWorkQueue {
     private var running bool
     private var closed bool
 
-    internal func Submit(path string, generation int32) bool {
+    internal func Submit(path string, generation int32, width int32, height int32) bool {
         lock gate {
             if closed {
                 return false
@@ -171,7 +171,7 @@ class PreviewWorkQueue {
                 imageCancellation = nil
             }
             latestGeneration = generation
-            pending = PreviewRequest{Path: path, Generation: generation}
+            pending = PreviewRequest{Path: path, Generation: generation, Width: width, Height: height}
             if running {
                 return false
             }
@@ -374,16 +374,13 @@ func browserPreview(window Window, controller BrowserController, queue PreviewWo
         }
         var data PreviewData
         var source ImageSource?
-        var cache ImageSourceCache?
         try {
             data = FileSystemService().ReadPreview(request.Path, () -> !queue.IsCurrent(request.Generation))
             if data.Kind == "image" && queue.IsCurrent(request.Generation) {
                 let cancellation = CancellationTokenSource()
                 if queue.BeginImage(request.Generation, cancellation) {
                     try {
-                        let imageCache = ImageSourceCache(67108864, 1)
-                        cache = imageCache
-                        source = imageCache.LoadAsync(data.Path, cancellation.Token).GetAwaiter().GetResult()
+                        source = ImageSource.LoadThumbnail(data.Path, request.Width, request.Height, cancellation.Token)
                     } finally {
                         queue.FinishImage(cancellation)
                     }
@@ -399,28 +396,18 @@ func browserPreview(window Window, controller BrowserController, queue PreviewWo
                 failure.Message
             }
             data = PreviewData{Kind: "error", Text: "", Path: request.Path, Error: error}
-            if let failedCache = cache {
-                failedCache.Dispose()
-            }
-            cache = nil
         }
         if !queue.IsCurrent(request.Generation) {
             if let staleSource = source {
                 staleSource.Dispose()
             }
-            if let staleCache = cache {
-                staleCache.Dispose()
-            }
             continue
         }
         try {
-            window.Post(() -> controller.ApplyPreview(request.Generation, data, source, cache))
+            window.Post(() -> controller.ApplyPreview(request, data, source))
         } catch (failure Exception) {
             if let failedSource = source {
                 failedSource.Dispose()
-            }
-            if let failedCache = cache {
-                failedCache.Dispose()
             }
         }
     }
