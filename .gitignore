@@ -6,6 +6,7 @@ obj/
 .vs/
 .vscode/
 *.lscache
+__pycache__/
 AGENTS.md
 docs/
 tests/
