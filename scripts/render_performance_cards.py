@@ -233,7 +233,7 @@ def coverage_card(rows, apps, output):
 
 
 def publish_card(apps, output, builds=None):
-    figure = base_card('Source build time / fresh compile and link' if builds else 'Publish time / build provenance',
+    figure = base_card('Source build time / prepared dependencies' if builds else 'Publish time / build provenance',
                        'One observation per application, two CPUs and 8 GiB. Build commands and toolchains are recorded.' if builds else
                        'Publish is toolchain specific. Prebuilt competitor packages do not have a measured source publish time.')
     axis = figure.add_axes((.09, .19, .82, .64))
@@ -241,14 +241,14 @@ def publish_card(apps, output, builds=None):
     cells = []
     for app in apps:
         record = next((item for item in builds['builds'] if item['id'] == app['id']), {}) if builds else {}
-        value = record.get('compile_link_seconds') if builds else app.get('publish_time_s')
+        value = record.get('source_build_seconds') if builds else app.get('publish_time_s')
         if builds and record.get('status') != 'ok':
             value = None
         scope = record.get('scope', 'No build observation') if builds else (
             'NativeAOT Size / Ubuntu 24.04' if app['name'] == 'Gloop' else 'Prebuilt package or upstream archive')
         cells.append([app['name'], f'{value:.3f} s' if value is not None else 'N/A' if builds else 'Not measured',
                       textwrap.fill(scope, 74)])
-    table = axis.table(cellText=cells, colLabels=['Application', 'Compile and link' if builds else 'Publish time',
+    table = axis.table(cellText=cells, colLabels=['Application', 'Build time' if builds else 'Publish time',
                                                 'Build scope' if builds else 'Artifact source'],
                        colWidths=[.28, .2, .52], bbox=[0, 0, 1, 1], cellLoc='left')
     table.auto_set_font_size(False)
@@ -262,7 +262,7 @@ def publish_card(apps, output, builds=None):
             cell.get_text().set_weight('bold')
             cell.get_text().set_color(TEXT if row == 0 else GREEN)
     save_card(figure, output / 'publish_time.png',
-              'Fresh source compile and link after restore and configuration. One observation, no min/max ranges or metric positions.\nBuild outputs differ from the released runtime binaries. N/A failures and exact toolchains are in source-builds.json.' if builds else
+              'Timed build command after restore and configuration. Scope varies, including Double Commander postlink steps.\nOne observation, no metric positions. Outputs differ from runtime binaries. N/A reasons and toolchains: source-builds.json.' if builds else
               'Gloop: prior same-day controlled observation, SDK 10.0.401, two CPUs, 8 GiB. Restore and packaging checks excluded. No cross-toolchain ranking.')
 
 
