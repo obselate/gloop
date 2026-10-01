@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-Goo 0.7.11 and Goo.Svg 0.7.11 | MIT
+Goo 0.7.13 and Goo.Svg 0.7.13 | MIT
 ========================================================================
 
 MIT License
@@ -54,7 +54,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-Goo.Widgets 0.2.12 and Goo.Animations 0.2.5 | MIT
+Goo.Widgets 0.2.13 and Goo.Animations 0.2.5 | MIT
 ========================================================================
 
 MIT License
