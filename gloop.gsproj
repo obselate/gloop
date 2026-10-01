@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>gloop</RootNamespace>
     <AssemblyName>gloop</AssemblyName>
-    <Version>0.7.0</Version>
+    <Version>0.7.1</Version>
     <Product>Gloop</Product>
     <Description>A keyboard-first file manager for Linux and Wayland.</Description>
     <Authors>obselate</Authors>
