@@ -728,33 +728,34 @@ class BrowserController {
         pane.Loading = false
         pane.Error = error
         pane.VisibleEntries = entries
+        if error == "" && pane.Filter == "" && EntryFilter == nil {
+            pane.Entries = entries
+        }
         pane.Selected = entries.Count == 0 ? -1: 0
         pane.PendingFocusPath = ""
-        if focusPath != "" {
-            for i in 0 ... entries.Count {
-                if entries[i].FullPath == focusPath {
-                    pane.Selected = i
-                    break
-                }
+        let missing = HashSet[string](pane.SelectedPaths, StringComparer.Ordinal)
+        var focused = focusPath == ""
+        var anchorVisible = false
+        for i in 0 ... entries.Count {
+            let path = entries[i].FullPath
+            if !focused && path == focusPath {
+                pane.Selected = i
+                focused = true
+            }
+            if missing.Count > 0 {
+                missing.Remove(path)
+            }
+            if !anchorVisible && path == pane.SelectionAnchorPath {
+                anchorVisible = true
             }
         }
-        let visiblePaths = HashSet[string](StringComparer.Ordinal)
-        for entry in entries {
-            visiblePaths.Add(entry.FullPath)
-        }
-        let selected = List[string]()
-        for path in pane.SelectedPaths {
-            if !visiblePaths.Contains(path) {
-                selected.Add(path)
-            }
-        }
-        for path in selected {
+        for path in missing {
             pane.SelectedPaths.Remove(path)
         }
         if SelectFirstEntry && pane.SelectedPaths.Count == 0 && pane.SelectionAnchorPath == "" && pane.Selected >= 0 {
             pane.SelectedPaths.Add(entries[pane.Selected].FullPath)
         }
-        if pane.SelectionAnchorPath == "" || !visiblePaths.Contains(pane.SelectionAnchorPath) {
+        if !anchorVisible {
             pane.SelectionAnchorPath = SelectionPath(pane)
         }
         if error != "" {
