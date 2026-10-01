@@ -1058,6 +1058,75 @@ def planned_slots(apps, fixtures, reviews, records, root, selected_apps, selecte
     return roster, slots, warmup_gui
 
 
+def reviewed_terminal_slots(reviews, records, plan, history_path, plan_sha256):
+    acknowledgments = reviews.get("terminal_failures", {})
+    if not isinstance(acknowledgments, dict):
+        raise RuntimeError("terminal failure reviews must map raw ordinals to acknowledgments")
+    if not acknowledgments:
+        return set()
+    history = [json.loads(line) for line in history_path.read_text().splitlines()] if history_path.exists() else []
+    slots = {slot["slot_id"]: slot for slot in plan["slots"]}
+    pins = plan["pins"]
+    by_ordinal = {str(record["ordinal"]): record for record in records if not record["warmup"]}
+    terminal_slots = set()
+    for ordinal, review in acknowledgments.items():
+        record = by_ordinal.get(ordinal)
+        slot = slots.get(record.get("slot_id")) if record else None
+        reason = record.get("reason", "") if record else ""
+        input_deadline = (reason.startswith("no owned active Wayland app window before preview input deadline:") or
+                          reason == "input actions did not complete before CPU first-three-second sample")
+        if (not isinstance(review, dict) or review.get("acknowledged") is not True or
+                not isinstance(review.get("reason"), str) or not review["reason"].strip() or
+                slot is None or record["status"] != "error" or record.get("accepted") is not False or
+                not input_deadline or record.get("discard_reason") is not None or
+                (record.get("background") or {}).get("discard_reason") is not None or
+                any(record.get(key) != slot[key] for key in ("slot_id", "app", "scenario", "round")) or
+                record.get("manifest_sha256") != pins["manifest_sha256"] or
+                record.get("adapter_sha256") != pins["adapter_sha256"] or
+                record.get("binary_sha256") != pins["binary_sha256"][slot["app"]] or
+                record.get("gui_executable_sha256") not in
+                (None, plan["warmup_gui_sha256"][f"{slot['app']}/{slot['scenario']}"])):
+            raise RuntimeError(f"invalid terminal failure review for raw ordinal {ordinal}")
+        attempts = [item for item in records if item.get("slot_id") == slot["slot_id"]]
+        if attempts[-1] is not record or any(item.get("accepted") is True for item in attempts):
+            raise RuntimeError(f"terminal failure review conflicts with slot {slot['slot_id']}")
+        closed = [item for item in history if
+                  item.get("invocation_ordinal_start", 1) <= record["ordinal"] <=
+                  item.get("invocation_ordinal_end", -1)]
+        expected = {"manifest_sha256": pins["manifest_sha256"],
+                    "adapter_sha256": pins["adapter_sha256"],
+                    "host_baseline_sha256": pins["host_baseline_sha256"],
+                    "fixture_inventory_at_start": pins["fixture_inventory"],
+                    "fixture_inventory_at_end": pins["fixture_inventory"],
+                    "source_sha256_at_start": pins["source_sha256"],
+                    "source_sha256_at_end": pins["source_sha256"],
+                    "host_package_inventory_sha256": pins["host_package_inventory_sha256"],
+                    "host_package_inventory_sha256_at_end": pins["host_package_inventory_sha256"],
+                    "nvidia_smi": pins["gpu_driver_identity"],
+                    "gpu_driver_identity_at_end": pins["gpu_driver_identity"],
+                    "input_hashes_at_end": {"manifest_sha256": pins["manifest_sha256"],
+                                            "adapter_sha256": pins["adapter_sha256"],
+                                            "host_baseline_sha256": pins["host_baseline_sha256"],
+                                            "binary_sha256": pins["binary_sha256"]}}
+        invocation = closed[0] if len(closed) == 1 else {}
+        if (invocation.get("mode") != "run" or invocation.get("plan_sha256") != plan_sha256 or
+                invocation.get("execution_status") != "failed" or
+                invocation.get("end_snapshot_errors") != [] or
+                invocation.get("provenance_drift") is not False or
+                invocation.get("session_identity") != record.get("session_identity") or
+                any(invocation.get(key) != value for key, value in expected.items()) or
+                {app["id"]: app["sha256"] for app in invocation.get("apps", [])} != pins["binary_sha256"] or
+                (invocation.get("session_files_sha256") or {}).get("window-size.js") !=
+                pins["session_method"]["window_rules_sha256"] or
+                (invocation.get("session_files_sha256_at_end") or {}).get("window-size.js") !=
+                pins["session_method"]["window_rules_sha256"]):
+            raise RuntimeError(f"terminal failure lacks closed no-drift invocation: {ordinal}")
+        if slot["slot_id"] in terminal_slots:
+            raise RuntimeError(f"multiple terminal failures reviewed for slot {slot['slot_id']}")
+        terminal_slots.add(slot["slot_id"])
+    return terminal_slots
+
+
 def append_record(stream, records, record):
     stream.write(json.dumps(record) + "\n")
     stream.flush()
@@ -1380,6 +1449,7 @@ def main():
     execution_error = None
     execution_status = "complete"
     launch_count = 0
+    terminal_slots = set()
     if args.mode != "preflight":
         if not os.environ.get("WAYLAND_DISPLAY") or not os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
             parser.error("private Wayland compositor and its DBus address are required")
@@ -1489,12 +1559,17 @@ def main():
                 elif args.mode == "run":
                     external_reasons = {"monitored external process used CPU/GPU",
                                         "new external GPU process appeared"}
+                    terminal_slots = reviewed_terminal_slots(
+                        reviews, records, plan, root / "environment-run-invocations.jsonl",
+                        provenance["plan_sha256"])
                     for slot in plan["slots"]:
                         attempts = [r for r in records if r.get("slot_id") == slot["slot_id"]]
                         accepted = [r for r in attempts if r.get("accepted") is True]
                         if len(accepted) > 1:
                             raise RuntimeError(f"multiple accepted attempts for {slot['slot_id']}")
                         if accepted:
+                            continue
+                        if slot["slot_id"] in terminal_slots:
                             continue
                         if any(r["status"] != "deferred" and
                                (r["status"] not in ("ok", "late_window") or
@@ -1527,7 +1602,8 @@ def main():
                                       attempt=len(attempts) + 1, quiet_before=quiet_before,
                                       session_identity=session_identity)
                         expected_gui = plan["warmup_gui_sha256"][f"{app['id']}/{scenario}"]
-                        if record["status"] != "validation_timeout" and \
+                        if (record["status"] not in ("validation_timeout", "error") or
+                                record.get("gui_executable_sha256") is not None) and \
                            record.get("gui_executable_sha256") != expected_gui:
                             record["reason"] = ("GUI executable hash differs from reviewed warmup: "
                                                 f"{record.get('gui_executable_sha256')} != {expected_gui}")
@@ -1563,10 +1639,16 @@ def main():
                 execution_error = str(error)
                 execution_status = "failed"
     records = [json.loads(line) for line in records_path.read_text().splitlines()] if records_path.exists() else []
-    if args.mode == "run" and execution_status == "complete" and plan and any(
-            not any(r.get("slot_id") == slot["slot_id"] and r.get("accepted") is True for r in records)
-            for slot in plan["slots"]):
-        execution_status = "partial_pending_slots"
+    if args.mode == "run" and plan and execution_status in ("complete", "partial_launch_limit"):
+        pending = any(slot["slot_id"] not in terminal_slots and
+                      not any(r.get("slot_id") == slot["slot_id"] and r.get("accepted") is True
+                              for r in records) for slot in plan["slots"])
+        if pending and execution_status == "complete":
+            execution_status = "partial_pending_slots"
+        elif not pending:
+            execution_status = "complete"
+    if args.mode == "run":
+        provenance["terminal_failed_slot_ids"] = sorted(terminal_slots)
     provenance["execution_status"] = execution_status
     provenance["execution_error"] = execution_error
     provenance["launches_this_invocation"] = launch_count
