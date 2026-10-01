@@ -8,6 +8,7 @@ import System.Linq
 
 internal data struct FileTileItem {
     var Entry FileEntry
+    var Index int32
     var Selected bool
     var Focused bool
     var DropActive bool
@@ -36,6 +37,7 @@ class FileTileSource : IReadOnlyList[FileTileItem] {
             let entry = entries[index]
             return FileTileItem{
                 Entry: entry,
+                Index: index,
                 Selected: pane.SelectedPaths.Contains(entry.FullPath),
                 Focused: value.Active && pane.Selected == index,
                 DropActive: value.DropPath == entry.FullPath,
@@ -59,20 +61,11 @@ open class FileTiles : Cell[FileTableInput] {
     internal const TileWidth float64 = 144
     internal const TileHeight float64 = 156
     internal const Gap float64 = 8
-    private var entries List[FileEntry]?
-    private var indices Dictionary[string, int32] = Dictionary[string, int32](StringComparer.Ordinal)
     private var clickModifiers KeyModifiers
 
     protected override func Build(value FileTableInput) Blob {
         let pane = value.Pane
         let p = value.Palette
-        if !Object.ReferenceEquals(entries, pane.VisibleEntries) {
-            entries = pane.VisibleEntries
-            indices = Dictionary[string, int32](StringComparer.Ordinal)
-            for index in 0 ... pane.VisibleEntries.Count {
-                indices[pane.VisibleEntries[index].FullPath] = index
-            }
-        }
         let root = Container{
             Handle: value.FocusHandle,
             FlexGrow: 1,
@@ -166,7 +159,7 @@ open class FileTiles : Cell[FileTableInput] {
             },
             OnClick: () -> FileTransferUi.Select(
                 entry,
-                indices[entry.FullPath],
+                item.Index,
                 value,
                 clicks,
                 clickModifiers.Ctrl || clickModifiers.Super,

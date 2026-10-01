@@ -4,9 +4,9 @@
     "net10.0": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.7.11, 0.7.11]",
-        "resolved": "0.7.11",
-        "contentHash": "rbuSSAZR9Pt+m7NSDbqL1r97f1sVvaOrokGFqyqVkP6gXUE+p98gyx/Dn5YQ7zDzIbeggkx5tjFXTXnJVrYzcw==",
+        "requested": "[0.7.13, 0.7.13]",
+        "resolved": "0.7.13",
+        "contentHash": "/3nDRebSNmYXvx6HVEE6b9vuxLaUcE50JbwosA5y8OX/dO1lW7C01FyLXmuUM85STZmBiaI85aT393cQUwusLQ==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
           "StbImageSharp": "2.30.16",
@@ -24,18 +24,18 @@
       },
       "Goo.Svg": {
         "type": "Direct",
-        "requested": "[0.7.11, 0.7.11]",
-        "resolved": "0.7.11",
-        "contentHash": "wFkaV++ovavwhapf7ozfH9F3aHTlVXlBEUvb0NO3/2JUMnmZUc9sJ74HkZ92h0zKOjASsLb9U2+Q3pfkbTkDAA==",
+        "requested": "[0.7.13, 0.7.13]",
+        "resolved": "0.7.13",
+        "contentHash": "MUUCam2jzXuQXuEx+4GuN+Y9AgcT1yJWVfyITcRSSfs6hiY5XBlAF9D+tjTiRCOV5FdBNZATJBotmd5syTqV4Q==",
         "dependencies": {
-          "Goo": "0.7.11"
+          "Goo": "0.7.13"
         }
       },
       "Goo.Widgets": {
         "type": "Direct",
-        "requested": "[0.2.12, 0.2.12]",
-        "resolved": "0.2.12",
-        "contentHash": "LM7AYijZsy1xnGUnk6b9YfJUgdgfplXvoExri770nMNQIlc8lj+1D+FKowfmBd5fhRPBmFXNnR9WB8TbcpRc9g==",
+        "requested": "[0.2.13, 0.2.13]",
+        "resolved": "0.2.13",
+        "contentHash": "zO/aTBXYVt0gG4dc1+pzhHnGmg6TBIe71p0koshfcUwc1wDLCnMVn6KOVl2kywgJBOQbGj/Q6gp0y2bA/FzhSg==",
         "dependencies": {
           "Goo": "0.7.1",
           "Goo.Svg": "0.7.1"
@@ -86,9 +86,9 @@
     "net10.0/linux-x64": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.7.11, 0.7.11]",
-        "resolved": "0.7.11",
-        "contentHash": "rbuSSAZR9Pt+m7NSDbqL1r97f1sVvaOrokGFqyqVkP6gXUE+p98gyx/Dn5YQ7zDzIbeggkx5tjFXTXnJVrYzcw==",
+        "requested": "[0.7.13, 0.7.13]",
+        "resolved": "0.7.13",
+        "contentHash": "/3nDRebSNmYXvx6HVEE6b9vuxLaUcE50JbwosA5y8OX/dO1lW7C01FyLXmuUM85STZmBiaI85aT393cQUwusLQ==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
           "StbImageSharp": "2.30.16",

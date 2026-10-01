@@ -5,6 +5,7 @@ import System.Collections.Generic
 import System.Diagnostics
 import System.Globalization
 import System.IO
+import System.IO.Enumeration
 import System.Text
 
 class FileSystemService {
@@ -12,11 +13,21 @@ class FileSystemService {
         let snapshot = DirectorySnapshot{}
         try {
             snapshot.DirectoryPath = Path.GetFullPath(path)
-            for item in DirectoryInfo(snapshot.DirectoryPath).EnumerateFileSystemInfos() {
-                if !showHidden && item.Name.StartsWith(".") {
-                    continue
-                }
-                snapshot.Entries.Add(readEntry(item))
+            let kinds = Dictionary[string, string](StringComparer.OrdinalIgnoreCase)
+            let options = EnumerationOptions()
+            options.AttributesToSkip = FileAttributes(0)
+            options.IgnoreInaccessible = false
+            let enumeration = FileSystemEnumerable[FileEntry](
+                snapshot.DirectoryPath,
+                (ref raw FileSystemEntry) -> readEntry(ref raw, kinds),
+                options
+            )
+            if !showHidden {
+                enumeration.ShouldIncludePredicate = (ref raw FileSystemEntry) ->
+                raw.FileName.Length == 0 || raw.FileName[0] != '.'
+            }
+            for item in enumeration {
+                snapshot.Entries.Add(item)
             }
         } catch (failure Exception) {
             snapshot.Error = failure.Message
@@ -26,8 +37,12 @@ class FileSystemService {
 
     internal func Sort(entries List[FileEntry], column string, descending bool) List[FileEntry] {
         let sorted = System.Collections.Generic.List[FileEntry](entries)
-        sorted.Sort((left FileEntry, right FileEntry) -> compare(left, right, column, descending))
+        SortInPlace(sorted, column, descending)
         return sorted
+    }
+
+    internal func SortInPlace(entries List[FileEntry], column string, descending bool) {
+        entries.Sort((left FileEntry, right FileEntry) -> compare(left, right, column, descending))
     }
 
     internal func ReadPreview(path string, cancelled Func[bool]) PreviewData {
@@ -223,24 +238,27 @@ class FileSystemService {
         }
     }
 
-    private func readEntry(info FileSystemInfo) FileEntry {
-        var entry = FileEntry{Name: info.Name, FullPath: info.FullName, Kind: "File"}
+    private func readEntry(ref raw FileSystemEntry, kinds Dictionary[string, string]) FileEntry {
+        let name = raw.FileName.ToString()
+        var entry = FileEntry{Name: name, FullPath: raw.ToFullPath(), Kind: "File"}
         try {
-            let attributes = info.Attributes
+            let attributes = raw.Attributes
             entry.IsDirectory = hasAttribute(attributes, FileAttributes.Directory)
             entry.IsSymlink = hasAttribute(attributes, FileAttributes.ReparsePoint)
-            entry.Modified = info.LastWriteTime
+            entry.Modified = raw.LastWriteTimeUtc.LocalDateTime
             if entry.IsSymlink {
                 entry.Kind = "Link"
             } else if entry.IsDirectory {
                 entry.Kind = "Folder"
             } else {
-                if info is FileInfo {
-                    entry.Size = info.Length
-                }
-                let extension = Path.GetExtension(info.Name)
+                entry.Size = raw.Length
+                let extension = Path.GetExtension(name)
                 if extension != "" {
-                    entry.Kind = extension.Substring(1).ToUpperInvariant() + " file"
+                    if !kinds.TryGetValue(extension, out var kind) {
+                        kind = extension.Substring(1).ToUpperInvariant() + " file"
+                        kinds.Add(extension, kind)
+                    }
+                    entry.Kind = kind
                 }
             }
         } catch (failure Exception) {

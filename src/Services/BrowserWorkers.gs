@@ -50,6 +50,7 @@ class DirectoryWorkQueue {
 class ViewWorkQueue {
     private let gate object = Object()
     private var pending ViewRequest?
+    private var latestGeneration int32 = -1
     private var running bool
     private var closed bool
 
@@ -58,6 +59,7 @@ class ViewWorkQueue {
             if closed {
                 return false
             }
+            latestGeneration = request.Generation
             pending = request
             if running {
                 return false
@@ -82,6 +84,7 @@ class ViewWorkQueue {
     internal func Clear() {
         lock gate {
             pending = nil
+            latestGeneration = -1
         }
     }
 
@@ -89,6 +92,13 @@ class ViewWorkQueue {
         lock gate {
             closed = true
             pending = nil
+            latestGeneration = -1
+        }
+    }
+
+    internal func IsCurrent(generation int32) bool {
+        lock gate {
+            return !closed && latestGeneration == generation
         }
     }
 }
@@ -151,7 +161,7 @@ class PreviewWorkQueue {
     private var running bool
     private var closed bool
 
-    internal func Submit(path string, generation int32) bool {
+    internal func Submit(path string, generation int32, width int32, height int32) bool {
         lock gate {
             if closed {
                 return false
@@ -161,7 +171,7 @@ class PreviewWorkQueue {
                 imageCancellation = nil
             }
             latestGeneration = generation
-            pending = PreviewRequest{Path: path, Generation: generation}
+            pending = PreviewRequest{Path: path, Generation: generation, Width: width, Height: height}
             if running {
                 return false
             }
@@ -256,6 +266,9 @@ func browserLoadWorker(window Window, controller BrowserController, queue Direct
 
 func browserViewWorker(window Window, controller BrowserController, queue ViewWorkQueue) {
     while let request = queue.Take() {
+        if !queue.IsCurrent(request.Generation) {
+            continue
+        }
         var visible = List[FileEntry]()
         var error = ""
         try {
@@ -263,7 +276,12 @@ func browserViewWorker(window Window, controller BrowserController, queue ViewWo
                 visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
             } else {
                 let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
+                var count = 0
                 for entry in request.Entries {
+                    if (count & 1023) == 0 && !queue.IsCurrent(request.Generation) {
+                        break
+                    }
+                    count++
                     if let entryFilter = request.EntryFilter {
                         if !entryFilter(entry) {
                             continue
@@ -278,10 +296,15 @@ func browserViewWorker(window Window, controller BrowserController, queue ViewWo
                         visible.Add(entry)
                     }
                 }
-                visible = FileSystemService().Sort(visible, request.Column, request.Descending)
+                if queue.IsCurrent(request.Generation) {
+                    FileSystemService().SortInPlace(visible, request.Column, request.Descending)
+                }
             }
         } catch (failure Exception) {
             error = failure.Message
+        }
+        if !queue.IsCurrent(request.Generation) {
+            continue
         }
         try {
             window.Post(
@@ -351,16 +374,13 @@ func browserPreview(window Window, controller BrowserController, queue PreviewWo
         }
         var data PreviewData
         var source ImageSource?
-        var cache ImageSourceCache?
         try {
             data = FileSystemService().ReadPreview(request.Path, () -> !queue.IsCurrent(request.Generation))
             if data.Kind == "image" && queue.IsCurrent(request.Generation) {
                 let cancellation = CancellationTokenSource()
                 if queue.BeginImage(request.Generation, cancellation) {
                     try {
-                        let imageCache = ImageSourceCache(67108864, 1)
-                        cache = imageCache
-                        source = imageCache.LoadAsync(data.Path, cancellation.Token).GetAwaiter().GetResult()
+                        source = ImageSource.LoadThumbnail(data.Path, request.Width, request.Height, cancellation.Token)
                     } finally {
                         queue.FinishImage(cancellation)
                     }
@@ -376,28 +396,18 @@ func browserPreview(window Window, controller BrowserController, queue PreviewWo
                 failure.Message
             }
             data = PreviewData{Kind: "error", Text: "", Path: request.Path, Error: error}
-            if let failedCache = cache {
-                failedCache.Dispose()
-            }
-            cache = nil
         }
         if !queue.IsCurrent(request.Generation) {
             if let staleSource = source {
                 staleSource.Dispose()
             }
-            if let staleCache = cache {
-                staleCache.Dispose()
-            }
             continue
         }
         try {
-            window.Post(() -> controller.ApplyPreview(request.Generation, data, source, cache))
+            window.Post(() -> controller.ApplyPreview(request, data, source))
         } catch (failure Exception) {
             if let failedSource = source {
                 failedSource.Dispose()
-            }
-            if let failedCache = cache {
-                failedCache.Dispose()
             }
         }
     }
