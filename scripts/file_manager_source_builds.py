@@ -397,10 +397,32 @@ def public_results(root, manifest, manifest_hash):
     builds = []
     for app in manifest["apps"]:
         folder = root / "records" / app["id"]
-        fetch_record = read_json(folder / "fetch.json") if (folder / "fetch.json").exists() else {}
-        prepare_record = read_json(folder / "prepare.json") if (folder / "prepare.json").exists() else {}
-        measure_record = read_json(folder / "measure.json") if (folder / "measure.json").exists() else {}
-        status = measure_record.get("status", prepare_record.get("status", fetch_record.get("status", "not_run")))
+        fetch_path = folder / "fetch.json"
+        prepare_path = folder / "prepare.json"
+        measure_path = folder / "measure.json"
+        fetch_record = read_json(fetch_path) if fetch_path.exists() else {}
+        prepare_record = read_json(prepare_path) if prepare_path.exists() else {}
+        measure_record = read_json(measure_path) if measure_path.exists() else {}
+        if measure_path.exists():
+            status = measure_record.get("status", "measure_failed")
+            seconds = measure_record.get("source_build_seconds")
+            executable_bytes = measure_record.get("built_executable_bytes")
+            scope_returncode = measure_record.get("scope_returncode")
+            measured_limits = measure_record.get("limits")
+            if status == "ok" and not (
+                    type(seconds) in (int, float) and seconds >= 0
+                    and measure_record.get("built_executable_sha256")
+                    and type(executable_bytes) is int and executable_bytes > 0
+                    and type(scope_returncode) is int and scope_returncode == 0
+                    and measure_record.get("scope_log_sha256")
+                    and isinstance(measured_limits, dict) and measured_limits.get("verified") is True):
+                status = "invalid_measurement"
+        elif prepare_path.exists():
+            status = "prepared" if prepare_record.get("status") == "ok" else prepare_record.get("status", "prepare_failed")
+        elif fetch_path.exists():
+            status = "source_fetched" if fetch_record.get("status") == "ok" else fetch_record.get("status", "fetch_failed")
+        else:
+            status = "not_run"
         record_manifest = measure_record.get("manifest_sha256", prepare_record.get("manifest_sha256", fetch_record.get("manifest_sha256")))
         if record_manifest and record_manifest != manifest_hash:
             status = "manifest_mismatch"
@@ -423,7 +445,9 @@ def public_results(root, manifest, manifest_hash):
             "built_executable_bytes": measure_record.get("built_executable_bytes"),
             "toolchains": public_toolchains(measure_record.get("toolchains", prepare_record.get("toolchains"))),
             "limits": measure_record.get("limits", prepare_record.get("limits")),
-            "failure_reason": "manifest changed after measurement" if status == "manifest_mismatch" else public_reason(measure_record.get("reason", prepare_record.get("reason", fetch_record.get("reason")))),
+            "failure_reason": "manifest changed after measurement" if status == "manifest_mismatch" else (
+                "incomplete measured success record" if status == "invalid_measurement" else
+                public_reason(measure_record.get("reason", prepare_record.get("reason", fetch_record.get("reason"))))),
             "prepare_log_sha256": prepare_record.get("log_sha256"),
             "build_log_sha256": measure_record.get("log_sha256"),
         })
