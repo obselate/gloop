@@ -52,73 +52,80 @@ To compile Gloop yourself, follow the [source build guide](BUILD.md).
 ## Performance
 
 <details>
-<summary>Recorded benchmarks and hardware</summary>
+<summary>October 2026 optimization measurements</summary>
 
-Measured on an AMD Ryzen 7 3700X, NVIDIA RTX 3080, 64 GiB RAM, Btrfs,
-and CachyOS Linux 7.2.7. These are warm-cache measurements on a shared host.
-The tables identify the measured versions. These are historical results.
+Compared with Gloop 0.7.1 (`c0efcfe`), the optimized NativeAOT Size build is
+14.2% smaller. It embeds 53 required Material icons instead of the full 4,128,
+uses packed Linux relocations, and reduces directory and preview work.
+Delivery remains one executable with embedded third-party notices.
 
-**Gloop 0.4.0 memory** <sup>[1](#performance-note-1)</sup>
+**Publishing on Ubuntu 24.04**
 
-| Files | Process PSS | Process RSS |
-| ---: | ---: | ---: |
-| 0 | 85.1 MiB | 148.5 MiB |
-| 100 | 87.6 MiB | 151.1 MiB |
-| 10,000 | 100.4 MiB | 163.8 MiB |
-| 100,000 | 177.9 MiB | 241.2 MiB |
-
-**Gloop 0.3.0 candidate startup and runtime** <sup>[2](#performance-note-2)</sup>
-
-| Files | First frame feedback | Startup CPU | PSS | RSS | CPU 1.5 to 3.5 s |
-| ---: | ---: | ---: | ---: | ---: | ---: |
-| 0 | 336.4 ms | 263.7 ms | 87.1 MiB | 148.0 MiB | 3.6 ms |
-| 10,000 | 397.8 ms | 303.8 ms | 98.3 MiB | 159.3 MiB | 2.6 ms |
-| 100,000 | 344.0 ms | 665.9 ms | 170.2 MiB | 231.3 MiB | 2.2 ms |
-
-**Gloop 0.4.0 publishing** <sup>[3](#performance-note-3)</sup>
-
-| NativeAOT profile | Executable | Publish time |
+| Build | Executable | Publish time |
 | --- | ---: | ---: |
-| Size | 19,688,240 bytes | 22.855 s |
-| Speed | 20,534,864 bytes | 24.032 s |
+| Before, Size | 20,534,288 bytes | 28.714 s |
+| Optimized, Size | 17,615,832 bytes | 25.704 s |
+| Optimized, Speed | 18,572,856 bytes | 20.179 s |
 
-**Earlier managed Release processing benchmarks** <sup>[4](#performance-note-4)</sup>
+Each profile has one warm-payload publish observation using .NET SDK 10.0.401,
+limited to two CPUs and 8 GiB RAM. Timing covers `dotnet publish` only, excluding
+restore and packaging checks. Speed ran after Size and may reuse intermediates.
+Both optimized profiles require GLIBC_2.38, within the supported 2.39 baseline.
 
-| Workload | Before | After |
-| --- | ---: | ---: |
-| Directory listing and view processing, 10,000 files | 43.96 ms | 40.35 ms |
-| Directory listing and view processing, 100,000 files | 347.57 ms | 309.82 ms |
-| Same 100,000 files, filter with one match | 340.63 ms | 286.96 ms |
-| DataGrid build, 100,000 rows, selection near start | 11,376 us | 93 us |
-| DataGrid build, 100,000 rows, selection at end | 12,801.5 us | 1,268 us |
-| DataGrid allocation per unchanged-row build | 10,633,472 bytes | 7,864 bytes |
+**Default Size profile, matched warm launches**
 
-1. <a id="performance-note-1"></a> **Memory:** NativeAOT Size, Goo 0.7.8,
-   private KWin Wayland, 1180x760 window. Median of three fresh launches per
-   zero-byte-file fixture, sampled for 15 seconds in list mode. Preview and
-   split were off. PSS apportions shared resident memory. RSS counts each
-   process's resident mappings. Both exclude GPU and compositor memory.
-   Image and text previews can raise memory above these directory-only figures.
+| Workload | Build | First buffer | CPU, first 3 s | RSS | PSS | GPU memory |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 100 files, list | Before | 260.15 ms | 270 ms | 149.0 MiB | 85.7 MiB | 89 MiB |
+| 100 files, list | Optimized | 257.02 ms | 260 ms | 147.1 MiB | 84.0 MiB | 89 MiB |
+| 100,000 files, list | Before | 273.35 ms | 690 ms | 231.1 MiB | 168.8 MiB | 89 MiB |
+| 100,000 files, list | Optimized | 270.51 ms | 630 ms | 215.4 MiB | 153.1 MiB | 89 MiB |
+| 100,000 files, tiles | Before | 265.31 ms | 650 ms | 204.1 MiB | 141.6 MiB | 89 MiB |
+| 100,000 files, tiles | Optimized | 262.98 ms | 580 ms | 185.6 MiB | 123.4 MiB | 89 MiB |
+| Three 4096x4096 PNGs, preview open | Before | 261.75 ms | 1,440 ms | 421.6 MiB | 359.1 MiB | 153 MiB |
+| Three 4096x4096 PNGs, preview open | Optimized | 248.98 ms | 880 ms | 409.9 MiB | 347.5 MiB | 93 MiB |
 
-2. <a id="performance-note-2"></a> **Startup and runtime:** local Goo 0.7.4,
-   Hyprland 0.56.2, 1398x858 windows, NVIDIA driver 615.71.09. Median of three
-   warm launches after one warmup per fixture. First frame feedback includes
-   Wayland tracing and delivery to the harness. It does not measure directory
-   readiness. A separate untraced pass measured CPU over startup's first
-   1.5 seconds, memory at 3.5 seconds, and CPU time over the intervening
-   2 seconds. Runs used a systemd scope launcher. A resident inference server
-   remained running. These results do not establish a general speed ranking
-   or cold-start performance.
+Image decoding still needs a temporary full raster. The optimized image case
+reached a median process peak RSS of 490.1 MiB during the first five seconds.
+Bounding preview dimensions reduces retained image and GPU data but does not
+eliminate this decoding cost.
 
-3. <a id="performance-note-3"></a> **Publishing:** Ubuntu 24.04, build limited
-   to two CPU cores and 8 GiB RAM. One publish observation per profile,
-   separate from runtime.
+**Why Size remains the default**
 
-4. <a id="performance-note-4"></a> **Processing:** same Ryzen 7 3700X host.
-   These measure individual stages, not complete UI interactions. Directory
-   results are medians of 14 samples, with each process's first iteration
-   discarded. DataGrid results compare Goo Widgets 0.2.8 and 0.2.9, with
-   60 builds per case after three warmups in each of three processes.
+| Workload | Size first buffer | Speed first buffer | Size CPU, first 3 s | Speed CPU, first 3 s |
+| --- | ---: | ---: | ---: | ---: |
+| 100 files, list | 257.02 ms | 255.84 ms | 260 ms | 260 ms |
+| 100,000 files, list | 270.51 ms | 260.66 ms | 630 ms | 620 ms |
+| 100,000 files, tiles | 262.98 ms | 271.74 ms | 580 ms | 600 ms |
+| Three PNGs, preview open | 248.98 ms | 246.13 ms | 880 ms | 870 ms |
+
+Speed adds 957,024 bytes (5.4%) with no consistent runtime advantage in these
+cases. These runs do not establish a consistent startup improvement.
+
+Measured on an AMD Ryzen 7 3700X, NVIDIA RTX 3080 with driver 615.71.09,
+64 GiB RAM, Btrfs, and CachyOS Linux 7.2.7. Each value is the median of three
+warm launches with alternating build order. Each build received one warmup
+before each benchmark group (list, tiles, and images). Runs used a private
+KWin Wayland compositor, a 1180x760 window,
+1440x900 output at scale 1, and no Goo developer tools.
+
+First buffer measures process launch to the first non-null Wayland buffer
+attachment observed in the client trace. It includes trace delivery overhead
+and does not measure presentation, directory readiness, or preview readiness.
+CPU time covers approximately the first three seconds, with 10 ms accounting
+resolution. RSS and PSS were sampled around five seconds. They exclude GPU
+and compositor memory. GPU values are per-process samples, not peaks. Idle
+CPU medians during the three-to-five-second interval were 0 to 0.5% of one core.
+These shared-host, warm-cache results do not establish cold-start performance
+or a ranking against other file managers.
+
+Final source: `9fff806`, using public Goo and Goo.Svg 0.7.13,
+Goo.Widgets 0.2.13, and Goo.Animations 0.2.5. Runtime measurements used the
+same application code and Goo fix before package publication. The final
+executables have identical executable code and runtime data, with differences
+limited to module identifiers, native build paths, and debug/build metadata.
+The exact public-package Size executable also passed the full Wayland visual,
+selection, and local file-operation checks.
 
 </details>
 
