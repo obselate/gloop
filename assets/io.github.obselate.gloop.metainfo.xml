@@ -26,6 +26,9 @@
   <url type="bugtracker">https://github.com/obselate/gloop/issues</url>
   <url type="vcs-browser">https://github.com/obselate/gloop</url>
   <releases>
+    <release version="0.7.1" date="2026-10-01">
+      <url>https://github.com/obselate/gloop/releases/tag/v0.7.1</url>
+    </release>
     <release version="0.7.0" date="2026-09-30">
       <url>https://github.com/obselate/gloop/releases/tag/v0.7.0</url>
     </release>
