@@ -28,6 +28,16 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                 Width: 240,
                 MaxHeight: 340,
                 AccessibilityName: value.Name,
+                CreateRoot: (_, root) -> {
+                    root.OnPointerUp = e -> {
+                        if e.Button != PointerButton.Primary {
+                            e.PreventDefault()
+                            e.StopPropagation()
+                            value.OnDismiss()
+                        }
+                    }
+                    return root
+                },
                 CreatePanel: (_, panel) -> {
                     panel.Padding = 4
                     panel.BackgroundColor = p.Background

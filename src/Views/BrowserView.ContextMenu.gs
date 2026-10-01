@@ -10,6 +10,12 @@ partial class BrowserView {
     private var contextMenuPoint Point
     private var contextMenuBookmark string = ""
 
+    private func DismissContextMenuOnBlur(focused bool) {
+        if !focused {
+            CloseContextMenu()
+        }
+    }
+
     private func OpenBookmarkContextMenu(path string, point Point) {
         if dialog != "" || chooser != nil {
             return

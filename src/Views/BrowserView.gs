@@ -120,6 +120,7 @@ partial class BrowserView : Cell {
 
     internal func Attach(value Window) {
         window = value
+        value.FocusChanged += DismissContextMenuOnBlur
         value.WheelScrollScale = float32(settings.ScrollSpeed)
         value.SmoothScrolling = settings.SmoothScrolling
         browser = BrowserController(value, settings, () -> Changed())
@@ -149,6 +150,9 @@ partial class BrowserView : Cell {
     }
 
     internal func Shutdown() {
+        if let attached = window {
+            attached.FocusChanged -= DismissContextMenuOnBlur
+        }
         if let done = setupCompletion {
             <-done
         }
