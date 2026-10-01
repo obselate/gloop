@@ -13,6 +13,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>true</PublishAot>
+    <OptimizationPreference>Size</OptimizationPreference>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
