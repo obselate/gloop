@@ -161,6 +161,26 @@
       "path": "scripts/file_manager_cohort.py",
       "origin_git_revision": "47bd17b:scripts/file_manager_cohort.py",
       "sha256": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3"
+    },
+    "v6_warmup42_prearchive_fingerprints": {
+      "path": "artifacts/performance/file-managers-20261001/incidents/v6-warm-42-hashes.json",
+      "sha256": "b7fabae28cc5d93c647ecc2bc87f02f8c820553b8cb6cffc34aabe3cda9d12d2"
+    },
+    "v6_warmup42_recovery": {
+      "path": "artifacts/performance/file-managers-20261001/incidents/v6-aborted-42/recovery.json",
+      "sha256": "159863c71b819193b2ebc5d26538ad48475ebc5088cb0aaab356e8680bc783b5"
+    },
+    "v6_warmup42_aborted_start_original": {
+      "path": "artifacts/performance/file-managers-20261001/incidents/v6-aborted-42/environment-warmup-aborted-start.json",
+      "sha256": "7cf84f5c7528804ae5f59a9a4afc2b7db39f2585e8494514279ba9ea5ec79b99"
+    },
+    "v6_warmup42_aborted_start_public": {
+      "path": "assets/performance/file-managers-2026-10-01/excluded-v6-warmup-42-start.json",
+      "sha256": "316e874aa8de55902610c66a25975e969ecc91059a48be1f4390eec603369509"
+    },
+    "v6_warmup42_detached_service": {
+      "path": "artifacts/performance/file-managers-20261001/sessions/v6-warm-42-r1/outer-service-result.json",
+      "sha256": "971c4f8df6fda96ed095d21e15795927f633f08401ade1f9d20e027b45d5f6d9"
     }
   },
   "events": [
@@ -369,6 +389,41 @@
       },
       "review": "Primary and independent reviewers checked the actual captures, failed slot, fixed plan, terminal acknowledgement, and complete provenance.",
       "disposition": "The injected delay is a controlled failure check, not a Gloop performance result. Fresh v6 starts with no earlier records or profiles imported."
+    },
+    {
+      "id": "v6_warmup42_interruption",
+      "sources": ["v6_warmup42_prearchive_fingerprints", "v6_warmup42_recovery", "v6_warmup42_aborted_start_original", "v6_warmup42_aborted_start_public", "v6_warmup42_detached_service", "final_runner"],
+      "facts": {
+        "aborted_ordinal": 42,
+        "app": "elementary-files",
+        "scenario": "tiles100000",
+        "outer_wrapper_exit": "SIGTERM, status 143",
+        "signal_sender": "unknown",
+        "cause": "unknown",
+        "aborted_attempt_raw_record": false,
+        "aborted_attempt_invocation_end": false,
+        "aborted_start_end_fields_present": false,
+        "genuinely_closed_prefix_ordinals": [0, 41],
+        "prefix_raw_sha256": "25a8e849892b3cb116d8fd3175578952aa6b7e6927ce85148ef900cd4cef2320",
+        "prefix_history_sha256": "33f7b5d076244046e859637ab482da34350d95fb7f9da4436e1befe596f579cc",
+        "archived_start_sha256": "7cf84f5c7528804ae5f59a9a4afc2b7db39f2585e8494514279ba9ea5ec79b99",
+        "restored_environment_pointer_from_ordinal": 41,
+        "genuine_history_line_41_sha256": "2a6ec77d9129f89d9bb929a4f991f6fc7fc9351777ee789a50ecb567eb824bd5",
+        "restored_environment_pointer_sha256": "da035c4350e8449be56e89c6a338a23629c532eaca9910cc851d46d188a78953",
+        "archived_control_tree_sha256": "c996faab3a68eac86d72dca842e742e70458eeb6a2579d04f23b255b9db98840",
+        "archived_partial_profile_tree_sha256": "d30af7c959bae0679911f9dee0ad12c6e5503ccc78662af9cc330d9836b1c8a0",
+        "aborted_partial_5s_capture_original_sha256": "f4de5a7466e69107ea5789df16c443f343f370d0c82aa978379ce2e431804506",
+        "aborted_partial_20s_capture_original_sha256": "79291d2f37d9ef12d5042475b57f4a5f6b229a06679bca0fa893db873f74362e",
+        "aborted_partial_capture_original_bytes_available": false,
+        "fresh_ordinal42_raw_line_sha256": "605bb948fc927d0f47fcb374d2812f81a6bdad561a7342417b9ead5f3a88f3b0",
+        "fresh_ordinal42_history_line_sha256": "456b0883fa036d94baa66eddedde06d5c0a037f28805b3180d4f00ead2689f1a",
+        "fresh_ordinal42_raw_status": "ok",
+        "fresh_ordinal42_history_status": "partial_launch_limit",
+        "fresh_ordinal42_end_snapshot_errors": [],
+        "fresh_ordinal42_provenance_drift": false
+      },
+      "review": "The incident archive omitted two partial spinner captures. The independent reviewer viewed the originals and reported their hashes. The fresh warmup overwrote the same-name files. The original bytes are unavailable, and the hashes are historical observations only, not archived image or completed population evidence.",
+      "disposition": "The interrupted attempt is excluded setup evidence with no fabricated raw row or end record. Its START is published separately with private strings sanitized and all numeric, boolean, null, and hash fields preserved. The completed prefix and matching profiles were retained; only the archived partial profile was reset for the fresh ordinal 42. Primary and independent reviewers cleared fresh ordinal 42 as loading at the five-, twenty-, and 120-second captures with a genuine closed invocation. Remaining warmups are pending."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
