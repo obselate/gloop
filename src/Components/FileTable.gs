@@ -45,6 +45,11 @@ open class FileTable : Cell[FileTableInput] {
 
     protected override func Build(value FileTableInput) Blob {
         if value.Tiles {
+            if entries != nil {
+                entries = nil
+                rows = []DataGridRow{}
+                indices = Dictionary[string, int32](StringComparer.Ordinal)
+            }
             return Cell.Mount[FileTableInput, FileTiles]("tiles", value)
         }
         let pane = value.Pane
