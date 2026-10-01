@@ -535,7 +535,8 @@ def active_window_info(compositor_bus):
     shot = dbus.Interface(bus.get_object("org.kde.KWin.ScreenShot2", "/org/kde/KWin/ScreenShot2"),
                           "org.kde.KWin.ScreenShot2")
     with open(os.devnull, "wb") as sink:
-        result = shot.CaptureActiveWindow({}, dbus.types.UnixFd(sink.fileno()), signature="a{sv}h")
+        result = shot.CaptureActiveWindow({"include-shadow": False},
+                                          dbus.types.UnixFd(sink.fileno()), signature="a{sv}h")
     kwin = dbus.Interface(bus.get_object("org.kde.KWin", "/KWin"), "org.kde.KWin")
     window = {str(k): str(v) for k, v in
               dict(kwin.getWindowInfo(str(result["windowId"]), signature="s")).items()}
@@ -692,13 +693,18 @@ def launch(root, app, scenario, fixture, ordinal, warmup, monitored_pids, monito
                         mapped, _ = trace.matched_first_buffer(candidate)
                         sized = all(abs(float(candidate.get(key, 0)) - target) < 1 for key, target in
                                     (("x", 130), ("y", 70), ("width", 1180), ("height", 760)))
-                        if owned and mapped and sized:
+                        content_sized = (round(float(candidate["width"])) == int(candidate["capture_width"]) and
+                                         0 <= round(float(candidate["height"])) -
+                                         int(candidate["capture_height"]) <= 80)
+                        if owned and mapped and sized and content_sized:
                             pre_input_window = candidate
                             pre_input_window_elapsed = (time.monotonic_ns() - begin) / 1e9
                             break
                         last_window_error = (f"owned={owned}, mapped={bool(mapped)}, "
                                              f"geometry={candidate.get('x')},{candidate.get('y')},"
-                                             f"{candidate.get('width')}x{candidate.get('height')}")
+                                             f"{candidate.get('width')}x{candidate.get('height')}, "
+                                             f"capture={candidate.get('capture_width')}x"
+                                             f"{candidate.get('capture_height')}")
                     except Exception as error:
                         last_window_error = str(error)
                 time.sleep(.02)
@@ -716,9 +722,18 @@ def launch(root, app, scenario, fixture, ordinal, warmup, monitored_pids, monito
                         current = active_window_info(os.environ["DBUS_SESSION_BUS_ADDRESS"])
                         if int(current.get("pid", 0)) != int(pre_input_window["pid"]):
                             raise RuntimeError("active window changed before preview click")
-                        inset_y = round(float(current["height"])) - int(current["capture_height"])
+                        frame_width = round(float(current["width"]))
+                        frame_height = round(float(current["height"]))
+                        capture_width = int(current["capture_width"])
+                        capture_height = int(current["capture_height"])
+                        if frame_width != capture_width:
+                            raise RuntimeError("unexpected window content width inset " +
+                                               str(frame_width - capture_width))
+                        inset_y = frame_height - capture_height
                         if not 0 <= inset_y <= 80:
                             raise RuntimeError(f"unexpected window content inset {inset_y}")
+                        if not 0 <= x < capture_width or not 0 <= y < capture_height:
+                            raise RuntimeError("preview click is outside window content")
                         screen = [round(float(current["x"])) + x,
                                   round(float(current["y"])) + inset_y + y]
                         keyboard.click(*screen)
@@ -730,6 +745,9 @@ def launch(root, app, scenario, fixture, ordinal, warmup, monitored_pids, monito
                     else:
                         raise ValueError("post_launch_input supports key, click and wait actions")
                     applied.append({"action": action, "screen_at": screen if action["action"] == "click" else None,
+                                    "input_capture": {"width": capture_width, "height": capture_height,
+                                                      "top_inset": inset_y, "includes_shadow": False}
+                                    if action["action"] == "click" else None,
                                     "start_elapsed_s": when,
                                     "end_elapsed_s": (time.monotonic_ns() - begin) / 1e9})
             finally:
