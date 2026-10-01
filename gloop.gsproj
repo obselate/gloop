@@ -19,6 +19,7 @@
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
+    <ExtraLinkerArg Include="-z,pack-relative-relocs" Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' == 'linux-x64'" />
     <Compile Include="src/**/*.gs" />
     <EmbeddedResource Include="src/Resources/ThirdPartyNotices.txt" LogicalName="gloop.ThirdPartyNotices.txt" />
     <EmbeddedResource Include="assets/gloop.png" LogicalName="gloop.Icon.png" />
