@@ -32,6 +32,7 @@ class BrowserController {
     private var previewHeight int32
     private var loadedPreviewWidth int32
     private var loadedPreviewHeight int32
+    private var previewAtOriginalSize bool
     private var previewResizeError string = ""
     private var framebufferWidth int32
     private var framebufferHeight int32
@@ -778,6 +779,7 @@ class BrowserController {
         previewHeight = 0
         loadedPreviewWidth = 0
         loadedPreviewHeight = 0
+        previewAtOriginalSize = false
         Preview = PreviewData{Kind: "", Text: "", Path: "", Error: ""}
         if let source = PreviewImage {
             source.Dispose()
@@ -809,6 +811,7 @@ class BrowserController {
         framebufferWidth = metrics.FramebufferWidth
         framebufferHeight = metrics.FramebufferHeight
         if PreviewImage != nil &&
+            !previewAtOriginalSize &&
             Preview.Kind == "image" &&
             (framebufferWidth > previewWidth || framebufferHeight > previewHeight) {
             previewResizeTimer?.Dispose()
@@ -821,6 +824,7 @@ class BrowserController {
         if disposed ||
             !PreviewVisible ||
             PreviewImage == nil ||
+            previewAtOriginalSize ||
             Preview.Kind != "image" ||
             (framebufferWidth <= previewWidth && framebufferHeight <= previewHeight) {
             return
@@ -862,18 +866,24 @@ class BrowserController {
         if let old = PreviewImage {
             old.Dispose()
         }
-        if source != nil {
-            loadedPreviewWidth = request.Width
-            loadedPreviewHeight = request.Height
+        if data.Kind != "error" {
             if Status == previewResizeError && previewResizeError != "" {
                 Status = ""
             }
             previewResizeError = ""
         }
+        if let image = source {
+            loadedPreviewWidth = request.Width
+            loadedPreviewHeight = request.Height
+            previewAtOriginalSize = image.Width < request.Width && image.Height < request.Height
+        } else {
+            previewAtOriginalSize = false
+        }
         Preview = data
         PreviewImage = source
         Notify()
         if source != nil &&
+            !previewAtOriginalSize &&
             (framebufferWidth > previewWidth || framebufferHeight > previewHeight) &&
             framebufferWidth > 0 &&
             framebufferHeight > 0 {
