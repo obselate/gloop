@@ -1,0 +1,590 @@
+{
+  "date": "2026-10-01",
+  "packages": [
+    {
+      "name": "cpptrace",
+      "version": "1.0.4-2",
+      "filename": "cpptrace-1.0.4-2-x86_64.pkg.tar.zst",
+      "url": "https://archive.archlinux.org/packages/c/cpptrace/cpptrace-1.0.4-2-x86_64.pkg.tar.zst",
+      "sha256": "912573814ac0e332f88a9e819979383fc966426dbb9864bf1c6e6761259bbdff",
+      "bytes": 206654,
+      "destination": "flea-runtime-root"
+    },
+    {
+      "name": "libdwarf",
+      "version": "1:2.3.3-1",
+      "filename": "libdwarf-1_2.3.3-1-x86_64.pkg.tar.zst",
+      "url": "https://archive.archlinux.org/packages/l/libdwarf/libdwarf-1:2.3.3-1-x86_64.pkg.tar.zst",
+      "sha256": "0c75b69d4d606bdea576a50389bb10a5aa4515dcd3a78b98766fc8f096c927f2",
+      "bytes": 479295,
+      "destination": "flea-runtime-root"
+    },
+    {
+      "name": "qt6-wayland",
+      "version": "6.11.2-1",
+      "filename": "qt6-wayland-6.11.2-1-x86_64.pkg.tar.zst",
+      "url": "https://archive.archlinux.org/packages/q/qt6-wayland/qt6-wayland-6.11.2-1-x86_64.pkg.tar.zst",
+      "sha256": "0e4f84b21871bf4a2f65278a0a4e85d43aa2681e036eb143ce882817552c8f66",
+      "bytes": 827120,
+      "destination": "flea-runtime-root"
+    },
+    {
+      "name": "quickshell",
+      "version": "0.3.1-1",
+      "filename": "quickshell-0.3.1-1-x86_64.pkg.tar.zst",
+      "url": "https://archive.archlinux.org/packages/q/quickshell/quickshell-0.3.1-1-x86_64.pkg.tar.zst",
+      "sha256": "5988659fdc1b0addf138a3cd8e3540fc1078bfc60c995c6f4cd0fb9054484ec7",
+      "bytes": 1706847,
+      "destination": "flea-runtime-root"
+    },
+    {
+      "name": "baloo-widgets",
+      "version": "26.08.1-1.1",
+      "filename": "baloo-widgets-26.08.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/baloo-widgets-26.08.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "bc8c6583b4aa46eb5abb83b12153251ed3e933cb67c2e54ff71d67aead768db3",
+      "bytes": 158828,
+      "destination": "root"
+    },
+    {
+      "name": "caja",
+      "version": "1.28.0-4.1",
+      "filename": "caja-1.28.0-4.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/caja-1.28.0-4.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "0b53961ebcac0fcbcdb5e4559e04e8d5c10f510a337e0a80cbf5948c86cde869",
+      "bytes": 3642022,
+      "destination": "root"
+    },
+    {
+      "name": "cosmic-files",
+      "version": "1:1.9.0-1.1",
+      "filename": "cosmic-files-1:1.9.0-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/cosmic-files-1:1.9.0-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "2bc1dfb9fd618a9722229dd9f4dcdcf5fd22ee4473a4b6e3879c965b61e2feb5",
+      "bytes": 24301890,
+      "destination": "root"
+    },
+    {
+      "name": "cosmic-icon-theme",
+      "version": "1:1.9.0-1",
+      "filename": "cosmic-icon-theme-1:1.9.0-1-any.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/cosmic-icon-theme-1:1.9.0-1-any.pkg.tar.zst",
+      "sha256": "475a25af709a80d43c04c14334edeea9767ef8194e83094aa8f1cfc936797905",
+      "bytes": 255949,
+      "destination": "root"
+    },
+    {
+      "name": "dolphin",
+      "version": "26.08.1-1.1",
+      "filename": "dolphin-26.08.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/dolphin-26.08.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "f38dfab31ec0e6eff1476965a54a8dd6ece88133301b17a3ea43a2f858dd7bca",
+      "bytes": 5197807,
+      "destination": "root"
+    },
+    {
+      "name": "doublecmd-qt6",
+      "version": "1.2.9-1",
+      "filename": "doublecmd-qt6-1.2.9-1-x86_64.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/doublecmd-qt6-1.2.9-1-x86_64.pkg.tar.zst",
+      "sha256": "ee05f5f7801b643cb5e47cc24b4ef2148ed70dc31a808e088a9aacd9e66bff45",
+      "bytes": 8740257,
+      "destination": "root"
+    },
+    {
+      "name": "exo",
+      "version": "4.20.0-2.1",
+      "filename": "exo-4.20.0-2.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/exo-4.20.0-2.1-x86_64.pkg.tar.zst",
+      "sha256": "c0382e774a048517173e910abf8c66b584bfac34e0a1f3ebf5a19c190e8d4f61",
+      "bytes": 351431,
+      "destination": "root"
+    },
+    {
+      "name": "gexiv2",
+      "version": "0.16.2-2.1",
+      "filename": "gexiv2-0.16.2-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/gexiv2-0.16.2-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "85824968cbc4053967278e9726261f1d3e0760d4d227a2453c4957fe34f3114a",
+      "bytes": 107326,
+      "destination": "root"
+    },
+    {
+      "name": "glycin-gtk4",
+      "version": "2.1.5-2.1",
+      "filename": "glycin-gtk4-2.1.5-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/glycin-gtk4-2.1.5-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "778d972cf31a307fed6c2e8bbbc108cd2e5836a4ba3f501d6c25035ae90f6028",
+      "bytes": 133854,
+      "destination": "root"
+    },
+    {
+      "name": "gnome-autoar",
+      "version": "0.5.2-1.1",
+      "filename": "gnome-autoar-0.5.2-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/gnome-autoar-0.5.2-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "2413abd1133b42b1a54bce8c7968dfbcffb77adf5f8947854f0fa86a5c8ce305",
+      "bytes": 46010,
+      "destination": "root"
+    },
+    {
+      "name": "gnome-desktop-4",
+      "version": "1:44.5-1.1",
+      "filename": "gnome-desktop-4-1:44.5-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/gnome-desktop-4-1:44.5-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "eac9570c42fa8146a32442230e5e5f96e2c3e847a1005928c5735ab5a2b35359",
+      "bytes": 134013,
+      "destination": "root"
+    },
+    {
+      "name": "granite",
+      "version": "1:6.2.0-1.1",
+      "filename": "granite-1:6.2.0-1.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/granite-1:6.2.0-1.1-x86_64.pkg.tar.zst",
+      "sha256": "6f6a8191cc37c365d2c53c516df05bb40d2c0eb6dc36abbd2ea24a6131363141",
+      "bytes": 319659,
+      "destination": "root"
+    },
+    {
+      "name": "gtksourceview5",
+      "version": "5.20.0-1.1",
+      "filename": "gtksourceview5-5.20.0-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/gtksourceview5-5.20.0-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "116939264ed3c37f9a971b60244dc84d672f5e431bdbb5012308c90663839bc0",
+      "bytes": 1034773,
+      "destination": "root"
+    },
+    {
+      "name": "gupnp-dlna",
+      "version": "0.12.0-5.1",
+      "filename": "gupnp-dlna-0.12.0-5.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/gupnp-dlna-0.12.0-5.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "d1837f013ae5b70403a5fc854795b4efb9344abfe5e2b6d77601eca82c95ecfd",
+      "bytes": 104984,
+      "destination": "root"
+    },
+    {
+      "name": "konqueror",
+      "version": "26.08.1-1.1",
+      "filename": "konqueror-26.08.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/konqueror-26.08.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "071e8ed406f572a5b4026d853168383b3eae5d2ee2d92c0ea5933250431ad1ee",
+      "bytes": 9082193,
+      "destination": "root"
+    },
+    {
+      "name": "krusader",
+      "version": "2.9.0-2",
+      "filename": "krusader-2.9.0-2-x86_64.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/krusader-2.9.0-2-x86_64.pkg.tar.zst",
+      "sha256": "fda400f66d06a75b5aa8919b852c71eec343ac7252dd1b10f06ddc1a2fc8ef36",
+      "bytes": 4024050,
+      "destination": "root"
+    },
+    {
+      "name": "libcue",
+      "version": "2.3.0-2.1",
+      "filename": "libcue-2.3.0-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libcue-2.3.0-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "7ff82628227e261ea8121e21209ad7c675ce58a89a27555e38491bb53dc5cb1b",
+      "bytes": 19039,
+      "destination": "root"
+    },
+    {
+      "name": "libfm",
+      "version": "1.4.1-1.1",
+      "filename": "libfm-1.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libfm-1.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "4e168e403daeb43429416811a91357b994f61d03789353c3446e7ba41467e6f4",
+      "bytes": 573193,
+      "destination": "root"
+    },
+    {
+      "name": "libfm-extra",
+      "version": "1.4.1-1.1",
+      "filename": "libfm-extra-1.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libfm-extra-1.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "93c4ff9d7d6ee494802ea3e523c5020ab3d3b34a53517a574a733874259e39be",
+      "bytes": 17985,
+      "destination": "root"
+    },
+    {
+      "name": "libfm-gtk3",
+      "version": "1.4.1-1.1",
+      "filename": "libfm-gtk3-1.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libfm-gtk3-1.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "5896fcf7ece2bb061dd68cd61dd786d6c073878d409f34b727df04853eebc96d",
+      "bytes": 185828,
+      "destination": "root"
+    },
+    {
+      "name": "libfm-qt",
+      "version": "2.4.0-3.1",
+      "filename": "libfm-qt-2.4.0-3.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libfm-qt-2.4.0-3.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "e49e75c8d66418333da635593b832833436c8cc946172ab159af2a801cb82f47",
+      "bytes": 763070,
+      "destination": "root"
+    },
+    {
+      "name": "libfox-1.6-0",
+      "version": "1.6.57-1+b4",
+      "filename": "libfox-1.6-0_1.6.57-1+b4_amd64.deb",
+      "url": "https://deb.debian.org/debian/pool/main/f/fox1.6/libfox-1.6-0_1.6.57-1+b4_amd64.deb",
+      "sha256": "cb0570ef286351f9fb3be67aabffb6ec7466c8fb1fdfa68ae7fca645607260ae",
+      "bytes": 870924,
+      "destination": "root"
+    },
+    {
+      "name": "libgee",
+      "version": "0.20.8-1.1",
+      "filename": "libgee-0.20.8-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libgee-0.20.8-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "f6a71969bc94a7d461ae2b3c912360348725cea2904f279fe5ebac5014d68078",
+      "bytes": 324060,
+      "destination": "root"
+    },
+    {
+      "name": "libgit2-glib",
+      "version": "1.2.1-2.1",
+      "filename": "libgit2-glib-1.2.1-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libgit2-glib-1.2.1-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "c12fcbfe0b29325d0820ec1ed78f3dd30972cd26e83084b43ab8d3316cc69b72",
+      "bytes": 204046,
+      "destination": "root"
+    },
+    {
+      "name": "libgtop",
+      "version": "2.41.3-2.1",
+      "filename": "libgtop-2.41.3-2.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libgtop-2.41.3-2.1-x86_64.pkg.tar.zst",
+      "sha256": "8e0ade3c9f26bbb7468b8e530e1b13de07822e6eb8470bfd96a6ef2f2b028ebb",
+      "bytes": 201923,
+      "destination": "root"
+    },
+    {
+      "name": "libgxps",
+      "version": "0.3.2-5.1",
+      "filename": "libgxps-0.3.2-5.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libgxps-0.3.2-5.1-x86_64.pkg.tar.zst",
+      "sha256": "547ab0cd1d574a8ecf1b9ab3ee7a8259e3f1f5cd782f2873452931b0fd64d31f",
+      "bytes": 114059,
+      "destination": "root"
+    },
+    {
+      "name": "libhandy",
+      "version": "1.8.3-2.1",
+      "filename": "libhandy-1.8.3-2.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libhandy-1.8.3-2.1-x86_64.pkg.tar.zst",
+      "sha256": "4a6016fd414f2b00e2dcc087be3ff8076cd941dfc9d29ac484eb6b503de79a11",
+      "bytes": 491409,
+      "destination": "root"
+    },
+    {
+      "name": "libiptcdata",
+      "version": "1.0.5-5.1",
+      "filename": "libiptcdata-1.0.5-5.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libiptcdata-1.0.5-5.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "1d03a3a6c1d815ea3fbcf43d57dce3f58a3d08afccac0891124d91c7b9e90c22",
+      "bytes": 80287,
+      "destination": "root"
+    },
+    {
+      "name": "libjpeg62-turbo",
+      "version": "1:2.1.5-4",
+      "filename": "libjpeg62-turbo_2.1.5-4_amd64.deb",
+      "url": "https://deb.debian.org/debian/pool/main/libj/libjpeg-turbo/libjpeg62-turbo_2.1.5-4_amd64.deb",
+      "sha256": "5504299ad0e3c0a9ca9f962a68a650a040db52f9f416a109e74df48d55601d3f",
+      "bytes": 168152,
+      "destination": "root"
+    },
+    {
+      "name": "libportal",
+      "version": "0.11.0-1.1",
+      "filename": "libportal-0.11.0-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libportal-0.11.0-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "fc82b00de9f9ec38a87f1a550c377cbcc52a68da389676967313710922724cf6",
+      "bytes": 127627,
+      "destination": "root"
+    },
+    {
+      "name": "libportal-gtk3",
+      "version": "0.11.0-1.1",
+      "filename": "libportal-gtk3-0.11.0-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libportal-gtk3-0.11.0-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "c6a2fa8cdc468d27abebfb02a1ca2379dc4a6362561fc4feb3cb9f464b3e82a8",
+      "bytes": 13601,
+      "destination": "root"
+    },
+    {
+      "name": "libportal-gtk4",
+      "version": "0.11.0-1.1",
+      "filename": "libportal-gtk4-0.11.0-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libportal-gtk4-0.11.0-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "ecaa7dc142b7f9342cb030704c09a74a2a78753df0c9931df770cbe04b9c97b4",
+      "bytes": 13601,
+      "destination": "root"
+    },
+    {
+      "name": "libxfce4ui",
+      "version": "4.20.2-1.1",
+      "filename": "libxfce4ui-4.20.2-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libxfce4ui-4.20.2-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "0a8a881fbf53bd4c272e34348dbe2ad2a50026d56ed07decd348e96a3cc51081",
+      "bytes": 405729,
+      "destination": "root"
+    },
+    {
+      "name": "libxfce4util",
+      "version": "4.20.1-1.1",
+      "filename": "libxfce4util-4.20.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/libxfce4util-4.20.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "fbe04dad2c7f9370a493d4fc5191e0be6a8a69b4eb2d1007c4ecf617bdfdbf34",
+      "bytes": 147583,
+      "destination": "root"
+    },
+    {
+      "name": "localsearch",
+      "version": "3.11.2-1",
+      "filename": "localsearch-3.11.2-1-x86_64.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/localsearch-3.11.2-1-x86_64.pkg.tar.zst",
+      "sha256": "c38f0fe421841a17828fd2a74e97416c50871763f3dc7e379d8233d478049633",
+      "bytes": 669005,
+      "destination": "root"
+    },
+    {
+      "name": "lxmenu-data",
+      "version": "0.1.7-1",
+      "filename": "lxmenu-data-0.1.7-1-any.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/lxmenu-data-0.1.7-1-any.pkg.tar.zst",
+      "sha256": "285a8388cd149dbc984589daf7881f37184890fb4a7f62d531acf1fe1dda2609",
+      "bytes": 22516,
+      "destination": "root"
+    },
+    {
+      "name": "lxqt-menu-data",
+      "version": "2.4.0-1",
+      "filename": "lxqt-menu-data-2.4.0-1-any.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/lxqt-menu-data-2.4.0-1-any.pkg.tar.zst",
+      "sha256": "82854822745e3f957419408c96e470a495b477ef361b5e3cd1f2947218e423d4",
+      "bytes": 51605,
+      "destination": "root"
+    },
+    {
+      "name": "mate-desktop",
+      "version": "1.28.2-2.1",
+      "filename": "mate-desktop-1.28.2-2.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/mate-desktop-1.28.2-2.1-x86_64.pkg.tar.zst",
+      "sha256": "16589600da8fd9c5aaea7d73728056ec455b46ef897325cbabea841a4f080a44",
+      "bytes": 736377,
+      "destination": "root"
+    },
+    {
+      "name": "menu-cache",
+      "version": "1.1.1-2.1",
+      "filename": "menu-cache-1.1.1-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/menu-cache-1.1.1-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "430a91266ea9824e7a0fd9dc9bde59c0530796412b3b012e59a260562a0d1d52",
+      "bytes": 59828,
+      "destination": "root"
+    },
+    {
+      "name": "nautilus",
+      "version": "50.3.1-1.1",
+      "filename": "nautilus-50.3.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/nautilus-50.3.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "a8a1222b30924250386a28282447c33556f9d9d55d7735eafec54bfb858f362f",
+      "bytes": 2552159,
+      "destination": "root"
+    },
+    {
+      "name": "nemo",
+      "version": "6.6.4-1.1",
+      "filename": "nemo-6.6.4-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/nemo-6.6.4-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "fd47cbea0075ea4599c80bebb0a3f3f7d877839b6055ee2692fcba1a3e11d09a",
+      "bytes": 1181211,
+      "destination": "root"
+    },
+    {
+      "name": "pantheon-files",
+      "version": "7.3.2-2.1",
+      "filename": "pantheon-files-7.3.2-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/pantheon-files-7.3.2-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "56ac4a935b325a840fb2ed158a4061137d8719a75f75c2bcb48ad26e1d076f2d",
+      "bytes": 1047348,
+      "destination": "root"
+    },
+    {
+      "name": "pcmanfm",
+      "version": "1.4.0-2.1",
+      "filename": "pcmanfm-1.4.0-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/pcmanfm-1.4.0-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "a5d2be3b4d70996b0dbe6cf0abeab9c4c486ae03fe38c0e66c8f4d93ff9e335f",
+      "bytes": 315745,
+      "destination": "root"
+    },
+    {
+      "name": "pcmanfm-qt",
+      "version": "2.4.1-1.1",
+      "filename": "pcmanfm-qt-2.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/pcmanfm-qt-2.4.1-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "bcc511616319fda9e26f458298adaeeec1969d6d201f9f8f0bd0de7bc053164a",
+      "bytes": 606135,
+      "destination": "root"
+    },
+    {
+      "name": "pop-icon-theme",
+      "version": "3.5.1-1",
+      "filename": "pop-icon-theme-3.5.1-1-any.pkg.tar.zst",
+      "url": "https://archlinux.cachyos.org/repo/extra/os/x86_64/pop-icon-theme-3.5.1-1-any.pkg.tar.zst",
+      "sha256": "c96ad753df74cdebe826f8c726e76a6726637b40ec058f8e33eab78bbabff8de",
+      "bytes": 2371594,
+      "destination": "root"
+    },
+    {
+      "name": "qt6pas",
+      "version": "6.2.10-4.1",
+      "filename": "qt6pas-6.2.10-4.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/qt6pas-6.2.10-4.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725",
+      "bytes": 542927,
+      "destination": "root"
+    },
+    {
+      "name": "spacefm",
+      "version": "1.0.6-9",
+      "filename": "spacefm_1.0.6-9_amd64.deb",
+      "url": "https://deb.debian.org/debian/pool/main/s/spacefm/spacefm_1.0.6-9_amd64.deb",
+      "sha256": "d7b82ce5995432efbc58a7076fa0dc89364b3ff735f0fab79075f4680dc7fdca",
+      "bytes": 1135908,
+      "destination": "root"
+    },
+    {
+      "name": "startup-notification",
+      "version": "0.12-9.1",
+      "filename": "startup-notification-0.12-9.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/startup-notification-0.12-9.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "fb638081011e59aca89f0ba88ec7e485ea43048f1b2c447ca8e1aec637656bae",
+      "bytes": 20089,
+      "destination": "root"
+    },
+    {
+      "name": "telepathy-glib",
+      "version": "0.24.2-5.1",
+      "filename": "telepathy-glib-0.24.2-5.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/telepathy-glib-0.24.2-5.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "487d209c79cbfbe19dab93707370833c9aebf17f0e5a2b0c860e6b433de39865",
+      "bytes": 1571088,
+      "destination": "root"
+    },
+    {
+      "name": "thunar",
+      "version": "4.20.10-1.1",
+      "filename": "thunar-4.20.10-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/thunar-4.20.10-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "3f7b36e0a1eb50842cc227945e736b40e8bf2c4a58a268199592f0fea10b6bcc",
+      "bytes": 1695547,
+      "destination": "root"
+    },
+    {
+      "name": "totem-pl-parser",
+      "version": "3.26.7-1.1",
+      "filename": "totem-pl-parser-3.26.7-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/totem-pl-parser-3.26.7-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "8afa53e94988e1b10464724d0df6721c857a3c50e437f0165145ada745deff7e",
+      "bytes": 127238,
+      "destination": "root"
+    },
+    {
+      "name": "tumbler",
+      "version": "4.20.2-2.1",
+      "filename": "tumbler-4.20.2-2.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/tumbler-4.20.2-2.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "7e5f90369c60f4db98dd74dc5dd72b9d4a453a4139a1d08b3c124f3e8cd5e10d",
+      "bytes": 184251,
+      "destination": "root"
+    },
+    {
+      "name": "xapian-core",
+      "version": "1:2.1.0-1.1",
+      "filename": "xapian-core-1:2.1.0-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/xapian-core-1:2.1.0-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "d506455ed413540809412319726d831105f4297e22f9638d7b4faa13fbebeaef",
+      "bytes": 1520995,
+      "destination": "root"
+    },
+    {
+      "name": "xdg-user-dirs-gtk",
+      "version": "0.16-1.1",
+      "filename": "xdg-user-dirs-gtk-0.16-1.1-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/xdg-user-dirs-gtk-0.16-1.1-x86_64_v3.pkg.tar.zst",
+      "sha256": "66eaf691edc7ca15266d6658567e524bf1b8ec8f5b8abedbd61af8589a72ad4a",
+      "bytes": 52141,
+      "destination": "root"
+    },
+    {
+      "name": "xfconf",
+      "version": "4.20.0-2.1",
+      "filename": "xfconf-4.20.0-2.1-x86_64.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/xfconf-4.20.0-2.1-x86_64.pkg.tar.zst",
+      "sha256": "494e09df6df899e6b199e1593290ecd788680146d68841ce15baed5f40ab8332",
+      "bytes": 193199,
+      "destination": "root"
+    },
+    {
+      "name": "xfe",
+      "version": "2.0.1-2",
+      "filename": "xfe_2.0.1-2_amd64.deb",
+      "url": "https://deb.debian.org/debian/pool/main/x/xfe/xfe_2.0.1-2_amd64.deb",
+      "sha256": "549b285e6c87dae29aea214c54bc24843d816e943fd2074c3e91ddf25615a495",
+      "bytes": 1135740,
+      "destination": "root"
+    },
+    {
+      "name": "xfe-themes",
+      "version": "2.0.1-2",
+      "filename": "xfe-themes_2.0.1-2_all.deb",
+      "url": "https://deb.debian.org/debian/pool/main/x/xfe/xfe-themes_2.0.1-2_all.deb",
+      "sha256": "676da0883a05f956e4ee42abb0251a72f44a8263a85d5a8eddc9405d40d1ed04",
+      "bytes": 1997624,
+      "destination": "root"
+    },
+    {
+      "name": "zeitgeist",
+      "version": "1.0.4-7.2",
+      "filename": "zeitgeist-1.0.4-7.2-x86_64_v3.pkg.tar.zst",
+      "url": "https://cdn77.cachyos.org/repo/x86_64_v3/cachyos-extra-v3/zeitgeist-1.0.4-7.2-x86_64_v3.pkg.tar.zst",
+      "sha256": "6efdf305c53cb07d52ba8664336d2708f671456ddf2c9115fdb35afd18366810",
+      "bytes": 453333,
+      "destination": "root"
+    },
+    {
+      "name": "flea",
+      "version": "0.3.7",
+      "filename": "flea-v0.3.7-linux-x86_64.tar.gz",
+      "url": "https://github.com/thisisgm/flea/releases/download/v0.3.7/flea-v0.3.7-linux-x86_64.tar.gz",
+      "sha256": "671fdfa1bf2095900bb084da67b27b036a09d3f6c3368904174e0a6fd787c6a4",
+      "bytes": 1914593,
+      "destination": "root/opt"
+    },
+    {
+      "name": "omarchy",
+      "version": "b18ab4952b88b95efe7758ee5f9bd3bb47483875",
+      "filename": "omarchy-b18ab495.tar.gz",
+      "url": "https://codeload.github.com/basecamp/omarchy/tar.gz/b18ab4952b88b95efe7758ee5f9bd3bb47483875",
+      "sha256": "7a892b4e68142637aaf331612bf3f9b65abd31f0be488a81c1486d9a2bd85f0b",
+      "bytes": 71506580,
+      "destination": "root/opt"
+    },
+    {
+      "name": "strata",
+      "version": "0.20.1",
+      "filename": "strata-0.20.1-x86_64-unknown-linux-gnu.tar.gz",
+      "url": "https://github.com/lgse/strata/releases/download/v0.20.1/strata-0.20.1-x86_64-unknown-linux-gnu.tar.gz",
+      "sha256": "55f35eabb8006ddc8498cba59cdd3906ceda361ab583486ea5b61c8c6e4c2205",
+      "bytes": 12236678,
+      "destination": "root/opt"
+    }
+  ]
+}

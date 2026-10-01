@@ -59,6 +59,34 @@ def position(rows, key, decimals):
     return gloop, f'{rank}/{len(rows)}' + (' tied' if tied else '')
 
 
+def window_marker(row):
+    counts = row.get('window_state_counts_at_5s', {})
+    if counts.get('no_captured_window', 0):
+        return ' +'
+    return ' *' if counts.get('loading_window', 0) or row.get('ready_at_5s') is False else ''
+
+
+def coverage_label(row):
+    count = row.get('n', 0)
+    if not count:
+        return 'N/A'
+    if count != 3:
+        return f'Incomplete {count}/3'
+    if not row.get('comparable'):
+        if 'deadline' in (row.get('reason') or ''):
+            deadlines = [item['deadline_elapsed_s'] for item in row.get('population_validation', [])
+                         if item.get('deadline_elapsed_s') is not None]
+            return f'Incomplete ~{round(max(deadlines))}s' if deadlines else 'Incomplete'
+        return 'Unverified'
+    counts = row.get('window_state_counts_at_5s', {})
+    for state, label in [('populated_window', 'Populated at 5s'),
+                         ('loading_window', 'Loading at 5s'),
+                         ('no_captured_window', 'Late window')]:
+        if counts.get(state) == count:
+            return label
+    return 'Mixed 5s states' if counts else 'Loading at 5s' if row.get('ready_at_5s') is False else 'Measured'
+
+
 def base_card(title, subtitle):
     figure = plt.figure(figsize=(18, 14), dpi=120, facecolor=BACKGROUND)
     figure.text(.045, .958, title, color=TEXT, fontsize=26, weight='bold', va='top')
@@ -101,8 +129,7 @@ def chart(axis, rows, key, unit, decimals, title):
         axis.set_xlim(0, max(maximum, .1) * 1.28)
         axis.set_ylim(len(usable) - .4, -.8)
         axis.set_yticks(range(len(usable)),
-                       [row['app'] + (' *' if row.get('ready_at_5s') is False else '')
-                        for row in usable], fontsize=11)
+                       [row['app'] + window_marker(row) for row in usable], fontsize=11)
         for index, row in enumerate(usable):
             value = row[key]
             color = GREEN if row['app'] == 'Gloop' else BLUE
@@ -141,7 +168,7 @@ def metric_cards(rows, output):
         for axis, (scenario, label) in zip(axes.flat, SCENARIOS.items()):
             chart(axis, [row for row in rows if row['scenario'] == scenario],
                   key, unit, decimals, label)
-        save_card(figure, output / f'{key}.png', note + '\n* Workload still loading at the five-second capture. Positions describe this cohort, not universal performance.')
+        save_card(figure, output / f'{key}.png', note + '\n* Loading at five seconds. + No captured window at five seconds, validated later. Positions apply to this cohort.')
 
 
 def footprint_card(apps, output):
@@ -187,8 +214,7 @@ def coverage_card(rows, apps, output):
         values = []
         for scenario in SCENARIOS:
             row = next((row for row in rows if row['app'] == app['name'] and row['scenario'] == scenario), {})
-            values.append('Loading at 5s' if row.get('comparable') and row.get('ready_at_5s') is False
-                          else 'Measured' if row.get('comparable') else 'Unverified' if row.get('n', 0) == 3 else 'N/A')
+            values.append(coverage_label(row))
         cells.append([app['name'], app['version'], *values])
     table = axis.table(cellText=cells,
                        colLabels=['Application', 'Tested version', '100 / list', '100k / list', '100k / tiles', 'PNG preview'],
@@ -203,7 +229,7 @@ def coverage_card(rows, apps, output):
         if row == 0 or row > 0 and apps[row - 1]['name'] == 'Gloop':
             cell.get_text().set_weight('bold')
             cell.get_text().set_color(TEXT if row == 0 else GREEN)
-    save_card(figure, output / 'coverage.png', 'N/A reasons and exact binary hashes are in the report and data files. Package versions can differ from the latest upstream release.')
+    save_card(figure, output / 'coverage.png', 'Late window: no five-second capture, validated later. Incomplete cases remain in raw data and have no metric positions.\nLarge-folder validation is at about 20s or 120s. N/A reasons and binary hashes are in the report. Tested versions can differ from current releases.')
 
 
 def publish_card(apps, output):
@@ -238,6 +264,7 @@ def main():
     args = parser.parse_args()
     summary = json.loads(args.summary.read_text())
     manifest = json.loads(args.manifest.read_text())
+    manifest['apps'].sort(key=lambda app: app['id'] != 'gloop')
     args.output.mkdir(parents=True, exist_ok=True)
     rows = summary['summaries'] if isinstance(summary, dict) else summary
     for row in rows:
