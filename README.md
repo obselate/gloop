@@ -12,7 +12,12 @@ Install [gloop-bin](https://aur.archlinux.org/packages/gloop-bin) with your AUR 
 yay -S gloop-bin
 ```
 
-Or use `paru -S gloop-bin`. See the [Arch installation guide](packaging/aur/gloop-bin/README.md)
+Or
+```sh
+paru -S gloop-bin
+``` 
+
+See the [Arch installation guide](packaging/aur/gloop-bin/README.md)
 for manual installation or migration from a portable install.
 
 ### Download
