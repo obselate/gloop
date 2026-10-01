@@ -742,7 +742,7 @@
               "action": "click",
               "at": [
                 300,
-                127
+                100
               ]
             }
           ],
@@ -1267,7 +1267,7 @@
   "package_lock": "{workspace}/assets/performance/file-managers-2026-10-01/packages.lock.json",
   "package_lock_sha256": "d3525959c0a1d27e95d8d3e8881b07d935d179ff52784b93f0ccf467e23fd7a4",
   "package_input_manifest_sha256": "a638ce5f978d0b3a3c673195d194c916e3d1b153ff39213eb3beafd23744aff9",
-  "adapter_input_sha256": "b14b113caf7490e27e2cb167dfa2e15d05d7e86dc65d6735008c8fb4998e081d",
+  "adapter_input_sha256": "241bbe4b66236f966f7567f57b3a7190d227538b9a4c778d88608dcbc2ce14a2",
   "fixture_generator": "{workspace}/scripts/file_manager_fixtures.py",
   "package_fetcher": "{workspace}/scripts/file_manager_packages.py"
 }
