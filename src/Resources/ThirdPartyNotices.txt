@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-Goo 0.7.10 and Goo.Svg 0.7.10 | MIT
+Goo 0.7.11 and Goo.Svg 0.7.11 | MIT
 ========================================================================
 
 MIT License
