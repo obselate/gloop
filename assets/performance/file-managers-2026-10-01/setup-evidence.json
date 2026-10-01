@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "scope": "setup_only",
+  "final_cohort": "cohort-final-v4",
+  "note": "These events preceded measured comparison. They supply no application measurements or ranking. Earlier cohorts are retained as setup evidence and contribute no rows to the final cohort.",
+  "source_files": {
+    "host_only_baseline": {
+      "path": "artifacts/performance/file-manager-harness-probe/idle-host-baseline.json",
+      "sha256": "865e317cf5441886836de996a2018298e9f68ab8775f5c05d6a4e3a99e089718"
+    },
+    "first_final_attempt_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final/environment-warmup-invocations.jsonl",
+      "sha256": "1be75306e1b3c10a82b312b7e18094cca11024eca8faff7985aee01e7fbd902c"
+    },
+    "private_compositor_baseline": {
+      "path": "artifacts/performance/file-manager-harness-probe/idle-private-60s-baseline.json",
+      "sha256": "3f8ad4166b8d0974c5ad92467622d9f7354b13e646e491aea04d5859d059cf50"
+    },
+    "warmup_v1_environment": {
+      "path": "artifacts/performance/file-managers-20261001/warmup-v1/environment.json",
+      "sha256": "12f0c1058167927e88236b06c4d2eebb569517353ab58a2d17533236c58d4d57"
+    },
+    "warmup_v1_raw": {
+      "path": "artifacts/performance/file-managers-20261001/warmup-v1/raw.jsonl",
+      "sha256": "5a54030725bca0f7e58893ea0457798f976d79b6b4c62c38463c02a76060d117"
+    },
+    "v2_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v2/raw.jsonl",
+      "sha256": "e72455905256cc3eb4fcb7c0866fa8820945c16a4dbd90f0baade124b3662849"
+    },
+    "v2_incomplete_environment": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v2/environment-warmup.json",
+      "sha256": "7ddf6da5c6b300d40b2b7bb0e0934d823571484fa20fb26df70e55bfe5d628ba"
+    },
+    "v2_closed_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v2/environment-warmup-invocations.jsonl",
+      "sha256": "542161fadd627427958f3d3a80b7709e8ef2b7088afcb3136b48b36cda15928a"
+    },
+    "cohort_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v2/inputs/cohort-manifest.json",
+      "sha256": "6d693e7353a66db060221ae4ea2826761a744f439f51991bb807f29449545b5e"
+    },
+    "v3_recovery_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v3/recovery-manifest.json",
+      "sha256": "2300f14da03bc090181cb5766e6a359f7d992237802ab04f5cee30e2d9270931"
+    },
+    "v3_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v3/raw.jsonl",
+      "sha256": "ee5d4aa6bb1aa57736d3eb0f4bca71c4a9906858d46b574a1af7469fd05edb54"
+    },
+    "v3_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v3/environment-warmup-invocations.jsonl",
+      "sha256": "05c34e4a3b0ad3fea7570c043c2f2679389d58424238be967bf1b1dcd2757db3"
+    }
+  },
+  "events": [
+    {
+      "id": "initial_quiet_guard",
+      "sources": ["host_only_baseline", "first_final_attempt_history"],
+      "facts": {
+        "baseline_seconds": 30,
+        "baseline_gpu_utilization_p95_percent": 26,
+        "initial_gpu_utilization_cap_percent": 30,
+        "deferred_warmup_attempts": 2,
+        "launched_apps": 0
+      },
+      "disposition": "The two deferred attempts are setup only. No application was launched."
+    },
+    {
+      "id": "corrected_quiet_guard",
+      "sources": ["private_compositor_baseline", "v2_closed_history"],
+      "facts": {
+        "baseline": "App-free, 60-second private KWin virtual Wayland and XWayland session using the cohort wrapper",
+        "baseline_samples": 60,
+        "baseline_gpu_utilization_p95_percent": 45,
+        "gpu_cap_rule": "ceil(p95 / 10) * 10",
+        "gpu_utilization_cap_percent": 50,
+        "quiet_seconds": 10,
+        "quiet_timeout_seconds": 45,
+        "gpu_free_floor_mib": 512,
+        "inference_monitor": "Dynamic llama-server process guard; no inference process was observed and the operator confirmed inference was idle"
+      },
+      "disposition": "The guard deferred launches when the desktop was busy. User applications were left running."
+    },
+    {
+      "id": "initial_gloop_tile_abort",
+      "sources": ["warmup_v1_environment", "warmup_v1_raw", "cohort_manifest", "v2_raw"],
+      "additional_source": "systemd-coredump metadata for PID 1842815, queried with coredumpctl info; no core memory is published",
+      "facts": {
+        "warmup_ordinal": 49,
+        "app": "gloop",
+        "scenario": "tiles100000",
+        "recorded_status": "error",
+        "recorded_reason": "no app processes in scope at memory sample",
+        "signal": "SIGABRT",
+        "process_id": 1842815,
+        "time_local": "2026-10-01 14:37:48 EDT",
+        "binary": "released Gloop 0.7.2 NativeAOT Size",
+        "binary_sha256": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+        "cause": "unknown",
+        "later_functional_tile_warmup": "v2 ordinal 0 recorded ok with an owned window capture"
+      },
+      "disposition": "Retained as an isolated setup failure; no cause is inferred and it is not attributed to the historical 0.7.1 swapchain issue."
+    },
+    {
+      "id": "v2_interrupted_warmup",
+      "sources": ["v2_raw", "v2_incomplete_environment", "v2_closed_history", "v3_recovery_manifest"],
+      "additional_source": "Outer wrapper exit status and elapsed time recorded by the benchmark operator; signal sender was not identified",
+      "facts": {
+        "session": "v2-full-4",
+        "outer_wrapper_exit": "SIGTERM, status 143, at 2026-10-01 16:53:46 EDT after approximately 388 seconds",
+        "signal_sender": "unknown",
+        "raw_warmup_ordinals_present": [0, 38],
+        "genuinely_closed_history_ordinals": [0, 32],
+        "unclosed_ordinals_excluded": [33, 34, 35, 36, 37, 38],
+        "latest_environment_has_end_snapshots": false,
+        "v3_copied_closed_prefix_and_captures": true,
+        "v3_copied_profiles": false
+      },
+      "disposition": "Only the byte-identical closed prefix and verified captures were copied into v3 setup. Unclosed attempts were omitted and rerun; v2 originals remain untouched."
+    },
+    {
+      "id": "v3_post_record_pipe_failure",
+      "sources": ["v3_raw", "v3_history"],
+      "facts": {
+        "warmup_ordinal": 48,
+        "app": "konqueror",
+        "scenario": "tiles100000",
+        "raw_record_fsynced": true,
+        "owned_window_captures": ["5-second", "120-second"],
+        "invocation_execution_status": "failed",
+        "execution_error": "[Errno 32] Broken pipe",
+        "source_fixture_session_input_and_host_end_snapshots_present": true,
+        "end_snapshot_errors": [],
+        "provenance_drift": false
+      },
+      "disposition": "The post-record progress print failed after a daemon restart. The invocation remains failed in the genuine history. V3 stopped after its closed Xfe tile warmup at ordinal 50."
+    },
+    {
+      "id": "fresh_final_cohort",
+      "sources": ["v3_recovery_manifest"],
+      "facts": {
+        "v3_copied_profiles": false,
+        "cache_audit": "Imported v3 warmups 0 through 32 lacked application profiles, while later reruns had real application caches",
+        "decision": "Run all 59 functional warmups again in fresh v4, with persistent matching profiles, before any measured launch",
+        "v2_or_v3_records_imported_to_v4": 0,
+        "invocation_output": "Outer stdout and stderr redirected to per-invocation private logs so a detached worker can survive a daemon reader restart"
+      },
+      "disposition": "V2 and v3 remain setup evidence only. Final comparison accepts records only from fresh v4."
+    }
+  ],
+  "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
+}
