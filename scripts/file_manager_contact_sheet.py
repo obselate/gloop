@@ -58,7 +58,7 @@ def main():
                         draw.text((x + 16, y + CELL[1] - 25), details,
                                   fill=COLORS["muted"], font=small)
                     else:
-                        draw.text((x + 16, y + 70), record.get("reason", "N/A"),
+                        draw.text((x + 16, y + 70), record.get("reason") or "N/A",
                                   fill=COLORS["accent"], font=small)
             target = args.output_dir / f"{kind}-{batch:02d}.png"
             sheet.save(target)
