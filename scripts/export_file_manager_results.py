@@ -26,7 +26,8 @@ REQUIRED = (
     "inputs/host-baseline.json",
     "inputs/host-packages.txt",
 )
-OPTIONAL = ("inputs/scenario-adapters.json",)
+OPTIONAL = ("inputs/scenario-adapters.json", "recovery-manifest.json")
+APPROVED_RECOVERY_SHA256 = "2300f14da03bc090181cb5766e6a359f7d992237802ab04f5cee30e2d9270931"
 SECRET = re.compile(r"(?i)\b(?:authorization|bearer|password|passwd|api[_-]?key|secret|access[_-]?token|cookie)\b\s*[:=]\s*\S+")
 BEARER = re.compile(r"(?i)\bBearer\s+\S+")
 SECRET_OPTION = re.compile(r"(?i)(--(?:api[-_]?key|password|passwd|secret|access[-_]?token|auth[-_]?token|cookie))(?:\s+|=)\S+")
@@ -49,14 +50,92 @@ def paths_under(value, root):
     return value == root or root in value.parents
 
 
-class Sanitizer:
+def prefix_sha256(path, lines):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for _ in range(lines):
+            line = stream.readline()
+            if not line:
+                raise ValueError(f"recovery prefix is shorter than declared: {path}")
+            digest.update(line)
+    return digest.hexdigest()
+
+
+class Recovery:
     def __init__(self, source):
+        path = source / "recovery-manifest.json"
+        if sha256(path) != APPROVED_RECOVERY_SHA256:
+            raise ValueError("recovery manifest differs from independently reviewed evidence")
+        manifest = json.loads(path.read_text())
+        self.origin = Path(manifest["source"]).resolve(strict=True)
+        if Path(manifest["target"]).resolve() != source or self.origin.parent != source.parent:
+            raise ValueError("recovery origin/target are not the reviewed sibling cohorts")
+        if manifest["closed_ordinal_range"] != [0, 32] or \
+                [row["ordinal"] for row in manifest["excluded_ordinals"]] != list(range(33, 39)):
+            raise ValueError("recovery ordinal boundary differs from reviewed evidence")
+        self.source = source
+        self.manifest = manifest
+        self.captures = {}
+        self.verify()
+        for name, expected in manifest["copied_capture_sha256"].items():
+            old = self.origin / "captures" / name
+            current = source / "captures" / name
+            if current.is_file() and not current.is_symlink() and sha256(current) == expected:
+                self.captures[old] = (current, Path("captures") / name)
+            else:
+                self.captures[old] = (old, Path("captures/recovery-origin") / name)
+
+    def verify(self):
+        manifest = self.manifest
+        source = self.source
+        if sha256(source / "recovery-manifest.json") != APPROVED_RECOVERY_SHA256:
+            raise ValueError("recovery manifest changed during export")
+        originals = (("raw.jsonl", "source_raw_sha256"),
+                     ("environment-warmup.json", "source_incomplete_environment_sha256"),
+                     ("environment-warmup-invocations.jsonl", "source_history_sha256"))
+        for name, key in originals:
+            if sha256(self.origin / name) != manifest[key]:
+                raise ValueError(f"recovery origin changed: {name}")
+        copied = manifest["copied_file_sha256"]
+        if prefix_sha256(source / "raw.jsonl", 33) != copied["raw.jsonl"] or \
+                prefix_sha256(source / "environment-warmup-invocations.jsonl", 5) != \
+                copied["environment-warmup-invocations.jsonl"]:
+            raise ValueError("recovered closed prefix changed")
+        for name in ("environment.json", "inputs/cohort-manifest.json",
+                     "inputs/host-baseline.json", "inputs/host-packages.txt"):
+            if sha256(source / name) != copied[name]:
+                raise ValueError(f"recovered pinned input changed: {name}")
+        for name, expected in manifest["copied_capture_sha256"].items():
+            if Path(name).name != name or not name.endswith(".png"):
+                raise ValueError(f"invalid recovery capture name: {name}")
+            old = self.origin / "captures" / name
+            if not old.is_file() or old.is_symlink() or sha256(old) != expected:
+                raise ValueError(f"recovery origin capture changed: {name}")
+        for old, (evidence, _) in self.captures.items():
+            expected = manifest["copied_capture_sha256"][old.name]
+            if evidence == old:
+                continue
+            if not evidence.is_file() or evidence.is_symlink() or sha256(evidence) != expected:
+                raise ValueError(f"recovered current capture changed during export: {old.name}")
+
+    def resolve_capture(self, path):
+        if path not in self.captures:
+            raise ValueError(f"capture is not listed by reviewed recovery manifest: {path.name}")
+        return self.captures[path]
+
+
+class Sanitizer:
+    def __init__(self, source, recovery):
         repo = Path(__file__).resolve().parent.parent
         staging = repo / "artifacts/performance/file-managers-20261001"
-        self.prefixes = (
+        recovered = tuple((str(old), str(target))
+                          for old, (_, target) in recovery.captures.items()) if recovery else ()
+        origin_prefix = ((str(recovery.origin), "${RECOVERY_ORIGIN}"),) if recovery else ()
+        self.prefixes = recovered + (
             (str(source / "captures") + "/", "captures/"),
             (str(source / "inputs") + "/", "inputs/"),
             (str(source), "${COHORT}"),
+        ) + origin_prefix + (
             (str(staging), "${STAGING}"),
             (str(repo), "${REPO}"),
             (str(Path.home()), "${HOME}"),
@@ -101,20 +180,25 @@ class Sanitizer:
         return value
 
 
-def referenced_captures(value, source, found, required, label):
+def referenced_captures(value, source, recovery, found, required, label):
     if isinstance(value, dict):
         path = value.get("path")
         if isinstance(path, str) and path.endswith(".png"):
             candidate = Path(path).resolve()
-            if not paths_under(candidate, source / "captures"):
+            if paths_under(candidate, source / "captures"):
+                evidence, exported = candidate, candidate.relative_to(source)
+            elif recovery and paths_under(candidate, recovery.origin / "captures"):
+                evidence, exported = recovery.resolve_capture(candidate)
+            else:
                 raise ValueError(f"capture reference escapes cohort: {path}")
-            found.append({"path": candidate, "expected_sha256": value.get("sha256"),
+            found.append({"path": evidence, "export_path": exported,
+                          "expected_sha256": value.get("sha256"),
                           "required": required, "record": label})
         for child in value.values():
-            referenced_captures(child, source, found, required, label)
+            referenced_captures(child, source, recovery, found, required, label)
     elif isinstance(value, list):
         for child in value:
-            referenced_captures(child, source, found, required, label)
+            referenced_captures(child, source, recovery, found, required, label)
 
 
 def latest_successful_warmups(path):
@@ -185,8 +269,9 @@ def export(source, output, allow_incomplete):
     if not allow_incomplete and problems:
         raise ValueError("cohort provenance invalid: " + "; ".join(problems))
 
+    recovery = Recovery(source) if (source / "recovery-manifest.json").is_file() else None
     output.mkdir(parents=True, exist_ok=True)
-    sanitizer = Sanitizer(source)
+    sanitizer = Sanitizer(source, recovery)
     files = {}
     capture_refs = []
     latest_warmups = latest_successful_warmups(source / "raw.jsonl")
@@ -207,11 +292,11 @@ def export(source, output, allow_incomplete):
                         original.get("ordinal") == latest_warmups.get((original.get("app"), original.get("scenario")))
                     required = name != "raw.jsonl" or original.get("accepted") is True or latest_warmup
                     label = f"{name}:ordinal={original.get('ordinal')}:status={original.get('status')}"
-                    referenced_captures(original, source, capture_refs, required, label)
+                    referenced_captures(original, source, recovery, capture_refs, required, label)
                     dst.write(json.dumps(sanitizer.walk(original), ensure_ascii=False) + "\n")
         elif name.endswith(".json"):
             original = json.loads(origin.read_text())
-            referenced_captures(original, source, capture_refs, True, name)
+            referenced_captures(original, source, recovery, capture_refs, True, name)
             cleaned = sanitizer.walk(original)
             write_json(target, cleaned)
             if name == "summary.json":
@@ -239,6 +324,20 @@ def export(source, output, allow_incomplete):
                                     "export_sha256": sha256(target),
                                     "source_bytes": origin.stat().st_size,
                                     "export_bytes": target.stat().st_size}
+    if recovery:
+        for old, (evidence, relative) in recovery.captures.items():
+            if evidence != old:
+                continue
+            target = output / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(old, target)
+            expected = sha256(old)
+            if sha256(target) != expected:
+                raise ValueError(f"recovery capture changed during export: {old.name}")
+            files[str(relative)] = {"source_sha256": expected, "export_sha256": expected,
+                                    "source_bytes": old.stat().st_size,
+                                    "export_bytes": target.stat().st_size,
+                                    "source_reference": "${RECOVERY_ORIGIN}/captures/" + old.name}
     missing_captures = []
     stale_captures = []
     historical_captures = []
@@ -248,7 +347,7 @@ def export(source, output, allow_incomplete):
         expected = reference["expected_sha256"]
         if actual is not None and actual == expected:
             continue
-        mismatch = {"path": str(path.relative_to(source)), "record": reference["record"],
+        mismatch = {"path": str(reference["export_path"]), "record": reference["record"],
                     "expected_sha256": expected, "current_sha256": actual}
         if not reference["required"]:
             historical_captures.append(mismatch)
@@ -264,6 +363,8 @@ def export(source, output, allow_incomplete):
                                 "export_sha256": sha256(output / "summary.csv"),
                                 "source_bytes": None,
                                 "export_bytes": (output / "summary.csv").stat().st_size}
+    if recovery:
+        recovery.verify()
     provenance = {"schema_version": 1,
                   "complete": not missing and not missing_captures and not stale_captures and not problems and
                               run.get("execution_status") == "complete",
@@ -273,7 +374,9 @@ def export(source, output, allow_incomplete):
                   "missing_required_files": missing, "missing_referenced_captures": missing_captures,
                   "overwritten_capture_references": stale_captures,
                   "historical_capture_references": historical_captures,
+                  "recovery_manifest_sha256": APPROVED_RECOVERY_SHA256 if recovery else None,
                   "path_tokens": {"${COHORT}": "original ignored cohort root",
+                                  "${RECOVERY_ORIGIN}": "frozen original interrupted cohort",
                                   "${STAGING}": "ignored performance staging root",
                                   "${REPO}": "repository root", "${HOME}": "user home",
                                   "${HOSTNAME}": "source host name",
