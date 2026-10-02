@@ -492,6 +492,50 @@
     "v7_recovery86_service_command": {
       "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume86.json",
       "sha256": "afdf356c137bba475cd09d2dd7ac8aa8037fcd5d045c36ded433e4c6b3b06feb"
+    },
+    "v7_recovery104_raw_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-archive/raw-first167.jsonl",
+      "sha256": "9d4d6f9157a7172a581bb7544dec81013ed6ef0b372eaf9e0ed233deb9872866"
+    },
+    "v7_recovery104_run_history_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-archive/environment-run-invocations-first108.jsonl",
+      "sha256": "bf965b04aa761e802bdeecc9c998a1e4a3df425b3337018a581cf8572a159a9f"
+    },
+    "v7_recovery104_stopped_state": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-archive/resume86-controller-state.json",
+      "sha256": "8ceb97ac9706370c1ad066c4a62ab674289352b7fd7760e14923137b9148ba59"
+    },
+    "v7_recovery104_stopped_log": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-archive/resume86-controller.log",
+      "sha256": "f9af144230e7268a8a5a3777e320b2491645eb0cfd622a192ee641d2de9df73e"
+    },
+    "v7_recovery104_deferred_result": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-archive/run104-svc1-outer-service-result.json",
+      "sha256": "62408125d0638ea704bd41faea61c9efe3c449f2f05fd6a78abce161e20e21a2"
+    },
+    "v7_recovery104_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-archive/archive-index.json",
+      "sha256": "b4ab10f086abe8cd2722698d1b182659acc0610f409a193ed8f60ec574f40eb7"
+    },
+    "v7_recovery104_ledger": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery104-ledger.json",
+      "sha256": "504ccf5a9e357edb3808f828f624ee6f7e6c3f08b341f245b7286d860091dc66"
+    },
+    "v7_recovery104_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-resume104-gate.json",
+      "sha256": "219393d08ea8d89ca1a20b9b57a376a88fdece1fc114be5bc6a8dc084b6f0d94"
+    },
+    "v7_recovery104_commands": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-commands-node2-resume104.json",
+      "sha256": "5b66b68218fc7428f752a6f3edbcf467ddb68b605c62bdaa91559a7661e0e46b"
+    },
+    "v7_recovery104_controller": {
+      "path": "artifacts/performance/file-managers-20261001/run-v7-measured-controller-node2-resume104.py",
+      "sha256": "8b019f1bbf74c1a045f3910200228881589366d08e2d00bc140c63b29b15f89f"
+    },
+    "v7_recovery104_service_command": {
+      "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume104.json",
+      "sha256": "1a6afc91f3e1c3947e750ffcf1eb0d19151268b32e0fcff1c1c465f87e69eced"
     }
   },
   "events": [
@@ -904,6 +948,31 @@
         "cohort_export_run": false
       },
       "disposition": "Global GPU activity prevented the quiet gate before the application launched. Raw 147 and its genuine clean deferred end remain as excluded setup evidence. The reviewed continuation keeps the same fixed plan, resumes the unmeasured slot in a unique service, and preserves prior accepted rows. The exporter change admits only closed zero-launch quiet deferrals, not captured or timed application attempts. No benchmark value is claimed for raw 147."
+    },
+    {
+      "id": "v7_measured_zero_launch_quiet_deferral_recovery104",
+      "sources": ["v7_recovery104_raw_prefix", "v7_recovery104_run_history_prefix", "v7_recovery104_stopped_state", "v7_recovery104_stopped_log", "v7_recovery104_deferred_result", "v7_recovery104_archive_index", "v7_recovery104_ledger", "v7_recovery104_gate", "v7_recovery104_commands", "v7_recovery104_controller", "v7_recovery104_service_command", "exporter_with_quiet_deferral"],
+      "facts": {
+        "accepted_measured_slots_before_stop": 104,
+        "deferred_raw_ordinal": 166,
+        "deferred_slot_id": "tiles100000/0/xfe",
+        "deferred_end_status": "deferred_quiet",
+        "launches_in_deferred_invocation": 0,
+        "quiet_samples": 45,
+        "global_gpu_samples_above_50_percent": 12,
+        "monitored_pid_samples_present": 0,
+        "deferred_attempt_used_for_numeric_metrics": false,
+        "frozen_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+        "recovery_resume_index": 104,
+        "first_new_raw_ordinal": 167,
+        "raw_ordinal_offset": 4,
+        "previous_excluded_raw_ordinals": [98, 124, 147],
+        "planned_measured_slots": 177,
+        "replacement_service": "gloop-bench-v7-controller-node2-resume104.service",
+        "controller_invocation_id_observed_after_gate": "89b4c8af2afa4333a38dda56de04070e",
+        "cohort_export_run": false
+      },
+      "disposition": "Global GPU activity again prevented the quiet gate before an application launch. Raw 166 and its genuine clean zero-launch end remain excluded from metrics. The reviewed resume104 gate authorized one detached controller with the same fixed plan and 104 prior accepted slots; its new service was observed running under the recorded invocation identity. The semantic strict-export guard already covers this closed quiet deferral without an exporter change. No benchmark value is claimed for raw 166."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
