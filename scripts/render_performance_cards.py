@@ -17,6 +17,7 @@ TEXT = '#e6edf3'
 MUTED = '#9da7b3'
 GREEN = '#3fb950'
 BLUE = '#58a6ff'
+PROFILE_QUALIFICATION = 'PCManFM-Qt folder views lacked file icons.'
 SCENARIOS = {
     'list100': '100 files / list',
     'list100000': '100,000 files / list',
@@ -168,7 +169,7 @@ def metric_cards(rows, output):
         for axis, (scenario, label) in zip(axes.flat, SCENARIOS.items()):
             chart(axis, [row for row in rows if row['scenario'] == scenario],
                   key, unit, decimals, label)
-        save_card(figure, output / f'{key}.png', note + '\n* Loading in at least one launch at 5s. + No 5s capture in at least one launch, validated later.\nSame-host comparison. SpaceFM uses a later corrective cohort.')
+        save_card(figure, output / f'{key}.png', note + '\n* Loading in at least one launch at 5s. + No 5s capture in at least one launch, validated later.\nSame-host comparison. SpaceFM uses a later corrective cohort. ' + PROFILE_QUALIFICATION)
 
 
 def footprint_card(apps, output):
@@ -202,7 +203,7 @@ def overview_card(rows, output):
         cell.get_text().set_color(TEXT if row == 0 or column == 0 else GREEN)
         if row == 0 or column == 0:
             cell.get_text().set_weight('bold')
-    save_card(figure, output / 'gloop_positions.png', 'Three warm launches per case. Individual metric cards show every competitor and min/max ranges.\nSame-host comparison. SpaceFM uses a later corrective cohort. Native view layouts differ.\nFive-second samples can include loading. CPU, 3 to 5s is not necessarily idle.')
+    save_card(figure, output / 'gloop_positions.png', 'Three warm launches per case. Individual metric cards show every competitor and min/max ranges.\nSame-host comparison. SpaceFM uses a later corrective cohort. Native view layouts differ.\nFive-second samples can include loading. CPU, 3 to 5s is not necessarily idle. ' + PROFILE_QUALIFICATION)
 
 
 def coverage_card(rows, apps, output):
@@ -229,7 +230,7 @@ def coverage_card(rows, apps, output):
         if row == 0 or row > 0 and apps[row - 1]['name'] == 'Gloop':
             cell.get_text().set_weight('bold')
             cell.get_text().set_color(TEXT if row == 0 else GREEN)
-    save_card(figure, output / 'coverage.png', 'Late window: no five-second capture, validated later. Incomplete cases remain in raw data and have no metric positions.\nLarge-folder validation is at about 20s or 120s. N/A reasons and binary hashes are in the report. Tested versions can differ from current releases.')
+    save_card(figure, output / 'coverage.png', 'Late window: no five-second capture, validated later. Incomplete cases remain in raw data and have no metric positions.\nLarge-folder validation is at about 20s or 120s. N/A reasons and binary hashes are in the report. Tested versions can differ from current releases.\n' + PROFILE_QUALIFICATION)
 
 
 def publish_card(apps, output, builds=None):
