@@ -142,6 +142,7 @@ class Sanitizer:
         )
         self.hostname = os.uname().nodename
         self.counts = {"process_argv_removed": 0, "secret_fields_redacted": 0,
+                       "account_fields_redacted": 0,
                        "private_socket_redacted": 0, "hostnames_redacted": 0}
 
     def string(self, value):
@@ -167,6 +168,9 @@ class Sanitizer:
                 if key.lower() in CMD_KEYS:
                     result[key] = "<omitted: process arguments or environment>"
                     self.counts["process_argv_removed"] += 1
+                elif key in ("USER", "LOGNAME") and isinstance(item, str):
+                    result[key] = "<redacted account>"
+                    self.counts["account_fields_redacted"] += 1
                 elif key.lower().replace("-", "_") in SECRET_KEYS:
                     result[key] = "<redacted credential>"
                     self.counts["secret_fields_redacted"] += 1
