@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "scope": "setup_only",
-  "final_cohort": "cohort-final-v6",
-  "note": "These events preceded measured comparison. They supply no application measurements or ranking. Earlier cohorts are retained as setup evidence and contribute no rows to the final cohort.",
+  "final_cohort": "cohort-final-v7",
+  "note": "These events document setup checks and excluded earlier cohorts. The withdrawn v6 warmups and measured prefix remain intact as evidence but contribute no rows or ranking to v7.",
   "source_files": {
     "host_only_baseline": {
       "path": "artifacts/performance/file-manager-harness-probe/idle-host-baseline.json",
@@ -110,7 +110,8 @@
       "sha256": "241bbe4b66236f966f7567f57b3a7190d227538b9a4c778d88608dcbc2ce14a2"
     },
     "corrected_template": {
-      "path": "assets/performance/file-managers-2026-10-01/cohort.template.json",
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/template-before-tab-restore.json",
+      "origin_git_revision": "c83f1e3:assets/performance/file-managers-2026-10-01/cohort.template.json",
       "sha256": "9cf328c7a9c494dcccefa4a40c4177c6f9bf90b641fd5788e70ca586b90939b9"
     },
     "v5_raw": {
@@ -181,6 +182,94 @@
     "v6_warmup42_detached_service": {
       "path": "artifacts/performance/file-managers-20261001/sessions/v6-warm-42-r1/outer-service-result.json",
       "sha256": "971c4f8df6fda96ed095d21e15795927f633f08401ade1f9d20e027b45d5f6d9"
+    },
+    "v6_raw": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v6/raw.jsonl",
+      "sha256": "6d3df56b31d44aaec88bc6285ae98eb637dd9937210d8d54adea58f0c27e9006"
+    },
+    "v6_warmup_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v6/environment-warmup-invocations.jsonl",
+      "sha256": "34b38e19a87c8ccc76d5ba009e32a7cd7f6335423c0126f3f4273b51f4fb1a2d"
+    },
+    "v6_run_history": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v6/environment-run-invocations.jsonl",
+      "sha256": "522dd89f72bcd5498dc7fa3e954fbe7fd36f2ef64ea739f522a1bc967063b8b1"
+    },
+    "v6_plan": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v6/plan.json",
+      "sha256": "247d7e663ce8eba686a0ae857cd13a4846822c5d7ac6e97f63d4d82cd2fe4e18"
+    },
+    "v6_review": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v6/review.json",
+      "sha256": "f0faacfee24696626755d059a4c500e53d20b5b5ac96f40d9cb3511aa82438f1"
+    },
+    "v6_independent_review_proposals": {
+      "path": "artifacts/performance/file-managers-20261001/independent-review-proposals-v6-withdrawn.json",
+      "sha256": "cea556b3f398c0d266e05e58945d7112bffa1479169b36fe99bbc9400df01cb5"
+    },
+    "v6_capture_refs": {
+      "path": "artifacts/performance/file-managers-20261001/v6-excluded-capture-refs.json",
+      "sha256": "1624b2a051475c6c72faf89ada485f96970c2b56f5fa9b804a600eadd1ace28e"
+    },
+    "v6_withdrawal": {
+      "path": "artifacts/performance/file-managers-20261001/v6-withdrawal.json",
+      "sha256": "c901cd003018690678c09112066a2ed62d9d969ab06fd886d46abeec0474324e"
+    },
+    "tab_restore_probe_preparation": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/probe-preparation.json",
+      "sha256": "1ff46cedefb1370cf3c19a3280efb1e0d50199346e3809c2328878e11e7dc746"
+    },
+    "tab_restore_default_clone_raw": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/default-clone/raw.jsonl",
+      "sha256": "8b0ac8f9bb12e8bd49f433c07ba3ede7e6b2a1ea1bd21239b0c9723db22e76de"
+    },
+    "tab_restore_corrected_raw": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/corrected/raw.jsonl",
+      "sha256": "8fdd4254800aac829f5793d2e505da2e168368dc3ab636c1f70e969093e5906a"
+    },
+    "tab_restore_corrected_run_history": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/corrected/environment-run-invocations.jsonl",
+      "sha256": "f210a2e9741f1a8cb9c47f149bc722eea55c63d6827f6382f4ff8781584bde04"
+    },
+    "tab_restore_corrected_plan": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/corrected/plan.json",
+      "sha256": "cfd40ec0e4c60a0a1437f43e3127e8fa0da9c48602d92ab05dff7e8e7b2e1cb4"
+    },
+    "tab_restore_corrected_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/manifest-restore-tabs-off.json",
+      "sha256": "aa2ef926e4458e8511a691d06aa702c39a299ab7469c0fc5fd61c4e64b02d1ef"
+    },
+    "tab_restore_control_final_audit": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/control-e2e-final-audit.json",
+      "sha256": "2540c595a95dd63b600ff4f7b072b2a6b2ef813581f76687e9d84010d0385d1d"
+    },
+    "tab_restore_parser_rejection": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/sessions/corrected-run0/outer-service-result.json",
+      "sha256": "d933a3803ae073608295b702f0400f1c3265cd109f9bf9f4971532f57b911105"
+    },
+    "tab_restore_parser_rejection_log": {
+      "path": "artifacts/performance/file-managers-20261001/tab-restore-e2e-v1/sessions/corrected-run0/invocation.log",
+      "sha256": "8307ef5bd05eff98c227104c531bd9a7570681115c5b1bfbabd8dc90e319db0e"
+    },
+    "v7_adapters": {
+      "path": "artifacts/performance/file-managers-20261001/scenario-adapters-v7.json",
+      "sha256": "0d41bd1a90bbca7a3e53e34cc5946b86fd5c83191b726cb62a348c448e0f8798"
+    },
+    "v7_template": {
+      "path": "assets/performance/file-managers-2026-10-01/cohort.template.json",
+      "sha256": "ca5ffe0f8ba688cef8a63a5d4eb145c8b570dbf774471b963df2ee403c8bec40"
+    },
+    "v7_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-manifest-v7.json",
+      "sha256": "a9e953d1abd9323964d4e4145b9c8e2be6d6fd73daa94bdfa04b511066bc0d19"
+    },
+    "input_automation_source": {
+      "path": "scripts/file_manager_input.py",
+      "sha256": "e96c37e06628717de2a436c61f1d244ab425045034a3820d3ebac7346ee34b7f"
+    },
+    "session_wrapper_source": {
+      "path": "scripts/file_manager_session.py",
+      "sha256": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee"
     }
   },
   "events": [
@@ -423,7 +512,68 @@
         "fresh_ordinal42_provenance_drift": false
       },
       "review": "The incident archive omitted two partial spinner captures. The independent reviewer viewed the originals and reported their hashes. The fresh warmup overwrote the same-name files. The original bytes are unavailable, and the hashes are historical observations only, not archived image or completed population evidence.",
-      "disposition": "The interrupted attempt is excluded setup evidence with no fabricated raw row or end record. Its START is published separately with private strings sanitized and all numeric, boolean, null, and hash fields preserved. The completed prefix and matching profiles were retained; only the archived partial profile was reset for the fresh ordinal 42. Primary and independent reviewers cleared fresh ordinal 42 as loading at the five-, twenty-, and 120-second captures with a genuine closed invocation. Remaining warmups are pending."
+      "disposition": "The interrupted attempt is excluded setup evidence with no fabricated raw row or end record. Its START is published separately with private strings sanitized and all numeric, boolean, null, and hash fields preserved. The completed prefix and matching profiles were retained; only the archived partial profile was reset for the fresh ordinal 42. Primary and independent reviewers cleared fresh ordinal 42 as loading at the five-, twenty-, and 120-second captures with a genuine closed invocation. The later completed v6 cohort is separately withdrawn below."
+    },
+    {
+      "id": "excluded_tab_restore_e2e",
+      "sources": ["v6_raw", "tab_restore_probe_preparation", "tab_restore_default_clone_raw", "tab_restore_parser_rejection", "tab_restore_parser_rejection_log", "tab_restore_corrected_manifest", "tab_restore_corrected_raw", "tab_restore_corrected_run_history", "tab_restore_corrected_plan", "tab_restore_control_final_audit", "final_runner", "input_automation_source", "session_wrapper_source"],
+      "facts": {
+        "scope": "Excluded elementary Files list100 method diagnostic, outside the comparison cohort",
+        "v6_ordinal_70": "The measured image showed two fixture tabs with the active listing populated, while the functional warmup showed one tab",
+        "exact_profile_clone": "A subsequent launch from the copied seven-file profile showed three fixture tabs with the active listing populated",
+        "cause": "elementary Files 7.3.2 defaults restore-tabs to true and persists tab-info-list entries",
+        "correction": "Append gsettings set io.elementary.files.preferences restore-tabs false to all four elementary Files scenario setup arrays",
+        "parser_rejection": "An initial corrected control command used --runs 2; the frozen runner rejected it with exit status 2 before plan creation or application launch",
+        "parser_rejection_application_rows": 0,
+        "corrected_control_warmups": 1,
+        "corrected_control_measured_runs": 3,
+        "corrected_control_capture_sha256": "00e36c152fba1032178ce575fdb64925f6556c8916a75f06905cdb2b9c656d7a",
+        "corrected_control_all_four_captures_byte_identical": true,
+        "corrected_control_run_histories": 3,
+        "v6_preserved_paths": 130,
+        "v6_preserved_paths_unchanged": true
+      },
+      "review": "Primary and independent reviewers inspected the actual tab captures, owned GUI records, source and binary pins, and genuine end snapshots for the corrected warmup and all three fixed measured controls.",
+      "disposition": "The clone, parser rejection, warmup, and three measured controls are excluded diagnostic records. None contributes a comparison row. The two-tab v6 workload defect is grounds to withdraw the whole v6 cohort."
+    },
+    {
+      "id": "withdraw_entire_v6_cohort",
+      "sources": ["v6_raw", "v6_warmup_history", "v6_run_history", "v6_plan", "v6_review", "v6_independent_review_proposals", "v6_capture_refs", "v6_withdrawal", "tab_restore_control_final_audit"],
+      "facts": {
+        "raw_rows_preserved": 76,
+        "functional_warmups_preserved": 59,
+        "measured_slots_preserved": 17,
+        "measured_plan_slots": 177,
+        "raw_ordinals_preserved": [0, 75],
+        "raw_capture_refs_preserved": 111,
+        "raw_capture_fields": {"capture": 74, "intermediate_capture": 4, "late_capture": 33},
+        "preservation_inventory_paths": 130,
+        "preservation_inventory_unchanged": true,
+        "withdrawal_basis": "Workload method defect from accumulating restored tabs, independent of numerical performance values",
+        "selected_v6_values_imported_to_v7": 0,
+        "v6_records_imported_to_v7": 0,
+        "v6_profiles_imported_to_v7": 0
+      },
+      "review": "Primary and independent reviewers accepted withdrawal after the three-run corrected control and full v6 preservation audit.",
+      "disposition": "The entire v6 cohort is excluded from comparison, including its 59 functional warmups and 17 measured rows. Its original raw data, histories, fixed plan, reviews, and 111 raw-referenced capture PNGs remain available by hash; no v6 value is promoted into v7."
+    },
+    {
+      "id": "fresh_v7_inputs",
+      "sources": ["corrected_template", "v7_template", "corrected_adapters", "v7_adapters", "v7_manifest", "final_runner", "input_automation_source", "session_wrapper_source"],
+      "facts": {
+        "cohort": "cohort-final-v7",
+        "change": "Four elementary Files scenario setup arrays append restore-tabs false; template adapter metadata points to the v7 adapter file",
+        "previous_template_sha256": "9cf328c7a9c494dcccefa4a40c4177c6f9bf90b641fd5788e70ca586b90939b9",
+        "v7_template_sha256": "ca5ffe0f8ba688cef8a63a5d4eb145c8b570dbf774471b963df2ee403c8bec40",
+        "v7_adapter_sha256": "0d41bd1a90bbca7a3e53e34cc5946b86fd5c83191b726cb62a348c448e0f8798",
+        "v7_manifest_sha256": "a9e953d1abd9323964d4e4145b9c8e2be6d6fd73daa94bdfa04b511066bc0d19",
+        "runtime_runner_sha256": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3",
+        "runtime_input_sha256": "e96c37e06628717de2a436c61f1d244ab425045034a3820d3ebac7346ee34b7f",
+        "runtime_session_sha256": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee",
+        "planned_fresh_functional_warmups": 59,
+        "planned_fixed_measured_slots": 177
+      },
+      "disposition": "V7 uses fresh records and profiles and requires functional review before measured launches; this setup event makes no v7 performance claim."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
