@@ -277,8 +277,73 @@
       "sha256": "c7b34c097f81543b9cceb048ace77eaeb3bda04fc443951ca0bb6d0e633d08dc"
     },
     "exporter_with_account_redaction": {
-      "path": "scripts/export_file_manager_results.py",
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/export_file_manager_results-before-node-rebase.py",
+      "origin_git_revision": "70e9281:scripts/export_file_manager_results.py",
       "sha256": "073c68b964ce206278ddcf905ebce8d510e03151b50de2c1034b27a86e970170"
+    },
+    "exporter_with_node_rebase": {
+      "path": "scripts/export_file_manager_results.py",
+      "sha256": "26c9d36255d2784f2c1a3819581235093b405627e0c507be9f40c4fa938d2c80"
+    },
+    "v7_node_rebase_script": {
+      "path": "artifacts/performance/file-managers-20261001/prepare-v7-node-rebase.py",
+      "sha256": "62e28997dd8db5db5538f2ff4b362638a0c4990f97d81a78a38567507ef21e63"
+    },
+    "v7_node_rebase_ledger": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-ledger.json",
+      "sha256": "8a6885cfdb1429f88062e45672c204f2b6c3c8a4ff108b8971c2354a1a7acd6e"
+    },
+    "v7_node_rebase_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/archive-index.json",
+      "sha256": "1ce332033fad2f7fc067bf9b164b97249d95e54073f03f707aed806b2ce8ae5e"
+    },
+    "v7_node_rebase_audit": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/v7-nodejs-provenance-audit.json",
+      "sha256": "a2ab3eb45188e9fd88962fe4ab93939407e2e4704fcc12c21be185c0ffdd0b29"
+    },
+    "v7_node_original_raw": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/raw.jsonl",
+      "sha256": "80eebc0957f038b7d01da087a367208e22c333021cb5d63fc394a4a84d135613"
+    },
+    "v7_node_original_warmup_history": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/environment-warmup-invocations.jsonl",
+      "sha256": "3fdeab54ab2d1af705f3642ad54313b4ca44b769e791fe5eb5ca071a0e704220"
+    },
+    "v7_node_original_host": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/inputs/host-packages.txt",
+      "sha256": "934d46bc3dda5404c936135b34ccaa765d9b4bce11c370dec05af5a444c55dc9"
+    },
+    "v7_node_failed_service_status": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/failed-service-systemctl.txt",
+      "sha256": "16102a3dd149f906216cbeb3e5673584d987344ce7550f5a247134908f312c93"
+    },
+    "v7_node_failed_invocation_log": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/failed-run-0-session/invocation.log",
+      "sha256": "0a266a9709c1a470887496db414a7c43f979e23e81cef9b379e84f26e047ab5e"
+    },
+    "v7_node_current_preflight_execution": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node-rebase-archive/current-preflight-execution.json",
+      "sha256": "5a95dcff5f9d99132ce312380cc11879d7cdd216d0c7ebddee1840020063298d"
+    },
+    "v7_node_current_preflight_environment": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v7/environment.json",
+      "sha256": "b0f0e6e3d9ba1a148d6ec36437444c9af8840c72073a46059b51cb09c92d6103"
+    },
+    "v7_node_current_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-manifest-v7-node2.json",
+      "sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859"
+    },
+    "v7_node_current_host": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-manifest-v7-node2.host-packages.txt",
+      "sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51"
+    },
+    "v7_node_current_plan": {
+      "path": "artifacts/performance/file-managers-20261001/cohort-final-v7/plan.json",
+      "sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283"
+    },
+    "v7_node_measured_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-node2-gate.json",
+      "sha256": "9d9871b5e2f8fa92ace9b45db11e4d46eaa5318df5770b5827cbe50a86b0c9e1"
     }
   },
   "events": [
@@ -594,7 +659,31 @@
         "synthetic_regression_check": "USER and LOGNAME are redacted while numeric, boolean, null, hash, and capture-reference values remain unchanged",
         "cohort_export_run": false
       },
-      "disposition": "The prior exporter bytes remain archived with Git origin. The corrected exporter is prepared for strict v7 export after runtime completion and full output audit."
+      "disposition": "The prior exporter bytes remain archived with Git origin. This account-redaction version is also archived before the Node rebase export integration below."
+    },
+    {
+      "id": "v7_node_only_provenance_rebase",
+      "sources": ["v7_node_rebase_script", "v7_node_rebase_ledger", "v7_node_rebase_archive_index", "v7_node_rebase_audit", "v7_node_original_raw", "v7_node_original_warmup_history", "v7_node_original_host", "v7_node_failed_service_status", "v7_node_failed_invocation_log", "v7_node_current_preflight_execution", "v7_node_current_preflight_environment", "v7_node_current_manifest", "v7_node_current_host", "v7_node_current_plan", "v7_node_measured_gate", "exporter_with_node_rebase"],
+      "facts": {
+        "old_nodejs_package": "26.10.0-1",
+        "new_nodejs_package": "26.10.0-2",
+        "other_host_package_changes": 0,
+        "original_functional_warmups": 59,
+        "original_warmup_raw_sha256": "80eebc0957f038b7d01da087a367208e22c333021cb5d63fc394a4a84d135613",
+        "original_warmup_history_sha256": "3fdeab54ab2d1af705f3642ad54313b4ca44b769e791fe5eb5ca071a0e704220",
+        "failed_first_measured_service": "Exit status 2 on the changed host inventory before an application launch; no measured raw row or run history",
+        "current_preflight_exit_code": 0,
+        "original_host_inventory_sha256": "934d46bc3dda5404c936135b34ccaa765d9b4bce11c370dec05af5a444c55dc9",
+        "new_host_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+        "new_manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859",
+        "new_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+        "fixed_measured_slots": 177,
+        "warmups_role": "Pre-update functional view checks and warmed profiles only",
+        "warmups_used_for_numeric_metrics": false,
+        "records_or_profiles_imported_from_v6": 0,
+        "public_ledger_export_path": "provenance-rebase/ledger.json"
+      },
+      "disposition": "The original v7 warmup bytes, histories, failed service, and input/plan evidence were archived before a no-launch preflight and a Node-only host provenance rebase. Warmed profiles were retained with their tree fingerprint recorded. Every measured row must close under the one new host pin. Strict export will validate this boundary and publish sanitized linked evidence after runtime completion."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
