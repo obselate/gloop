@@ -1,0 +1,3704 @@
+{
+  "schema_version": 1,
+  "manifest_sha256": null,
+  "manifest_sha256_by_batch": {
+    "b7556ad21deb4425b9240911228ec351": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+    "26d14c4370804e308a77c389a772be1f": "0fe2b9392e1630e782f8aac76afe17ea7c2e91e7cc0a8a3f3335501307673b2d",
+    "1f5a664a3f24414babda8f9ab35f1d93": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+    "856193e0a1e94b11b9839863bb092b55": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+    "bc4dc64d6f25463eaae455bf77086db6": "f7b035d0668658b99170105b2d9f139309449006d3c6b1bf04b5d575f2a16950"
+  },
+  "method": {
+    "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+    "cpu_quota": "200%",
+    "memory_max_bytes": 8589934592,
+    "affinity_logical_cpus": 2,
+    "observations_per_app": 1,
+    "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+    "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+    "comparison": "toolchain-specific durations; no cross-toolchain rank",
+    "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+  },
+  "method_by_batch": {
+    "b7556ad21deb4425b9240911228ec351": {
+      "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+      "cpu_quota": "200%",
+      "memory_max_bytes": 8589934592,
+      "affinity_logical_cpus": 2,
+      "observations_per_app": 1,
+      "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+      "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+      "comparison": "toolchain-specific durations; no cross-toolchain rank",
+      "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+    },
+    "1f5a664a3f24414babda8f9ab35f1d93": {
+      "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+      "cpu_quota": "200%",
+      "memory_max_bytes": 8589934592,
+      "affinity_logical_cpus": 2,
+      "observations_per_app": 1,
+      "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+      "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+      "comparison": "toolchain-specific durations; no cross-toolchain rank",
+      "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+    },
+    "26d14c4370804e308a77c389a772be1f": {
+      "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+      "cpu_quota": "200%",
+      "memory_max_bytes": 8589934592,
+      "affinity_logical_cpus": 2,
+      "observations_per_app": 1,
+      "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+      "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+      "comparison": "toolchain-specific durations; no cross-toolchain rank",
+      "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+    },
+    "856193e0a1e94b11b9839863bb092b55": {
+      "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+      "cpu_quota": "200%",
+      "memory_max_bytes": 8589934592,
+      "affinity_logical_cpus": 2,
+      "observations_per_app": 1,
+      "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+      "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+      "comparison": "toolchain-specific durations; no cross-toolchain rank",
+      "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+    },
+    "1c85d6dd67e04cb6b6e0ba0ce49981e2": {
+      "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+      "cpu_quota": "200%",
+      "memory_max_bytes": 8589934592,
+      "affinity_logical_cpus": 2,
+      "observations_per_app": 1,
+      "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+      "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+      "comparison": "toolchain-specific durations; no cross-toolchain rank",
+      "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+    },
+    "bc4dc64d6f25463eaae455bf77086db6": {
+      "timed_scope": "one fresh source build command from prepared source with dependency fetch and configuration excluded; per-app scope states any post-link work",
+      "cpu_quota": "200%",
+      "memory_max_bytes": 8589934592,
+      "affinity_logical_cpus": 2,
+      "observations_per_app": 1,
+      "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+      "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
+      "comparison": "toolchain-specific durations; no cross-toolchain rank",
+      "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
+    }
+  },
+  "build_conditions_by_batch": {
+    "b7556ad21deb4425b9240911228ec351": {
+      "host": "CachyOS x86_64-v3, glibc 2.44; isolated archive extraction only",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "package_plan_sha256": "eddb8e14056371b4d774149149fc0d2c9e71aacfabb64726583c0be704d82636",
+      "prefix_source_manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "batch_manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "reused_prefix_receipt_sha256": null,
+      "compiler_linker_flags": {
+        "CFLAGS": "-I${PREFIX}/usr/include",
+        "CXXFLAGS": "-I${PREFIX}/usr/include",
+        "LDFLAGS": "-L${PREFIX}/usr/lib"
+      },
+      "application_flag_overrides": {},
+      "prefix_relocations": {
+        "rebased_scripts": {},
+        "rebased_package_links": [
+          {
+            "path": "usr/bin/ppcx64",
+            "package_target": "/usr/lib/fpc/3.2.2/ppcx64",
+            "prefix_target": "../lib/fpc/3.2.2/ppcx64"
+          },
+          {
+            "path": "usr/bin/lazbuild",
+            "package_target": "/usr/lib/lazarus/lazbuild",
+            "prefix_target": "../lib/lazarus/lazbuild"
+          },
+          {
+            "path": "usr/bin/lazarus",
+            "package_target": "/usr/lib/lazarus/lazarus",
+            "prefix_target": "../lib/lazarus/lazarus"
+          },
+          {
+            "path": "usr/bin/startlazarus",
+            "package_target": "/usr/lib/lazarus/startlazarus",
+            "prefix_target": "../lib/lazarus/startlazarus"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/html",
+            "package_target": "/usr/share/doc/lazarus/chm",
+            "prefix_target": "../../../share/doc/lazarus/chm"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/lazdoc.css",
+            "package_target": "/usr/share/doc/lazarus/lazdoc.css",
+            "prefix_target": "../../../share/doc/lazarus/lazdoc.css"
+          }
+        ]
+      },
+      "private_packages": [
+        {
+          "name": "cmake",
+          "version": "4.4.3-2.1",
+          "sha256": "6b321d718d6bea3ea880cbab6e95dd169ea493d2e2c888882ace8bc8b5d0d501"
+        },
+        {
+          "name": "cppdap",
+          "version": "1.58.0-3.1",
+          "sha256": "d6590b94912082bef080fbccda796c2ae9e122860b0c4de5bd2e0b13dcf97177"
+        },
+        {
+          "name": "rhash",
+          "version": "1.4.6-1.1",
+          "sha256": "49b92a1d142d3ef8f07cc3d61b6771cb2dded35afdefa66bba4898a040d18aee"
+        },
+        {
+          "name": "vala",
+          "version": "0.56.19-2.1",
+          "sha256": "fa31d107b2503e25292350744640d29fee14a581ff3fd259e0087c51e0306921"
+        },
+        {
+          "name": "fpc",
+          "version": "3.2.2-11",
+          "sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+        },
+        {
+          "name": "fpc-src",
+          "version": "3.2.2-4",
+          "sha256": "dfb2c0002d4db8735bd2323cc7fb815ee30ae524d21666d68dc803e75a900290"
+        },
+        {
+          "name": "lazarus",
+          "version": "4.8-1.1",
+          "sha256": "78e50098f36139792b073e7cf2e0ff20bb582c9904fd774b4299487b2956660d"
+        },
+        {
+          "name": "lazarus-qt6",
+          "version": "4.8-1.1",
+          "sha256": "7be14efb66ed688b5808828ce9a6457188c23f7b4df10813842c0ee574696b14"
+        },
+        {
+          "name": "intltool",
+          "version": "0.51.0-6",
+          "sha256": "0555d00c455a056dc08c172c3572c6147c76d5edca25712c4e0ed57e6eb99c71"
+        },
+        {
+          "name": "extra-cmake-modules",
+          "version": "6.30.0-1",
+          "sha256": "c827279575ece3efc0cea75d05679c7224cb13b771d3600c22369edaae607c6d"
+        },
+        {
+          "name": "fox",
+          "version": "1:1.6.59-1.1",
+          "sha256": "f818e0f5a84e51e173b20f76991b060d6f5a0df21bc0e44575aabf60b0e621ca"
+        },
+        {
+          "name": "gobject-introspection",
+          "version": "1.86.0-2.1",
+          "sha256": "af39594f89e4d0a6d695d4dfc0544e283d91845ca672b75a66450d25bb6dd0ca"
+        },
+        {
+          "name": "python-mako",
+          "version": "1.3.12-1",
+          "sha256": "8ba0e868bcc28b591e2f36711d9c7d47c2d8174690f413811c7aac7de702ed8b"
+        },
+        {
+          "name": "python-markdown",
+          "version": "3.11.0-1",
+          "sha256": "ae350c25dd9173496c483db07c9fd46ca9200e65873c214d0f690b82ab93f113"
+        },
+        {
+          "name": "gtk-doc",
+          "version": "1.37.0-1",
+          "sha256": "b01772b3e79492b4763859a54052789a1965336581f7aa32dfb08e1a5f989d2b"
+        },
+        {
+          "name": "docbook-xml",
+          "version": "4.5-11",
+          "sha256": "22a209bf18d25c5a9d1700b3372f2d82ed9d9e6d920a5c36c6acaa7db73af1b0"
+        },
+        {
+          "name": "docbook-xsl",
+          "version": "1.79.2-9",
+          "sha256": "db99c591878ef9696353af75ce19cd6d082b4512ca5acc098c8464d1aeeda168"
+        },
+        {
+          "name": "glib2-docs",
+          "version": "2.88.3-1",
+          "sha256": "705747a3c173417a8d1aa8cbd9c51868baeb501be32ec9a49e577ddc8067f205"
+        },
+        {
+          "name": "itstool",
+          "version": "1:2.0.7-3",
+          "sha256": "4cab46eefcf2f1bcf3871baa3ebb9e197ad5bf7a46329e3a92f0076d7af97126"
+        },
+        {
+          "name": "yelp-tools",
+          "version": "42.1-2",
+          "sha256": "7b1850b4afa3729636959ae6b3db5e2448f715ba5d88c103a3dc9d5effcf5046"
+        },
+        {
+          "name": "yelp-xsl",
+          "version": "49.0-1",
+          "sha256": "1083b08dcb7dfd9bfe39ea0009a56e82b0705273ed88d289b5138c02053da037"
+        },
+        {
+          "name": "mallard-ducktype",
+          "version": "1.0.2-13",
+          "sha256": "138d0bea18b4818d82c5f526cb813d0629557f53574d0f1c1dc4755661f9df80"
+        },
+        {
+          "name": "qt6pas",
+          "version": "6.2.10-4.1",
+          "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725"
+        }
+      ]
+    },
+    "1f5a664a3f24414babda8f9ab35f1d93": {
+      "host": "CachyOS x86_64-v3, glibc 2.44; isolated archive extraction only",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "package_plan_sha256": "ad37770e7c43f209e5a7c5d11b13dc88b626a9b961e627e4c2d8ea27ba09ab92",
+      "prefix_source_manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "batch_manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "reused_prefix_receipt_sha256": null,
+      "compiler_linker_flags": {
+        "CFLAGS": "-I${PREFIX}/usr/include",
+        "CXXFLAGS": "-I${PREFIX}/usr/include",
+        "LDFLAGS": "-L${PREFIX}/usr/lib"
+      },
+      "application_flag_overrides": {
+        "spacefm": {
+          "CFLAGS": "-I${PREFIX}/usr/include -std=gnu17"
+        },
+        "xfe": {
+          "CXXFLAGS": "-I${PREFIX}/usr/include/fox-1.6 -I${PREFIX}/usr/include"
+        }
+      },
+      "prefix_relocations": {
+        "rebased_scripts": {
+          "usr/bin/intltoolize": {
+            "original_sha256": "ee8690c5575721116602de74a470e84d687ce4b8a67c843fca984aeb4d6b11dd",
+            "rebased_sha256": "77cd530e58a322b9591f47b875db274c6a048e43a8606308818d3c01c58c324e",
+            "prefix": "${PREFIX}/usr"
+          },
+          "etc/fpc.cfg": {
+            "original_sha256": "4648ba54aef6664f59baa0bb429336ea171ee33baeb794df12552151f04c6a28",
+            "rebased_sha256": "f95f45433ee30503a89507dd236d6cfad56b53510a0e12cb2e5abefc2742bf70",
+            "library_search_path": "${PREFIX}/usr/lib"
+          }
+        },
+        "rebased_package_links": [
+          {
+            "path": "usr/bin/ppcx64",
+            "package_target": "/usr/lib/fpc/3.2.2/ppcx64",
+            "prefix_target": "../lib/fpc/3.2.2/ppcx64"
+          },
+          {
+            "path": "usr/bin/lazbuild",
+            "package_target": "/usr/lib/lazarus/lazbuild",
+            "prefix_target": "../lib/lazarus/lazbuild"
+          },
+          {
+            "path": "usr/bin/lazarus",
+            "package_target": "/usr/lib/lazarus/lazarus",
+            "prefix_target": "../lib/lazarus/lazarus"
+          },
+          {
+            "path": "usr/bin/startlazarus",
+            "package_target": "/usr/lib/lazarus/startlazarus",
+            "prefix_target": "../lib/lazarus/startlazarus"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/html",
+            "package_target": "/usr/share/doc/lazarus/chm",
+            "prefix_target": "../../../share/doc/lazarus/chm"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/lazdoc.css",
+            "package_target": "/usr/share/doc/lazarus/lazdoc.css",
+            "prefix_target": "../../../share/doc/lazarus/lazdoc.css"
+          }
+        ]
+      },
+      "private_packages": [
+        {
+          "name": "cmake",
+          "version": "4.4.3-2.1",
+          "sha256": "6b321d718d6bea3ea880cbab6e95dd169ea493d2e2c888882ace8bc8b5d0d501"
+        },
+        {
+          "name": "cppdap",
+          "version": "1.58.0-3.1",
+          "sha256": "d6590b94912082bef080fbccda796c2ae9e122860b0c4de5bd2e0b13dcf97177"
+        },
+        {
+          "name": "rhash",
+          "version": "1.4.6-1.1",
+          "sha256": "49b92a1d142d3ef8f07cc3d61b6771cb2dded35afdefa66bba4898a040d18aee"
+        },
+        {
+          "name": "vala",
+          "version": "0.56.19-2.1",
+          "sha256": "fa31d107b2503e25292350744640d29fee14a581ff3fd259e0087c51e0306921"
+        },
+        {
+          "name": "fpc",
+          "version": "3.2.2-11",
+          "sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+        },
+        {
+          "name": "fpc-src",
+          "version": "3.2.2-4",
+          "sha256": "dfb2c0002d4db8735bd2323cc7fb815ee30ae524d21666d68dc803e75a900290"
+        },
+        {
+          "name": "lazarus",
+          "version": "4.8-1.1",
+          "sha256": "78e50098f36139792b073e7cf2e0ff20bb582c9904fd774b4299487b2956660d"
+        },
+        {
+          "name": "lazarus-qt6",
+          "version": "4.8-1.1",
+          "sha256": "7be14efb66ed688b5808828ce9a6457188c23f7b4df10813842c0ee574696b14"
+        },
+        {
+          "name": "intltool",
+          "version": "0.51.0-6",
+          "sha256": "0555d00c455a056dc08c172c3572c6147c76d5edca25712c4e0ed57e6eb99c71"
+        },
+        {
+          "name": "extra-cmake-modules",
+          "version": "6.30.0-1",
+          "sha256": "c827279575ece3efc0cea75d05679c7224cb13b771d3600c22369edaae607c6d"
+        },
+        {
+          "name": "fox",
+          "version": "1:1.6.59-1.1",
+          "sha256": "f818e0f5a84e51e173b20f76991b060d6f5a0df21bc0e44575aabf60b0e621ca"
+        },
+        {
+          "name": "gobject-introspection",
+          "version": "1.86.0-2.1",
+          "sha256": "af39594f89e4d0a6d695d4dfc0544e283d91845ca672b75a66450d25bb6dd0ca"
+        },
+        {
+          "name": "python-mako",
+          "version": "1.3.12-1",
+          "sha256": "8ba0e868bcc28b591e2f36711d9c7d47c2d8174690f413811c7aac7de702ed8b"
+        },
+        {
+          "name": "python-markdown",
+          "version": "3.11.0-1",
+          "sha256": "ae350c25dd9173496c483db07c9fd46ca9200e65873c214d0f690b82ab93f113"
+        },
+        {
+          "name": "gtk-doc",
+          "version": "1.37.0-1",
+          "sha256": "b01772b3e79492b4763859a54052789a1965336581f7aa32dfb08e1a5f989d2b"
+        },
+        {
+          "name": "docbook-xml",
+          "version": "4.5-11",
+          "sha256": "22a209bf18d25c5a9d1700b3372f2d82ed9d9e6d920a5c36c6acaa7db73af1b0"
+        },
+        {
+          "name": "docbook-xsl",
+          "version": "1.79.2-9",
+          "sha256": "db99c591878ef9696353af75ce19cd6d082b4512ca5acc098c8464d1aeeda168"
+        },
+        {
+          "name": "glib2-docs",
+          "version": "2.88.3-1",
+          "sha256": "705747a3c173417a8d1aa8cbd9c51868baeb501be32ec9a49e577ddc8067f205"
+        },
+        {
+          "name": "itstool",
+          "version": "1:2.0.7-3",
+          "sha256": "4cab46eefcf2f1bcf3871baa3ebb9e197ad5bf7a46329e3a92f0076d7af97126"
+        },
+        {
+          "name": "yelp-tools",
+          "version": "42.1-2",
+          "sha256": "7b1850b4afa3729636959ae6b3db5e2448f715ba5d88c103a3dc9d5effcf5046"
+        },
+        {
+          "name": "yelp-xsl",
+          "version": "49.0-1",
+          "sha256": "1083b08dcb7dfd9bfe39ea0009a56e82b0705273ed88d289b5138c02053da037"
+        },
+        {
+          "name": "mallard-ducktype",
+          "version": "1.0.2-13",
+          "sha256": "138d0bea18b4818d82c5f526cb813d0629557f53574d0f1c1dc4755661f9df80"
+        },
+        {
+          "name": "qt6pas",
+          "version": "6.2.10-4.1",
+          "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725"
+        },
+        {
+          "name": "blueprint-compiler",
+          "version": "0.22.2-1",
+          "sha256": "b833a28c82e1f3c8c8fee973e1427c348fcf5c501ddb56393cb6e7bcc86e6ba5"
+        },
+        {
+          "name": "lxqt-build-tools",
+          "version": "2.4.0-1",
+          "sha256": "f04622c61603742deb3a44cbfc1b558c2815728b3f2abbeaa4335ede32fbc4a1"
+        },
+        {
+          "name": "kdoctools",
+          "version": "6.30.0-1.1",
+          "sha256": "561b78f31eb3bd58304f11352bd5d8a58003df39c94bad39a1e3097ed7de99dc"
+        },
+        {
+          "name": "libgirepository",
+          "version": "1.86.0-2.1",
+          "sha256": "6b02f13dcd57566360eeaa3d58dfb347150ebcd22c90a99b1f6ed69ad491039c"
+        }
+      ]
+    },
+    "26d14c4370804e308a77c389a772be1f": {
+      "host": "CachyOS x86_64-v3, glibc 2.44; isolated archive extraction only",
+      "prefix_sha256": "57605c84e3c71cc1a1b1e11c6bbac885836142f740e39244ebc20f13a637b0bd",
+      "package_plan_sha256": "a2779d5472d02bcc241b4b702cb5304952390ba6249c1062754f00a9e8892954",
+      "prefix_source_manifest_sha256": "0fe2b9392e1630e782f8aac76afe17ea7c2e91e7cc0a8a3f3335501307673b2d",
+      "batch_manifest_sha256": "0fe2b9392e1630e782f8aac76afe17ea7c2e91e7cc0a8a3f3335501307673b2d",
+      "reused_prefix_receipt_sha256": null,
+      "compiler_linker_flags": {
+        "CFLAGS": "-I${PREFIX}/usr/include",
+        "CXXFLAGS": "-I${PREFIX}/usr/include",
+        "LDFLAGS": "-L${PREFIX}/usr/lib"
+      },
+      "application_flag_overrides": {
+        "spacefm": {
+          "CFLAGS": "-I${PREFIX}/usr/include -std=gnu17 -include sys/sysmacros.h"
+        },
+        "xfe": {
+          "CXXFLAGS": "-I${PREFIX}/usr/include/fox-1.6 -I${PREFIX}/usr/include"
+        }
+      },
+      "prefix_relocations": {
+        "rebased_scripts": {
+          "usr/bin/intltoolize": {
+            "original_sha256": "ee8690c5575721116602de74a470e84d687ce4b8a67c843fca984aeb4d6b11dd",
+            "rebased_sha256": "f1efa4da7bc276b024fc4c8ed96e224b620d6c7f1a5292a2dde986d5ef2b1fd2",
+            "prefix": "${PREFIX}/usr"
+          },
+          "etc/fpc.cfg": {
+            "original_sha256": "4648ba54aef6664f59baa0bb429336ea171ee33baeb794df12552151f04c6a28",
+            "rebased_sha256": "a547fec7b9693981a1d16d8c8f187e5c7bab884497a6c53857464992aa18bf58",
+            "library_search_path": "${PREFIX}/usr/lib"
+          },
+          "usr/share/cmake/fm-qt6/fm-qt6-targets.cmake": {
+            "original_sha256": "24ba0dba5d84246667bc6b3b8412be59ba0f43bb673f5a16a38eaeb0f9d14f1f",
+            "rebased_sha256": "d607d8a8a9dae284a188e3f556e0e75e66714a5e1148b71db523863fef10417d",
+            "original_path": "/usr/include/menu-cache",
+            "private_path": "${PREFIX}/usr/include/menu-cache"
+          },
+          "usr/share/kf6/kdoctools/customization/dtd/kdedbx45.dtd": {
+            "original_sha256": "aed05a8ab30f3e2f9cddb47c00b4d663ee3cc154191d04a46c87e21340168278",
+            "rebased_sha256": "238686ff06544c9d6abc841a11f55461bca2a2f23e3c319fde4c76dc0d03fabb",
+            "original_path": "/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+            "private_path": "${PREFIX}/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd"
+          }
+        },
+        "rebased_package_links": [
+          {
+            "path": "usr/bin/ppcx64",
+            "package_target": "/usr/lib/fpc/3.2.2/ppcx64",
+            "prefix_target": "../lib/fpc/3.2.2/ppcx64"
+          },
+          {
+            "path": "usr/bin/lazbuild",
+            "package_target": "/usr/lib/lazarus/lazbuild",
+            "prefix_target": "../lib/lazarus/lazbuild"
+          },
+          {
+            "path": "usr/bin/lazarus",
+            "package_target": "/usr/lib/lazarus/lazarus",
+            "prefix_target": "../lib/lazarus/lazarus"
+          },
+          {
+            "path": "usr/bin/startlazarus",
+            "package_target": "/usr/lib/lazarus/startlazarus",
+            "prefix_target": "../lib/lazarus/startlazarus"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/html",
+            "package_target": "/usr/share/doc/lazarus/chm",
+            "prefix_target": "../../../share/doc/lazarus/chm"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/lazdoc.css",
+            "package_target": "/usr/share/doc/lazarus/lazdoc.css",
+            "prefix_target": "../../../share/doc/lazarus/lazdoc.css"
+          }
+        ]
+      },
+      "private_packages": [
+        {
+          "name": "cmake",
+          "version": "4.4.3-2.1",
+          "sha256": "6b321d718d6bea3ea880cbab6e95dd169ea493d2e2c888882ace8bc8b5d0d501"
+        },
+        {
+          "name": "cppdap",
+          "version": "1.58.0-3.1",
+          "sha256": "d6590b94912082bef080fbccda796c2ae9e122860b0c4de5bd2e0b13dcf97177"
+        },
+        {
+          "name": "rhash",
+          "version": "1.4.6-1.1",
+          "sha256": "49b92a1d142d3ef8f07cc3d61b6771cb2dded35afdefa66bba4898a040d18aee"
+        },
+        {
+          "name": "vala",
+          "version": "0.56.19-2.1",
+          "sha256": "fa31d107b2503e25292350744640d29fee14a581ff3fd259e0087c51e0306921"
+        },
+        {
+          "name": "fpc",
+          "version": "3.2.2-11",
+          "sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+        },
+        {
+          "name": "fpc-src",
+          "version": "3.2.2-4",
+          "sha256": "dfb2c0002d4db8735bd2323cc7fb815ee30ae524d21666d68dc803e75a900290"
+        },
+        {
+          "name": "lazarus",
+          "version": "4.8-1.1",
+          "sha256": "78e50098f36139792b073e7cf2e0ff20bb582c9904fd774b4299487b2956660d"
+        },
+        {
+          "name": "lazarus-qt6",
+          "version": "4.8-1.1",
+          "sha256": "7be14efb66ed688b5808828ce9a6457188c23f7b4df10813842c0ee574696b14"
+        },
+        {
+          "name": "intltool",
+          "version": "0.51.0-6",
+          "sha256": "0555d00c455a056dc08c172c3572c6147c76d5edca25712c4e0ed57e6eb99c71"
+        },
+        {
+          "name": "extra-cmake-modules",
+          "version": "6.30.0-1",
+          "sha256": "c827279575ece3efc0cea75d05679c7224cb13b771d3600c22369edaae607c6d"
+        },
+        {
+          "name": "fox",
+          "version": "1:1.6.59-1.1",
+          "sha256": "f818e0f5a84e51e173b20f76991b060d6f5a0df21bc0e44575aabf60b0e621ca"
+        },
+        {
+          "name": "gobject-introspection",
+          "version": "1.86.0-2.1",
+          "sha256": "af39594f89e4d0a6d695d4dfc0544e283d91845ca672b75a66450d25bb6dd0ca"
+        },
+        {
+          "name": "python-mako",
+          "version": "1.3.12-1",
+          "sha256": "8ba0e868bcc28b591e2f36711d9c7d47c2d8174690f413811c7aac7de702ed8b"
+        },
+        {
+          "name": "python-markdown",
+          "version": "3.11.0-1",
+          "sha256": "ae350c25dd9173496c483db07c9fd46ca9200e65873c214d0f690b82ab93f113"
+        },
+        {
+          "name": "gtk-doc",
+          "version": "1.37.0-1",
+          "sha256": "b01772b3e79492b4763859a54052789a1965336581f7aa32dfb08e1a5f989d2b"
+        },
+        {
+          "name": "docbook-xml",
+          "version": "4.5-11",
+          "sha256": "22a209bf18d25c5a9d1700b3372f2d82ed9d9e6d920a5c36c6acaa7db73af1b0"
+        },
+        {
+          "name": "docbook-xsl",
+          "version": "1.79.2-9",
+          "sha256": "db99c591878ef9696353af75ce19cd6d082b4512ca5acc098c8464d1aeeda168"
+        },
+        {
+          "name": "glib2-docs",
+          "version": "2.88.3-1",
+          "sha256": "705747a3c173417a8d1aa8cbd9c51868baeb501be32ec9a49e577ddc8067f205"
+        },
+        {
+          "name": "itstool",
+          "version": "1:2.0.7-3",
+          "sha256": "4cab46eefcf2f1bcf3871baa3ebb9e197ad5bf7a46329e3a92f0076d7af97126"
+        },
+        {
+          "name": "yelp-tools",
+          "version": "42.1-2",
+          "sha256": "7b1850b4afa3729636959ae6b3db5e2448f715ba5d88c103a3dc9d5effcf5046"
+        },
+        {
+          "name": "yelp-xsl",
+          "version": "49.0-1",
+          "sha256": "1083b08dcb7dfd9bfe39ea0009a56e82b0705273ed88d289b5138c02053da037"
+        },
+        {
+          "name": "mallard-ducktype",
+          "version": "1.0.2-13",
+          "sha256": "138d0bea18b4818d82c5f526cb813d0629557f53574d0f1c1dc4755661f9df80"
+        },
+        {
+          "name": "qt6pas",
+          "version": "6.2.10-4.1",
+          "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725"
+        },
+        {
+          "name": "blueprint-compiler",
+          "version": "0.22.2-1",
+          "sha256": "b833a28c82e1f3c8c8fee973e1427c348fcf5c501ddb56393cb6e7bcc86e6ba5"
+        },
+        {
+          "name": "lxqt-build-tools",
+          "version": "2.4.0-1",
+          "sha256": "f04622c61603742deb3a44cbfc1b558c2815728b3f2abbeaa4335ede32fbc4a1"
+        },
+        {
+          "name": "kdoctools",
+          "version": "6.30.0-1.1",
+          "sha256": "561b78f31eb3bd58304f11352bd5d8a58003df39c94bad39a1e3097ed7de99dc"
+        },
+        {
+          "name": "libgirepository",
+          "version": "1.86.0-2.1",
+          "sha256": "6b02f13dcd57566360eeaa3d58dfb347150ebcd22c90a99b1f6ed69ad491039c"
+        },
+        {
+          "name": "libsepol",
+          "version": "3.11-1",
+          "sha256": "c642fc4c78fee0ee2d01a42debb2aafa6a2b298e9fe73f7f753da91709bf72ae"
+        },
+        {
+          "name": "libselinux",
+          "version": "3.11-1",
+          "sha256": "f6b5cd4a7a14e101c4861e31a239c7b346e9b5189d2248193674cae28a7b4ada"
+        },
+        {
+          "name": "localsearch",
+          "version": "3.11.2-1",
+          "sha256": "c38f0fe421841a17828fd2a74e97416c50871763f3dc7e379d8233d478049633"
+        }
+      ]
+    },
+    "856193e0a1e94b11b9839863bb092b55": {
+      "host": "CachyOS x86_64-v3, glibc 2.44; isolated archive extraction only",
+      "prefix_sha256": "a419b858a2d75e661f62642b726d486c64ab247a7688daa7e1f26f08e95efcd0",
+      "package_plan_sha256": "a2779d5472d02bcc241b4b702cb5304952390ba6249c1062754f00a9e8892954",
+      "prefix_source_manifest_sha256": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+      "batch_manifest_sha256": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+      "reused_prefix_receipt_sha256": null,
+      "compiler_linker_flags": {
+        "CFLAGS": "-I${PREFIX}/usr/include",
+        "CXXFLAGS": "-I${PREFIX}/usr/include",
+        "LDFLAGS": "-L${PREFIX}/usr/lib"
+      },
+      "application_flag_overrides": {
+        "spacefm": {
+          "CFLAGS": "-I${PREFIX}/usr/include -std=gnu17 -D_GNU_SOURCE -include sys/sysmacros.h"
+        },
+        "xfe": {
+          "CXXFLAGS": "-I${PREFIX}/usr/include/fox-1.6 -I${PREFIX}/usr/include"
+        }
+      },
+      "prefix_relocations": {
+        "rebased_scripts": {
+          "usr/bin/intltoolize": {
+            "original_sha256": "ee8690c5575721116602de74a470e84d687ce4b8a67c843fca984aeb4d6b11dd",
+            "rebased_sha256": "47a27ba624575e1aca1003334c53ff26a71acffb3fc7a9fc8e61acc10bc834d4",
+            "prefix": "${PREFIX}/usr"
+          },
+          "etc/fpc.cfg": {
+            "original_sha256": "4648ba54aef6664f59baa0bb429336ea171ee33baeb794df12552151f04c6a28",
+            "rebased_sha256": "65703c744c75bc3aa988e7041e743aa29bae9c361a20c505698ee9e4edb4be52",
+            "library_search_path": "${PREFIX}/usr/lib"
+          },
+          "usr/share/cmake/fm-qt6/fm-qt6-targets.cmake": {
+            "original_sha256": "24ba0dba5d84246667bc6b3b8412be59ba0f43bb673f5a16a38eaeb0f9d14f1f",
+            "rebased_sha256": "2aca31818d35e76e07c48c3b5227ec87ca3045435ecc777729152cce7f49c32d",
+            "replacements": [
+              {
+                "original_path": "/usr/include/menu-cache",
+                "private_path": "${PREFIX}/usr/include/menu-cache",
+                "occurrences": 1
+              },
+              {
+                "original_path": "/usr/lib/libmenu-cache.so",
+                "private_path": "${PREFIX}/usr/lib/libmenu-cache.so",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/dtd/kdedbx45.dtd": {
+            "original_sha256": "aed05a8ab30f3e2f9cddb47c00b4d663ee3cc154191d04a46c87e21340168278",
+            "rebased_sha256": "32d513b11ba0808f6e7f7ccd640f528a29187808853f4f8af44afbf7fed03341",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/kde-include-common.xsl": {
+            "original_sha256": "4447055e50a450e7676f265d831b5642ecb3b8bfc2a31354c787d1a9ecacb187",
+            "rebased_sha256": "be92da38b01f3a218e6133211380370c6b0ef0359cc4bd27294dc487ba721ed6",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 2
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/kde-include-man.xsl": {
+            "original_sha256": "3ab75705181a17b90d3b99774ccc2be18876d585a842709399d542599a1608ed",
+            "rebased_sha256": "b99645173dde8b9ae43148d1a7fc94a217bdf4148f8153bbc87a409d7264e797",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/xsl/all-l10n.xml": {
+            "original_sha256": "6fc2a3785943c1cf7f1a9b1fbd240382ac3b79438648ad890f1cc7a0dc6963df",
+            "rebased_sha256": "0c98830c525d91ad22c8bb659b2107eb78ed7f19639861330dd4c9132b55cffe",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 75
+              }
+            ]
+          }
+        },
+        "rebased_package_links": [
+          {
+            "path": "usr/bin/ppcx64",
+            "package_target": "/usr/lib/fpc/3.2.2/ppcx64",
+            "prefix_target": "../lib/fpc/3.2.2/ppcx64"
+          },
+          {
+            "path": "usr/bin/lazbuild",
+            "package_target": "/usr/lib/lazarus/lazbuild",
+            "prefix_target": "../lib/lazarus/lazbuild"
+          },
+          {
+            "path": "usr/bin/lazarus",
+            "package_target": "/usr/lib/lazarus/lazarus",
+            "prefix_target": "../lib/lazarus/lazarus"
+          },
+          {
+            "path": "usr/bin/startlazarus",
+            "package_target": "/usr/lib/lazarus/startlazarus",
+            "prefix_target": "../lib/lazarus/startlazarus"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/html",
+            "package_target": "/usr/share/doc/lazarus/chm",
+            "prefix_target": "../../../share/doc/lazarus/chm"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/lazdoc.css",
+            "package_target": "/usr/share/doc/lazarus/lazdoc.css",
+            "prefix_target": "../../../share/doc/lazarus/lazdoc.css"
+          }
+        ]
+      },
+      "private_packages": [
+        {
+          "name": "cmake",
+          "version": "4.4.3-2.1",
+          "sha256": "6b321d718d6bea3ea880cbab6e95dd169ea493d2e2c888882ace8bc8b5d0d501"
+        },
+        {
+          "name": "cppdap",
+          "version": "1.58.0-3.1",
+          "sha256": "d6590b94912082bef080fbccda796c2ae9e122860b0c4de5bd2e0b13dcf97177"
+        },
+        {
+          "name": "rhash",
+          "version": "1.4.6-1.1",
+          "sha256": "49b92a1d142d3ef8f07cc3d61b6771cb2dded35afdefa66bba4898a040d18aee"
+        },
+        {
+          "name": "vala",
+          "version": "0.56.19-2.1",
+          "sha256": "fa31d107b2503e25292350744640d29fee14a581ff3fd259e0087c51e0306921"
+        },
+        {
+          "name": "fpc",
+          "version": "3.2.2-11",
+          "sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+        },
+        {
+          "name": "fpc-src",
+          "version": "3.2.2-4",
+          "sha256": "dfb2c0002d4db8735bd2323cc7fb815ee30ae524d21666d68dc803e75a900290"
+        },
+        {
+          "name": "lazarus",
+          "version": "4.8-1.1",
+          "sha256": "78e50098f36139792b073e7cf2e0ff20bb582c9904fd774b4299487b2956660d"
+        },
+        {
+          "name": "lazarus-qt6",
+          "version": "4.8-1.1",
+          "sha256": "7be14efb66ed688b5808828ce9a6457188c23f7b4df10813842c0ee574696b14"
+        },
+        {
+          "name": "intltool",
+          "version": "0.51.0-6",
+          "sha256": "0555d00c455a056dc08c172c3572c6147c76d5edca25712c4e0ed57e6eb99c71"
+        },
+        {
+          "name": "extra-cmake-modules",
+          "version": "6.30.0-1",
+          "sha256": "c827279575ece3efc0cea75d05679c7224cb13b771d3600c22369edaae607c6d"
+        },
+        {
+          "name": "fox",
+          "version": "1:1.6.59-1.1",
+          "sha256": "f818e0f5a84e51e173b20f76991b060d6f5a0df21bc0e44575aabf60b0e621ca"
+        },
+        {
+          "name": "gobject-introspection",
+          "version": "1.86.0-2.1",
+          "sha256": "af39594f89e4d0a6d695d4dfc0544e283d91845ca672b75a66450d25bb6dd0ca"
+        },
+        {
+          "name": "python-mako",
+          "version": "1.3.12-1",
+          "sha256": "8ba0e868bcc28b591e2f36711d9c7d47c2d8174690f413811c7aac7de702ed8b"
+        },
+        {
+          "name": "python-markdown",
+          "version": "3.11.0-1",
+          "sha256": "ae350c25dd9173496c483db07c9fd46ca9200e65873c214d0f690b82ab93f113"
+        },
+        {
+          "name": "gtk-doc",
+          "version": "1.37.0-1",
+          "sha256": "b01772b3e79492b4763859a54052789a1965336581f7aa32dfb08e1a5f989d2b"
+        },
+        {
+          "name": "docbook-xml",
+          "version": "4.5-11",
+          "sha256": "22a209bf18d25c5a9d1700b3372f2d82ed9d9e6d920a5c36c6acaa7db73af1b0"
+        },
+        {
+          "name": "docbook-xsl",
+          "version": "1.79.2-9",
+          "sha256": "db99c591878ef9696353af75ce19cd6d082b4512ca5acc098c8464d1aeeda168"
+        },
+        {
+          "name": "glib2-docs",
+          "version": "2.88.3-1",
+          "sha256": "705747a3c173417a8d1aa8cbd9c51868baeb501be32ec9a49e577ddc8067f205"
+        },
+        {
+          "name": "itstool",
+          "version": "1:2.0.7-3",
+          "sha256": "4cab46eefcf2f1bcf3871baa3ebb9e197ad5bf7a46329e3a92f0076d7af97126"
+        },
+        {
+          "name": "yelp-tools",
+          "version": "42.1-2",
+          "sha256": "7b1850b4afa3729636959ae6b3db5e2448f715ba5d88c103a3dc9d5effcf5046"
+        },
+        {
+          "name": "yelp-xsl",
+          "version": "49.0-1",
+          "sha256": "1083b08dcb7dfd9bfe39ea0009a56e82b0705273ed88d289b5138c02053da037"
+        },
+        {
+          "name": "mallard-ducktype",
+          "version": "1.0.2-13",
+          "sha256": "138d0bea18b4818d82c5f526cb813d0629557f53574d0f1c1dc4755661f9df80"
+        },
+        {
+          "name": "qt6pas",
+          "version": "6.2.10-4.1",
+          "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725"
+        },
+        {
+          "name": "blueprint-compiler",
+          "version": "0.22.2-1",
+          "sha256": "b833a28c82e1f3c8c8fee973e1427c348fcf5c501ddb56393cb6e7bcc86e6ba5"
+        },
+        {
+          "name": "lxqt-build-tools",
+          "version": "2.4.0-1",
+          "sha256": "f04622c61603742deb3a44cbfc1b558c2815728b3f2abbeaa4335ede32fbc4a1"
+        },
+        {
+          "name": "kdoctools",
+          "version": "6.30.0-1.1",
+          "sha256": "561b78f31eb3bd58304f11352bd5d8a58003df39c94bad39a1e3097ed7de99dc"
+        },
+        {
+          "name": "libgirepository",
+          "version": "1.86.0-2.1",
+          "sha256": "6b02f13dcd57566360eeaa3d58dfb347150ebcd22c90a99b1f6ed69ad491039c"
+        },
+        {
+          "name": "libsepol",
+          "version": "3.11-1",
+          "sha256": "c642fc4c78fee0ee2d01a42debb2aafa6a2b298e9fe73f7f753da91709bf72ae"
+        },
+        {
+          "name": "libselinux",
+          "version": "3.11-1",
+          "sha256": "f6b5cd4a7a14e101c4861e31a239c7b346e9b5189d2248193674cae28a7b4ada"
+        },
+        {
+          "name": "localsearch",
+          "version": "3.11.2-1",
+          "sha256": "c38f0fe421841a17828fd2a74e97416c50871763f3dc7e379d8233d478049633"
+        }
+      ]
+    },
+    "1c85d6dd67e04cb6b6e0ba0ce49981e2": {
+      "host": "CachyOS x86_64-v3, glibc 2.44; isolated archive extraction only",
+      "prefix_sha256": "a419b858a2d75e661f62642b726d486c64ab247a7688daa7e1f26f08e95efcd0",
+      "package_plan_sha256": "a2779d5472d02bcc241b4b702cb5304952390ba6249c1062754f00a9e8892954",
+      "prefix_source_manifest_sha256": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+      "batch_manifest_sha256": "a0d25be9fa2a5b6d54a5ad0c2f2b57a6fcc859c5d122bef4e35fa09e60ab58c6",
+      "reused_prefix_receipt_sha256": "016c44e6e564e89f099e80f4ff35187e9c0eb8c3504059a691a22ccbe955ef41",
+      "compiler_linker_flags": {
+        "CFLAGS": "-I${PREFIX}/usr/include",
+        "CXXFLAGS": "-I${PREFIX}/usr/include",
+        "LDFLAGS": "-L${PREFIX}/usr/lib"
+      },
+      "application_flag_overrides": {
+        "spacefm": {
+          "CFLAGS": "-I${PREFIX}/usr/include -std=gnu17 -D_GNU_SOURCE -include sys/sysmacros.h -Wno-error=incompatible-pointer-types"
+        },
+        "xfe": {
+          "CXXFLAGS": "-I${PREFIX}/usr/include/fox-1.6 -I${PREFIX}/usr/include"
+        }
+      },
+      "prefix_relocations": {
+        "rebased_scripts": {
+          "usr/bin/intltoolize": {
+            "original_sha256": "ee8690c5575721116602de74a470e84d687ce4b8a67c843fca984aeb4d6b11dd",
+            "rebased_sha256": "47a27ba624575e1aca1003334c53ff26a71acffb3fc7a9fc8e61acc10bc834d4",
+            "prefix": "${PREFIX}/usr"
+          },
+          "etc/fpc.cfg": {
+            "original_sha256": "4648ba54aef6664f59baa0bb429336ea171ee33baeb794df12552151f04c6a28",
+            "rebased_sha256": "65703c744c75bc3aa988e7041e743aa29bae9c361a20c505698ee9e4edb4be52",
+            "library_search_path": "${PREFIX}/usr/lib"
+          },
+          "usr/share/cmake/fm-qt6/fm-qt6-targets.cmake": {
+            "original_sha256": "24ba0dba5d84246667bc6b3b8412be59ba0f43bb673f5a16a38eaeb0f9d14f1f",
+            "rebased_sha256": "2aca31818d35e76e07c48c3b5227ec87ca3045435ecc777729152cce7f49c32d",
+            "replacements": [
+              {
+                "original_path": "/usr/include/menu-cache",
+                "private_path": "${PREFIX}/usr/include/menu-cache",
+                "occurrences": 1
+              },
+              {
+                "original_path": "/usr/lib/libmenu-cache.so",
+                "private_path": "${PREFIX}/usr/lib/libmenu-cache.so",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/dtd/kdedbx45.dtd": {
+            "original_sha256": "aed05a8ab30f3e2f9cddb47c00b4d663ee3cc154191d04a46c87e21340168278",
+            "rebased_sha256": "32d513b11ba0808f6e7f7ccd640f528a29187808853f4f8af44afbf7fed03341",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/kde-include-common.xsl": {
+            "original_sha256": "4447055e50a450e7676f265d831b5642ecb3b8bfc2a31354c787d1a9ecacb187",
+            "rebased_sha256": "be92da38b01f3a218e6133211380370c6b0ef0359cc4bd27294dc487ba721ed6",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 2
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/kde-include-man.xsl": {
+            "original_sha256": "3ab75705181a17b90d3b99774ccc2be18876d585a842709399d542599a1608ed",
+            "rebased_sha256": "b99645173dde8b9ae43148d1a7fc94a217bdf4148f8153bbc87a409d7264e797",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/xsl/all-l10n.xml": {
+            "original_sha256": "6fc2a3785943c1cf7f1a9b1fbd240382ac3b79438648ad890f1cc7a0dc6963df",
+            "rebased_sha256": "0c98830c525d91ad22c8bb659b2107eb78ed7f19639861330dd4c9132b55cffe",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 75
+              }
+            ]
+          }
+        },
+        "rebased_package_links": [
+          {
+            "path": "usr/bin/ppcx64",
+            "package_target": "/usr/lib/fpc/3.2.2/ppcx64",
+            "prefix_target": "../lib/fpc/3.2.2/ppcx64"
+          },
+          {
+            "path": "usr/bin/lazbuild",
+            "package_target": "/usr/lib/lazarus/lazbuild",
+            "prefix_target": "../lib/lazarus/lazbuild"
+          },
+          {
+            "path": "usr/bin/lazarus",
+            "package_target": "/usr/lib/lazarus/lazarus",
+            "prefix_target": "../lib/lazarus/lazarus"
+          },
+          {
+            "path": "usr/bin/startlazarus",
+            "package_target": "/usr/lib/lazarus/startlazarus",
+            "prefix_target": "../lib/lazarus/startlazarus"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/html",
+            "package_target": "/usr/share/doc/lazarus/chm",
+            "prefix_target": "../../../share/doc/lazarus/chm"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/lazdoc.css",
+            "package_target": "/usr/share/doc/lazarus/lazdoc.css",
+            "prefix_target": "../../../share/doc/lazarus/lazdoc.css"
+          }
+        ]
+      },
+      "private_packages": [
+        {
+          "name": "cmake",
+          "version": "4.4.3-2.1",
+          "sha256": "6b321d718d6bea3ea880cbab6e95dd169ea493d2e2c888882ace8bc8b5d0d501"
+        },
+        {
+          "name": "cppdap",
+          "version": "1.58.0-3.1",
+          "sha256": "d6590b94912082bef080fbccda796c2ae9e122860b0c4de5bd2e0b13dcf97177"
+        },
+        {
+          "name": "rhash",
+          "version": "1.4.6-1.1",
+          "sha256": "49b92a1d142d3ef8f07cc3d61b6771cb2dded35afdefa66bba4898a040d18aee"
+        },
+        {
+          "name": "vala",
+          "version": "0.56.19-2.1",
+          "sha256": "fa31d107b2503e25292350744640d29fee14a581ff3fd259e0087c51e0306921"
+        },
+        {
+          "name": "fpc",
+          "version": "3.2.2-11",
+          "sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+        },
+        {
+          "name": "fpc-src",
+          "version": "3.2.2-4",
+          "sha256": "dfb2c0002d4db8735bd2323cc7fb815ee30ae524d21666d68dc803e75a900290"
+        },
+        {
+          "name": "lazarus",
+          "version": "4.8-1.1",
+          "sha256": "78e50098f36139792b073e7cf2e0ff20bb582c9904fd774b4299487b2956660d"
+        },
+        {
+          "name": "lazarus-qt6",
+          "version": "4.8-1.1",
+          "sha256": "7be14efb66ed688b5808828ce9a6457188c23f7b4df10813842c0ee574696b14"
+        },
+        {
+          "name": "intltool",
+          "version": "0.51.0-6",
+          "sha256": "0555d00c455a056dc08c172c3572c6147c76d5edca25712c4e0ed57e6eb99c71"
+        },
+        {
+          "name": "extra-cmake-modules",
+          "version": "6.30.0-1",
+          "sha256": "c827279575ece3efc0cea75d05679c7224cb13b771d3600c22369edaae607c6d"
+        },
+        {
+          "name": "fox",
+          "version": "1:1.6.59-1.1",
+          "sha256": "f818e0f5a84e51e173b20f76991b060d6f5a0df21bc0e44575aabf60b0e621ca"
+        },
+        {
+          "name": "gobject-introspection",
+          "version": "1.86.0-2.1",
+          "sha256": "af39594f89e4d0a6d695d4dfc0544e283d91845ca672b75a66450d25bb6dd0ca"
+        },
+        {
+          "name": "python-mako",
+          "version": "1.3.12-1",
+          "sha256": "8ba0e868bcc28b591e2f36711d9c7d47c2d8174690f413811c7aac7de702ed8b"
+        },
+        {
+          "name": "python-markdown",
+          "version": "3.11.0-1",
+          "sha256": "ae350c25dd9173496c483db07c9fd46ca9200e65873c214d0f690b82ab93f113"
+        },
+        {
+          "name": "gtk-doc",
+          "version": "1.37.0-1",
+          "sha256": "b01772b3e79492b4763859a54052789a1965336581f7aa32dfb08e1a5f989d2b"
+        },
+        {
+          "name": "docbook-xml",
+          "version": "4.5-11",
+          "sha256": "22a209bf18d25c5a9d1700b3372f2d82ed9d9e6d920a5c36c6acaa7db73af1b0"
+        },
+        {
+          "name": "docbook-xsl",
+          "version": "1.79.2-9",
+          "sha256": "db99c591878ef9696353af75ce19cd6d082b4512ca5acc098c8464d1aeeda168"
+        },
+        {
+          "name": "glib2-docs",
+          "version": "2.88.3-1",
+          "sha256": "705747a3c173417a8d1aa8cbd9c51868baeb501be32ec9a49e577ddc8067f205"
+        },
+        {
+          "name": "itstool",
+          "version": "1:2.0.7-3",
+          "sha256": "4cab46eefcf2f1bcf3871baa3ebb9e197ad5bf7a46329e3a92f0076d7af97126"
+        },
+        {
+          "name": "yelp-tools",
+          "version": "42.1-2",
+          "sha256": "7b1850b4afa3729636959ae6b3db5e2448f715ba5d88c103a3dc9d5effcf5046"
+        },
+        {
+          "name": "yelp-xsl",
+          "version": "49.0-1",
+          "sha256": "1083b08dcb7dfd9bfe39ea0009a56e82b0705273ed88d289b5138c02053da037"
+        },
+        {
+          "name": "mallard-ducktype",
+          "version": "1.0.2-13",
+          "sha256": "138d0bea18b4818d82c5f526cb813d0629557f53574d0f1c1dc4755661f9df80"
+        },
+        {
+          "name": "qt6pas",
+          "version": "6.2.10-4.1",
+          "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725"
+        },
+        {
+          "name": "blueprint-compiler",
+          "version": "0.22.2-1",
+          "sha256": "b833a28c82e1f3c8c8fee973e1427c348fcf5c501ddb56393cb6e7bcc86e6ba5"
+        },
+        {
+          "name": "lxqt-build-tools",
+          "version": "2.4.0-1",
+          "sha256": "f04622c61603742deb3a44cbfc1b558c2815728b3f2abbeaa4335ede32fbc4a1"
+        },
+        {
+          "name": "kdoctools",
+          "version": "6.30.0-1.1",
+          "sha256": "561b78f31eb3bd58304f11352bd5d8a58003df39c94bad39a1e3097ed7de99dc"
+        },
+        {
+          "name": "libgirepository",
+          "version": "1.86.0-2.1",
+          "sha256": "6b02f13dcd57566360eeaa3d58dfb347150ebcd22c90a99b1f6ed69ad491039c"
+        },
+        {
+          "name": "libsepol",
+          "version": "3.11-1",
+          "sha256": "c642fc4c78fee0ee2d01a42debb2aafa6a2b298e9fe73f7f753da91709bf72ae"
+        },
+        {
+          "name": "libselinux",
+          "version": "3.11-1",
+          "sha256": "f6b5cd4a7a14e101c4861e31a239c7b346e9b5189d2248193674cae28a7b4ada"
+        },
+        {
+          "name": "localsearch",
+          "version": "3.11.2-1",
+          "sha256": "c38f0fe421841a17828fd2a74e97416c50871763f3dc7e379d8233d478049633"
+        }
+      ]
+    },
+    "bc4dc64d6f25463eaae455bf77086db6": {
+      "host": "CachyOS x86_64-v3, glibc 2.44; isolated archive extraction only",
+      "prefix_sha256": "a419b858a2d75e661f62642b726d486c64ab247a7688daa7e1f26f08e95efcd0",
+      "package_plan_sha256": "a2779d5472d02bcc241b4b702cb5304952390ba6249c1062754f00a9e8892954",
+      "prefix_source_manifest_sha256": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+      "batch_manifest_sha256": "f7b035d0668658b99170105b2d9f139309449006d3c6b1bf04b5d575f2a16950",
+      "reused_prefix_receipt_sha256": "42a851bfebe1d565438f895801c40b3a1c133fc32796e460eed2e1ad4d9cdd3f",
+      "compiler_linker_flags": {
+        "CFLAGS": "-I${PREFIX}/usr/include",
+        "CXXFLAGS": "-I${PREFIX}/usr/include",
+        "LDFLAGS": "-L${PREFIX}/usr/lib"
+      },
+      "application_flag_overrides": {
+        "spacefm": {
+          "CFLAGS": "-I${PREFIX}/usr/include -std=gnu17 -D_GNU_SOURCE -include sys/sysmacros.h -Wno-error=incompatible-pointer-types -fcommon"
+        },
+        "xfe": {
+          "CXXFLAGS": "-I${PREFIX}/usr/include/fox-1.6 -I${PREFIX}/usr/include"
+        }
+      },
+      "prefix_relocations": {
+        "rebased_scripts": {
+          "usr/bin/intltoolize": {
+            "original_sha256": "ee8690c5575721116602de74a470e84d687ce4b8a67c843fca984aeb4d6b11dd",
+            "rebased_sha256": "47a27ba624575e1aca1003334c53ff26a71acffb3fc7a9fc8e61acc10bc834d4",
+            "prefix": "${PREFIX}/usr"
+          },
+          "etc/fpc.cfg": {
+            "original_sha256": "4648ba54aef6664f59baa0bb429336ea171ee33baeb794df12552151f04c6a28",
+            "rebased_sha256": "65703c744c75bc3aa988e7041e743aa29bae9c361a20c505698ee9e4edb4be52",
+            "library_search_path": "${PREFIX}/usr/lib"
+          },
+          "usr/share/cmake/fm-qt6/fm-qt6-targets.cmake": {
+            "original_sha256": "24ba0dba5d84246667bc6b3b8412be59ba0f43bb673f5a16a38eaeb0f9d14f1f",
+            "rebased_sha256": "2aca31818d35e76e07c48c3b5227ec87ca3045435ecc777729152cce7f49c32d",
+            "replacements": [
+              {
+                "original_path": "/usr/include/menu-cache",
+                "private_path": "${PREFIX}/usr/include/menu-cache",
+                "occurrences": 1
+              },
+              {
+                "original_path": "/usr/lib/libmenu-cache.so",
+                "private_path": "${PREFIX}/usr/lib/libmenu-cache.so",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/dtd/kdedbx45.dtd": {
+            "original_sha256": "aed05a8ab30f3e2f9cddb47c00b4d663ee3cc154191d04a46c87e21340168278",
+            "rebased_sha256": "32d513b11ba0808f6e7f7ccd640f528a29187808853f4f8af44afbf7fed03341",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xml-dtd-4.5/docbookx.dtd",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/kde-include-common.xsl": {
+            "original_sha256": "4447055e50a450e7676f265d831b5642ecb3b8bfc2a31354c787d1a9ecacb187",
+            "rebased_sha256": "be92da38b01f3a218e6133211380370c6b0ef0359cc4bd27294dc487ba721ed6",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 2
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/kde-include-man.xsl": {
+            "original_sha256": "3ab75705181a17b90d3b99774ccc2be18876d585a842709399d542599a1608ed",
+            "rebased_sha256": "b99645173dde8b9ae43148d1a7fc94a217bdf4148f8153bbc87a409d7264e797",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 1
+              }
+            ]
+          },
+          "usr/share/kf6/kdoctools/customization/xsl/all-l10n.xml": {
+            "original_sha256": "6fc2a3785943c1cf7f1a9b1fbd240382ac3b79438648ad890f1cc7a0dc6963df",
+            "rebased_sha256": "0c98830c525d91ad22c8bb659b2107eb78ed7f19639861330dd4c9132b55cffe",
+            "replacements": [
+              {
+                "original_path": "/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "private_path": "${PREFIX}/usr/share/xml/docbook/xsl-stylesheets-nons/",
+                "occurrences": 75
+              }
+            ]
+          }
+        },
+        "rebased_package_links": [
+          {
+            "path": "usr/bin/ppcx64",
+            "package_target": "/usr/lib/fpc/3.2.2/ppcx64",
+            "prefix_target": "../lib/fpc/3.2.2/ppcx64"
+          },
+          {
+            "path": "usr/bin/lazbuild",
+            "package_target": "/usr/lib/lazarus/lazbuild",
+            "prefix_target": "../lib/lazarus/lazbuild"
+          },
+          {
+            "path": "usr/bin/lazarus",
+            "package_target": "/usr/lib/lazarus/lazarus",
+            "prefix_target": "../lib/lazarus/lazarus"
+          },
+          {
+            "path": "usr/bin/startlazarus",
+            "package_target": "/usr/lib/lazarus/startlazarus",
+            "prefix_target": "../lib/lazarus/startlazarus"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/html",
+            "package_target": "/usr/share/doc/lazarus/chm",
+            "prefix_target": "../../../share/doc/lazarus/chm"
+          },
+          {
+            "path": "usr/lib/lazarus/docs/lazdoc.css",
+            "package_target": "/usr/share/doc/lazarus/lazdoc.css",
+            "prefix_target": "../../../share/doc/lazarus/lazdoc.css"
+          }
+        ]
+      },
+      "private_packages": [
+        {
+          "name": "cmake",
+          "version": "4.4.3-2.1",
+          "sha256": "6b321d718d6bea3ea880cbab6e95dd169ea493d2e2c888882ace8bc8b5d0d501"
+        },
+        {
+          "name": "cppdap",
+          "version": "1.58.0-3.1",
+          "sha256": "d6590b94912082bef080fbccda796c2ae9e122860b0c4de5bd2e0b13dcf97177"
+        },
+        {
+          "name": "rhash",
+          "version": "1.4.6-1.1",
+          "sha256": "49b92a1d142d3ef8f07cc3d61b6771cb2dded35afdefa66bba4898a040d18aee"
+        },
+        {
+          "name": "vala",
+          "version": "0.56.19-2.1",
+          "sha256": "fa31d107b2503e25292350744640d29fee14a581ff3fd259e0087c51e0306921"
+        },
+        {
+          "name": "fpc",
+          "version": "3.2.2-11",
+          "sha256": "13345961c4d77e4498d60905cee958af3814c71b6953dbe4c57765c5bc9a307a"
+        },
+        {
+          "name": "fpc-src",
+          "version": "3.2.2-4",
+          "sha256": "dfb2c0002d4db8735bd2323cc7fb815ee30ae524d21666d68dc803e75a900290"
+        },
+        {
+          "name": "lazarus",
+          "version": "4.8-1.1",
+          "sha256": "78e50098f36139792b073e7cf2e0ff20bb582c9904fd774b4299487b2956660d"
+        },
+        {
+          "name": "lazarus-qt6",
+          "version": "4.8-1.1",
+          "sha256": "7be14efb66ed688b5808828ce9a6457188c23f7b4df10813842c0ee574696b14"
+        },
+        {
+          "name": "intltool",
+          "version": "0.51.0-6",
+          "sha256": "0555d00c455a056dc08c172c3572c6147c76d5edca25712c4e0ed57e6eb99c71"
+        },
+        {
+          "name": "extra-cmake-modules",
+          "version": "6.30.0-1",
+          "sha256": "c827279575ece3efc0cea75d05679c7224cb13b771d3600c22369edaae607c6d"
+        },
+        {
+          "name": "fox",
+          "version": "1:1.6.59-1.1",
+          "sha256": "f818e0f5a84e51e173b20f76991b060d6f5a0df21bc0e44575aabf60b0e621ca"
+        },
+        {
+          "name": "gobject-introspection",
+          "version": "1.86.0-2.1",
+          "sha256": "af39594f89e4d0a6d695d4dfc0544e283d91845ca672b75a66450d25bb6dd0ca"
+        },
+        {
+          "name": "python-mako",
+          "version": "1.3.12-1",
+          "sha256": "8ba0e868bcc28b591e2f36711d9c7d47c2d8174690f413811c7aac7de702ed8b"
+        },
+        {
+          "name": "python-markdown",
+          "version": "3.11.0-1",
+          "sha256": "ae350c25dd9173496c483db07c9fd46ca9200e65873c214d0f690b82ab93f113"
+        },
+        {
+          "name": "gtk-doc",
+          "version": "1.37.0-1",
+          "sha256": "b01772b3e79492b4763859a54052789a1965336581f7aa32dfb08e1a5f989d2b"
+        },
+        {
+          "name": "docbook-xml",
+          "version": "4.5-11",
+          "sha256": "22a209bf18d25c5a9d1700b3372f2d82ed9d9e6d920a5c36c6acaa7db73af1b0"
+        },
+        {
+          "name": "docbook-xsl",
+          "version": "1.79.2-9",
+          "sha256": "db99c591878ef9696353af75ce19cd6d082b4512ca5acc098c8464d1aeeda168"
+        },
+        {
+          "name": "glib2-docs",
+          "version": "2.88.3-1",
+          "sha256": "705747a3c173417a8d1aa8cbd9c51868baeb501be32ec9a49e577ddc8067f205"
+        },
+        {
+          "name": "itstool",
+          "version": "1:2.0.7-3",
+          "sha256": "4cab46eefcf2f1bcf3871baa3ebb9e197ad5bf7a46329e3a92f0076d7af97126"
+        },
+        {
+          "name": "yelp-tools",
+          "version": "42.1-2",
+          "sha256": "7b1850b4afa3729636959ae6b3db5e2448f715ba5d88c103a3dc9d5effcf5046"
+        },
+        {
+          "name": "yelp-xsl",
+          "version": "49.0-1",
+          "sha256": "1083b08dcb7dfd9bfe39ea0009a56e82b0705273ed88d289b5138c02053da037"
+        },
+        {
+          "name": "mallard-ducktype",
+          "version": "1.0.2-13",
+          "sha256": "138d0bea18b4818d82c5f526cb813d0629557f53574d0f1c1dc4755661f9df80"
+        },
+        {
+          "name": "qt6pas",
+          "version": "6.2.10-4.1",
+          "sha256": "fba10c99cc7c53d89ecfe0dc231b3ce78a2d1c405b86e2dc47a584a1dd6ad725"
+        },
+        {
+          "name": "blueprint-compiler",
+          "version": "0.22.2-1",
+          "sha256": "b833a28c82e1f3c8c8fee973e1427c348fcf5c501ddb56393cb6e7bcc86e6ba5"
+        },
+        {
+          "name": "lxqt-build-tools",
+          "version": "2.4.0-1",
+          "sha256": "f04622c61603742deb3a44cbfc1b558c2815728b3f2abbeaa4335ede32fbc4a1"
+        },
+        {
+          "name": "kdoctools",
+          "version": "6.30.0-1.1",
+          "sha256": "561b78f31eb3bd58304f11352bd5d8a58003df39c94bad39a1e3097ed7de99dc"
+        },
+        {
+          "name": "libgirepository",
+          "version": "1.86.0-2.1",
+          "sha256": "6b02f13dcd57566360eeaa3d58dfb347150ebcd22c90a99b1f6ed69ad491039c"
+        },
+        {
+          "name": "libsepol",
+          "version": "3.11-1",
+          "sha256": "c642fc4c78fee0ee2d01a42debb2aafa6a2b298e9fe73f7f753da91709bf72ae"
+        },
+        {
+          "name": "libselinux",
+          "version": "3.11-1",
+          "sha256": "f6b5cd4a7a14e101c4861e31a239c7b346e9b5189d2248193674cae28a7b4ada"
+        },
+        {
+          "name": "localsearch",
+          "version": "3.11.2-1",
+          "sha256": "c38f0fe421841a17828fd2a74e97416c50871763f3dc7e379d8233d478049633"
+        }
+      ]
+    }
+  },
+  "attempt_proof": "source-build-attempts.jsonl",
+  "comparison": "One selected observation per app; build scopes and toolchains are not ranked.",
+  "builds": [
+    {
+      "id": "dolphin",
+      "tested_version": "26.08.1-1.1",
+      "source_url": "https://download.kde.org/stable/release-service/26.08.1/src/dolphin-26.08.1.tar.xz",
+      "source_ref": "v26.08.1",
+      "source_commit": "da98e98d3e806c1ea57edc8e39988173a6dfdef7",
+      "source_archive_sha256": "f5635feff84e7070d35342d6defb46e9b42ff1c44e3896635f4bd9f43da947c1",
+      "manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "extracted_source_sha256": "95ed6c10242ced5828b4832d63da31d6d8f3aa820112a99aac0e3505c2deb901",
+      "prepared_source_sha256": "8d51d9edcf233e2b1469b6dbdda0992bbca1522d5d829730d2714d245aed4dc2",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "a3ff9c9ef0d870ea2bca0b106ab5d751440be7460a07cfbfb31e5786e0109167",
+      "status": "ok",
+      "source_build_seconds": 263.711329636,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "cmake",
+        "--build",
+        "{build}",
+        "--parallel",
+        "2"
+      ],
+      "scope": "KDE release CMake default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "38bc9c876b17609534ce3539f6532ac2a9078fc27eb5471f431e29dbd79ef1b6",
+      "built_executable_bytes": 2229168,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "CMAKE_CXX_COMPILER": {
+          "executable": "c++",
+          "version": null,
+          "sha256": "48b8668b8c2f3a30ae4710f379e482adaee193f1399cb0af281bb5dab21c96fb"
+        },
+        "CMAKE_C_COMPILER": {
+          "executable": "cc",
+          "version": null,
+          "sha256": "a5f680ca8b01b1e7a98d531cac90f258875a301d841fab28a8b56d513470f988"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "ebb665dd35b9668e8b4dec31170f0d34c072d96f58e29e1592b625b99d55de3e",
+      "build_log_sha256": "562fd64bd2b09694130a82c54c94ab821f060384c3c51f98f3437e1566cf4a66",
+      "attempt_id": "c3fdcf892c514fb59c5816d5c9282c16",
+      "batch_id": "b7556ad21deb4425b9240911228ec351"
+    },
+    {
+      "id": "nautilus",
+      "tested_version": "50.3.1-1.1",
+      "source_url": "https://download.gnome.org/sources/nautilus/50/nautilus-50.3.1.tar.xz",
+      "source_ref": "50.3.1",
+      "source_commit": "435f8d4cd7eb5b6e6932e3b2732c2ac3d0bfe67d",
+      "source_archive_sha256": "71d54703cc6095db829baa13ad9d853d18b49cb84cae3e0b927ed6f3cf679a1f",
+      "omitted_archive_members": [],
+      "manifest_sha256": "0fe2b9392e1630e782f8aac76afe17ea7c2e91e7cc0a8a3f3335501307673b2d",
+      "extracted_source_sha256": "0a6712d73151571932b37088089b94e91ae4a71e75769cbde5df8c57c82ac4ef",
+      "prepared_source_sha256": "0a6712d73151571932b37088089b94e91ae4a71e75769cbde5df8c57c82ac4ef",
+      "prefix_sha256": "57605c84e3c71cc1a1b1e11c6bbac885836142f740e39244ebc20f13a637b0bd",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "1b5cffed39ee99eee6917a389d77e269b4dafa7a7b08cfa67fbd9fe5a73f05fd",
+      "dependency_cache_changed_during_build": true,
+      "environment_sha256": "27bdf3070935f1841707fe156860dcef2f7202143f1fe495dc71e36d8371b2a3",
+      "status": "ok",
+      "source_build_seconds": 36.280245144,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "meson",
+        "compile",
+        "-C",
+        "{build}",
+        "-j",
+        "2"
+      ],
+      "scope": "GNOME Meson default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "bbdf69818d7d6d780718f11a64b6d06e1c003e7263a9791bd1e5b75d87d47ac6",
+      "built_executable_bytes": 1942392,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "b24b8f501a785019c73eea3d150dc378855e81a0dc3af6ea2d5858b190b4ca9a",
+      "build_log_sha256": "9ce18a014fce1d37ea5e88bfe4d5f24de05d1754f7e38c2d5a47054e90587313",
+      "attempt_id": "2c71a26b048c483dab11dcdf77000099",
+      "batch_id": "26d14c4370804e308a77c389a772be1f"
+    },
+    {
+      "id": "thunar",
+      "tested_version": "4.20.10-1.1",
+      "source_url": "https://archive.xfce.org/src/xfce/thunar/4.20/thunar-4.20.10.tar.bz2",
+      "source_ref": "thunar-4.20.10",
+      "source_commit": "7760dfaa32db5ab6049606ca048ba2219688f369",
+      "source_archive_sha256": "a5a32b51028dc821155e44cdec025fe70398bae193c619ae6ba8b1babf6f49f1",
+      "omitted_archive_members": [],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "fd690052d89670a48fe35158e03b28ce0a0726683585c8a9354bd92383b0b4a9",
+      "prepared_source_sha256": "7f2b012ff62b3318333c4be02ec2511e35cb535f62a96e58ad364fdf413dfeaa",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "8e0ddf37c1741161a678a141b48474e24050ffb702caa2bd1778c254b8adb7f5",
+      "dependency_cache_changed_during_build": true,
+      "environment_sha256": "88f7b25f461c5b6ebff6ea8ecd51060af137ee6f1c536448c76f276cfbfa9f37",
+      "status": "ok",
+      "source_build_seconds": 17.345533781,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "make",
+        "-j2"
+      ],
+      "scope": "Xfce Autotools default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "d8b8d3b03851b6f81aa65ccb2cd89d7bdc70d6b2013d734176b43f5071c57fc7",
+      "built_executable_bytes": 1634096,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "1bc670223b6380d5a337933e50b52198b345461539449bc68ef24f09123f40a0",
+      "build_log_sha256": "f1d7c79a91dac563c71ca3aa945fe9b467b04c1e0a9495f8352cf92ffd05d6e7",
+      "attempt_id": "63336abd62424612b43cfdfed9cb9abe",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "caja",
+      "tested_version": "1.28.0-4.1",
+      "source_url": "https://pub.mate-desktop.org/releases/1.28/caja-1.28.0.tar.xz",
+      "source_ref": "v1.28.0",
+      "source_commit": "27fdb849de02f551eab46eb78f48065da9d1d1ec",
+      "source_archive_sha256": "1e3014ce1455817ec2ef74d09efdfb6835d8a372ed9a16efb5919ef7b821957a",
+      "omitted_archive_members": [],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "8695fe0d6da924b58fe0d32c68ee804e8cd482b9161675e961019401b2f00a23",
+      "prepared_source_sha256": "710f1fa3f5e73028a596ce9ddd7a5fee24512d9d9d45030ddbe8b0818d86430b",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "92b37636b50f02e86d0c8ee296faa79a7d1e410abc972790a172d2d67308b00d",
+      "dependency_cache_changed_during_build": true,
+      "environment_sha256": "16bc51a1d606f3a93d3b702304b9a38c42a2b2f470eceb96d9482e6fbb0170b0",
+      "status": "ok",
+      "source_build_seconds": 29.352112687,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "make",
+        "-j2"
+      ],
+      "scope": "MATE Autotools default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "60105b92e7ee69e2ab035284b83ee7c35d821bd89d0126c671adce8918099647",
+      "built_executable_bytes": 3058928,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "dde6aa43e4117d2b244dae01709e220a0b728cb9086d3378b4b733ab780dffab",
+      "build_log_sha256": "1b4722ffe3aa59e115a9591a19484767d3f8dde33d4ab5e65eda93fa796f0c65",
+      "attempt_id": "0d967121b777402abea3305369353fd0",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "pcmanfm-qt",
+      "tested_version": "2.4.1-1.1",
+      "source_url": "https://github.com/lxqt/pcmanfm-qt/releases/download/2.4.1/pcmanfm-qt-2.4.1.tar.xz",
+      "source_ref": "2.4.1",
+      "source_commit": "56312ce4a0c728155a9127372bc7b84651caad08",
+      "source_archive_sha256": "f17f336072993855d92af40052f8f9ddb736df28b538b71a2925a56a038af1db",
+      "omitted_archive_members": [],
+      "manifest_sha256": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+      "extracted_source_sha256": "5a16c29e80ee99a1a3b3a1924939a1afdd1f2631df0cb558cdedbf7f3eb10c14",
+      "prepared_source_sha256": "5a16c29e80ee99a1a3b3a1924939a1afdd1f2631df0cb558cdedbf7f3eb10c14",
+      "prefix_sha256": "a419b858a2d75e661f62642b726d486c64ab247a7688daa7e1f26f08e95efcd0",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "dfa8d018368e0a3ea4510f9587149a01ccedbdbc7c3811381664deb2236335ea",
+      "status": "ok",
+      "source_build_seconds": 31.646420488,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "cmake",
+        "--build",
+        "{build}",
+        "--parallel",
+        "2"
+      ],
+      "scope": "LXQt CMake default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "91524c557a838e8a7b0fb16d9bdabbb19555d8c6fb9df1a299a9b56af84f5f24",
+      "built_executable_bytes": 1123272,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "CMAKE_CXX_COMPILER": {
+          "executable": "c++",
+          "version": null,
+          "sha256": "48b8668b8c2f3a30ae4710f379e482adaee193f1399cb0af281bb5dab21c96fb"
+        },
+        "CMAKE_C_COMPILER": {
+          "executable": "cc",
+          "version": null,
+          "sha256": "a5f680ca8b01b1e7a98d531cac90f258875a301d841fab28a8b56d513470f988"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "f0c34cc1f84512c9837c59412c587390579b5d6b8ad53c32625827389c4e0f38",
+      "build_log_sha256": "a8eeee00b101d935b43503e8a734c41ad21ec2f492d3dd12e5d378372c8d885c",
+      "attempt_id": "63cb9d5b41a440e9aae9b75cd0501035",
+      "batch_id": "856193e0a1e94b11b9839863bb092b55"
+    },
+    {
+      "id": "pcmanfm",
+      "tested_version": "1.4.0-2.1",
+      "source_url": "https://github.com/lxde/pcmanfm/archive/refs/tags/1.4.0.tar.gz",
+      "source_ref": "1.4.0",
+      "source_commit": "50aa9435c49551993fcd3c20d18615795c8daedf",
+      "source_archive_sha256": "cda4f5ad7e049dcdf3b051b9de4c779adcd55bd720e9c96c45275389aa84264e",
+      "omitted_archive_members": [],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "6ea075843f26454fe462f9591701b5f167fe5ccb49c0ab93dcfa19aa8e467263",
+      "prepared_source_sha256": "6c1f5392358fcf95b7e1cb61149c35332065de3776e82123c19f925c5ba7ca9f",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "e4e93ec124c10675532c091d68ae7d56e0bf325bb3df4136d3e36f1e58699717",
+      "status": "ok",
+      "source_build_seconds": 1.399233949,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "make",
+        "-j2"
+      ],
+      "scope": "LXDE Autotools GTK3 targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "d8ccd3c431f75ef0b0ff10b9edf49a317a5e71409676f2f0cb7af3964dc41383",
+      "built_executable_bytes": 385480,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "5a0f14bcc94170dbbd3df456713a4614494e2e1dd6717fa555079e93cf482fb8",
+      "build_log_sha256": "570cd55550aa2dcb732c03cb7b94a170561ff824e43557976563e4b728b5c8de",
+      "attempt_id": "3c1eeaa4a0434a858855dfe4f0be9c82",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "krusader",
+      "tested_version": "2.9.0-2",
+      "source_url": "https://download.kde.org/stable/krusader/2.9.0/krusader-2.9.0.tar.xz",
+      "source_ref": "v2.9.0",
+      "source_commit": "b91854b0f6e4c37a15f1f57e9628bcb3789f74b9",
+      "source_archive_sha256": "c9b79bfade6cc69fe0e341ecef932fcac8afd9fe94e8cbcfbd729feb54394e04",
+      "omitted_archive_members": [],
+      "manifest_sha256": "b07d288d38d8ab78a424cea234ff12df536c6450ce576ada7769b18a4884a5cb",
+      "extracted_source_sha256": "58df6955c4acb38f22ac97bf36adc05673dac6fcac2fd4e9b051f9ef6d542848",
+      "prepared_source_sha256": "749ee42df624a74f90a021621cc087be019f847866518d196aee1cfa89254dc7",
+      "prefix_sha256": "a419b858a2d75e661f62642b726d486c64ab247a7688daa7e1f26f08e95efcd0",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "271cfaa7a16e8f37489310dbb1ce8dde9899381f5f6afc46de615a153b44af70",
+      "status": "ok",
+      "source_build_seconds": 209.622373569,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "cmake",
+        "--build",
+        "{build}",
+        "--parallel",
+        "2"
+      ],
+      "scope": "KDE CMake default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "73d067f27c9e5f6e900addbeeaf6792bdc1312ccb202e99d4c84a9f53b1c35e3",
+      "built_executable_bytes": 5098152,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "CMAKE_CXX_COMPILER": {
+          "executable": "c++",
+          "version": null,
+          "sha256": "48b8668b8c2f3a30ae4710f379e482adaee193f1399cb0af281bb5dab21c96fb"
+        },
+        "CMAKE_C_COMPILER": {
+          "executable": "cc",
+          "version": null,
+          "sha256": "a5f680ca8b01b1e7a98d531cac90f258875a301d841fab28a8b56d513470f988"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "f1c9de2f2633c778f1b35c6e6898d321d78d13b64cecabbf3ba61433101f0520",
+      "build_log_sha256": "5a13cc1f674bf036b579c5ff0277514e5258dd1a35290512d79ccf59d07de657",
+      "attempt_id": "f2fedef01aba4e93824833d65a9238cc",
+      "batch_id": "856193e0a1e94b11b9839863bb092b55"
+    },
+    {
+      "id": "doublecmd",
+      "tested_version": "1.2.9-1",
+      "source_url": "https://github.com/doublecmd/doublecmd/releases/download/v1.2.9/doublecmd-1.2.9-src.tar.gz",
+      "source_ref": "v1.2.9",
+      "source_commit": "b583211ddfb57fe4be3673b3ffaed77f0a04e0b3",
+      "source_archive_sha256": "05ea5d580e2ac3a52cd0994e2152a56009b587a371672fd1ff37060e6f418e26",
+      "omitted_archive_members": [],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "92ee063ece7eb42d23670a6234f2fd8278397b7f31669926179abab3bc142b4f",
+      "prepared_source_sha256": "92ee063ece7eb42d23670a6234f2fd8278397b7f31669926179abab3bc142b4f",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "585a0486f01240291a8684d25604daa52c76d6bfa37808117d7d8247ec6e000f",
+      "dependency_cache_changed_during_build": true,
+      "environment_sha256": "6455af3409ade2aa54477969e0c61773c5756bc481e9a7d9668207166d490489",
+      "status": "ok",
+      "source_build_seconds": 35.863097554,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "./build.sh",
+        "release",
+        "qt6"
+      ],
+      "scope": "Qt6 release script builds components, plugins, executable, then extracts debug lines and strips it",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "900d3879429b2c6c082c77abc22e3f9868a7da2c993fd98e92afb37039c9a724",
+      "built_executable_bytes": 18710240,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "build_log_sha256": "69ec16df836fe3fc84eb674e65c04fc209ab015de4404f4405a4adc3a1e0afd1",
+      "attempt_id": "6e01dc2d193548cebf8c5575d19b40da",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "cosmic-files",
+      "tested_version": "1:1.9.0-1.1",
+      "source_url": "https://github.com/pop-os/cosmic-files/archive/refs/tags/epoch-1.9.0.tar.gz",
+      "source_ref": "epoch-1.9.0",
+      "source_commit": "d1f0af78e64f9e8ddb52c486913d53a234ce3cf2",
+      "source_archive_sha256": "c30cb40b8177112c821753a95134ba82e64dfd8230f5c371a1c89a4b0d066309",
+      "manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "extracted_source_sha256": "d4c5d1148828c67175fd41a0c1f258db51c9f0300ad85046c56abc0263c99dc3",
+      "prepared_source_sha256": "d4c5d1148828c67175fd41a0c1f258db51c9f0300ad85046c56abc0263c99dc3",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "dependency_cache_sha256": "6d32fdae588f7a65251d8fec3d8d21e286e37b15b84070507ab5c7865cd88e63",
+      "dependency_cache_after_sha256": "6d32fdae588f7a65251d8fec3d8d21e286e37b15b84070507ab5c7865cd88e63",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "a28154471840ff74c5f19bb7905ecc59db28e726781d5f10c691e49f54b1e14b",
+      "status": "ok",
+      "source_build_seconds": 532.833824672,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "{cargo}",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-j",
+        "2"
+      ],
+      "scope": "Cargo release binary and locked Rust dependencies; actual Rust version recorded",
+      "app_environment": {},
+      "rustup_channel": "1.93.0",
+      "built_executable_sha256": "befa4c9e82f6c7e0161a42387b3a171efe459f82acd6a1ca2a2a8dbd9fe4aeee",
+      "built_executable_bytes": 63884008,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "cargo": {
+          "executable": "cargo",
+          "version": "cargo 1.93.0 (083ac5135 2025-12-15)",
+          "sha256": null
+        },
+        "rustc": {
+          "executable": "rustc",
+          "version": "rustc 1.93.0 (254b59607 2026-01-19)",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "selected_rustc": {
+          "executable": "rustc",
+          "version": null,
+          "sha256": "d32249a7c3bfcfc67b471460386e46323accae7125e344567a12d5664d99bb57"
+        },
+        "selected_cargo": {
+          "executable": "cargo",
+          "version": null,
+          "sha256": "9548937d530bf439ff1ba47a3b2bd26eeb9c3aff1961c20c01798613de922578"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "ffd1472277414803235b571ae1cd06c508971e42e983fd2c47283864199f7508",
+      "build_log_sha256": "3e6b9fab06349f0b24cbca33cf2aba009ccf1b8d95156c4f9d8466dc45e2bc31",
+      "attempt_id": "5a8c140315914e05a749583f2494167a",
+      "batch_id": "b7556ad21deb4425b9240911228ec351"
+    },
+    {
+      "id": "elementary-files",
+      "tested_version": "7.3.2-2.1",
+      "source_url": "https://github.com/elementary/files/archive/refs/tags/7.3.2.tar.gz",
+      "source_ref": "7.3.2",
+      "source_commit": "c90fa459dd07fa3c167491763c7b54b9627767e9",
+      "source_archive_sha256": "a5e1b039d59001a636624315e37fa6aeeee8908cf1b323021d06d3ccd49214f2",
+      "manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "extracted_source_sha256": "0ac692eba22d26d753801ece7a83b5a2f7601d2b56205d4c99acd2abe01037f2",
+      "prepared_source_sha256": "0ac692eba22d26d753801ece7a83b5a2f7601d2b56205d4c99acd2abe01037f2",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "950b2882393832e15b32b5b7e07470638ab9cf23e3c81e4c4f0b9a9e2e92549a",
+      "status": "ok",
+      "source_build_seconds": 24.763374331,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "meson",
+        "compile",
+        "-C",
+        "{build}",
+        "-j",
+        "2"
+      ],
+      "scope": "elementary Vala Meson default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "1425e23a1e39551e1cb5bb061574f27a5b4e732ccd2b4e8365175980b7908b93",
+      "built_executable_bytes": 1105216,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "184c16f92785f9d7d31e1e4a78f9922c0038fc056eb0192e403bbfd5a69fd422",
+      "build_log_sha256": "5e8b64ea56d71b3c4721e636b541e7b860a60a89a23041a6fb17c84af995ff22",
+      "attempt_id": "06ff9d6fdb684d359c4a4639457b3f5e",
+      "batch_id": "b7556ad21deb4425b9240911228ec351"
+    },
+    {
+      "id": "nemo",
+      "tested_version": "6.6.4-1.1",
+      "source_url": "https://github.com/linuxmint/nemo/archive/refs/tags/6.6.4.tar.gz",
+      "source_ref": "6.6.4",
+      "source_commit": "8d23a398a2fde79910b962ebbf5526daf43fd0ce",
+      "source_archive_sha256": "258807feb2e7bac523707d6b3daf2d9439e7135123cbe795183d5aaa6fd691ed",
+      "omitted_archive_members": [],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "cc4a3e85615753a55c0d4b93b4cb90fa5d39fad9217ffec1e90adfd31a6e4b19",
+      "prepared_source_sha256": "cc4a3e85615753a55c0d4b93b4cb90fa5d39fad9217ffec1e90adfd31a6e4b19",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "738ebcc475a00cef05ea1c90842b86fe9ee6d23fe5313fd23a04d83f279ed74f",
+      "dependency_cache_changed_during_build": true,
+      "environment_sha256": "674869ebe2ca34da5d44ffeec9913658da56f28b50be81a21c8ca1e1ec1f2252",
+      "status": "ok",
+      "source_build_seconds": 36.627706201,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "meson",
+        "compile",
+        "-C",
+        "{build}",
+        "-j",
+        "2"
+      ],
+      "scope": "Cinnamon Meson default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "518f6301d4c4cd6f56867cd54c3844c870c5001e30b57f6754c9fd36fc571340",
+      "built_executable_bytes": 2369920,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "a62e34f6e4d8078cc28dc5407a8ee44b8c6a3dd3851a5395d28edfe607f401a0",
+      "build_log_sha256": "6ce6a227cb07ab1dbae2c10a9f053f496831019846626cf803e250b82221b92a",
+      "attempt_id": "c162fd0724284181a5013fb204351e06",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "flea",
+      "tested_version": "0.3.7",
+      "source_url": "https://github.com/thisisgm/flea/archive/refs/tags/v0.3.7.tar.gz",
+      "source_ref": "v0.3.7",
+      "source_commit": "ae9419c8de789ac4f8b25a5d3c7a3fa727ae4196",
+      "source_archive_sha256": "1f17c57377c59b6e8bf211633c73ef5ca9222b79b3331cf7226cb705dc83d71c",
+      "omitted_archive_members": [
+        {
+          "name": "flea-0.3.7/ui/Commons",
+          "type": "symlink",
+          "target": "/usr/share/omarchy/shell/Commons"
+        },
+        {
+          "name": "flea-0.3.7/ui/Ui",
+          "type": "symlink",
+          "target": "/usr/share/omarchy/shell/Ui"
+        },
+        {
+          "name": "flea-0.3.7/ui/boot/Commons",
+          "type": "symlink",
+          "target": "/usr/share/omarchy/shell/Commons"
+        },
+        {
+          "name": "flea-0.3.7/ui/boot/Ui",
+          "type": "symlink",
+          "target": "/usr/share/omarchy/shell/Ui"
+        }
+      ],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "9aa849c1b1b29368199cf381b7f48bd26ea6a5f2830f3caf28ff91d405a7e661",
+      "prepared_source_sha256": "9aa849c1b1b29368199cf381b7f48bd26ea6a5f2830f3caf28ff91d405a7e661",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "0c87896cec469044cad0eb623445912bfee04c15db72c9bd90bce1aceb6a47c3",
+      "dependency_cache_after_sha256": "0c87896cec469044cad0eb623445912bfee04c15db72c9bd90bce1aceb6a47c3",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "6e775da9bb59528ea3865df98cabf54a0187f8a46cdd0c70c507e33a68698eda",
+      "status": "ok",
+      "source_build_seconds": 37.87468617,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "{cargo}",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "-j",
+        "2"
+      ],
+      "scope": "Cargo release Rust executable only; QuickShell QML UI is loaded from source assets",
+      "app_environment": {},
+      "rustup_channel": "1.98.0",
+      "built_executable_sha256": "73c24ab7e8b48b4f85b099f1d9b8d7bcd0784cd6b85e485ec6baad2908acf392",
+      "built_executable_bytes": 2963696,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "cargo": {
+          "executable": "cargo",
+          "version": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+          "sha256": null
+        },
+        "rustc": {
+          "executable": "rustc",
+          "version": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "selected_rustc": {
+          "executable": "rustc",
+          "version": null,
+          "sha256": "3690cc576ede140504698405d5d8fa3826aaadbe71699c6c4ed0a565d6f493e2"
+        },
+        "selected_cargo": {
+          "executable": "cargo",
+          "version": null,
+          "sha256": "ff3022fcbd13b08434ea7afde9a0ef9d5b3f5c17b5fc7a40031be3ee000a6a24"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "09f77e2bffbe77c4022960975ede6d71c630d74b8ba58543b9183e20eef3f785",
+      "build_log_sha256": "8c15842093f03ed19747f86ca9dea96f503dbf4c47a1edce6fa5032e2a64d18e",
+      "attempt_id": "cfda36b01c954d8fb8b385432d87ff52",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "strata",
+      "tested_version": "0.20.1",
+      "source_url": "https://github.com/lgse/strata/archive/refs/tags/v0.20.1.tar.gz",
+      "source_ref": "v0.20.1",
+      "source_commit": "152299cbc2da3393815bbc1f5647323b9667e826",
+      "source_archive_sha256": "cdbe7f196970cbaa1fa41c427833899e35c2dcaa8bb68a864c3afa6428827e2f",
+      "manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "extracted_source_sha256": "b094172b27e10386d78f788bc0625afd19ab545267624ef5897e5e7ba0262d74",
+      "prepared_source_sha256": "b094172b27e10386d78f788bc0625afd19ab545267624ef5897e5e7ba0262d74",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "dependency_cache_sha256": "5f90186798b7568335be4828b006df2e4774734106a1c6ef9c241af1f262a519",
+      "dependency_cache_after_sha256": "5f90186798b7568335be4828b006df2e4774734106a1c6ef9c241af1f262a519",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "5cce920eda1160a5c3b30645e5792680fcf6127764dc3bbb9058623373e971ce",
+      "status": "ok",
+      "source_build_seconds": 459.394161023,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "{cargo}",
+        "build",
+        "--release",
+        "--locked",
+        "--offline",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "-j",
+        "2"
+      ],
+      "scope": "Cargo release target x86_64-unknown-linux-gnu with upstream line-table debug setting",
+      "app_environment": {
+        "CARGO_PROFILE_RELEASE_DEBUG": "line-tables-only"
+      },
+      "rustup_channel": "1.98.0",
+      "built_executable_sha256": "37767bd7210e71ca910256314c5cc9d6c8202459479b269f54d2c2a281007c09",
+      "built_executable_bytes": 144674008,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "cargo": {
+          "executable": "cargo",
+          "version": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+          "sha256": null
+        },
+        "rustc": {
+          "executable": "rustc",
+          "version": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "selected_rustc": {
+          "executable": "rustc",
+          "version": null,
+          "sha256": "3690cc576ede140504698405d5d8fa3826aaadbe71699c6c4ed0a565d6f493e2"
+        },
+        "selected_cargo": {
+          "executable": "cargo",
+          "version": null,
+          "sha256": "ff3022fcbd13b08434ea7afde9a0ef9d5b3f5c17b5fc7a40031be3ee000a6a24"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "27426f5871367fd45a63e6e6c2ccf1564462c365819f3c091a271b256a6cab3e",
+      "build_log_sha256": "f950286b97feca4edc42235be3191489f9dfb9203259aef53eadca5a28af60e9",
+      "attempt_id": "780c3b8a73ec4d19818d057412d7c016",
+      "batch_id": "b7556ad21deb4425b9240911228ec351"
+    },
+    {
+      "id": "konqueror",
+      "tested_version": "26.08.1-1.1",
+      "source_url": "https://download.kde.org/stable/release-service/26.08.1/src/konqueror-26.08.1.tar.xz",
+      "source_ref": "v26.08.1",
+      "source_commit": "bcc9d673918b188c147d54bf32914953a0cd7ca5",
+      "source_archive_sha256": "d974853fc14a356e76ac7901c7270323bf93a38e5ae4470b0a32e4b749854ccd",
+      "manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "extracted_source_sha256": "252d4ffa8984566d64b7e6af468b6570ab3855501197cddbe756f5e7be1f2d23",
+      "prepared_source_sha256": "252d4ffa8984566d64b7e6af468b6570ab3855501197cddbe756f5e7be1f2d23",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "691c05e328d2fda5da5860389dd635bcef5987b7242895a80a9c3f8488bc3c01",
+      "status": "ok",
+      "source_build_seconds": 303.92499684,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "cmake",
+        "--build",
+        "{build}",
+        "--parallel",
+        "2"
+      ],
+      "scope": "KDE CMake default targets",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "faafed411408ab0ae75536615a78f98a45f02ec0d08b365c339ec7fab6debede",
+      "built_executable_bytes": 2169680,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        },
+        "CMAKE_CXX_COMPILER": {
+          "executable": "c++",
+          "version": null,
+          "sha256": "48b8668b8c2f3a30ae4710f379e482adaee193f1399cb0af281bb5dab21c96fb"
+        },
+        "CMAKE_C_COMPILER": {
+          "executable": "cc",
+          "version": null,
+          "sha256": "a5f680ca8b01b1e7a98d531cac90f258875a301d841fab28a8b56d513470f988"
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "77686cb63120a1c8f797063a3349d3b1504445202ed795f708dc8f5effca9b8f",
+      "build_log_sha256": "ec3b7ea74dcb2bafe33a4db6d1878923b7ebfada08bd7878da63acfc56891bb4",
+      "attempt_id": "835a03989f5340a3afc7dc30389c4451",
+      "batch_id": "b7556ad21deb4425b9240911228ec351"
+    },
+    {
+      "id": "spacefm",
+      "tested_version": "1.0.6-9",
+      "source_url": "https://github.com/IgnorantGuru/spacefm/archive/refs/tags/1.0.6.tar.gz",
+      "source_ref": "1.0.6",
+      "source_commit": "e6f291858067e73db44fb57c90e4efb97b088ac8",
+      "source_archive_sha256": "fedea9fcad776e0af4b8d90c5a1c86684a9c96ef1cdd4e959530ce93bdebe7c9",
+      "omitted_archive_members": [],
+      "manifest_sha256": "f7b035d0668658b99170105b2d9f139309449006d3c6b1bf04b5d575f2a16950",
+      "extracted_source_sha256": "4e220d982a3b624daacec0688f29ae0e60415734903235ac82aa55db9a754572",
+      "prepared_source_sha256": "9092785ebf4cadb9a97fc4970cd3c0003cabacd71c2a46fdbe751ddcb73214ff",
+      "prefix_sha256": "a419b858a2d75e661f62642b726d486c64ab247a7688daa7e1f26f08e95efcd0",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "46b20840900be9b0ee5bece6198bda69d214a9230f119302d3b0882bbf0227f5",
+      "status": "ok",
+      "source_build_seconds": 6.934057145,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "make",
+        "-j2"
+      ],
+      "scope": "GTK3 Autotools default targets",
+      "app_environment": {
+        "CFLAGS": "-I{prefix}/usr/include -std=gnu17 -D_GNU_SOURCE -include sys/sysmacros.h -Wno-error=incompatible-pointer-types -fcommon"
+      },
+      "rustup_channel": null,
+      "built_executable_sha256": "33c3bdb1a274f442289ce556adde62ff88dc03597b83445d89b6a2279c79929d",
+      "built_executable_bytes": 1910216,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "043a59e73eadb02c124266eca0f703e38d494182346b18ade5caa0120c0b143f",
+      "build_log_sha256": "00ffea6c06fe2e1113f2d733a61fd0e129fc3fafa13509b4ea84aac5e1d60040",
+      "attempt_id": "398f4214c8fa4fefab60ebb11f324ec2",
+      "batch_id": "bc4dc64d6f25463eaae455bf77086db6"
+    },
+    {
+      "id": "xfe",
+      "tested_version": "2.0.1-2",
+      "source_url": "https://sourceforge.net/projects/xfe/files/xfe/2.0.1/xfe-2.0.1.tar.xz/download",
+      "source_ref": "2.0.1",
+      "source_commit": null,
+      "source_archive_sha256": "be5bb4cac853ef6ad6401d1aa8295e22c749499e2410bf0c52c6044f556a25b3",
+      "omitted_archive_members": [],
+      "manifest_sha256": "5e2c1cbe091711a92e4610083c697d2b7d174492cf966f003d23cbef6ffaf699",
+      "extracted_source_sha256": "ad1008c71313412e11ec754654768ddff7465b385afa232494fa0dd3c3d87fc2",
+      "prepared_source_sha256": "1fcf922e69aaf9faf43c26a1d2e1300df895285afa16fecb55a53143fed87145",
+      "prefix_sha256": "64962cd9e5b4c9f7204c1c5d5ed9a659119370d87d91d6bba272b28cac4b89cb",
+      "dependency_cache_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_after_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "dependency_cache_changed_during_build": false,
+      "environment_sha256": "de70d35148b81b2f0246f05f44131e6dc4e37179793c03c9aec409022f21dac8",
+      "status": "ok",
+      "source_build_seconds": 25.068284234,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "make",
+        "-j2"
+      ],
+      "scope": "FOX Autotools default targets",
+      "app_environment": {
+        "CXXFLAGS": "-I{prefix}/usr/include/fox-1.6 -I{prefix}/usr/include"
+      },
+      "rustup_channel": null,
+      "built_executable_sha256": "e5db6cad3d2086848355fb2f69bd8a200bb898db5f48ff631e35e7c5688a37ed",
+      "built_executable_bytes": 2170656,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "7a38b34847dd54aeae871f819f8b5cda100ce1e0ff436a09aebcca8f27f4a2f1",
+      "build_log_sha256": "e2d2da9d927643c5a4987cfdb61df399d28ca2d36164795337cfffe6167193f5",
+      "attempt_id": "8d373ab0709c46dabad8e43a3b313c6f",
+      "batch_id": "1f5a664a3f24414babda8f9ab35f1d93"
+    },
+    {
+      "id": "gloop",
+      "tested_version": "0.7.2 Size",
+      "source_url": "https://github.com/obselate/gloop/archive/refs/tags/v0.7.2.tar.gz",
+      "source_ref": "v0.7.2",
+      "source_commit": "18abcdf769498e1923481f513eccd5cbae6749b8",
+      "source_archive_sha256": "11c79d844833e39a4d9887e793aa8b2656419be3c3711861863a1a2e01a6b30a",
+      "manifest_sha256": "4d0ad0e93ffdd0d53006c44631714d61c79e0906a15ea465c3480da58f3282b5",
+      "extracted_source_sha256": "c447d6c1b220d713e7e681e0dd040f4bc5d5caaed32407ead19a4f70d96557e8",
+      "prepared_source_sha256": "17ca334d2d6d8a72b20550fbb991dc91c67817988bec5076bed17974b45a1d36",
+      "prefix_sha256": "23b89a27a5d7debe60c733bc2d43130fb417ff4b3aa0c1a78fd9db56bd3222a6",
+      "dependency_cache_sha256": "c82ce941bcd2d65b413e0f883cf306d81a061feb634e053a92c886dd66ed2c19",
+      "dependency_cache_after_sha256": "4ec8e6710f0dccf0a40bfa95a5a3c6640f01931991d51711e3273df499f174be",
+      "dependency_cache_changed_during_build": true,
+      "environment_sha256": "f12a577fb7a5d05629978f3e777be3d78ba6ad5abbdcfcf8fd37db3b2568c61a",
+      "status": "ok",
+      "source_build_seconds": 26.493978938,
+      "attempt_elapsed_seconds": null,
+      "command": [
+        "dotnet",
+        "publish",
+        "gloop.gsproj",
+        "-c",
+        "Release",
+        "-r",
+        "linux-x64",
+        "--self-contained",
+        "true",
+        "--no-restore",
+        "-o",
+        "{output}",
+        "-p:PublishAot=true",
+        "-p:OptimizationPreference=Size",
+        "-p:StripSymbols=true"
+      ],
+      "scope": "NativeAOT Size dotnet publish only; bootstrap and locked restore excluded; nonrelease local executable",
+      "app_environment": {},
+      "rustup_channel": null,
+      "built_executable_sha256": "09ee680167602d9294ab0bd479dd651e6536cff34777aed4e4903771bdf0abc7",
+      "built_executable_bytes": 17615888,
+      "toolchains": {
+        "cc": {
+          "executable": "cc",
+          "version": "cc (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "cxx": {
+          "executable": "c++",
+          "version": "c++ (GCC) 16.2.1 20260810",
+          "sha256": null
+        },
+        "clang": {
+          "executable": "clang",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "clangxx": {
+          "executable": "clang++",
+          "version": "clang version 22.1.8",
+          "sha256": null
+        },
+        "cmake": {
+          "executable": "cmake",
+          "version": "cmake version 4.4.3",
+          "sha256": null
+        },
+        "meson": {
+          "executable": "meson",
+          "version": "1.12.0",
+          "sha256": null
+        },
+        "ninja": {
+          "executable": "ninja",
+          "version": "1.13.2",
+          "sha256": null
+        },
+        "make": {
+          "executable": "make",
+          "version": "GNU Make 4.4.1",
+          "sha256": null
+        },
+        "fpc": {
+          "executable": "fpc",
+          "version": "3.2.2",
+          "sha256": null
+        },
+        "lazbuild": {
+          "executable": "lazbuild",
+          "version": "4.8",
+          "sha256": null
+        },
+        "valac": {
+          "executable": "valac",
+          "version": "Vala 0.56.19",
+          "sha256": null
+        },
+        "dotnet": {
+          "executable": "dotnet",
+          "version": "10.0.401",
+          "sha256": null
+        },
+        "ld": {
+          "executable": "ld",
+          "version": "GNU ld (GNU Binutils) 2.47",
+          "sha256": null
+        },
+        "lld": {
+          "executable": "ld.lld",
+          "version": "LLD 22.1.8 (compatible with GNU linkers)",
+          "sha256": null
+        },
+        "pkg_config": {
+          "executable": "pkg-config",
+          "version": "3.0.7",
+          "sha256": null
+        }
+      },
+      "limits": {
+        "cpu_max": "200000 100000",
+        "memory_max_bytes": "8589934592",
+        "affinity_cpus": [
+          0,
+          1
+        ],
+        "parent_cpu_quotas": [],
+        "parent_memory_limits_bytes": [],
+        "verified": true
+      },
+      "failure_reason": null,
+      "prepare_log_sha256": "c64676431d0be0bbfa3442a70c1661f3332a9a0e265de4a3ba4afd7b9352eba1",
+      "build_log_sha256": "97ff05093074cdd24a38359609724aab75e4af3632bc1d2d1ae06ca800ce02a0",
+      "attempt_id": "063cbb1170ad49d79171666ba89725f5",
+      "batch_id": "b7556ad21deb4425b9240911228ec351"
+    }
+  ]
+}
