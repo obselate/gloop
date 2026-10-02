@@ -282,8 +282,12 @@
       "sha256": "073c68b964ce206278ddcf905ebce8d510e03151b50de2c1034b27a86e970170"
     },
     "exporter_with_node_rebase": {
-      "path": "scripts/export_file_manager_results.py",
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/export_file_manager_results-before-quiet-deferral.py",
       "sha256": "26c9d36255d2784f2c1a3819581235093b405627e0c507be9f40c4fa938d2c80"
+    },
+    "exporter_with_quiet_deferral": {
+      "path": "scripts/export_file_manager_results.py",
+      "sha256": "119655daf2d537d259fcd5814ee60d485934c9779bff078b4ccae734b8d98ca8"
     },
     "v7_node_rebase_script": {
       "path": "artifacts/performance/file-managers-20261001/prepare-v7-node-rebase.py",
@@ -444,6 +448,50 @@
     "v7_recovery64_service_command": {
       "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume64.json",
       "sha256": "273dc78e840444f1078cdbe6c49641160d9396b4b11f1a35c4a2f7dece8efdde"
+    },
+    "v7_recovery86_raw_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-archive/raw-first148.jsonl",
+      "sha256": "9a694b6efc2155abdfe302e350b9521bc3c997e60af06876a4a0225797cb8dc3"
+    },
+    "v7_recovery86_run_history_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-archive/environment-run-invocations-first89.jsonl",
+      "sha256": "6cc12f02fb4f34940e4cd14e66b4f6953e3c5d4cd2189b2292882f2b232b9f0c"
+    },
+    "v7_recovery86_stopped_state": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-archive/resume64-controller-state.json",
+      "sha256": "05d26ab5e3cc93a9a9ef57798b3778b1600aecca74230db20a5dc67b7765f0a0"
+    },
+    "v7_recovery86_stopped_log": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-archive/resume64-controller.log",
+      "sha256": "fb8a603dbaeaeb52031431ac7f1d2ac547f9257c26245cc0061caf62ba8db4f5"
+    },
+    "v7_recovery86_deferred_result": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-archive/run86-svc1-outer-service-result.json",
+      "sha256": "937da58cd1b596e795e6bae8f3b98e7bae9ef6a52ba3378828c0c07c615a8064"
+    },
+    "v7_recovery86_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-archive/archive-index.json",
+      "sha256": "12d7e8d787a6c03a633fafe83ff23095b3107c4612365d4230d9b132ce179757"
+    },
+    "v7_recovery86_ledger": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery86-ledger.json",
+      "sha256": "b55d7e70fb4a65f10705965021cba57310681e713e2eafd37c8832474ccbeef9"
+    },
+    "v7_recovery86_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-resume86-gate.json",
+      "sha256": "e39daba36dceab5743bc3c08200ce8742368fb7317f19da356c355ac8534f0bb"
+    },
+    "v7_recovery86_commands": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-commands-node2-resume86.json",
+      "sha256": "ba08c9ee933ccc36c9dcdcbfae4242a3b081478152616e15d6361982c6333991"
+    },
+    "v7_recovery86_controller": {
+      "path": "artifacts/performance/file-managers-20261001/run-v7-measured-controller-node2-resume86.py",
+      "sha256": "472d94e5b1f9c16dac768e0692bf9c7c392c83aa06ac9ef758e0dbb257055b1e"
+    },
+    "v7_recovery86_service_command": {
+      "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume86.json",
+      "sha256": "afdf356c137bba475cd09d2dd7ac8aa8037fcd5d045c36ded433e4c6b3b06feb"
     }
   },
   "events": [
@@ -836,6 +884,26 @@
         "discarded_attempt_used_for_numeric_metrics": false
       },
       "disposition": "The resume39 controller stopped after 64 accepted measured slots when a new Spectacle GPU process appeared during slot 64. The contaminated ordinal 124 and genuine deferred end remain preserved but excluded. The reviewed continuation resumes the same fixed plan in a unique service and skips both discarded ordinals. The source references are fixed archive bytes, not the growing live raw and run-history files."
+    },
+    {
+      "id": "v7_measured_zero_launch_quiet_deferral_recovery86",
+      "sources": ["v7_recovery86_raw_prefix", "v7_recovery86_run_history_prefix", "v7_recovery86_stopped_state", "v7_recovery86_stopped_log", "v7_recovery86_deferred_result", "v7_recovery86_archive_index", "v7_recovery86_ledger", "v7_recovery86_gate", "v7_recovery86_commands", "v7_recovery86_controller", "v7_recovery86_service_command", "exporter_with_node_rebase", "exporter_with_quiet_deferral"],
+      "facts": {
+        "accepted_measured_slots_before_stop": 86,
+        "deferred_raw_ordinal": 147,
+        "deferred_slot_id": "list100000/2/gloop",
+        "deferred_end_status": "deferred_quiet",
+        "launches_in_deferred_invocation": 0,
+        "deferred_attempt_used_for_numeric_metrics": false,
+        "frozen_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+        "recovery_resume_index": 86,
+        "first_new_raw_ordinal": 148,
+        "raw_ordinal_offset": 3,
+        "planned_measured_slots": 177,
+        "strict_export_change": "A measured row without an app manifest pin is allowed only when its exact prelaunch shape and canonical slot are bound to a unique clean deferred_quiet invocation with zero launches and the frozen plan, session, input, source, fixture, host and driver pins",
+        "cohort_export_run": false
+      },
+      "disposition": "Global GPU activity prevented the quiet gate before the application launched. Raw 147 and its genuine clean deferred end remain as excluded setup evidence. The reviewed continuation keeps the same fixed plan, resumes the unmeasured slot in a unique service, and preserves prior accepted rows. The exporter change admits only closed zero-launch quiet deferrals, not captured or timed application attempts. No benchmark value is claimed for raw 147."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
