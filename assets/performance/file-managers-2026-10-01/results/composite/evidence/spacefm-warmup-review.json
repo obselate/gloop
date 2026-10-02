@@ -1,0 +1,59 @@
+{
+  "cohort": "artifacts/performance/file-managers-20261001/cohort-spacefm-no-saved-tabs-v1",
+  "cohort_review_json_sha256": "bb8b54476cdc1ef0713904c108c518abc5e72fc10335f70cfc7c1886f4f1b8d7",
+  "cohort_review_snapshot": "artifacts/performance/file-managers-20261001/spacefm-no-saved-tabs-warmup-review-snapshot-v1.json",
+  "cohort_review_snapshot_sha256": "bb8b54476cdc1ef0713904c108c518abc5e72fc10335f70cfc7c1886f4f1b8d7",
+  "independent_review": {
+    "artifact": "artifacts/performance/file-managers-20261001/independent-spacefm-no-saved-tabs-warmup-review-v1.json",
+    "decision": "pass",
+    "sha256": "cc0c6255dbb603c5fcdee9f2aa61c153bb00485b276d134e9c2a86e67e93bf16"
+  },
+  "manifest_sha256": "d6751cbb66c18041973ef4a06c584976dc58a705f6c0bc8fc177731e19548176",
+  "method_sha256": "da39873974a8225d749c7e06d91ccf76d20c3d2155aacb59f8fa6eaa895d9662",
+  "primary_review_basis": "Root directly viewed all current five-second original captures. SpaceFM showed one populated fixture tab in the configured mode and native 100 or 100000 count. Dolphin showed image-0.png selected, the full image in the Information panel, and three fixture rows. Both SpaceFM late captures matched the five-second bytes.",
+  "state": "reviewed_pass",
+  "warmups": {
+    "spacefm/list100": {
+      "approved": true,
+      "capture_path": "${STAGING}/cohort-spacefm-no-saved-tabs-v1/captures/spacefm-list100-warmup.png",
+      "capture_role": "capture",
+      "capture_sha256": "ee2f2e2e61c8bd82155dd62c52758a1bb78f53e7d0f2efbd8223aca1331b9375",
+      "expected_fixture_file_count": 100,
+      "expected_mode": "list",
+      "fixture_target": "${REPO}/artifacts/performance/optimization/fixtures/100",
+      "observed_mode": "list",
+      "populated_tab_count": 1,
+      "raw_line_sha256": "bc220b1237ef29e0f086b713cba903af8bd011e3e20776949ad8ba768e03a750",
+      "raw_ordinal": 0,
+      "target_folder_verified": true
+    },
+    "spacefm/list100000": {
+      "approved": true,
+      "capture_path": "${STAGING}/cohort-spacefm-no-saved-tabs-v1/captures/spacefm-list100000-warmup.png",
+      "capture_role": "capture",
+      "capture_sha256": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268",
+      "expected_fixture_file_count": 100000,
+      "expected_mode": "list",
+      "fixture_target": "${REPO}/artifacts/performance/optimization/fixtures/100000",
+      "observed_mode": "list",
+      "populated_tab_count": 1,
+      "raw_line_sha256": "f5479383d2728a1565ea6737fb1d1b3332317d319bf1db67335f9762125c792c",
+      "raw_ordinal": 1,
+      "target_folder_verified": true
+    },
+    "spacefm/tiles100000": {
+      "approved": true,
+      "capture_path": "${STAGING}/cohort-spacefm-no-saved-tabs-v1/captures/spacefm-tiles100000-warmup.png",
+      "capture_role": "capture",
+      "capture_sha256": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d",
+      "expected_fixture_file_count": 100000,
+      "expected_mode": "tiles",
+      "fixture_target": "${REPO}/artifacts/performance/optimization/fixtures/100000",
+      "observed_mode": "tiles",
+      "populated_tab_count": 1,
+      "raw_line_sha256": "0f2d587e48ddec1ea0c7d1470a73471e76e598cb5b0e293e85a803906227c60d",
+      "raw_ordinal": 2,
+      "target_folder_verified": true
+    }
+  }
+}

@@ -1,0 +1,1310 @@
+{
+  "date": "2026-10-01",
+  "platform": "CachyOS Linux x86_64_v3 host, private KWin Wayland runtime",
+  "package_root": "${STAGING}/packages/root",
+  "apps": [
+    {
+      "id": "dolphin",
+      "name": "Dolphin",
+      "binary": "${STAGING}/packages/root/usr/bin/dolphin",
+      "binary_sha256": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+      "binary_bytes": 1522944,
+      "version": "26.08.1-1.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "dolphin",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "data/dolphin/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "data/dolphin/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "data/dolphin/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=0\n"
+          }
+        },
+        "preview3png": {
+          "files": {
+            "data/dolphin/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n",
+            "state/dolphinstaterc": "[State]\n1440x900 screen: Height=732\n1440x900 screen: Width=1180\nRestorePositionForNextInstance=false\nState=AAAA/wAAAAD9AAAAAwAAAAAAAACQAAACrvwCAAAAAvsAAAAWAGYAbwBsAGQAZQByAHMARABvAGMAawAAAAAA/////wAAAAAA////+wAAABQAcABsAGEAYwBlAHMARABvAGMAawEAAAAuAAACrgAAAFMA////AAAAAQAAALQAAAKu/AIAAAAB+wAAABAAaQBuAGYAbwBEAG8AYwBrAQAAAC4AAAKuAAABCwD///8AAAADAAAAAAAAAAD8AQAAAAH7AAAAGAB0AGUAcgBtAGkAbgBhAGwARABvAGMAawAAAAAA/////wAAAAAA////AAADVgAAAq4AAAAEAAAABAAAAAgAAAAI/AAAAAEAAAACAAAAAQAAABYAbQBhAGkAbgBUAG8AbwBsAEIAYQByAQAAAAD/////AAAAAAAAAAA=\n"
+          },
+          "post_launch_input": [
+            {
+              "action": "click",
+              "at": [
+                340,
+                100
+              ]
+            }
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "nautilus",
+      "name": "GNOME Files",
+      "binary": "${STAGING}/packages/root/usr/bin/nautilus",
+      "binary_sha256": "56d597e4b4fa18ef6f9d9545d2ba8639f67ebb9b727c8fff1527ce82da03f8ce",
+      "binary_bytes": 1731400,
+      "version": "50.3.1-1.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "nautilus",
+      "command": [
+        "{binary}",
+        "--new-window",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.gnome.nautilus.preferences",
+              "default-folder-viewer",
+              "list-view"
+            ]
+          ]
+        },
+        "list100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.gnome.nautilus.preferences",
+              "default-folder-viewer",
+              "list-view"
+            ]
+          ]
+        },
+        "tiles100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.gnome.nautilus.preferences",
+              "default-folder-viewer",
+              "icon-view"
+            ]
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "Nautilus image thumbnails are not an integrated selected-image preview; Sushi opens a separate viewer."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "thunar",
+      "name": "Thunar",
+      "binary": "${STAGING}/packages/root/usr/bin/thunar",
+      "binary_sha256": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+      "binary_bytes": 1043416,
+      "version": "4.20.10-1.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "thunar",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<channel name=\"thunar\" version=\"1.0\"><property name=\"default-view\" type=\"string\" value=\"ThunarDetailsView\"/><property name=\"last-view\" type=\"string\" value=\"ThunarDetailsView\"/></channel>\n"
+          },
+          "setup": [
+            [
+              "/bin/sh",
+              "-c",
+              "${STAGING}/packages/root/usr/lib/xfce4/xfconf/xfconfd </dev/null >/dev/null 2>&1 &"
+            ]
+          ]
+        },
+        "list100000": {
+          "files": {
+            "config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<channel name=\"thunar\" version=\"1.0\"><property name=\"default-view\" type=\"string\" value=\"ThunarDetailsView\"/><property name=\"last-view\" type=\"string\" value=\"ThunarDetailsView\"/></channel>\n"
+          },
+          "setup": [
+            [
+              "/bin/sh",
+              "-c",
+              "${STAGING}/packages/root/usr/lib/xfce4/xfconf/xfconfd </dev/null >/dev/null 2>&1 &"
+            ]
+          ]
+        },
+        "tiles100000": {
+          "files": {
+            "config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<channel name=\"thunar\" version=\"1.0\"><property name=\"default-view\" type=\"string\" value=\"ThunarIconView\"/><property name=\"last-view\" type=\"string\" value=\"ThunarIconView\"/></channel>\n"
+          },
+          "setup": [
+            [
+              "/bin/sh",
+              "-c",
+              "${STAGING}/packages/root/usr/lib/xfce4/xfconf/xfconfd </dev/null >/dev/null 2>&1 &"
+            ]
+          ]
+        },
+        "preview3png": {
+          "files": {
+            "config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<channel name=\"thunar\" version=\"1.0\"><property name=\"default-view\" type=\"string\" value=\"ThunarDetailsView\"/><property name=\"last-view\" type=\"string\" value=\"ThunarDetailsView\"/><property name=\"last-image-preview-visible\" type=\"bool\" value=\"true\"/><property name=\"misc-image-preview-mode\" type=\"int\" value=\"0\"/></channel>\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Thumbnailer1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Thumbnailer1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Manager1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Manager1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Cache1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Cache1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n"
+          },
+          "post_launch_input": [
+            {
+              "action": "click",
+              "at": [
+                300,
+                108
+              ]
+            }
+          ],
+          "setup": [
+            [
+              "/bin/sh",
+              "-c",
+              "${STAGING}/packages/root/usr/lib/xfce4/xfconf/xfconfd </dev/null >/dev/null 2>&1 &"
+            ]
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "caja",
+      "name": "Caja",
+      "binary": "${STAGING}/packages/root/usr/bin/caja",
+      "binary_sha256": "b1036257b1a63e944aed180702e30e2ae496f61a02d2402a891eccdabbe58814",
+      "binary_bytes": 2378136,
+      "version": "1.28.0-4.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "caja",
+      "command": [
+        "/usr/bin/bwrap",
+        "--bind",
+        "/",
+        "/",
+        "--overlay-src",
+        "/usr/share",
+        "--tmp-overlay",
+        "/usr/share",
+        "--ro-bind",
+        "${STAGING}/packages/root/usr/share/caja",
+        "/usr/share/caja",
+        "--",
+        "{binary}",
+        "--no-desktop",
+        "--browser",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.mate.caja.preferences",
+              "default-folder-viewer",
+              "list-view"
+            ]
+          ]
+        },
+        "list100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.mate.caja.preferences",
+              "default-folder-viewer",
+              "list-view"
+            ]
+          ]
+        },
+        "tiles100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.mate.caja.preferences",
+              "default-folder-viewer",
+              "icon-view"
+            ]
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "Caja image thumbnails and information sidebar do not display an integrated selected-image preview."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "pcmanfm-qt",
+      "name": "PCManFM-Qt",
+      "binary": "${STAGING}/packages/root/usr/bin/pcmanfm-qt",
+      "binary_sha256": "b718beb347d356bffe2754237f1899982046b9b30426ca3e4d365ae7a4812ce1",
+      "binary_bytes": 841216,
+      "version": "2.4.1-1.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "pcmanfm-qt",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "config/pcmanfm-qt/default/settings.conf": "[FolderView]\nMode=detailed\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "config/pcmanfm-qt/default/settings.conf": "[FolderView]\nMode=detailed\n"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "config/pcmanfm-qt/default/settings.conf": "[FolderView]\nMode=icon\n"
+          }
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "The app supplies image thumbnails, not an integrated selected-image preview."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "pcmanfm",
+      "name": "PCManFM",
+      "binary": "${STAGING}/packages/root/usr/bin/pcmanfm",
+      "binary_sha256": "0626f3bbde791c0e4b331416108c8f5b1d79fc08bd8352ffe5713e0ee71e2fff",
+      "binary_bytes": 265664,
+      "version": "1.4.0-2.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "pcmanfm",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "config/pcmanfm/default/pcmanfm.conf": "[ui]\nview_mode=list\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "config/pcmanfm/default/pcmanfm.conf": "[ui]\nview_mode=list\n"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "config/pcmanfm/default/pcmanfm.conf": "[ui]\nview_mode=icon\n"
+          }
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "The app supplies image thumbnails, not an integrated selected-image preview."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "krusader",
+      "name": "Krusader",
+      "binary": "${STAGING}/packages/root/usr/bin/krusader",
+      "binary_sha256": "4c2ff2c65ed45c645496486c87427587ccb388ddb619ec561a1534841c72df76",
+      "binary_bytes": 3292832,
+      "version": "2.9.0-2",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "krusader",
+      "command": [
+        "{binary}",
+        "--left",
+        "{folder}",
+        "--right",
+        "{empty_folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "preview3png": {
+          "post_launch_input": [
+            {
+              "action": "click",
+              "at": [
+                150,
+                200
+              ]
+            },
+            {
+              "action": "click",
+              "at": [
+                573,
+                670
+              ]
+            },
+            {
+              "action": "wait",
+              "ms": 300
+            },
+            {
+              "action": "click",
+              "at": [
+                229,
+                154
+              ]
+            }
+          ],
+          "files": {
+            "config/krusaderrc": "First Time=false\nConfig Version=1\n"
+          }
+        },
+        "list100": {
+          "files": {
+            "config/krusaderrc": "First Time=false\nConfig Version=1\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "config/krusaderrc": "First Time=false\nConfig Version=1\n"
+          }
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "tiles100000": "Krusader supplies detailed and brief list modes but no comparable icon grid."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "doublecmd",
+      "name": "Double Commander Qt6",
+      "binary": "${STAGING}/packages/root/usr/bin/doublecmd",
+      "binary_sha256": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+      "binary_bytes": 18710240,
+      "version": "1.2.9-1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "doublecmd-qt6",
+      "command": [
+        "{binary}",
+        "--config-dir={config}/doublecmd",
+        "--no-splash",
+        "-L",
+        "{folder}",
+        "-R",
+        "{empty_folder}",
+        "-P",
+        "L"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "tiles100000": {
+          "files": {
+            "config/doublecmd/tabs.xml": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<doublecmd><Tabs><OpenedTabs><Left><ActiveTab>0</ActiveTab><Tab><FileView Type=\"thumbnails\"><History><Entry Active=\"True\"><FileSource Type=\"FileSystem\"/><Paths><Path>{folder}/</Path></Paths></Entry></History></FileView></Tab></Left><Right><ActiveTab>0</ActiveTab><Tab><FileView Type=\"columns\"><History><Entry Active=\"True\"><FileSource Type=\"FileSystem\"/><Paths><Path>{empty_folder}/</Path></Paths></Entry></History></FileView></Tab></Right></OpenedTabs></Tabs></doublecmd>\n"
+          }
+        },
+        "preview3png": {
+          "post_launch_input": [
+            {
+              "action": "key",
+              "key": "Home"
+            },
+            {
+              "action": "key",
+              "key": "Down"
+            },
+            {
+              "action": "key",
+              "key": "Ctrl+Q"
+            }
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "cosmic-files",
+      "name": "COSMIC Files",
+      "binary": "${STAGING}/packages/root/usr/bin/cosmic-files",
+      "binary_sha256": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+      "binary_bytes": 47217768,
+      "version": "1:1.9.0-1.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "cosmic-files",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "config/cosmic/com.system76.CosmicFiles/v1/tab": "(view: List)"
+          }
+        },
+        "list100000": {
+          "files": {
+            "config/cosmic/com.system76.CosmicFiles/v1/tab": "(view: List)"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "config/cosmic/com.system76.CosmicFiles/v1/tab": "(view: Grid)"
+          }
+        },
+        "preview3png": {
+          "files": {
+            "config/cosmic/com.system76.CosmicFiles/v1/tab": "(view: List)",
+            "config/cosmic/com.system76.CosmicFiles/v1/show_details": "true"
+          },
+          "post_launch_input": [
+            {
+              "action": "key",
+              "key": "Home"
+            }
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "elementary-files",
+      "name": "elementary Files",
+      "binary": "${STAGING}/packages/root/usr/bin/io.elementary.files",
+      "binary_sha256": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+      "binary_bytes": 882864,
+      "version": "7.3.2-2.1",
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "package": "pantheon-files",
+      "command": [
+        "/usr/bin/bwrap",
+        "--bind",
+        "/",
+        "/",
+        "--overlay-src",
+        "/usr/lib",
+        "--tmp-overlay",
+        "/usr/lib",
+        "--dir",
+        "/usr/lib/io.elementary.files",
+        "--ro-bind",
+        "${STAGING}/packages/root/usr/lib/io.elementary.files",
+        "/usr/lib/io.elementary.files",
+        "--",
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "list100": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "default-viewmode",
+              "list"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
+            ]
+          ],
+          "files": {
+            "data/dbus-1/services/org.xfce.Tumbler.Thumbnailer1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Thumbnailer1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Manager1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Manager1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Cache1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Cache1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n"
+          }
+        },
+        "list100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "default-viewmode",
+              "list"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
+            ]
+          ],
+          "files": {
+            "data/dbus-1/services/org.xfce.Tumbler.Thumbnailer1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Thumbnailer1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Manager1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Manager1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Cache1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Cache1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n"
+          }
+        },
+        "tiles100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "default-viewmode",
+              "icon"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
+            ]
+          ],
+          "files": {
+            "data/dbus-1/services/org.xfce.Tumbler.Thumbnailer1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Thumbnailer1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Manager1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Manager1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Cache1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Cache1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n"
+          }
+        },
+        "preview3png": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "default-viewmode",
+              "miller_columns"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "show-file-preview",
+              "true"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
+            ]
+          ],
+          "post_launch_input": [
+            {
+              "action": "click",
+              "at": [
+                300,
+                100
+              ]
+            }
+          ],
+          "files": {
+            "data/dbus-1/services/org.xfce.Tumbler.Thumbnailer1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Thumbnailer1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Manager1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Manager1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n",
+            "data/dbus-1/services/org.xfce.Tumbler.Cache1.service": "[D-BUS Service]\nName=org.freedesktop.thumbnails.Cache1\nExec=/usr/bin/bwrap --bind / / --dev-bind /dev /dev --overlay-src /usr/lib --tmp-overlay /usr/lib --ro-bind ${STAGING}/packages/root/usr/lib/tumbler-1/plugins /usr/lib/tumbler-1/plugins -- ${STAGING}/packages/root/usr/lib/tumbler-1/tumblerd\n"
+          }
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 115,
+        "tiles100000": 115
+      }
+    },
+    {
+      "id": "nemo",
+      "name": "Nemo",
+      "binary": "/usr/bin/nemo",
+      "binary_sha256": "d90084a66b20ec0e0a4c5b9b3edf6149fbea3445a4e579cbe62be3fca8ff09f0",
+      "binary_bytes": 1866944,
+      "version": "6.6.4-1.1",
+      "distribution": "installed CachyOS package, exact archive copied from pacman cache",
+      "package": "nemo",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {},
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.nemo.preferences",
+              "default-folder-viewer",
+              "list-view"
+            ]
+          ]
+        },
+        "list100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.nemo.preferences",
+              "default-folder-viewer",
+              "list-view"
+            ]
+          ]
+        },
+        "tiles100000": {
+          "setup": [
+            [
+              "gsettings",
+              "set",
+              "org.nemo.preferences",
+              "default-folder-viewer",
+              "icon-view"
+            ]
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "Nemo image thumbnails do not provide an integrated selected-image preview."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "flea",
+      "name": "Flea",
+      "binary": "${STAGING}/packages/root/opt/flea-0.3.7-linux-x86_64/flea",
+      "binary_sha256": "0c6a36f1504d6f3dee04cb2a94501ebfcd0fca6f49cbea047b44a6dae28ceb73",
+      "binary_bytes": 2978640,
+      "version": "0.3.7",
+      "distribution": "official GitHub prebuilt release",
+      "package": "official release archive",
+      "source_tag": "v0.3.7",
+      "source_commit": "ae9419c8de789ac4f8b25a5d3c7a3fa727ae4196",
+      "command": [
+        "{binary}",
+        "--gui",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/flea-runtime-root/usr/lib:${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0",
+        "PATH": "${STAGING}/packages/flea-runtime-root/usr/bin:/usr/local/bin:/usr/bin:/bin",
+        "QML_IMPORT_PATH": "${STAGING}/packages/flea-runtime-root/usr/lib/qt6/qml",
+        "QT_PLUGIN_PATH": "${STAGING}/packages/flea-runtime-root/usr/lib/qt6/plugins",
+        "FLEA_UI": "${STAGING}/packages/root/opt/flea-0.3.7-linux-x86_64/ui",
+        "FLEA_BIN": "${STAGING}/packages/root/opt/flea-0.3.7-linux-x86_64/flea",
+        "XDG_CURRENT_DESKTOP": "Hyprland"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "state/flea/ui.json": {
+              "view": "list",
+              "preview": {
+                "column": false
+              }
+            }
+          },
+          "setup": [
+            [
+              "/usr/bin/mkdir",
+              "-p",
+              "{home}/.local/state/omarchy/current"
+            ],
+            [
+              "/usr/bin/ln",
+              "-sfn",
+              "${STAGING}/packages/root/opt/omarchy-b18ab4952b88b95efe7758ee5f9bd3bb47483875/themes/catppuccin",
+              "{home}/.local/state/omarchy/current/theme"
+            ]
+          ]
+        },
+        "list100000": {
+          "files": {
+            "state/flea/ui.json": {
+              "view": "list",
+              "preview": {
+                "column": false
+              }
+            }
+          },
+          "setup": [
+            [
+              "/usr/bin/mkdir",
+              "-p",
+              "{home}/.local/state/omarchy/current"
+            ],
+            [
+              "/usr/bin/ln",
+              "-sfn",
+              "${STAGING}/packages/root/opt/omarchy-b18ab4952b88b95efe7758ee5f9bd3bb47483875/themes/catppuccin",
+              "{home}/.local/state/omarchy/current/theme"
+            ]
+          ]
+        },
+        "tiles100000": {
+          "files": {
+            "state/flea/ui.json": {
+              "view": "grid",
+              "preview": {
+                "column": false
+              }
+            }
+          },
+          "setup": [
+            [
+              "/usr/bin/mkdir",
+              "-p",
+              "{home}/.local/state/omarchy/current"
+            ],
+            [
+              "/usr/bin/ln",
+              "-sfn",
+              "${STAGING}/packages/root/opt/omarchy-b18ab4952b88b95efe7758ee5f9bd3bb47483875/themes/catppuccin",
+              "{home}/.local/state/omarchy/current/theme"
+            ]
+          ]
+        },
+        "preview3png": {
+          "files": {
+            "state/flea/ui.json": {
+              "view": "columns",
+              "preview": {
+                "column": true,
+                "loadOn": "automatic"
+              }
+            }
+          },
+          "post_launch_input": [
+            {
+              "action": "key",
+              "key": "Home"
+            }
+          ],
+          "setup": [
+            [
+              "/usr/bin/mkdir",
+              "-p",
+              "{home}/.local/state/omarchy/current"
+            ],
+            [
+              "/usr/bin/ln",
+              "-sfn",
+              "${STAGING}/packages/root/opt/omarchy-b18ab4952b88b95efe7758ee5f9bd3bb47483875/themes/catppuccin",
+              "{home}/.local/state/omarchy/current/theme"
+            ]
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt upstream release; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      },
+      "gui_executable": "${STAGING}/packages/flea-runtime-root/usr/bin/quickshell",
+      "gui_executable_sha256": "2dc99382c032710fe495ed115cdee9dc9c69bdb3a21af4d86a9a8ea16733069b"
+    },
+    {
+      "id": "strata",
+      "name": "Strata",
+      "binary": "${STAGING}/packages/root/opt/strata-0.20.1-x86_64-unknown-linux-gnu/strata",
+      "binary_sha256": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+      "binary_bytes": 27940520,
+      "version": "0.20.1",
+      "distribution": "official GitHub prebuilt release",
+      "package": "official release archive",
+      "source_tag": "v0.20.1",
+      "source_commit_embedded": "3edcb19905802d6f86c3538b2d38431c3a759a71",
+      "source_tag_commit": "152299cbc2da3393815bbc1f5647323b9667e826",
+      "source_commit_note": "Release tag adds only version metadata after the archive SOURCE_COMMIT; no application code or dependency change between commits.",
+      "command": [
+        "/usr/bin/bwrap",
+        "--bind",
+        "/",
+        "/",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--overlay-src",
+        "/usr/lib",
+        "--tmp-overlay",
+        "/usr/lib",
+        "--ro-bind",
+        "${STAGING}/packages/root/usr/lib/libgtksourceview-5.so.0.0.0",
+        "/usr/lib/libgtksourceview-5.so.0",
+        "--",
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "config/strata/settings.toml": "browser_mode = \"list\"\nsingle_click_previews = false\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "config/strata/settings.toml": "browser_mode = \"list\"\nsingle_click_previews = false\n"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "config/strata/settings.toml": "browser_mode = \"icons\"\nsingle_click_previews = false\n"
+          }
+        },
+        "preview3png": {
+          "files": {
+            "config/strata/settings.toml": "browser_mode = \"list\"\nsingle_click_previews = true\n"
+          },
+          "post_launch_input": [
+            {
+              "action": "key",
+              "key": "Home"
+            },
+            {
+              "action": "key",
+              "key": "Space"
+            }
+          ]
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt upstream release; source publish not measured",
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    },
+    {
+      "id": "konqueror",
+      "name": "Konqueror",
+      "binary": "${STAGING}/packages/root/usr/bin/konqueror",
+      "binary_sha256": "1c8e9276f4815533578a8e55fc769950fa190dabcf4405fc38fe71d55a902470",
+      "binary_bytes": 1398272,
+      "version": "26.08.1-1.1",
+      "distribution": "CachyOS repository package extracted into user-local root",
+      "package": "konqueror",
+      "command": [
+        "{binary}",
+        "--mimetype",
+        "inode/directory",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0",
+        "QT_PLUGIN_PATH": "${STAGING}/packages/root/usr/lib/qt6/plugins"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "data/konqueror/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "data/konqueror/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "data/konqueror/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=0\n"
+          }
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "Konqueror can open images in an embedded viewer, but this replaces the file listing instead of showing a selected-image pane."
+      },
+      "backend": "wayland",
+      "late_validation_seconds": {
+        "list100000": 115,
+        "tiles100000": 115
+      }
+    },
+    {
+      "backend": "wayland",
+      "binary": "${STAGING}/packages/root/usr/bin/spacefm",
+      "binary_bytes": 1253584,
+      "binary_sha256": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+      "command": [
+        "/usr/bin/bwrap",
+        "--bind",
+        "/",
+        "/",
+        "--overlay-src",
+        "/usr/share",
+        "--tmp-overlay",
+        "/usr/share",
+        "--ro-bind",
+        "${STAGING}/packages/root/usr/share/spacefm",
+        "/usr/share/spacefm",
+        "--overlay-src",
+        "/etc",
+        "--tmp-overlay",
+        "/etc",
+        "--ro-bind",
+        "${STAGING}/packages/root/etc/spacefm",
+        "/etc/spacefm",
+        "--",
+        "{binary}",
+        "--no-saved-tabs",
+        "{folder}"
+      ],
+      "distribution": "Debian 13 trixie stable package extracted into user-local root",
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib:${STAGING}/packages/root/usr/lib/x86_64-linux-gnu",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share"
+      },
+      "id": "spacefm",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      },
+      "name": "SpaceFM",
+      "package": "spacefm",
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "scenarios": {
+        "tiles100000": {
+          "files": {
+            "config/spacefm/session": "[MOD]\npanel1_list_detailed-b=2\npanel1_list_icons-b=1\n"
+          }
+        }
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "unsupported": {
+        "preview3png": "SpaceFM supplies image thumbnails in its file grid, but no integrated selected-image preview pane."
+      },
+      "version": "1.0.6-9"
+    },
+    {
+      "id": "xfe",
+      "name": "Xfe",
+      "binary": "${STAGING}/packages/root/usr/bin/xfe",
+      "binary_sha256": "63d97114333184118ab42549ec12483b9ca0ce1b5b94d62085867cad38a7aecd",
+      "binary_bytes": 1943440,
+      "version": "2.0.1-2",
+      "distribution": "Debian 13 trixie stable package extracted into user-local root",
+      "package": "xfe",
+      "backend": "xwayland",
+      "command": [
+        "/usr/bin/bwrap",
+        "--bind",
+        "/",
+        "/",
+        "--overlay-src",
+        "/usr/share",
+        "--tmp-overlay",
+        "/usr/share",
+        "--ro-bind",
+        "${STAGING}/packages/root/usr/share/xfe",
+        "/usr/share/xfe",
+        "--overlay-src",
+        "/etc",
+        "--tmp-overlay",
+        "/etc",
+        "--ro-bind",
+        "${STAGING}/packages/root/etc/xfe",
+        "/etc/xfe",
+        "--",
+        "{binary}",
+        "{folder}"
+      ],
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib:${STAGING}/packages/root/usr/lib/x86_64-linux-gnu",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share"
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "scenarios": {
+        "list100": {
+          "files": {
+            "config/xfe/xferc": "[LEFT PANEL]\nliststyle=4194304\n[RIGHT PANEL]\nliststyle=4194304\n"
+          }
+        },
+        "list100000": {
+          "files": {
+            "config/xfe/xferc": "[LEFT PANEL]\nliststyle=4194304\n[RIGHT PANEL]\nliststyle=4194304\n"
+          }
+        },
+        "tiles100000": {
+          "files": {
+            "config/xfe/xferc": "[LEFT PANEL]\nliststyle=20971520\n[RIGHT PANEL]\nliststyle=20971520\n"
+          }
+        }
+      },
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "unsupported": {
+        "preview3png": "Xfe supplies image thumbnails and a separate Xfi image viewer, but no integrated selected-image preview pane."
+      },
+      "late_validation_seconds": {
+        "list100000": 115,
+        "tiles100000": 115
+      }
+    },
+    {
+      "id": "gloop",
+      "name": "Gloop",
+      "version": "0.7.2",
+      "binary": "${STAGING}/packages/root/opt/gloop-0.7.2/gloop",
+      "binary_sha256": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+      "binary_bytes": 17615832,
+      "publish_time_s": 30.249,
+      "publish_time_status": "prior same-day Ubuntu 24.04 NativeAOT Size observation; not measured in this runtime cohort",
+      "publish_environment": "SDK 10.0.401, 2 CPUs, 8 GiB RAM, Ubuntu 24.04",
+      "backend": "wayland",
+      "trace_single_client_verified": true,
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000",
+        "preview3png"
+      ],
+      "scenarios": {},
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      }
+    }
+  ],
+  "cohort_schema_version": 1,
+  "package_lock": "${REPO}/assets/performance/file-managers-2026-10-01/packages.lock.json",
+  "package_lock_sha256": "d3525959c0a1d27e95d8d3e8881b07d935d179ff52784b93f0ccf467e23fd7a4",
+  "package_input_manifest_sha256": "a638ce5f978d0b3a3c673195d194c916e3d1b153ff39213eb3beafd23744aff9",
+  "adapter_input_sha256": "0d41bd1a90bbca7a3e53e34cc5946b86fd5c83191b726cb62a348c448e0f8798",
+  "fixture_generator": "${REPO}/scripts/file_manager_fixtures.py",
+  "package_fetcher": "${REPO}/scripts/file_manager_packages.py",
+  "gloop_origin_binary": "${HOME}/.local/bin/gloop",
+  "gloop_origin_sha256": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+  "template_sha256": "ca5ffe0f8ba688cef8a63a5d4eb145c8b570dbf774471b963df2ee403c8bec40",
+  "host_package_manager": "pacman",
+  "host_package_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+  "host_package_inventory_file": "${STAGING}/cohort-manifest-v7-node2.host-packages.txt",
+  "composition": {
+    "source_map": "../../source-map.json",
+    "method": "sixteen main-cohort apps, later whole-app SpaceFM and Dolphin preview corrections",
+    "interpretation": "Sixteen apps use the main cohort, except Dolphin's preview case. SpaceFM's whole-app correction and Dolphin's preview-only correction ran in separate cohorts on the same host and measurement method. This is a descriptive same-host comparison, not one balanced experiment."
+  }
+}

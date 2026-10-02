@@ -1,0 +1,19 @@
+{
+  "authorized_utc": "2026-10-02T02:33:20.515270+00:00",
+  "plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+  "commands_sha256": "0897058cd9f55e1afd1439b544363f27df766996727fc4e5aaea31593412c4c1",
+  "controller_sha256": "413ff9477ea732ed4e3939c35144875d562eba12de53956f5d632a9693074155",
+  "controller_service_command_sha256": "2f981b19beed3c2221bce190b2b4f045806d77dfef9f68f837812a0a1ca0ba3b",
+  "warmup_gate_sha256": "051491dbeca9d467cfd4eb46debbd402ce9fcd8824bb043f78284293fb0af975",
+  "provenance_rebase_ledger_sha256": "8a6885cfdb1429f88062e45672c204f2b6c3c8a4ff108b8971c2354a1a7acd6e",
+  "current_preflight_environment_sha256": "b0f0e6e3d9ba1a148d6ec36437444c9af8840c72073a46059b51cb09c92d6103",
+  "host_package_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+  "slots": 177,
+  "warmups": 59,
+  "primary_review": "actual archive, preflight, full177 slots and every transformed command cleared",
+  "independent_review": "actual archive, all pins, full177 slots, every exact command and unused services cleared",
+  "warmups_role": "pre-update functional views and warmed profiles only",
+  "warmups_used_for_numeric_metrics": false,
+  "execution": "one detached node2 controller, sequential unique one-slot services, no automatic retry",
+  "policy": "retain accepted bounded validation timeouts, hold unexpected failures or external contamination, no numerical or readiness retries, no later rebase after any measured row"
+}

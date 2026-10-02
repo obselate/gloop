@@ -1,0 +1,80 @@
+{
+  "adapter_input_sha256": "0d41bd1a90bbca7a3e53e34cc5946b86fd5c83191b726cb62a348c448e0f8798",
+  "apps": [
+    {
+      "backend": "wayland",
+      "binary": "${STAGING}/packages/root/usr/bin/dolphin",
+      "binary_bytes": 1522944,
+      "binary_sha256": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+      "command": [
+        "{binary}",
+        "{folder}"
+      ],
+      "distribution": "CachyOS/Arch repository package extracted into user-local root",
+      "env": {
+        "GI_TYPELIB_PATH": "${STAGING}/packages/root/usr/lib/girepository-1.0",
+        "GSETTINGS_SCHEMA_DIR": "${STAGING}/packages/root/usr/share/glib-2.0/schemas",
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share"
+      },
+      "id": "dolphin",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      },
+      "name": "Dolphin",
+      "package": "dolphin",
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "scenarios": {
+        "preview3png": {
+          "files": {
+            "data/dolphin/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n",
+            "state/dolphinstaterc": "[State]\n1440x900 screen: Height=732\n1440x900 screen: Width=1180\nRestorePositionForNextInstance=false\nState=AAAA/wAAAAD9AAAAAwAAAAAAAACQAAACrvwCAAAAAvsAAAAWAGYAbwBsAGQAZQByAHMARABvAGMAawAAAAAA/////wAAAAAA////+wAAABQAcABsAGEAYwBlAHMARABvAGMAawEAAAAuAAACrgAAAFMA////AAAAAQAAALQAAAKu/AIAAAAB+wAAABAAaQBuAGYAbwBEAG8AYwBrAQAAAC4AAAKuAAABCwD///8AAAADAAAAAAAAAAD8AQAAAAH7AAAAGAB0AGUAcgBtAGkAbgBhAGwARABvAGMAawAAAAAA/////wAAAAAA////AAADVgAAAq4AAAAEAAAABAAAAAgAAAAI/AAAAAEAAAACAAAAAQAAABYAbQBhAGkAbgBUAG8AbwBsAEIAYQByAQAAAAD/////AAAAAAAAAAA=\n"
+          },
+          "post_launch_input": [
+            {
+              "action": "click",
+              "at": [
+                340,
+                100
+              ]
+            }
+          ]
+        }
+      },
+      "supported_scenarios": [
+        "preview3png"
+      ],
+      "unsupported": {
+        "list100": "corrective cohort is scoped to Dolphin selected-image preview",
+        "list100000": "corrective cohort is scoped to Dolphin selected-image preview",
+        "tiles100000": "corrective cohort is scoped to Dolphin selected-image preview"
+      },
+      "version": "26.08.1-1.1"
+    }
+  ],
+  "cohort_schema_version": 1,
+  "correction": {
+    "command_delta": "none",
+    "known_on_state_sha256": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d",
+    "known_on_state_source": "cohort-final-v6/profiles/dolphin/preview3png/state/dolphinstaterc",
+    "scenario_delta": "stage known-on state/dolphinstaterc before every launch; remove F11 toggle; keep selected-image click",
+    "scope": "one-app, preview-only fresh-profile Dolphin information panel state correction",
+    "source_manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859"
+  },
+  "date": "2026-10-01",
+  "fixture_generator": "${REPO}/scripts/file_manager_fixtures.py",
+  "gloop_origin_binary": "${HOME}/.local/bin/gloop",
+  "gloop_origin_sha256": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+  "host_package_inventory_file": "${STAGING}/cohort-manifest-v7-node2.host-packages.txt",
+  "host_package_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+  "host_package_manager": "pacman",
+  "package_fetcher": "${REPO}/scripts/file_manager_packages.py",
+  "package_input_manifest_sha256": "a638ce5f978d0b3a3c673195d194c916e3d1b153ff39213eb3beafd23744aff9",
+  "package_lock": "${REPO}/assets/performance/file-managers-2026-10-01/packages.lock.json",
+  "package_lock_sha256": "d3525959c0a1d27e95d8d3e8881b07d935d179ff52784b93f0ccf467e23fd7a4",
+  "package_root": "${STAGING}/packages/root",
+  "platform": "CachyOS Linux x86_64_v3 host, private KWin Wayland runtime",
+  "template_sha256": "ca5ffe0f8ba688cef8a63a5d4eb145c8b570dbf774471b963df2ee403c8bec40"
+}

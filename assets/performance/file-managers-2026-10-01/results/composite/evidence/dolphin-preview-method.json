@@ -1,0 +1,59 @@
+{
+  "corrected_command": [
+    "{binary}",
+    "{folder}"
+  ],
+  "corrected_post_launch_input": [
+    {
+      "action": "click",
+      "at": [
+        340,
+        100
+      ]
+    }
+  ],
+  "corrective_manifest_sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622",
+  "fixture_root": "artifacts/performance/optimization/fixtures",
+  "host_baseline_sha256": "3f8ad4166b8d0974c5ad92467622d9f7354b13e646e491aea04d5859d059cf50",
+  "host_package_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+  "known_on_state_bytes": 532,
+  "known_on_state_sha256": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d",
+  "known_on_state_source": "cohort-final-v6/profiles/dolphin/preview3png/state/dolphinstaterc",
+  "measured_commands_path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-measured-commands-v1.json",
+  "measured_commands_sha256": "d76730821fc6d0c580571d1ca7ec34b10eeb9bedc017fcf2982ac5f0ce917604",
+  "measured_slot_count": 3,
+  "method_review_gate": "Before any measured launch, inspect actual corrective warmup capture for selected image-0.png, visible Information panel and whole image, verify owned GUI PID and seed-at-launch hash, obtain primary and independent reviews, freeze warmup review snapshot, then generate and pin the fixed three-slot plan.",
+  "original_command": [
+    "{binary}",
+    "{folder}"
+  ],
+  "original_manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859",
+  "original_post_launch_input": [
+    {
+      "action": "key",
+      "key": "F11"
+    },
+    {
+      "action": "click",
+      "at": [
+        340,
+        100
+      ]
+    }
+  ],
+  "output_dir": "artifacts/performance/file-managers-20261001/cohort-dolphin-preview-state-seed-v1",
+  "same_binary_sha256": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+  "scope": "Separate Dolphin preview-only method correction; every original main Dolphin preview observation remains unranked; other Dolphin scenarios stay in main.",
+  "seed_policy": "Stage only the known-on Qt window/dock state file before every launch. Do not copy paths, selection, profile caches or history. Keep the original click to select image-0.png.",
+  "source_main_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+  "source_sha256": {
+    "file_manager_cohort.py": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3",
+    "file_manager_input.py": "e96c37e06628717de2a436c61f1d244ab425045034a3820d3ebac7346ee34b7f",
+    "file_manager_session.py": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee"
+  },
+  "state": "prepared_not_launched",
+  "view_mode_seed": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n",
+  "warmup_commands_sha256": "4bb2ed0e15c0b952c34f9d66a5581b77e1c38b5116cd73433cc42d276d63e153",
+  "warmup_count": 1,
+  "withdrawal_ledger_sha256": "2a58a8683396e3fa0dc216b5306ca43eaa81c6195bb0760e9eb562a90d42b160"
+}

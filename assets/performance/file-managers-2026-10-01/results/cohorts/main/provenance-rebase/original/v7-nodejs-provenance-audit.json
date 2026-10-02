@@ -1,0 +1,83 @@
+{
+  "commands_sha256": "46576c927450e8454f3d003c4bc361c97392b06e2844440ee8a37dfef3e06f5b",
+  "controller_log_sha256": "ad656ffb9ae48851a767d593d1b4e4329a17600028a96dcc34abebc178fe9161",
+  "controller_state_sha256": "83903f56e26723e24f0a92c96dbdde5283bd9bdf5a7afbd09ab13d0cedd83c41",
+  "current_host_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+  "current_node_bytes": 62015008,
+  "current_node_sha256": "06b9073a69a1b7a4bf0e6d64c48b08294ef23a450e0e8e94b96fc8a4820d7e6d",
+  "declared_app_binary_count": 17,
+  "declared_app_binary_mismatches": [],
+  "direct_node_or_v8_needed_hits": [],
+  "host_inventory_diff": {
+    "current_only": [
+      "nodejs 26.10.0-2"
+    ],
+    "saved_only": [
+      "nodejs 26.10.0-1"
+    ]
+  },
+  "nodejs_current_package": "nodejs 26.10.0-2",
+  "nodejs_owned_path_count_current": 127,
+  "nodejs_payload_path_count_old": 127,
+  "nodejs_payload_paths_differ": false,
+  "nodejs_runtime_binary_path": "/usr/bin/node",
+  "old_archive": "/var/cache/pacman/pkg/nodejs-26.10.0-1-x86_64_v3.pkg.tar.zst",
+  "old_node_bytes": 55239904,
+  "old_node_sha256": "b2c8bd80260439cd1c991e93853f86672bafd0c520ac725760aea18c934a50a3",
+  "pacman_transaction_lines": [
+    "[2026-10-01T22:01:18-0400] [PACMAN] Running '/usr/bin/pacman --config ${PRIVATE_TMP}/pacman.conf -U --noconfirm ${PRIVATE_TMP}/nodejs-26.10.0-2-x86_64.pkg.tar.zst'",
+    "[2026-10-01T22:01:18-0400] [ALPM] running '05-snap-pac-pre.hook'...",
+    "[2026-10-01T22:01:18-0400] [ALPM-SCRIPTLET] ==> root: 177",
+    "[2026-10-01T22:01:18-0400] [ALPM] running '10-limine-snapper-lock.hook'...",
+    "[2026-10-01T22:01:18-0400] [ALPM] transaction started",
+    "[2026-10-01T22:01:18-0400] [ALPM] upgraded nodejs (26.10.0-1 -> 26.10.0-2)",
+    "[2026-10-01T22:01:18-0400] [ALPM] transaction completed",
+    "[2026-10-01T22:01:18-0400] [ALPM] running '35-systemd-update.hook'...",
+    "[2026-10-01T22:01:18-0400] [ALPM] running 'rebuild-detector.hook'...",
+    "[2026-10-01T22:01:19-0400] [ALPM-SCRIPTLET] warning: database file for 'openai-chatgpt' does not exist (use '-Sy' to download)",
+    "[2026-10-01T22:01:19-0400] [ALPM-SCRIPTLET] warning: database file for 'openai-chatgpt' does not exist (use '-Sy' to download)",
+    "[2026-10-01T22:01:19-0400] [ALPM-SCRIPTLET] warning: database file for 'openai-chatgpt' does not exist (use '-Sy' to download)",
+    "[2026-10-01T22:01:19-0400] [ALPM-SCRIPTLET] warning: database file for 'openai-chatgpt' does not exist (use '-Sy' to download)",
+    "[2026-10-01T22:01:20-0400] [ALPM-SCRIPTLET] warning: database file for 'openai-chatgpt' does not exist (use '-Sy' to download)",
+    "[2026-10-01T22:01:20-0400] [ALPM-SCRIPTLET] warning: database file for 'openai-chatgpt' does not exist (use '-Sy' to download)",
+    "[2026-10-01T22:01:20-0400] [ALPM-SCRIPTLET] foreign\tcodex-desktop",
+    "[2026-10-01T22:01:20-0400] [ALPM] running 'zz-snap-pac-post.hook'...",
+    "[2026-10-01T22:01:21-0400] [ALPM-SCRIPTLET] ==> root: 178"
+  ],
+  "plan_sha256": "37808af654ffedc40011ba1a416fefe690fa31a2853bfe37e1a9eae26bb86226",
+  "raw_count": 59,
+  "raw_nodejs_reference_hits": [],
+  "raw_sha256": "80eebc0957f038b7d01da087a367208e22c333021cb5d63fc394a4a84d135613",
+  "recorded_utc": "2026-10-02T02:08:55.651130+00:00",
+  "run0_invocation_log_sha256": "0a266a9709c1a470887496db414a7c43f979e23e81cef9b379e84f26e047ab5e",
+  "run0_session_json_sha256": "37d83314de88c5704f7a57788eb35f7367585d8b038ce375f2a451eb16a11083",
+  "run_history_exists": false,
+  "saved_host_inventory_sha256": "934d46bc3dda5404c936135b34ccaa765d9b4bce11c370dec05af5a444c55dc9",
+  "services": {
+    "gloop-bench-v7-controller.service": {
+      "ExecMainCode": "1",
+      "ExecMainExitTimestamp": "Thu 2026-10-01 22:04:06 EDT",
+      "ExecMainStartTimestamp": "Thu 2026-10-01 22:04:04 EDT",
+      "ExecMainStatus": "1",
+      "Id": "gloop-bench-v7-controller.service",
+      "InvocationID": "1c7f3a56217d4b418e4dbfa877dd128f",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "SubState": "failed"
+    },
+    "gloop-bench-v7-run-0-s1.service": {
+      "ExecMainCode": "1",
+      "ExecMainExitTimestamp": "Thu 2026-10-01 22:04:06 EDT",
+      "ExecMainStartTimestamp": "Thu 2026-10-01 22:04:04 EDT",
+      "ExecMainStatus": "2",
+      "Id": "gloop-bench-v7-run-0-s1.service",
+      "InvocationID": "e45e9ffc4e944f7e9021cce465a64061",
+      "MainPID": "0",
+      "Result": "exit-code",
+      "SubState": "failed"
+    }
+  },
+  "unique_app_or_gui_elf_paths_checked": 19,
+  "warmup_gui_pair_count": 59,
+  "warmup_gui_sha_mismatches": []
+}

@@ -1,0 +1,16 @@
+{
+  "method": "frozen file_manager_cohort.planned_slots with actual reviewed warmup; no GUI launch",
+  "plan_sha256": "8cfb77660acde3b173651b9076772d344bfddea64f303035ada59dc3316b63d4",
+  "main_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+  "corrective_manifest_sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622",
+  "warmup_review_sha256": "0b4c939722d8bcce42fceb63c62eec1fd65906411d9dc30ce7573f6703fdd88c",
+  "review_snapshot_sha256": "da8ef4e91bfbc38a4fc0ed8b5f8016028c7cddbf5f74f118b76d654b426aaa85",
+  "independent_review_sha256": "66abffdef097b4ca290630d021e987b02a5d7ccbfd82b5f4709a0a418ed5d7bc",
+  "warmup_controller_state_sha256": "5d9b688995c55d05dcaf681f9f8036dd667534766fc97d3f89bbef345529c7c9",
+  "source_sha256": {
+    "file_manager_cohort.py": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3",
+    "file_manager_input.py": "e96c37e06628717de2a436c61f1d244ab425045034a3820d3ebac7346ee34b7f",
+    "file_manager_session.py": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee"
+  },
+  "slot_count": 3
+}

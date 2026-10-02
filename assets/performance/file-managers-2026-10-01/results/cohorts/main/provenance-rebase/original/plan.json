@@ -1,0 +1,1345 @@
+{
+  "created_utc": "2026-10-02T01:59:51.082501+00:00",
+  "pins": {
+    "manifest_sha256": "a9e953d1abd9323964d4e4145b9c8e2be6d6fd73daa94bdfa04b511066bc0d19",
+    "adapter_sha256": null,
+    "fixture_inventory": {
+      "100": {
+        "count": 100,
+        "bytes": 0,
+        "sha256": "e6bc187d01c0926620fbeb1118c8997d3ddb5a1b52a47d92080bc54199587b41",
+        "nonempty_sha256": {}
+      },
+      "100000": {
+        "count": 100000,
+        "bytes": 0,
+        "sha256": "ef12496ef40c317679333fa284c7835773594c9a209421f283b6d3503abe6936",
+        "nonempty_sha256": {}
+      },
+      "3": {
+        "count": 3,
+        "bytes": 311786,
+        "sha256": "9c7885617cd73c46ccb0f81e8916b6c6b38aeae452908b1862ad566f89667f41",
+        "nonempty_sha256": {
+          "image-0.png": "ec3df6aba16e0f1a44af4b7acb0985295138e618418af883404f3b5d9d15f5b6",
+          "image-1.png": "8e9af76331d553369bf00c823363e3dfa16f7ce9fd36291b4c411b75ad803f60",
+          "image-2.png": "27e80984020ffc6303145f93d36c1e71956343eecce05b33d134ca7c235bd5d9"
+        }
+      }
+    },
+    "source_sha256": {
+      "file_manager_cohort.py": "a286250da3725bdc1040fed99e92f759d4f1659fd9f6940170f51bf156ad64c3",
+      "file_manager_input.py": "e96c37e06628717de2a436c61f1d244ab425045034a3820d3ebac7346ee34b7f",
+      "file_manager_session.py": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee"
+    },
+    "binary_sha256": {
+      "dolphin": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+      "nautilus": "56d597e4b4fa18ef6f9d9545d2ba8639f67ebb9b727c8fff1527ce82da03f8ce",
+      "thunar": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+      "caja": "b1036257b1a63e944aed180702e30e2ae496f61a02d2402a891eccdabbe58814",
+      "pcmanfm-qt": "b718beb347d356bffe2754237f1899982046b9b30426ca3e4d365ae7a4812ce1",
+      "pcmanfm": "0626f3bbde791c0e4b331416108c8f5b1d79fc08bd8352ffe5713e0ee71e2fff",
+      "krusader": "4c2ff2c65ed45c645496486c87427587ccb388ddb619ec561a1534841c72df76",
+      "doublecmd": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+      "cosmic-files": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+      "elementary-files": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+      "nemo": "d90084a66b20ec0e0a4c5b9b3edf6149fbea3445a4e579cbe62be3fca8ff09f0",
+      "flea": "0c6a36f1504d6f3dee04cb2a94501ebfcd0fca6f49cbea047b44a6dae28ceb73",
+      "strata": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+      "konqueror": "1c8e9276f4815533578a8e55fc769950fa190dabcf4405fc38fe71d55a902470",
+      "spacefm": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+      "xfe": "63d97114333184118ab42549ec12483b9ca0ce1b5b94d62085867cad38a7aecd",
+      "gloop": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd"
+    },
+    "host_package_inventory_sha256": "934d46bc3dda5404c936135b34ccaa765d9b4bce11c370dec05af5a444c55dc9",
+    "gpu_driver_identity": "NVIDIA GeForce RTX 3080, 615.71.09",
+    "session_method": {
+      "kwin_command": [
+        "kwin_wayland",
+        "--virtual",
+        "--xwayland",
+        "--socket",
+        "{private_wayland_socket}",
+        "--width",
+        "1440",
+        "--height",
+        "900",
+        "--scale",
+        "1",
+        "--no-global-shortcuts",
+        "--no-lockscreen"
+      ],
+      "output": "1440x900@1",
+      "window_target": "1180x760",
+      "window_rules_sha256": "51f089c7276d862f1188e13d9943fe2f8593109bd156da3bbdd09d10ccc88a1a",
+      "xwayland_available": true
+    },
+    "only_app": [],
+    "only_scenario": [],
+    "order_seed": 20261001,
+    "monitor_pids": [],
+    "monitor_comms": [
+      "llama-server"
+    ],
+    "min_gpu_free_mib": 512,
+    "max_global_gpu_util_percent": 50,
+    "host_baseline_sha256": "3f8ad4166b8d0974c5ad92467622d9f7354b13e646e491aea04d5859d059cf50",
+    "quiet_seconds": 10,
+    "runs": 3
+  },
+  "roster": {
+    "list100": [
+      "dolphin",
+      "nautilus",
+      "thunar",
+      "caja",
+      "pcmanfm-qt",
+      "pcmanfm",
+      "krusader",
+      "doublecmd",
+      "cosmic-files",
+      "elementary-files",
+      "nemo",
+      "flea",
+      "strata",
+      "konqueror",
+      "spacefm",
+      "xfe",
+      "gloop"
+    ],
+    "list100000": [
+      "dolphin",
+      "nautilus",
+      "thunar",
+      "caja",
+      "pcmanfm-qt",
+      "pcmanfm",
+      "krusader",
+      "doublecmd",
+      "cosmic-files",
+      "elementary-files",
+      "nemo",
+      "flea",
+      "strata",
+      "konqueror",
+      "spacefm",
+      "xfe",
+      "gloop"
+    ],
+    "tiles100000": [
+      "dolphin",
+      "nautilus",
+      "thunar",
+      "caja",
+      "pcmanfm-qt",
+      "pcmanfm",
+      "doublecmd",
+      "cosmic-files",
+      "elementary-files",
+      "nemo",
+      "flea",
+      "strata",
+      "konqueror",
+      "spacefm",
+      "xfe",
+      "gloop"
+    ],
+    "preview3png": [
+      "dolphin",
+      "thunar",
+      "krusader",
+      "doublecmd",
+      "cosmic-files",
+      "elementary-files",
+      "flea",
+      "strata",
+      "gloop"
+    ]
+  },
+  "slots": [
+    {
+      "slot_id": "list100/0/konqueror",
+      "app": "konqueror",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/dolphin",
+      "app": "dolphin",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/nemo",
+      "app": "nemo",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/doublecmd",
+      "app": "doublecmd",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/spacefm",
+      "app": "spacefm",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/gloop",
+      "app": "gloop",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/thunar",
+      "app": "thunar",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/xfe",
+      "app": "xfe",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/krusader",
+      "app": "krusader",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/elementary-files",
+      "app": "elementary-files",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/caja",
+      "app": "caja",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/nautilus",
+      "app": "nautilus",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/strata",
+      "app": "strata",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/0/flea",
+      "app": "flea",
+      "scenario": "list100",
+      "round": 0
+    },
+    {
+      "slot_id": "list100/1/krusader",
+      "app": "krusader",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/elementary-files",
+      "app": "elementary-files",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/caja",
+      "app": "caja",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/nautilus",
+      "app": "nautilus",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/strata",
+      "app": "strata",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/flea",
+      "app": "flea",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/konqueror",
+      "app": "konqueror",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/dolphin",
+      "app": "dolphin",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/nemo",
+      "app": "nemo",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/doublecmd",
+      "app": "doublecmd",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/spacefm",
+      "app": "spacefm",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/gloop",
+      "app": "gloop",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/thunar",
+      "app": "thunar",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/1/xfe",
+      "app": "xfe",
+      "scenario": "list100",
+      "round": 1
+    },
+    {
+      "slot_id": "list100/2/xfe",
+      "app": "xfe",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/flea",
+      "app": "flea",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/thunar",
+      "app": "thunar",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/gloop",
+      "app": "gloop",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/strata",
+      "app": "strata",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/spacefm",
+      "app": "spacefm",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/nautilus",
+      "app": "nautilus",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/doublecmd",
+      "app": "doublecmd",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/caja",
+      "app": "caja",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/nemo",
+      "app": "nemo",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/elementary-files",
+      "app": "elementary-files",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/dolphin",
+      "app": "dolphin",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/krusader",
+      "app": "krusader",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100/2/konqueror",
+      "app": "konqueror",
+      "scenario": "list100",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/0/elementary-files",
+      "app": "elementary-files",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/spacefm",
+      "app": "spacefm",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/nautilus",
+      "app": "nautilus",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/krusader",
+      "app": "krusader",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/thunar",
+      "app": "thunar",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/caja",
+      "app": "caja",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/nemo",
+      "app": "nemo",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/doublecmd",
+      "app": "doublecmd",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/konqueror",
+      "app": "konqueror",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/dolphin",
+      "app": "dolphin",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/strata",
+      "app": "strata",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/flea",
+      "app": "flea",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/xfe",
+      "app": "xfe",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/0/gloop",
+      "app": "gloop",
+      "scenario": "list100000",
+      "round": 0
+    },
+    {
+      "slot_id": "list100000/1/doublecmd",
+      "app": "doublecmd",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/konqueror",
+      "app": "konqueror",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/dolphin",
+      "app": "dolphin",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/strata",
+      "app": "strata",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/flea",
+      "app": "flea",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/xfe",
+      "app": "xfe",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/gloop",
+      "app": "gloop",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/elementary-files",
+      "app": "elementary-files",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/spacefm",
+      "app": "spacefm",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/nautilus",
+      "app": "nautilus",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/krusader",
+      "app": "krusader",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/thunar",
+      "app": "thunar",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/caja",
+      "app": "caja",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/nemo",
+      "app": "nemo",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/1/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "list100000",
+      "round": 1
+    },
+    {
+      "slot_id": "list100000/2/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/gloop",
+      "app": "gloop",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/nemo",
+      "app": "nemo",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/caja",
+      "app": "caja",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/xfe",
+      "app": "xfe",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/thunar",
+      "app": "thunar",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/flea",
+      "app": "flea",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/strata",
+      "app": "strata",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/krusader",
+      "app": "krusader",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/dolphin",
+      "app": "dolphin",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/nautilus",
+      "app": "nautilus",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/konqueror",
+      "app": "konqueror",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/spacefm",
+      "app": "spacefm",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/doublecmd",
+      "app": "doublecmd",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "list100000/2/elementary-files",
+      "app": "elementary-files",
+      "scenario": "list100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/0/spacefm",
+      "app": "spacefm",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/xfe",
+      "app": "xfe",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/strata",
+      "app": "strata",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/nemo",
+      "app": "nemo",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/elementary-files",
+      "app": "elementary-files",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/caja",
+      "app": "caja",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/nautilus",
+      "app": "nautilus",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/doublecmd",
+      "app": "doublecmd",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/dolphin",
+      "app": "dolphin",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/flea",
+      "app": "flea",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/konqueror",
+      "app": "konqueror",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/gloop",
+      "app": "gloop",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/0/thunar",
+      "app": "thunar",
+      "scenario": "tiles100000",
+      "round": 0
+    },
+    {
+      "slot_id": "tiles100000/1/nautilus",
+      "app": "nautilus",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/doublecmd",
+      "app": "doublecmd",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/dolphin",
+      "app": "dolphin",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/flea",
+      "app": "flea",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/konqueror",
+      "app": "konqueror",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/gloop",
+      "app": "gloop",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/thunar",
+      "app": "thunar",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/spacefm",
+      "app": "spacefm",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/xfe",
+      "app": "xfe",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/strata",
+      "app": "strata",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/nemo",
+      "app": "nemo",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/elementary-files",
+      "app": "elementary-files",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/1/caja",
+      "app": "caja",
+      "scenario": "tiles100000",
+      "round": 1
+    },
+    {
+      "slot_id": "tiles100000/2/caja",
+      "app": "caja",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/thunar",
+      "app": "thunar",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/pcmanfm",
+      "app": "pcmanfm",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/gloop",
+      "app": "gloop",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/elementary-files",
+      "app": "elementary-files",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/pcmanfm-qt",
+      "app": "pcmanfm-qt",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/nemo",
+      "app": "nemo",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/konqueror",
+      "app": "konqueror",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/strata",
+      "app": "strata",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/flea",
+      "app": "flea",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/xfe",
+      "app": "xfe",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/dolphin",
+      "app": "dolphin",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/doublecmd",
+      "app": "doublecmd",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/spacefm",
+      "app": "spacefm",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "tiles100000/2/nautilus",
+      "app": "nautilus",
+      "scenario": "tiles100000",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/0/gloop",
+      "app": "gloop",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/thunar",
+      "app": "thunar",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/krusader",
+      "app": "krusader",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/dolphin",
+      "app": "dolphin",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/doublecmd",
+      "app": "doublecmd",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/elementary-files",
+      "app": "elementary-files",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/flea",
+      "app": "flea",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/0/strata",
+      "app": "strata",
+      "scenario": "preview3png",
+      "round": 0
+    },
+    {
+      "slot_id": "preview3png/1/doublecmd",
+      "app": "doublecmd",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/elementary-files",
+      "app": "elementary-files",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/flea",
+      "app": "flea",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/strata",
+      "app": "strata",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/gloop",
+      "app": "gloop",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/thunar",
+      "app": "thunar",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/krusader",
+      "app": "krusader",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/1/dolphin",
+      "app": "dolphin",
+      "scenario": "preview3png",
+      "round": 1
+    },
+    {
+      "slot_id": "preview3png/2/dolphin",
+      "app": "dolphin",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/strata",
+      "app": "strata",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/krusader",
+      "app": "krusader",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/flea",
+      "app": "flea",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/thunar",
+      "app": "thunar",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/elementary-files",
+      "app": "elementary-files",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/cosmic-files",
+      "app": "cosmic-files",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/doublecmd",
+      "app": "doublecmd",
+      "scenario": "preview3png",
+      "round": 2
+    },
+    {
+      "slot_id": "preview3png/2/gloop",
+      "app": "gloop",
+      "scenario": "preview3png",
+      "round": 2
+    }
+  ],
+  "warmup_gui_sha256": {
+    "dolphin/list100": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+    "nautilus/list100": "56d597e4b4fa18ef6f9d9545d2ba8639f67ebb9b727c8fff1527ce82da03f8ce",
+    "thunar/list100": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+    "caja/list100": "b1036257b1a63e944aed180702e30e2ae496f61a02d2402a891eccdabbe58814",
+    "pcmanfm-qt/list100": "b718beb347d356bffe2754237f1899982046b9b30426ca3e4d365ae7a4812ce1",
+    "pcmanfm/list100": "0626f3bbde791c0e4b331416108c8f5b1d79fc08bd8352ffe5713e0ee71e2fff",
+    "krusader/list100": "4c2ff2c65ed45c645496486c87427587ccb388ddb619ec561a1534841c72df76",
+    "doublecmd/list100": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+    "cosmic-files/list100": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+    "elementary-files/list100": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+    "nemo/list100": "d90084a66b20ec0e0a4c5b9b3edf6149fbea3445a4e579cbe62be3fca8ff09f0",
+    "flea/list100": "2dc99382c032710fe495ed115cdee9dc9c69bdb3a21af4d86a9a8ea16733069b",
+    "strata/list100": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+    "konqueror/list100": "1c8e9276f4815533578a8e55fc769950fa190dabcf4405fc38fe71d55a902470",
+    "spacefm/list100": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+    "xfe/list100": "63d97114333184118ab42549ec12483b9ca0ce1b5b94d62085867cad38a7aecd",
+    "gloop/list100": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+    "dolphin/list100000": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+    "nautilus/list100000": "56d597e4b4fa18ef6f9d9545d2ba8639f67ebb9b727c8fff1527ce82da03f8ce",
+    "thunar/list100000": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+    "caja/list100000": "b1036257b1a63e944aed180702e30e2ae496f61a02d2402a891eccdabbe58814",
+    "pcmanfm-qt/list100000": "b718beb347d356bffe2754237f1899982046b9b30426ca3e4d365ae7a4812ce1",
+    "pcmanfm/list100000": "0626f3bbde791c0e4b331416108c8f5b1d79fc08bd8352ffe5713e0ee71e2fff",
+    "krusader/list100000": "4c2ff2c65ed45c645496486c87427587ccb388ddb619ec561a1534841c72df76",
+    "doublecmd/list100000": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+    "cosmic-files/list100000": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+    "elementary-files/list100000": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+    "nemo/list100000": "d90084a66b20ec0e0a4c5b9b3edf6149fbea3445a4e579cbe62be3fca8ff09f0",
+    "flea/list100000": "2dc99382c032710fe495ed115cdee9dc9c69bdb3a21af4d86a9a8ea16733069b",
+    "strata/list100000": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+    "konqueror/list100000": "1c8e9276f4815533578a8e55fc769950fa190dabcf4405fc38fe71d55a902470",
+    "spacefm/list100000": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+    "xfe/list100000": "63d97114333184118ab42549ec12483b9ca0ce1b5b94d62085867cad38a7aecd",
+    "gloop/list100000": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+    "dolphin/tiles100000": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+    "nautilus/tiles100000": "56d597e4b4fa18ef6f9d9545d2ba8639f67ebb9b727c8fff1527ce82da03f8ce",
+    "thunar/tiles100000": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+    "caja/tiles100000": "b1036257b1a63e944aed180702e30e2ae496f61a02d2402a891eccdabbe58814",
+    "pcmanfm-qt/tiles100000": "b718beb347d356bffe2754237f1899982046b9b30426ca3e4d365ae7a4812ce1",
+    "pcmanfm/tiles100000": "0626f3bbde791c0e4b331416108c8f5b1d79fc08bd8352ffe5713e0ee71e2fff",
+    "doublecmd/tiles100000": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+    "cosmic-files/tiles100000": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+    "elementary-files/tiles100000": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+    "nemo/tiles100000": "d90084a66b20ec0e0a4c5b9b3edf6149fbea3445a4e579cbe62be3fca8ff09f0",
+    "flea/tiles100000": "2dc99382c032710fe495ed115cdee9dc9c69bdb3a21af4d86a9a8ea16733069b",
+    "strata/tiles100000": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+    "konqueror/tiles100000": "1c8e9276f4815533578a8e55fc769950fa190dabcf4405fc38fe71d55a902470",
+    "spacefm/tiles100000": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+    "xfe/tiles100000": "63d97114333184118ab42549ec12483b9ca0ce1b5b94d62085867cad38a7aecd",
+    "gloop/tiles100000": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+    "dolphin/preview3png": "106c81154a2a7f87bad91a994e3ae7bb33f5a0956b82d29639aa88c8b1fac1da",
+    "thunar/preview3png": "e8bd3f33d23d08dc8b5898dfaccec48ae1d3989d42fd139af9ab3383b6b0a231",
+    "krusader/preview3png": "4c2ff2c65ed45c645496486c87427587ccb388ddb619ec561a1534841c72df76",
+    "doublecmd/preview3png": "72f5ad57c8ce3535115388d56e06f6facbcce178fb840ad904e4da66ef8e1a04",
+    "cosmic-files/preview3png": "5fcef95ee90dc41472382a1ee068df0f5d3c4a454dc2cc7bab45a88d5b7c13de",
+    "elementary-files/preview3png": "de0296cd5b1fe6dc22207ab58b46bca6aa7a34caa5893d0c37f34479e4d35582",
+    "flea/preview3png": "2dc99382c032710fe495ed115cdee9dc9c69bdb3a21af4d86a9a8ea16733069b",
+    "strata/preview3png": "31dd823f880f11f44bb7aecdbf9e3225125f98d5a0d4376b8d77ccf167987a22",
+    "gloop/preview3png": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd"
+  },
+  "warmup_reviews_at_plan": {
+    "dolphin/list100": true,
+    "nautilus/list100": true,
+    "thunar/list100": true,
+    "caja/list100": true,
+    "pcmanfm-qt/list100": true,
+    "pcmanfm/list100": true,
+    "cosmic-files/list100": true,
+    "elementary-files/list100": true,
+    "krusader/list100": true,
+    "doublecmd/list100": true,
+    "nemo/list100": true,
+    "flea/list100": true,
+    "strata/list100": true,
+    "konqueror/list100": true,
+    "spacefm/list100": true,
+    "xfe/list100": true,
+    "gloop/list100": true,
+    "dolphin/list100000": true,
+    "nautilus/list100000": true,
+    "thunar/list100000": true,
+    "caja/list100000": true,
+    "pcmanfm-qt/list100000": true,
+    "pcmanfm/list100000": true,
+    "krusader/list100000": true,
+    "doublecmd/list100000": true,
+    "cosmic-files/list100000": true,
+    "elementary-files/list100000": true,
+    "nemo/list100000": true,
+    "flea/list100000": true,
+    "strata/list100000": true,
+    "konqueror/list100000": true,
+    "spacefm/list100000": true,
+    "xfe/list100000": true,
+    "gloop/list100000": true,
+    "dolphin/tiles100000": true,
+    "nautilus/tiles100000": true,
+    "thunar/tiles100000": true,
+    "caja/tiles100000": true,
+    "pcmanfm-qt/tiles100000": true,
+    "pcmanfm/tiles100000": true,
+    "doublecmd/tiles100000": true,
+    "cosmic-files/tiles100000": true,
+    "elementary-files/tiles100000": true,
+    "nemo/tiles100000": true,
+    "strata/tiles100000": true,
+    "flea/tiles100000": true,
+    "konqueror/tiles100000": true,
+    "spacefm/tiles100000": true,
+    "xfe/tiles100000": true,
+    "gloop/tiles100000": true,
+    "dolphin/preview3png": true,
+    "thunar/preview3png": true,
+    "cosmic-files/preview3png": true,
+    "krusader/preview3png": true,
+    "doublecmd/preview3png": true,
+    "elementary-files/preview3png": true,
+    "flea/preview3png": true,
+    "strata/preview3png": true,
+    "gloop/preview3png": true
+  }
+}

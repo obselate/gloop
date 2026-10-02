@@ -1,0 +1,81 @@
+{
+  "corrected_post_launch_input": [
+    {
+      "action": "click",
+      "at": [
+        340,
+        100
+      ]
+    }
+  ],
+  "correction_manifest": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-manifest-v1.json",
+  "correction_manifest_sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622",
+  "correction_scope": "fresh isolated Dolphin preview profile; one warmup and three measured slots only; same binary, fixture, source, host, baseline, timing, geometry and capture method",
+  "corrective_output": "artifacts/performance/file-managers-20261001/cohort-dolphin-preview-state-seed-v1",
+  "corrective_output_exists_at_declaration": false,
+  "independent_state_audit_sha256": "2474f0c9bd267d55be00e2de86b857797996d34052fbe84ca97303aaca9da9cb",
+  "known_on_state_sha256": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d",
+  "known_on_state_source": "artifacts/performance/file-managers-20261001/cohort-final-v6/profiles/dolphin/preview3png/state/dolphinstaterc",
+  "observed_source_records_at_declaration": [
+    {
+      "ordinal": 50,
+      "scenario": "preview3png",
+      "slot_id": null,
+      "warmup": true
+    },
+    {
+      "ordinal": 217,
+      "scenario": "preview3png",
+      "slot_id": "preview3png/0/dolphin",
+      "warmup": false
+    }
+  ],
+  "original_post_launch_input": [
+    {
+      "action": "key",
+      "key": "F11"
+    },
+    {
+      "action": "click",
+      "at": [
+        340,
+        100
+      ]
+    }
+  ],
+  "reason": "Original preview F11 toggled the Information panel off from the reused warmup profile at measured ordinal217, so the selected-image preview workload was absent.",
+  "source_cohort": "artifacts/performance/file-managers-20261001/cohort-final-v7",
+  "source_manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859",
+  "source_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+  "source_raw_count_at_declaration": 222,
+  "source_raw_prefix_sha256_at_declaration": "9d2e0c87da344e8c5574cb602afccf89960f0fd2da1c501930dc75ef88cc3992",
+  "source_run_end_count_at_declaration": 163,
+  "source_run_end_prefix_sha256_at_declaration": "708ad2a3127610a0ee78b9d7a1e713d4345f5d2e9dc58a8c2004742a7166b0e4",
+  "state": "withdrawal_declared_before_corrective_launch",
+  "withdrawal_policy": "Unconditionally exclude every original main-cohort Dolphin preview3png warmup and measured observation from ranking and aggregate statistics, including original planned slots completed after this declaration. Preserve original raw evidence. Retain Dolphin list100, list100000 and tiles100000 results from their separate profiles. The corrective Dolphin preview cohort is a separately identified method.",
+  "withdrawn_app": "dolphin",
+  "withdrawn_main_plan_slots": [
+    {
+      "app": "dolphin",
+      "index": 154,
+      "round": 0,
+      "scenario": "preview3png",
+      "slot_id": "preview3png/0/dolphin"
+    },
+    {
+      "app": "dolphin",
+      "index": 167,
+      "round": 1,
+      "scenario": "preview3png",
+      "slot_id": "preview3png/1/dolphin"
+    },
+    {
+      "app": "dolphin",
+      "index": 168,
+      "round": 2,
+      "scenario": "preview3png",
+      "slot_id": "preview3png/2/dolphin"
+    }
+  ],
+  "withdrawn_scenario": "preview3png"
+}

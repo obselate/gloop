@@ -1,0 +1,7 @@
+{
+  "argv": "<omitted: process arguments or environment>",
+  "cwd": "${REPO}",
+  "exit_code": 0,
+  "stdout": "preflight: complete; 68 app/scenario rows, 59 raw records; ${COHORT}/summary.json\n",
+  "stderr": ""
+}

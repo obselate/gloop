@@ -570,7 +570,7 @@
       "sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622"
     },
     "v7_dolphin_method": {
-      "path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-method-v1.json",
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/dolphin-preview-state-seed-method-before-measured-command-pin-reconstructed.json",
       "sha256": "06346f145987a0192e5e7f957ee15e3ba7ee7886bd95cb90c184f3050d719719"
     },
     "v7_dolphin_warmup_commands": {
@@ -677,6 +677,50 @@
     "v7_main177_closure_environment": {
       "path": "artifacts/performance/file-managers-20261001/v7-main-177-closure-archive/environment-run.json",
       "sha256": "3849c0178e9656d9019233a206aa126c96adc170e40326b51b82b69546aceb33"
+    },
+    "v7_main_final_review_snapshot": {
+      "path": "artifacts/performance/file-managers-20261001/v7-main-final-visual-review-snapshot/snapshot-index.json",
+      "sha256": "b2a54a5b08ea1a0a22ecf8ca7764c176ea08963786510a3eec630b196d0068e6"
+    },
+    "v7_spacefm_corrective_closure": {
+      "path": "artifacts/performance/file-managers-20261001/spacefm-no-saved-tabs-9-closure-archive-v1/archive-index.json",
+      "sha256": "d1d032d3cc59c625e72718792f69c7388e763f7f236aa46df0cfc98ac4d9b6fa"
+    },
+    "v7_dolphin_preview_corrective_closure": {
+      "path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-3-closure-archive-v1/archive-index.json",
+      "sha256": "e262c7dc6653d76bc07a50a7e7ffdca887fb9fc3b46c6c14f46455592c6b3a1b"
+    },
+    "v7_corrective_final_review_snapshot": {
+      "path": "artifacts/performance/file-managers-20261001/v7-corrective-final-review-snapshot-v1/archive-index.json",
+      "sha256": "116aebba0c27949e659f1492051999fcb6a847e9dd8aa840c9bb5cbc89495ad9"
+    },
+    "v7_prospective_composite_source_map": {
+      "path": "artifacts/performance/file-managers-20261001/v7-spacefm-composite-source-map.json",
+      "sha256": "3a7aca14d0d48e52826d8abaf6aef0a8cdcf8baebd83b19f5055aa2e7982f3d1"
+    },
+    "v7_strict_composer_invocation": {
+      "path": "artifacts/performance/file-managers-20261001/v7-three-cohort-composer-invocation-prepared-v1.json",
+      "sha256": "cdb32ce9d3cbe8590809a2fd5441519f45a509286801b94eba395244312c1689"
+    },
+    "v7_public_composite_source_map": {
+      "path": "assets/performance/file-managers-2026-10-01/results/source-map.json",
+      "sha256": "2f2a86388b3391e0075acb1bfb72fe0d15321af3875ca3adfeb94a65d04333f5"
+    },
+    "v7_public_composite_summary": {
+      "path": "assets/performance/file-managers-2026-10-01/results/composite/summary.json",
+      "sha256": "602a8e9977b591d590931f80968e9d23e36593e8979538d557ea090f27d1ea61"
+    },
+    "v7_public_workload_tables": {
+      "path": "artifacts/performance/file-managers-20261001/v7-three-cohort-workload-tables.md",
+      "sha256": "715e1b96228d86b8f3390e12b50194d4a73f71c3f3a9743b66e367e0618fbd05"
+    },
+    "v7_dolphin_measured_method": {
+      "path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-method-v1.json",
+      "sha256": "b43716385d3a31bab52f5b6886916bad460660c79e66119ca8d5d8103f09a19a"
+    },
+    "v7_independent_composite_output_audit": {
+      "path": "artifacts/performance/file-managers-20261001/independent-composite-output-audit-v1.json",
+      "sha256": "68777086fe9c623e58268155c81f53be1e5d9ef1ea7784c01ccb5af0902f2cdf"
     }
   },
   "events": [
@@ -1225,6 +1269,41 @@
         "corrective_cohort_outputs_at_closure_archive": "absent"
       },
       "disposition": "The new Spectacle process contaminated original Dolphin preview raw 231. Its raw record and genuine end remain preserved and excluded. A reviewed continuation resumed the same fixed slot under a unique service. All 177 main plan slots later closed, with five attempts excluded, before final visual review or either corrective cohort. This event makes no final metric claim."
+    },
+    {
+      "id": "v7_final_corrective_closure_and_strict_three_cohort_export",
+      "sources": [
+        "v7_main_final_review_snapshot",
+        "v7_spacefm_corrective_closure",
+        "v7_dolphin_preview_corrective_closure",
+        "v7_corrective_final_review_snapshot",
+        "v7_prospective_composite_source_map",
+        "v7_strict_composer_invocation",
+        "v7_public_composite_source_map",
+        "v7_public_composite_summary",
+        "v7_public_workload_tables",
+        "v7_dolphin_measured_method",
+        "v7_independent_composite_output_audit"
+      ],
+      "facts": {
+        "main_planned_slots_closed": 177,
+        "spacefm_corrective_slots_closed": 9,
+        "dolphin_preview_corrective_slots_closed": 3,
+        "composite_summary_rows": 68,
+        "composite_selected_source_rows": {
+          "cohort-final-v7": 63,
+          "cohort-spacefm-no-saved-tabs-v1": 4,
+          "cohort-dolphin-preview-state-seed-v1": 1
+        },
+        "metric_comparable_rows": 55,
+        "deadline_incomplete_rows": 4,
+        "unsupported_profile_rows": 9,
+        "dolphin_preview_accepted_raw_observations": 3,
+        "dolphin_preview_workload_comparable": false,
+        "dolphin_preview_metric_values_publishable": false,
+        "historical_dolphin_method_source": "Exact SHA-256-matched reconstruction of the earlier 06346f method bytes by removing only the later measured_commands_sha256 field from the canonical sorted JSON. No original archived copy was found."
+      },
+      "disposition": "Final primary and independent corrective reviews are frozen. The strict export selects only the prospectively declared sources and preserves all three Dolphin preview raw medians and ranges, but its failed selected-image preview at the five-second deadline makes the whole case unranked with N/A public metric cells. The public source map and composite summary carry the final numeric and provenance detail; this setup event records closure and selection only."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
