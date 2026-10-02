@@ -6,6 +6,8 @@
     "memory_max_bytes": 8589934592,
     "affinity_logical_cpus": 2,
     "observations_per_app": 1,
+    "dependency_cache": "per-app cache content is hashed after preparation and rechecked immediately before timing; build-time cache writes are recorded, not prohibited",
+    "rust_toolchains": "provision Rust 1.98.0 for Flea/Strata and 1.93.0 with clippy/rustfmt for COSMIC under the separate --prefix-root/rustup before preparation; automatic rustup installs are disabled during source builds",
     "comparison": "toolchain-specific durations; no cross-toolchain rank",
     "gloop_note": "New matched Size build is a local measurement, separate from the released Ubuntu 24.04 executable and prior 30.249 s observation."
   },
@@ -73,7 +75,7 @@
       "id": "doublecmd", "tested_version": "1.2.9-1", "source_ref": "v1.2.9",
       "source_commit": "b583211ddfb57fe4be3673b3ffaed77f0a04e0b3",
       "source_url": "https://github.com/doublecmd/doublecmd/releases/download/v1.2.9/doublecmd-1.2.9-src.tar.gz",
-      "archive": "doublecmd-1.2.9-src.tar.gz", "expected_executable": "doublecmd", "scope": "Qt6 release script builds components, plugins, executable, then strips it",
+      "archive": "doublecmd-1.2.9-src.tar.gz", "expected_executable": "doublecmd", "scope": "Qt6 release script builds components, plugins, executable, then extracts debug lines and strips it",
       "prepare": [],
       "build": {"cwd": "{source}", "argv": ["./build.sh", "release", "qt6"]}
     },
@@ -82,8 +84,9 @@
       "source_commit": "d1f0af78e64f9e8ddb52c486913d53a234ce3cf2",
       "source_url": "https://github.com/pop-os/cosmic-files/archive/refs/tags/epoch-1.9.0.tar.gz",
       "archive": "cosmic-files-epoch-1.9.0.tar.gz", "expected_executable": "cosmic-files", "scope": "Cargo release binary and locked Rust dependencies; actual Rust version recorded",
-      "prepare": [{"cwd": "{source}", "argv": ["cargo", "fetch", "--locked"]}],
-      "build": {"cwd": "{source}", "argv": ["cargo", "build", "--release", "--locked", "--offline", "-j", "2"]}
+      "rustup_channel": "1.93.0", "expected_rustc_version": "1.93.0",
+      "prepare": [{"cwd": "{source}", "argv": ["{cargo}", "fetch", "--locked"]}],
+      "build": {"cwd": "{source}", "argv": ["{cargo}", "build", "--release", "--locked", "--offline", "-j", "2"]}
     },
     {
       "id": "elementary-files", "tested_version": "7.3.2-2.1", "source_ref": "7.3.2",
@@ -106,8 +109,9 @@
       "source_commit": "ae9419c8de789ac4f8b25a5d3c7a3fa727ae4196",
       "source_url": "https://github.com/thisisgm/flea/archive/refs/tags/v0.3.7.tar.gz",
       "archive": "flea-v0.3.7.tar.gz", "expected_executable": "flea", "scope": "Cargo release Rust executable only; QuickShell QML UI is loaded from source assets",
-      "prepare": [{"cwd": "{source}", "argv": ["cargo", "fetch", "--locked"]}],
-      "build": {"cwd": "{source}", "argv": ["cargo", "build", "--release", "--locked", "--offline", "-j", "2"]}
+      "rustup_channel": "1.98.0", "expected_rustc_version": "1.98.0",
+      "prepare": [{"cwd": "{source}", "argv": ["{cargo}", "fetch", "--locked"]}],
+      "build": {"cwd": "{source}", "argv": ["{cargo}", "build", "--release", "--locked", "--offline", "-j", "2"]}
     },
     {
       "id": "strata", "tested_version": "0.20.1", "source_ref": "v0.20.1",
@@ -115,9 +119,10 @@
       "release_embedded_commit": "3edcb19905802d6f86c3538b2d38431c3a759a71",
       "source_url": "https://github.com/lgse/strata/archive/refs/tags/v0.20.1.tar.gz",
       "archive": "strata-v0.20.1.tar.gz", "expected_executable": "strata", "scope": "Cargo release target x86_64-unknown-linux-gnu with upstream line-table debug setting",
+      "rustup_channel": "1.98.0", "expected_rustc_version": "1.98.0",
       "environment": {"CARGO_PROFILE_RELEASE_DEBUG": "line-tables-only"},
-      "prepare": [{"cwd": "{source}", "argv": ["cargo", "fetch", "--locked", "--target", "x86_64-unknown-linux-gnu"]}],
-      "build": {"cwd": "{source}", "argv": ["cargo", "build", "--release", "--locked", "--offline", "--target", "x86_64-unknown-linux-gnu", "-j", "2"]}
+      "prepare": [{"cwd": "{source}", "argv": ["{cargo}", "fetch", "--locked", "--target", "x86_64-unknown-linux-gnu"]}],
+      "build": {"cwd": "{source}", "argv": ["{cargo}", "build", "--release", "--locked", "--offline", "--target", "x86_64-unknown-linux-gnu", "-j", "2"]}
     },
     {
       "id": "konqueror", "tested_version": "26.08.1-1.1", "source_ref": "v26.08.1",
