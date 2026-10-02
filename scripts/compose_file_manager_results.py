@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export two closed cohorts and select the declared app sources."""
+"""Export three closed cohorts and select the declared app and scenario sources."""
 
 import argparse
 import hashlib
@@ -11,8 +11,9 @@ from file_manager_cohort import reviewed_terminal_slots
 
 
 SCENARIOS = {"list100", "list100000", "tiles100000", "preview3png"}
-DISCLOSURE = ("The 16 main-cohort apps and SpaceFM's later corrective cohort use the same host "
-              "and measurement method, but ran in separate orders. This is a descriptive "
+DISCLOSURE = ("Sixteen apps use the main cohort, except Dolphin's preview case. SpaceFM's "
+              "whole-app correction and Dolphin's preview-only correction ran in separate "
+              "cohorts on the same host and measurement method. This is a descriptive "
               "same-host comparison, not one balanced experiment.")
 SHARED_PINS = (
     "adapter_sha256", "fixture_inventory", "source_sha256", "host_package_inventory_sha256",
@@ -127,6 +128,105 @@ def validate_sources(main, spacefm, declaration, withdrawal, audit):
             {key: value for key, value in original_app.items() if key != "command"},
             "corrective SpaceFM app differs beyond the declared command flag")
     return main_apps
+
+
+def validate_dolphin_sources(main, dolphin, declaration, withdrawal, audit, seed):
+    main_plan = read_json(main / "plan.json")
+    plan = read_json(dolphin / "plan.json")
+    main_manifest = read_json(main / "inputs/cohort-manifest.json")
+    manifest = read_json(dolphin / "inputs/cohort-manifest.json")
+    spec = declaration["dolphin_preview"]
+    require(dolphin.name == spec["cohort"] == "cohort-dolphin-preview-state-seed-v1" and
+            sha256(dolphin / "plan.json") == spec["plan_sha256"] and
+            sha256(dolphin / "inputs/cohort-manifest.json") == spec["manifest_sha256"] and
+            sha256(dolphin / "inputs/cohort-manifest.json") ==
+            declaration["dolphin_seed_manifest_sha256"] and
+            declaration["scenario_sources"] == {"dolphin/preview3png": "dolphin_preview"},
+            "Dolphin preview source declaration differs")
+    require(withdrawal["state"] == "withdrawal_declared_before_corrective_launch" and
+            withdrawal["withdrawn_app"] == "dolphin" and
+            withdrawal["withdrawn_scenario"] == "preview3png" and
+            withdrawal["source_plan_sha256"] == declaration["main"]["plan_sha256"] and
+            withdrawal["source_manifest_sha256"] == declaration["main"]["manifest_sha256"] and
+            withdrawal["correction_manifest_sha256"] == spec["manifest_sha256"] and
+            withdrawal["independent_state_audit_sha256"] ==
+            declaration["dolphin_audit_sha256"],
+            "Dolphin preview withdrawal differs from prospective source choice")
+    raw_path = main / "raw.jsonl"
+    end_path = main / "environment-run-invocations.jsonl"
+    require(declaration["dolphin_withdrawal_raw_prefix_lines"] ==
+            withdrawal["source_raw_count_at_declaration"] == 222 and
+            declaration["dolphin_withdrawal_run_end_prefix_lines"] ==
+            withdrawal["source_run_end_count_at_declaration"] == 163 and
+            prefix_sha256(raw_path, 222) ==
+            withdrawal["source_raw_prefix_sha256_at_declaration"] and
+            prefix_sha256(end_path, 163) ==
+            withdrawal["source_run_end_prefix_sha256_at_declaration"],
+            "Dolphin preview prospective raw or run-end prefix changed")
+    raw_lines = raw_path.read_bytes().splitlines(keepends=True)
+    main_raw = [json.loads(line) for line in raw_lines]
+    for item in withdrawal["observed_source_records_at_declaration"]:
+        record = main_raw[item["ordinal"]]
+        require(record["app"] == "dolphin" and
+                all(record.get(key) == item[key] for key in
+                    ("ordinal", "scenario", "slot_id", "warmup")),
+                "Dolphin observed raw identity differs")
+    slots = [dict(slot, index=index) for index, slot in enumerate(main_plan["slots"])
+             if slot["app"] == "dolphin" and slot["scenario"] == "preview3png"]
+    require(len(slots) == len(plan["slots"]) == 3 and
+            slots == withdrawal["withdrawn_main_plan_slots"] and
+            [{key: slot[key] for key in ("slot_id", "app", "scenario", "round")}
+             for slot in slots] == plan["slots"],
+            "Dolphin preview three-slot replacement differs")
+    pins = main_plan["pins"]
+    correction_pins = plan["pins"]
+    require(all(pins[key] == correction_pins[key] for key in SHARED_PINS) and
+            correction_pins["binary_sha256"] == {"dolphin": pins["binary_sha256"]["dolphin"]} and
+            pins["runs"] == 3, "Dolphin preview shared method or binary pins differ")
+    original = next(app for app in main_manifest["apps"] if app["id"] == "dolphin")
+    require(len(manifest["apps"]) == 1 and manifest["apps"][0]["id"] == "dolphin",
+            "Dolphin corrective manifest app roster differs")
+    corrected = manifest["apps"][0]
+    require({key: value for key, value in corrected.items() if key not in
+             ("scenarios", "supported_scenarios", "unsupported")} ==
+            {key: value for key, value in original.items() if key not in
+             ("scenarios", "supported_scenarios", "unsupported")} and
+            corrected["supported_scenarios"] == ["preview3png"] and
+            set(corrected["unsupported"]) == SCENARIOS - {"preview3png"} and
+            set(corrected["scenarios"]) == {"preview3png"},
+            "Dolphin corrective app differs outside preview support")
+    old = original["scenarios"]["preview3png"]
+    new = corrected["scenarios"]["preview3png"]
+    known_on = evidence_path(withdrawal["known_on_state_source"])
+    known_hash = sha256(known_on)
+    require(withdrawal["known_on_state_source"].endswith(
+                seed["correction"]["known_on_state_source"]) and
+            known_hash == seed["correction"]["known_on_state_sha256"] ==
+            withdrawal["known_on_state_sha256"] and
+            withdrawal["original_post_launch_input"] == old["post_launch_input"] and
+            withdrawal["corrected_post_launch_input"] == new["post_launch_input"] and
+            old["post_launch_input"] == [{"action": "key", "key": "F11"},
+                                         {"action": "click", "at": [340, 100]}] and
+            new["post_launch_input"] == [{"action": "click", "at": [340, 100]}] and
+            new["files"] == {**old["files"], "state/dolphinstaterc": known_on.read_text()} and
+            seed["correction"]["command_delta"] == "none" and
+            corrected["command"] == original["command"],
+            "Dolphin known-on seed or click-only delta differs")
+    warmup = audit["warmup"]
+    measured = audit["measured"]
+    require(audit["scope"] == "dolphin/preview3png" and
+            audit["manifest_sha256"] == declaration["main"]["manifest_sha256"] and
+            audit["plan_sha256"] == declaration["main"]["plan_sha256"] and
+            warmup["ordinal"] == 50 and measured["ordinal"] == 217 and
+            warmup["raw_line_sha256"] == hashlib.sha256(raw_lines[50]).hexdigest() and
+            measured["raw_line_sha256"] == hashlib.sha256(raw_lines[217]).hexdigest() and
+            warmup["profile_state_sha256_at_end"] ==
+            measured["profile_state_sha256_at_launch"] == known_hash and
+            measured["profile_state_sha256_at_end"] != known_hash and
+            all(sha256(evidence_path(item["capture"]["path"])) == item["capture"]["sha256"]
+                for item in (warmup, measured)),
+            "Dolphin preview state audit differs from frozen raw and captures")
+    return corrected
 
 
 def validate_export(path, spec, provenance):
@@ -278,47 +378,188 @@ def validate_warmup_review(spacefm, plan, review_path, method_path, declaration)
     return independent_path, snapshot_path
 
 
-def compose(main, spacefm, declaration_path, withdrawal_path, audit_path,
-            warmup_review_path, method_path, output):
+def validate_dolphin_warmup_review(dolphin, plan, review_path, method_path, declaration):
+    review = read_json(review_path)
+    method = read_json(method_path)
+    cohort = "artifacts/performance/file-managers-20261001/" + dolphin.name
+    require(sha256(review_path) == declaration["dolphin_warmup_review_sha256"] and
+            sha256(method_path) == declaration["dolphin_method_sha256"] and
+            review["state"] == "reviewed_pass" and review["cohort"] == cohort and
+            review["manifest_sha256"] == declaration["dolphin_preview"]["manifest_sha256"] and
+            review["method_sha256"] == declaration["dolphin_method_sha256"] and
+            method["withdrawal_ledger_sha256"] ==
+            declaration["dolphin_withdrawal_ledger_sha256"] and
+            method["corrective_manifest_sha256"] ==
+            declaration["dolphin_preview"]["manifest_sha256"] and
+            method["known_on_state_sha256"] == declaration["dolphin_known_on_state_sha256"] and
+            method["source_main_plan_sha256"] == declaration["main"]["plan_sha256"] and
+            method["source_sha256"] == plan["pins"]["source_sha256"] and
+            method["measured_slot_count"] == len(plan["slots"]) == 3,
+            "Dolphin reviewed warmup or method differs")
+    independent = review["independent_review"]
+    independent_path = evidence_path(independent["artifact"])
+    independent_review = read_json(independent_path)
+    snapshot_path = evidence_path(review["cohort_review_snapshot"])
+    snapshot = read_json(snapshot_path)
+    require(independent["decision"] == "pass" and
+            sha256(independent_path) == independent["sha256"] ==
+            declaration["dolphin_independent_warmup_review_sha256"] and
+            sha256(snapshot_path) == review["cohort_review_snapshot_sha256"] ==
+            review["cohort_review_json_sha256"] ==
+            declaration["dolphin_warmup_review_snapshot_sha256"] and
+            snapshot["warmups"] == read_json(dolphin / "review.json")["warmups"] and
+            set(review["warmups"]) == {"dolphin/preview3png"},
+            "Dolphin independent warmup or frozen review snapshot differs")
+    raw_lines = (dolphin / "raw.jsonl").read_bytes().splitlines(keepends=True)
+    record = json.loads(raw_lines[0])
+    item = review["warmups"]["dolphin/preview3png"]
+    other = independent_review["warmups"]["preview3png"]
+    capture = record[item["capture_role"]]
+    path = evidence_path(item["capture_path"])
+    target = Path(__file__).resolve().parent.parent / "artifacts/performance/optimization/fixtures/3"
+    owned = (record["processes_at_5s"] if item["capture_role"] == "capture" else
+             record["late_state"]["processes"])
+    validation = other["validation"]
+    require(len(raw_lines) >= 1 and item["capture_role"] in ("capture", "late_capture") and
+            record["ordinal"] == item["raw_ordinal"] == other["ordinal"] == 0 and
+            record["app"] == "dolphin" and record["scenario"] == "preview3png" and
+            record["warmup"] is True and record["status"] in ("ok", "late_window") and
+            not record.get("discard_reason") and
+            record["manifest_sha256"] == declaration["dolphin_preview"]["manifest_sha256"] and
+            record["binary_sha256"] == plan["pins"]["binary_sha256"]["dolphin"] and
+            record["gui_executable_sha256"] == plan["pins"]["binary_sha256"]["dolphin"] and
+            record["profile_files_sha256_at_launch"]["state/dolphinstaterc"] ==
+            declaration["dolphin_known_on_state_sha256"] and
+            [entry["action"] for entry in record["post_launch_input"]] ==
+            [{"action": "click", "at": [340, 100]}] and
+            hashlib.sha256(raw_lines[0]).hexdigest() ==
+            item["raw_line_sha256"] == other["raw_line_sha256"] and
+            capture["path"] == str(path) == item["capture_path"] and
+            capture["sha256"] == item["capture_sha256"] == other["capture_sha256"] and
+            sha256(path) == capture["sha256"] and
+            int(capture["window"]["pid"]) == record["gui_process_pid"] and
+            any(process["pid"] == record["gui_process_pid"] for process in owned) and
+            item["fixture_target"] == str(target) == record["launch_command"][-1] and
+            item["expected_fixture_file_count"] ==
+            plan["pins"]["fixture_inventory"]["3"]["count"] == 3 and
+            item["observed_mode"] == "preview" and
+            item["selected_image"] == other["selected_image"] == "image-0.png" and
+            item["information_panel_visible"] is True and
+            item["whole_image_visible"] is True and
+            item["seed_sha256"] == declaration["dolphin_known_on_state_sha256"] and
+            item["approved"] is True and
+            other["capture_role"] == item["capture_role"] and
+            other["information_panel_visible"] is True and
+            other["whole_image_visible"] is True and
+            other["population_validated_by_deadline"] is True and
+            validation["owned_gui_pid"] == record["gui_process_pid"] and
+            validation["gui_executable_sha256"] == record["gui_executable_sha256"] and
+            validation["pid_in_saved_capture_tree"] is True,
+            "Dolphin preview warmup review is not bound to an owned full-image preview")
+    source = plan["pins"]["source_sha256"]
+    require(independent_review["cohort"] == cohort and
+            independent_review["decision"] == "pass" and
+            independent_review["manifest_sha256"] == declaration["dolphin_preview"]["manifest_sha256"] and
+            independent_review["method_sha256"] == declaration["dolphin_method_sha256"] and
+            independent_review["withdrawal_ledger_sha256"] ==
+            declaration["dolphin_withdrawal_ledger_sha256"] and
+            independent_review["audit_sha256"] == declaration["dolphin_audit_sha256"] and
+            independent_review["seed_sha256"] == declaration["dolphin_known_on_state_sha256"] and
+            independent_review["source_sha256"] == source and
+            independent_review["raw_prefix_rows"] == 1 and
+            independent_review["raw_prefix_sha256"] == prefix_sha256(dolphin / "raw.jsonl", 1) and
+            independent_review["warmup_history_rows"] == 1 and
+            independent_review["warmup_history_sha256"] ==
+            prefix_sha256(dolphin / "environment-warmup-invocations.jsonl", 1) and
+            independent_review["captures"] == {"preview3png": capture["sha256"]},
+            "Dolphin independent reviewer did not approve the actual warmup prefix")
+    return independent_path, snapshot_path
+
+
+def compose(main, spacefm, dolphin, declaration_path, withdrawal_path, audit_path,
+            warmup_review_path, method_path, dolphin_withdrawal_path, dolphin_audit_path,
+            dolphin_seed_path, dolphin_warmup_review_path, dolphin_method_path, output):
     main = main.resolve(strict=True)
     spacefm = spacefm.resolve(strict=True)
+    dolphin = dolphin.resolve(strict=True)
     output = output.resolve()
     require(not output.exists() or not any(output.iterdir()), "results directory must be absent or empty")
     declaration = read_json(declaration_path)
     withdrawal = read_json(withdrawal_path)
     audit = read_json(audit_path)
+    dolphin_withdrawal = read_json(dolphin_withdrawal_path)
+    dolphin_audit = read_json(dolphin_audit_path)
+    dolphin_seed = read_json(dolphin_seed_path)
+    space_ledger = evidence_path(
+        "artifacts/performance/file-managers-20261001/spacefm-no-saved-tabs-plan-creation-v1.json")
+    dolphin_ledger = evidence_path(
+        "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-plan-creation-v1.json")
     require(declaration["schema_version"] == 1 and declaration["disclosure"] == DISCLOSURE and
+            declaration["stage"] ==
+            "after_reviewed_corrective_warmups_before_corrective_measurements" and
+            all(declaration[key] == 0 for key in
+                ("corrective_measured_raw_rows_at_declaration",
+                 "corrective_run_end_rows_at_declaration",
+                 "dolphin_corrective_measured_raw_rows_at_declaration",
+                 "dolphin_corrective_run_end_rows_at_declaration")) and
             sha256(Path(__file__).with_name("export_file_manager_results.py")) ==
             declaration["exporter_sha256"] and
+            sha256(space_ledger) == declaration["plan_creation_ledger_sha256"] and
+            sha256(dolphin_ledger) == declaration["dolphin_plan_creation_ledger_sha256"] and
+            read_json(space_ledger)["plan_sha256"] == declaration["spacefm"]["plan_sha256"] and
+            read_json(dolphin_ledger)["plan_sha256"] ==
+            declaration["dolphin_preview"]["plan_sha256"] and
             sha256(withdrawal_path) == declaration["withdrawal_ledger_sha256"] and
-            sha256(audit_path) == declaration["tab_audit_sha256"],
+            sha256(audit_path) == declaration["tab_audit_sha256"] and
+            sha256(dolphin_withdrawal_path) == declaration["dolphin_withdrawal_ledger_sha256"] and
+            sha256(dolphin_audit_path) == declaration["dolphin_audit_sha256"] and
+            sha256(dolphin_seed_path) == declaration["dolphin_seed_manifest_sha256"],
             "composition declaration or original evidence hash differs")
     main_apps = validate_sources(main, spacefm, declaration, withdrawal, audit)
+    corrected_dolphin = validate_dolphin_sources(
+        main, dolphin, declaration, dolphin_withdrawal, dolphin_audit, dolphin_seed)
     independent_path, snapshot_path = validate_warmup_review(
         spacefm, read_json(spacefm / "plan.json"), warmup_review_path, method_path, declaration)
+    dolphin_independent, dolphin_snapshot = validate_dolphin_warmup_review(
+        dolphin, read_json(dolphin / "plan.json"), dolphin_warmup_review_path,
+        dolphin_method_path, declaration)
     main_terminal = source_terminal_slots(main, read_json(main / "plan.json"))
     space_terminal = source_terminal_slots(spacefm, read_json(spacefm / "plan.json"))
+    dolphin_terminal = source_terminal_slots(dolphin, read_json(dolphin / "plan.json"))
     main_export = output / "cohorts/main"
     space_export = output / "cohorts/spacefm"
+    dolphin_export = output / "cohorts/dolphin_preview"
     main_provenance = export(main, main_export, False)
     space_provenance = export(spacefm, space_export, False)
+    dolphin_provenance = export(dolphin, dolphin_export, False)
     validate_export(main_export, declaration["main"], main_provenance)
     validate_export(space_export, declaration["spacefm"], space_provenance)
+    validate_export(dolphin_export, declaration["dolphin_preview"], dolphin_provenance)
     main_rows, main_raw = validate_rows(main_export, read_json(main_export / "plan.json"),
                                         main_apps, main_terminal)
     space_rows, space_raw = validate_rows(space_export, read_json(space_export / "plan.json"),
                                           {"spacefm"}, space_terminal)
+    dolphin_rows, dolphin_raw = validate_rows(
+        dolphin_export, read_json(dolphin_export / "plan.json"), {"dolphin"}, dolphin_terminal)
     require(len([record for record in space_raw if record["warmup"] is True]) == 3 and
             {record["scenario"] for record in space_raw if record["warmup"] is True} ==
             SCENARIOS - {"preview3png"}, "corrective warmups differ from the three declared workloads")
     app_rows(space_rows, "spacefm")
-    selected = {(row["app"], row["scenario"]): row for row in space_rows}
+    require(len([record for record in dolphin_raw if record["warmup"] is True]) == 1 and
+            [(record["app"], record["scenario"]) for record in dolphin_raw
+             if record["warmup"] is True] == [("dolphin", "preview3png")],
+            "corrective Dolphin warmup differs from the declared workload")
+    app_rows(dolphin_rows, "dolphin")
+    selected = {"spacefm": {(row["app"], row["scenario"]): row for row in space_rows},
+                "dolphin_preview": {(row["app"], row["scenario"]): row for row in dolphin_rows}}
     cohort_names = {"main": declaration["main"]["cohort"],
-                    "spacefm": declaration["spacefm"]["cohort"]}
+                    "spacefm": declaration["spacefm"]["cohort"],
+                    "dolphin_preview": declaration["dolphin_preview"]["cohort"]}
     combined = []
     for row in main_rows:
-        source = declaration["app_sources"][row["app"]]
-        selected_row = row if source == "main" else selected[(row["app"], row["scenario"])]
+        key = row["app"] + "/" + row["scenario"]
+        source = declaration["scenario_sources"].get(key, declaration["app_sources"][row["app"]])
+        selected_row = row if source == "main" else selected[source][(row["app"], row["scenario"])]
         result = dict(selected_row)
         result["source_cohort"] = cohort_names[source]
         result["raw_ids"] = [f"{cohort_names[source]}:{ordinal}"
@@ -333,10 +574,12 @@ def compose(main, spacefm, declaration_path, withdrawal_path, audit_path,
     write_csv(composite / "summary.csv", combined)
     manifest = read_json(main_export / "inputs/cohort-manifest.json")
     corrected_app = read_json(space_export / "inputs/cohort-manifest.json")["apps"][0]
-    manifest["apps"] = [corrected_app if app["id"] == "spacefm" else app
-                        for app in manifest["apps"]]
+    manifest["apps"] = [corrected_app if app["id"] == "spacefm" else
+                        {**app, "scenarios": {**app["scenarios"],
+                                              "preview3png": corrected_dolphin["scenarios"]["preview3png"]}}
+                        if app["id"] == "dolphin" else app for app in manifest["apps"]]
     manifest["composition"] = {"source_map": "../../source-map.json",
-                               "method": "sixteen main-cohort apps plus later corrective SpaceFM cohort",
+                               "method": "sixteen main-cohort apps, later whole-app SpaceFM and Dolphin preview corrections",
                                "interpretation": DISCLOSURE}
     write_json(composite / "inputs/composite-manifest.json", manifest)
     sanitizer = Sanitizer(main, None)
@@ -348,6 +591,17 @@ def compose(main, spacefm, declaration_path, withdrawal_path, audit_path,
                sanitizer.walk(read_json(independent_path)))
     write_json(composite / "evidence/spacefm-warmup-review-snapshot.json",
                sanitizer.walk(read_json(snapshot_path)))
+    for name, path in (("spacefm-method", method_path),
+                       ("spacefm-plan-creation", space_ledger),
+                       ("dolphin-preview-method", dolphin_method_path),
+                       ("dolphin-preview-plan-creation", dolphin_ledger),
+                       ("dolphin-preview-withdrawal", dolphin_withdrawal_path),
+                       ("dolphin-preview-audit", dolphin_audit_path),
+                       ("dolphin-preview-seed-manifest", dolphin_seed_path),
+                       ("dolphin-preview-warmup-review", dolphin_warmup_review_path),
+                       ("dolphin-preview-independent-warmup-review", dolphin_independent),
+                       ("dolphin-preview-warmup-review-snapshot", dolphin_snapshot)):
+        write_json(composite / "evidence" / (name + ".json"), sanitizer.walk(read_json(path)))
     source_map = sanitizer.walk(declaration)
     source_map["declaration_sha256"] = sha256(declaration_path)
     source_map["composer_sha256"] = sha256(Path(__file__))
@@ -356,11 +610,18 @@ def compose(main, spacefm, declaration_path, withdrawal_path, audit_path,
                  "summary_sha256": sha256(main_export / "summary.json")},
         "spacefm": {"path": "cohorts/spacefm", "provenance_sha256": sha256(space_export / "export-provenance.json"),
                     "summary_sha256": sha256(space_export / "summary.json")},
+        "dolphin_preview": {"path": "cohorts/dolphin_preview",
+                            "provenance_sha256": sha256(dolphin_export / "export-provenance.json"),
+                            "summary_sha256": sha256(dolphin_export / "summary.json")},
     }
     source_map["withdrawn_main_spacefm_raw_ids"] = [
         f"{cohort_names['main']}:{record['ordinal']}" for record in main_raw if record["app"] == "spacefm"]
+    source_map["withdrawn_main_dolphin_preview_raw_ids"] = [
+        f"{cohort_names['main']}:{record['ordinal']}" for record in main_raw
+        if record["app"] == "dolphin" and record["scenario"] == "preview3png"]
     source_map["reviewed_terminal_slot_ids"] = {"main": sorted(main_terminal),
-                                                "spacefm": sorted(space_terminal)}
+                                                "spacefm": sorted(space_terminal),
+                                                "dolphin_preview": sorted(dolphin_terminal)}
     source_map["final_summary_sha256"] = sha256(composite / "summary.json")
     source_map["final_csv_sha256"] = sha256(composite / "summary.csv")
     source_map["composite_manifest_sha256"] = sha256(composite / "inputs/composite-manifest.json")
@@ -373,6 +634,14 @@ def compose(main, spacefm, declaration_path, withdrawal_path, audit_path,
         composite / "evidence/spacefm-independent-warmup-review.json")
     source_map["public_warmup_review_snapshot_sha256"] = sha256(
         composite / "evidence/spacefm-warmup-review-snapshot.json")
+    for key in ("spacefm-method", "spacefm-plan-creation",
+                "dolphin-preview-method", "dolphin-preview-plan-creation",
+                "dolphin-preview-withdrawal", "dolphin-preview-audit",
+                "dolphin-preview-seed-manifest", "dolphin-preview-warmup-review",
+                "dolphin-preview-independent-warmup-review",
+                "dolphin-preview-warmup-review-snapshot"):
+        source_map["public_" + key.replace("-", "_") + "_sha256"] = sha256(
+            composite / "evidence" / (key + ".json"))
     write_json(output / "source-map.json", source_map)
     return source_map
 
@@ -381,17 +650,25 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--main-cohort", type=Path, required=True)
     parser.add_argument("--spacefm-cohort", type=Path, required=True)
+    parser.add_argument("--dolphin-cohort", type=Path, required=True)
     parser.add_argument("--source-map", type=Path, required=True)
     parser.add_argument("--withdrawal-ledger", type=Path, required=True)
     parser.add_argument("--tab-audit", type=Path, required=True)
     parser.add_argument("--warmup-review", type=Path, required=True)
     parser.add_argument("--method", type=Path, required=True)
+    parser.add_argument("--dolphin-withdrawal-ledger", type=Path, required=True)
+    parser.add_argument("--dolphin-audit", type=Path, required=True)
+    parser.add_argument("--dolphin-seed-manifest", type=Path, required=True)
+    parser.add_argument("--dolphin-warmup-review", type=Path, required=True)
+    parser.add_argument("--dolphin-method", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     try:
-        result = compose(args.main_cohort, args.spacefm_cohort, args.source_map,
-                         args.withdrawal_ledger, args.tab_audit, args.warmup_review,
-                         args.method, args.output_dir)
+        result = compose(args.main_cohort, args.spacefm_cohort, args.dolphin_cohort,
+                         args.source_map, args.withdrawal_ledger, args.tab_audit,
+                         args.warmup_review, args.method, args.dolphin_withdrawal_ledger,
+                         args.dolphin_audit, args.dolphin_seed_manifest,
+                         args.dolphin_warmup_review, args.dolphin_method, args.output_dir)
     except (OSError, ValueError, RuntimeError, KeyError, TypeError, IndexError,
             json.JSONDecodeError) as error:
         parser.exit(1, f"composition failed: {error}\n")
