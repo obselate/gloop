@@ -536,6 +536,147 @@
     "v7_recovery104_service_command": {
       "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume104.json",
       "sha256": "1a6afc91f3e1c3947e750ffcf1eb0d19151268b32e0fcff1c1c465f87e69eced"
+    },
+    "v7_dolphin_hold_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume104-hold-after-158-archive/archive-index.json",
+      "sha256": "4324844a26db22c30263ece4cc4983a5650a9cd3983e559bf31ab12e0e802953"
+    },
+    "v7_dolphin_hold_service_observation": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume104-hold-after-158-archive/outer-service-observation-after-controller-hold.json",
+      "sha256": "04bcf04105683bf8e28d50167f36fbe5da2d5f8f6649fb3938e6ff66b1a3c852"
+    },
+    "v7_dolphin_hold_snapshot_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-closure-snapshot/snapshot-index.json",
+      "sha256": "114c640649f8bcb31569a1e8d408b1a62c2b169ca38c68afaf3b10170906b042"
+    },
+    "v7_dolphin_hold_raw_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-closure-snapshot/main-raw.jsonl",
+      "sha256": "9d2e0c87da344e8c5574cb602afccf89960f0fd2da1c501930dc75ef88cc3992"
+    },
+    "v7_dolphin_hold_run_end_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-closure-snapshot/main-run-ends.jsonl",
+      "sha256": "708ad2a3127610a0ee78b9d7a1e713d4345f5d2e9dc58a8c2004742a7166b0e4"
+    },
+    "v7_dolphin_withdrawal": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-closure-snapshot/v7-dolphin-preview-withdrawal.json",
+      "sha256": "2a58a8683396e3fa0dc216b5306ca43eaa81c6195bb0760e9eb562a90d42b160"
+    },
+    "v7_dolphin_state_audit": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-closure-snapshot/independent-dolphin-preview-state-audit-v7.json",
+      "sha256": "2474f0c9bd267d55be00e2de86b857797996d34052fbe84ca97303aaca9da9cb"
+    },
+    "v7_dolphin_seed_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-manifest-v1.json",
+      "sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622"
+    },
+    "v7_dolphin_method": {
+      "path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-method-v1.json",
+      "sha256": "06346f145987a0192e5e7f957ee15e3ba7ee7886bd95cb90c184f3050d719719"
+    },
+    "v7_dolphin_warmup_commands": {
+      "path": "artifacts/performance/file-managers-20261001/dolphin-preview-state-seed-warmup-commands-v1.json",
+      "sha256": "4bb2ed0e15c0b952c34f9d66a5581b77e1c38b5116cd73433cc42d276d63e153"
+    },
+    "v7_dolphin_independent_method_review": {
+      "path": "artifacts/performance/file-managers-20261001/independent-dolphin-preview-correction-method-review-v1.json",
+      "sha256": "c3a5298bbb3e1dd943650be7ad9480e0332467d2fd46138bcd7cdb3d588f572d"
+    },
+    "v7_resume159_review_snapshot": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-primary-final-review-snapshot/snapshot-index.json",
+      "sha256": "dc551123c839f1afb1c169f28daac39eba40aa034655f95c79dd62b434e36a6e"
+    },
+    "v7_resume159_pins_audit": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-current-pins-audit.json",
+      "sha256": "f96f96e0976dde3260f6860b2fee9ed53b6a1f27b923809f4bde4eaa13a833ee"
+    },
+    "v7_resume159_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-resume159-gate.json",
+      "sha256": "0fc4e91589c58262505329fae03546c08783e232376b4069503cd62aa38b0029"
+    },
+    "v7_resume159_commands": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-commands-node2-resume159.json",
+      "sha256": "fa22e9ed375f9c8e843de65877d4996bc74523f3e6557611c36bf8c658cacbf0"
+    },
+    "v7_resume159_controller": {
+      "path": "artifacts/performance/file-managers-20261001/run-v7-measured-controller-node2-resume159.py",
+      "sha256": "bfd3e0201adf5be345ac0a65202642bb83f4d6d54a5c489d3eaf3e51fa7681cc"
+    },
+    "v7_resume159_service_command": {
+      "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume159.json",
+      "sha256": "7ad2359b3a8d95dca22fa61f29b8bab227ea1bc327c77b708d28ae693e0a425c"
+    },
+    "v7_three_cohort_composer": {
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/compose_file_manager_results-three-cohort.py",
+      "origin_git_revision": "559672c:scripts/compose_file_manager_results.py",
+      "sha256": "6709bdb7fb08721440c59e7cfdd615be4eba9340444387bdeba93e0e0400566a"
+    },
+    "v7_three_cohort_source_build_gate": {
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/source-build-run-three-cohort.py",
+      "sha256": "899e69bcf1457c9a1794d33b48802b3fa270d98d2b9799afaf2017c4f348e29d"
+    },
+    "v7_contamination168_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-contamination168-archive/archive-index.json",
+      "sha256": "95663c5293ca304ed089a6f5a07a45d869408676e17c3caa7eba0c46a8dbdb30"
+    },
+    "v7_contamination168_raw_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-contamination168-archive/raw-prefix.jsonl",
+      "sha256": "e6202f5a373c44a461cfb6f9d4bbb8f3ef63bd395fbf3b585f1762c8d407d39c"
+    },
+    "v7_contamination168_run_end_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-contamination168-archive/run-ends-prefix.jsonl",
+      "sha256": "dcacf3f935df562badbb353e9f952807c0e54833645cab275e061f66534e7c1c"
+    },
+    "v7_contamination168_controller_state": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-contamination168-archive/controller-state.json",
+      "sha256": "8f2ba7f15a6f1a0fd20501c431d90611f775481e4840465e60a37e9d0bdc2063"
+    },
+    "v7_contamination168_service_result": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume159-contamination168-archive/slot-service-result.json",
+      "sha256": "c9b804c354830b873a36da3ad1d4fad461df927f45e9ff0d3e4a91a57fec77b2"
+    },
+    "v7_spectacle231_process_audit": {
+      "path": "artifacts/performance/file-managers-20261001/v7-spectacle231-readonly-process-audit.json",
+      "sha256": "8a63b06ee599cad20d83dc749ce98d064c5d52b1545c43ed9e758fcf86a7761e"
+    },
+    "v7_resume168_review_snapshot": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume168-primary-review-snapshot/snapshot-index.json",
+      "sha256": "2708347297abc0c4ced71b05f7cf8b0d19fe4474347d5430f9c72106a2d1d5d3"
+    },
+    "v7_resume168_pins_audit": {
+      "path": "artifacts/performance/file-managers-20261001/v7-resume168-current-pins-audit.json",
+      "sha256": "eaddddb8b5768b22e6eaba7408c2041ab4c9f75e48faa5774834fdadfeb8fa6f"
+    },
+    "v7_resume168_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-resume168-gate.json",
+      "sha256": "5be30719d72a038c30b0cf19f5b5e9962dfbde00a62a6c5868d7f6070b1bfc25"
+    },
+    "v7_resume168_commands": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-commands-node2-resume168.json",
+      "sha256": "1ce885594ef8822c444469a05d4b70ab6301dd5dfd59b7b1e43359d2aa777784"
+    },
+    "v7_resume168_controller": {
+      "path": "artifacts/performance/file-managers-20261001/run-v7-measured-controller-node2-resume168.py",
+      "sha256": "44f849c95cc1bbd907cc1af875741ce7805bfc5b0551aaffea9a7f406a36d91a"
+    },
+    "v7_resume168_service_command": {
+      "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume168.json",
+      "sha256": "aa5936211e518450317e05235d0ca49add0cc3e201fc59a8cbf3104206a7ad25"
+    },
+    "v7_main177_closure_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-main-177-closure-archive/archive-index.json",
+      "sha256": "76d54cf7c234565d771298ca109892b8f9e911d0c43d4558e49f59d079a01834"
+    },
+    "v7_main177_closure_raw": {
+      "path": "artifacts/performance/file-managers-20261001/v7-main-177-closure-archive/raw.jsonl",
+      "sha256": "99b6ed455f9f26326e2eaa966a346f6ab0be558e27dd5f7c025de5574acb02fd"
+    },
+    "v7_main177_closure_run_ends": {
+      "path": "artifacts/performance/file-managers-20261001/v7-main-177-closure-archive/environment-run-invocations.jsonl",
+      "sha256": "4dc9832b6ca35c5f988ee890323eab610b2c27687de45dc7525e1d52ac159794"
+    },
+    "v7_main177_closure_environment": {
+      "path": "artifacts/performance/file-managers-20261001/v7-main-177-closure-archive/environment-run.json",
+      "sha256": "3849c0178e9656d9019233a206aa126c96adc170e40326b51b82b69546aceb33"
     }
   },
   "events": [
@@ -973,6 +1114,117 @@
         "cohort_export_run": false
       },
       "disposition": "Global GPU activity again prevented the quiet gate before an application launch. Raw 166 and its genuine clean zero-launch end remain excluded from metrics. The reviewed resume104 gate authorized one detached controller with the same fixed plan and 104 prior accepted slots; its new service was observed running under the recorded invocation identity. The semantic strict-export guard already covers this closed quiet deferral without an exporter change. No benchmark value is claimed for raw 166."
+    },
+    {
+      "id": "v7_dolphin_preview_withdrawal_and_main_resume159",
+      "sources": [
+        "v7_dolphin_hold_archive_index",
+        "v7_dolphin_hold_service_observation",
+        "v7_dolphin_hold_snapshot_index",
+        "v7_dolphin_hold_raw_prefix",
+        "v7_dolphin_hold_run_end_prefix",
+        "v7_dolphin_withdrawal",
+        "v7_dolphin_state_audit",
+        "v7_dolphin_seed_manifest",
+        "v7_dolphin_method",
+        "v7_dolphin_warmup_commands",
+        "v7_dolphin_independent_method_review",
+        "v7_resume159_review_snapshot",
+        "v7_resume159_pins_audit",
+        "v7_resume159_gate",
+        "v7_resume159_commands",
+        "v7_resume159_controller",
+        "v7_resume159_service_command",
+        "v7_three_cohort_composer",
+        "v7_three_cohort_source_build_gate",
+        "v7_contamination168_archive_index"
+      ],
+      "facts": {
+        "genuine_closed_main_slots_before_hold": 159,
+        "stopped_raw_rows": 222,
+        "stopped_run_end_rows": 163,
+        "original_preview_warmup_ordinal": 50,
+        "original_preview_failed_workload_ordinal": 217,
+        "original_preview_failure": "F11 toggled the reused saved-on Information panel off before the selected-image capture",
+        "withdrawn_main_dolphin_preview_slot_indices": [
+          154,
+          167,
+          168
+        ],
+        "other_dolphin_scenarios_retained": [
+          "list100",
+          "list100000",
+          "tiles100000"
+        ],
+        "corrective_preview_seed_sha256": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d",
+        "corrective_preview_input": "click selected image only; no F11",
+        "corrective_warmups_planned": 1,
+        "corrective_measured_slots_planned": 3,
+        "corrective_launches_at_withdrawal": 0,
+        "slot158_genuine_service_invocation_id": "2daa275078934535a7c498e93d5156ce",
+        "resume_index": 159,
+        "remaining_main_slots_at_resume": 18,
+        "prior_excluded_attempts": 4,
+        "resume159_controller_invocation_id": "4ca74df4c82947029ea003abf11ebf92",
+        "three_cohort_composer_commit": "559672c",
+        "three_cohort_composer_status": "committed and static reviewed; no export run",
+        "source_build_gate_status": "static reviewed; no provisioning, source build or control probe run"
+      },
+      "disposition": "All original main Dolphin preview observations are prospectively withdrawn from final preview metrics, regardless of later values. The then-existing warmup and measured ordinal 217 remain in the immutable stopped prefix; later originals remain in the final archive. The reviewed main continuation started at slot 159 under the unchanged fixed plan and preserved prior exclusions. A separate preview-only correction remains unmeasured in this setup event."
+    },
+    {
+      "id": "v7_measured_external_contamination_recovery168_and_main_closure",
+      "sources": [
+        "v7_contamination168_archive_index",
+        "v7_contamination168_raw_prefix",
+        "v7_contamination168_run_end_prefix",
+        "v7_contamination168_controller_state",
+        "v7_contamination168_service_result",
+        "v7_spectacle231_process_audit",
+        "v7_resume168_review_snapshot",
+        "v7_resume168_pins_audit",
+        "v7_resume168_gate",
+        "v7_resume168_commands",
+        "v7_resume168_controller",
+        "v7_resume168_service_command",
+        "v7_main177_closure_archive_index",
+        "v7_main177_closure_raw",
+        "v7_main177_closure_run_ends",
+        "v7_main177_closure_environment"
+      ],
+      "facts": {
+        "accepted_main_slots_before_stop": 168,
+        "discarded_raw_ordinal": 231,
+        "discarded_slot_id": "preview3png/2/dolphin",
+        "discarded_raw_accepted": false,
+        "discard_reason": "new external GPU process appeared",
+        "new_external_gpu_process": "Spectacle",
+        "new_external_gpu_pid": 2530053,
+        "spectacle_activation_cause": "unknown",
+        "discarded_end_status": "deferred_external_contamination",
+        "launches_in_discarded_invocation": 1,
+        "stopped_raw_rows": 232,
+        "stopped_run_end_rows": 173,
+        "discarded_attempt_used_for_numeric_metrics": false,
+        "resume_index": 168,
+        "remaining_main_slots_at_resume": 9,
+        "prior_excluded_attempts": 5,
+        "final_controller_invocation_id": "84580fb6a87d4fcca811565c815b5670",
+        "final_controller_exit_status": 0,
+        "main_planned_slots_genuinely_closed": 177,
+        "final_raw_rows": 241,
+        "final_run_end_rows": 182,
+        "excluded_raw_ordinals": [
+          98,
+          124,
+          147,
+          166,
+          231
+        ],
+        "main_final_visual_review_at_closure_archive": "pending",
+        "corrective_cohort_outputs_at_closure_archive": "absent"
+      },
+      "disposition": "The new Spectacle process contaminated original Dolphin preview raw 231. Its raw record and genuine end remain preserved and excluded. A reviewed continuation resumed the same fixed slot under a unique service. All 177 main plan slots later closed, with five attempts excluded, before final visual review or either corrective cohort. This event makes no final metric claim."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
