@@ -249,7 +249,7 @@ def publish_card(apps, output, builds=None):
         scope = record.get('scope', 'No build observation') if builds else (
             'NativeAOT Size / Ubuntu 24.04' if app['name'] == 'Gloop' else 'Prebuilt package or upstream archive')
         cells.append([app['name'], f'{value:.3f} s' if value is not None else 'N/A' if builds else 'Not measured',
-                      textwrap.fill(scope, 74)])
+                      textwrap.fill(scope, 60)])
     table = axis.table(cellText=cells, colLabels=['Application', 'Build time' if builds else 'Publish time',
                                                 'Build scope' if builds else 'Artifact source'],
                        colWidths=[.28, .2, .52], bbox=[0, 0, 1, 1], cellLoc='left')
@@ -264,7 +264,7 @@ def publish_card(apps, output, builds=None):
             cell.get_text().set_weight('bold')
             cell.get_text().set_color(TEXT if row == 0 else GREEN)
     save_card(figure, output / 'publish_time.png',
-              'Timed build command after restore and configuration. Scope varies, including Double Commander postlink steps.\nOne observation, no metric positions. Outputs differ from runtime binaries. N/A reasons and toolchains: source-builds.json.' if builds else
+              'Clean build after restore and configuration. Scope varies, including Double Commander plugins and stripping.\nGloop: raw NativeAOT publish before packaging. Flea: Rust executable only, four QML asset aliases omitted.\nOne observation, no metric positions. Outputs differ from runtime binaries. Commands and toolchains: source-builds.json.' if builds else
               'Gloop: prior same-day controlled observation, SDK 10.0.401, two CPUs, 8 GiB. Restore and packaging checks excluded. No cross-toolchain ranking.')
 
 

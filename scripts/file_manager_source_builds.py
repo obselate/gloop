@@ -18,6 +18,13 @@ MANIFEST = REPO / "assets/performance/file-managers-2026-10-01/source-builds.tem
 DEFAULT_ROOT = REPO / "artifacts/performance/file-managers-20261001/source-builds"
 MEMORY_LIMIT = 8 * 1024 ** 3
 RUST_APPS = {"cosmic-files", "flea", "strata"}
+FLEA_ARCHIVE_SHA256 = "1f17c57377c59b6e8bf211633c73ef5ca9222b79b3331cf7226cb705dc83d71c"
+FLEA_RUNTIME_ALIASES = {
+    "flea-0.3.7/ui/Commons": "/usr/share/omarchy/shell/Commons",
+    "flea-0.3.7/ui/Ui": "/usr/share/omarchy/shell/Ui",
+    "flea-0.3.7/ui/boot/Commons": "/usr/share/omarchy/shell/Commons",
+    "flea-0.3.7/ui/boot/Ui": "/usr/share/omarchy/shell/Ui",
+}
 CACHE_ENV_KEYS = {"XDG_CACHE_HOME", "CARGO_HOME", "NUGET_PACKAGES",
                   "NUGET_HTTP_CACHE_PATH", "NUGET_PLUGINS_CACHE_PATH",
                   "NUGET_SCRATCH", "DOTNET_CLI_HOME", "RUSTUP_HOME",
@@ -134,18 +141,32 @@ def fetch(root, app, manifest_hash):
     archive_hash = sha256(archive)
     if app.get("source_archive_sha256") and archive_hash != app["source_archive_sha256"]:
         raise RuntimeError(f"{id}: source archive SHA-256 differs from manifest")
+    if id == "flea" and archive_hash != FLEA_ARCHIVE_SHA256:
+        raise RuntimeError("flea: source archive differs from reviewed runtime alias archive")
     if source.exists():
         raise RuntimeError(f"{id}: source directory already exists without a valid record")
     temporary = root / "source" / (".extract-" + id)
     if temporary.exists():
         raise RuntimeError(f"{id}: unfinished source extraction exists")
     temporary.mkdir(parents=True)
+    omitted_members = []
+    def safe_member(member, destination):
+        if id == "flea" and member.name in FLEA_RUNTIME_ALIASES:
+            if not member.issym() or member.linkname != FLEA_RUNTIME_ALIASES[member.name]:
+                raise RuntimeError(f"flea: reviewed runtime alias differs: {member.name}")
+            omitted_members.append({"name": member.name, "type": "symlink",
+                                    "target": member.linkname})
+            return None
+        return tarfile.data_filter(member, destination)
     with tarfile.open(archive) as bundle:
         for member in bundle.getmembers():
             path = PurePosixPath(member.name)
             if path.is_absolute() or ".." in path.parts:
                 raise RuntimeError(f"{id}: unsafe archive member {member.name}")
-        bundle.extractall(temporary, filter="data")
+        bundle.extractall(temporary, filter=safe_member)
+    if id == "flea" and (len(omitted_members) != len(FLEA_RUNTIME_ALIASES)
+                          or {entry["name"] for entry in omitted_members} != set(FLEA_RUNTIME_ALIASES)):
+        raise RuntimeError("flea: reviewed runtime aliases are missing or duplicated")
     roots = list(temporary.iterdir())
     if len(roots) != 1 or not roots[0].is_dir():
         raise RuntimeError(f"{id}: expected one source root in archive")
@@ -155,6 +176,7 @@ def fetch(root, app, manifest_hash):
         "status": "ok", "manifest_sha256": manifest_hash, "source_url": app["source_url"],
         "source_ref": app["source_ref"], "source_commit": app.get("source_commit"),
         "source_archive_sha256": archive_hash,
+        "omitted_archive_members": omitted_members,
         "extracted_source_sha256": tree_sha256(source),
     })
 
@@ -162,9 +184,10 @@ def fetch(root, app, manifest_hash):
 def scope(payload_path, cpu_pair, environment, phase):
     isolation = ["bwrap", "--unshare-net", "--bind", "/", "/", "--dev-bind", "/dev", "/dev", "--"] if phase == "measure" else []
     command = [
-        "systemd-run", "--user", "--scope", "--wait", "--collect",
+        "systemd-run", "--user", "--scope", "--collect",
         "--property=CPUQuota=200%", f"--property=MemoryMax={MEMORY_LIMIT}",
-        "--", *isolation, "taskset", "-c", ",".join(map(str, cpu_pair)),
+        "--", *isolation, "/usr/bin/env", "-u", "INVOCATION_ID",
+        "taskset", "-c", ",".join(map(str, cpu_pair)),
         sys.executable, str(Path(__file__).resolve()), "internal", str(payload_path),
     ]
     return subprocess.run(command, capture_output=True, text=True, env=environment)
@@ -235,6 +258,17 @@ def cache_environment(root, app, environment, prefix):
 
 def environment_hash(environment, app):
     return hash_environment(environment | app.get("environment", {}))
+
+
+def resolved_app(app, prefix):
+    values = {}
+    for key, value in app.get("environment", {}).items():
+        if not isinstance(key, str) or not isinstance(value, str):
+            raise ValueError(f"{app['id']}: environment values must be strings")
+        if "{prefix}" in value and prefix is None:
+            raise ValueError(f"{app['id']}: environment requires --prefix-root")
+        values[key] = value.replace("{prefix}", str(prefix))
+    return {**app, "environment": values}
 
 
 def hash_environment(environment):
@@ -418,6 +452,7 @@ def internal(payload_path):
     environment = os.environ.copy()
     environment.update(payload["app_environment"])
     result = {"status": "ok", "environment_sha256": payload["environment_sha256"],
+              "app_environment": payload["app_environment"],
               "prefix_sha256": payload["prefix_sha256"],
               "manifest_sha256": payload["manifest_sha256"],
               "limits": limits(), "toolchains": toolchains(environment, payload["search_roots"][0],
@@ -555,6 +590,7 @@ def public_results(root, manifest, manifest_hash):
             "source_url": app["source_url"], "source_ref": app["source_ref"],
             "source_commit": app.get("source_commit"),
             "source_archive_sha256": fetch_record.get("source_archive_sha256"),
+            "omitted_archive_members": fetch_record.get("omitted_archive_members", []),
             "manifest_sha256": record_manifest,
             "extracted_source_sha256": fetch_record.get("extracted_source_sha256"),
             "prepared_source_sha256": prepare_record.get("prepared_source_sha256"),
@@ -633,6 +669,7 @@ def main():
         raise ValueError("prefix root must be an existing directory inside ignored artifacts/")
     if prefix and (prefix.is_relative_to(root) or root.is_relative_to(prefix)):
         raise ValueError("prefix root must be separate from the per-app build and cache root")
+    apps = [resolved_app(app, prefix) for app in apps]
     prefix_hash = tree_sha256(prefix) if prefix else None
     failed = False
     for app in apps:
