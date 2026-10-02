@@ -69,7 +69,7 @@ def window_marker(row):
 def coverage_label(row):
     count = row.get('n', 0)
     if not count:
-        return 'N/A'
+        return 'Incomplete 0/3' if row.get('raw_ordinals') else 'N/A'
     if count != 3:
         return f'Incomplete {count}/3'
     if not row.get('comparable'):
@@ -168,7 +168,7 @@ def metric_cards(rows, output):
         for axis, (scenario, label) in zip(axes.flat, SCENARIOS.items()):
             chart(axis, [row for row in rows if row['scenario'] == scenario],
                   key, unit, decimals, label)
-        save_card(figure, output / f'{key}.png', note + '\n* Loading at five seconds. + No captured window at five seconds, validated later. Positions apply to this cohort.')
+        save_card(figure, output / f'{key}.png', note + '\n* Loading in at least one launch at 5s. + No 5s capture in at least one launch, validated later. Positions apply to this cohort.')
 
 
 def footprint_card(apps, output):
