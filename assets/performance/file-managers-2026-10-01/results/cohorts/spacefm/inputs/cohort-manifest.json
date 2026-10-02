@@ -1,0 +1,86 @@
+{
+  "adapter_input_sha256": "0d41bd1a90bbca7a3e53e34cc5946b86fd5c83191b726cb62a348c448e0f8798",
+  "apps": [
+    {
+      "backend": "wayland",
+      "binary": "${STAGING}/packages/root/usr/bin/spacefm",
+      "binary_bytes": 1253584,
+      "binary_sha256": "48dfde611658348ccdb89cb940d5ec9e99adfb8ffbd5bebd2f070a9809ba7398",
+      "command": [
+        "/usr/bin/bwrap",
+        "--bind",
+        "/",
+        "/",
+        "--overlay-src",
+        "/usr/share",
+        "--tmp-overlay",
+        "/usr/share",
+        "--ro-bind",
+        "${STAGING}/packages/root/usr/share/spacefm",
+        "/usr/share/spacefm",
+        "--overlay-src",
+        "/etc",
+        "--tmp-overlay",
+        "/etc",
+        "--ro-bind",
+        "${STAGING}/packages/root/etc/spacefm",
+        "/etc/spacefm",
+        "--",
+        "{binary}",
+        "--no-saved-tabs",
+        "{folder}"
+      ],
+      "distribution": "Debian 13 trixie stable package extracted into user-local root",
+      "env": {
+        "LD_LIBRARY_PATH": "${STAGING}/packages/root/usr/lib:${STAGING}/packages/root/usr/lib/x86_64-linux-gnu",
+        "XDG_DATA_DIRS": "${STAGING}/packages/root/usr/share:/usr/local/share:/usr/share"
+      },
+      "id": "spacefm",
+      "late_validation_seconds": {
+        "list100000": 15,
+        "tiles100000": 15
+      },
+      "name": "SpaceFM",
+      "package": "spacefm",
+      "publish_time_s": null,
+      "publish_time_status": "prebuilt distribution package; source publish not measured",
+      "scenarios": {
+        "tiles100000": {
+          "files": {
+            "config/spacefm/session": "[MOD]\npanel1_list_detailed-b=2\npanel1_list_icons-b=1\n"
+          }
+        }
+      },
+      "supported_scenarios": [
+        "list100",
+        "list100000",
+        "tiles100000"
+      ],
+      "unsupported": {
+        "preview3png": "SpaceFM supplies image thumbnails in its file grid, but no integrated selected-image preview pane."
+      },
+      "version": "1.0.6-9"
+    }
+  ],
+  "cohort_schema_version": 1,
+  "correction": {
+    "command_delta": "insert --no-saved-tabs before {folder}",
+    "scope": "one-app fresh-profile SpaceFM correction",
+    "source_manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859",
+    "withdrawal_ledger_sha256": "9c784dd8625cc336c25ce6d96c882568458367601088c698bd5a88e22b8e3242"
+  },
+  "date": "2026-10-01",
+  "fixture_generator": "${REPO}/scripts/file_manager_fixtures.py",
+  "gloop_origin_binary": "${HOME}/.local/bin/gloop",
+  "gloop_origin_sha256": "28c9cc2f583c94db4e67c40224cf92a073e66cff8147ca8c204cddf3722ca6bd",
+  "host_package_inventory_file": "${STAGING}/cohort-manifest-v7-node2.host-packages.txt",
+  "host_package_inventory_sha256": "90b2f44729d0329c97fa80ccc935fa69d2cd9d0acf2f68737b8fec2459fb4a51",
+  "host_package_manager": "pacman",
+  "package_fetcher": "${REPO}/scripts/file_manager_packages.py",
+  "package_input_manifest_sha256": "a638ce5f978d0b3a3c673195d194c916e3d1b153ff39213eb3beafd23744aff9",
+  "package_lock": "${REPO}/assets/performance/file-managers-2026-10-01/packages.lock.json",
+  "package_lock_sha256": "d3525959c0a1d27e95d8d3e8881b07d935d179ff52784b93f0ccf467e23fd7a4",
+  "package_root": "${STAGING}/packages/root",
+  "platform": "CachyOS Linux x86_64_v3 host, private KWin Wayland runtime",
+  "template_sha256": "ca5ffe0f8ba688cef8a63a5d4eb145c8b570dbf774471b963df2ee403c8bec40"
+}

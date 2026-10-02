@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "declared_utc": "2026-10-02T06:32:11.367566+00:00",
+  "stage": "after_reviewed_corrective_warmups_before_corrective_measurements",
+  "corrective_measured_raw_rows_at_declaration": 0,
+  "corrective_run_end_rows_at_declaration": 0,
+  "dolphin_corrective_measured_raw_rows_at_declaration": 0,
+  "dolphin_corrective_run_end_rows_at_declaration": 0,
+  "plan_creation_ledger_sha256": "65d38ab1bf0ed10c4f1f9994b70eb46f1b91900eb88773c5c55858f1f3c181ac",
+  "dolphin_plan_creation_ledger_sha256": "78546dfed69e23c3b457510b2c211d9d937d9907bf388ad95cde26a300d9b11a",
+  "main_run_sha256": "3849c0178e9656d9019233a206aa126c96adc170e40326b51b82b69546aceb33",
+  "exporter_sha256": "119655daf2d537d259fcd5814ee60d485934c9779bff078b4ccae734b8d98ca8",
+  "withdrawal_ledger_sha256": "9c784dd8625cc336c25ce6d96c882568458367601088c698bd5a88e22b8e3242",
+  "tab_audit_sha256": "f39cecaad31f7572593e6d91e44e3bee3ce6c64cc798ee1f79f9c707ddd2cd9d",
+  "withdrawal_raw_prefix_lines": 125,
+  "method_sha256": "da39873974a8225d749c7e06d91ccf76d20c3d2155aacb59f8fa6eaa895d9662",
+  "warmup_review_sha256": "7e38593091c4f2e4be1ffa1f5a3e3dfa10125ebf9f6355da8b093c095b73ead0",
+  "independent_warmup_review_sha256": "cc0c6255dbb603c5fcdee9f2aa61c153bb00485b276d134e9c2a86e67e93bf16",
+  "warmup_review_snapshot_sha256": "bb8b54476cdc1ef0713904c108c518abc5e72fc10335f70cfc7c1886f4f1b8d7",
+  "dolphin_withdrawal_ledger_sha256": "2a58a8683396e3fa0dc216b5306ca43eaa81c6195bb0760e9eb562a90d42b160",
+  "dolphin_audit_sha256": "2474f0c9bd267d55be00e2de86b857797996d34052fbe84ca97303aaca9da9cb",
+  "dolphin_seed_manifest_sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622",
+  "dolphin_known_on_state_sha256": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d",
+  "dolphin_method_sha256": "b43716385d3a31bab52f5b6886916bad460660c79e66119ca8d5d8103f09a19a",
+  "dolphin_warmup_review_sha256": "0b4c939722d8bcce42fceb63c62eec1fd65906411d9dc30ce7573f6703fdd88c",
+  "dolphin_independent_warmup_review_sha256": "66abffdef097b4ca290630d021e987b02a5d7ccbfd82b5f4709a0a418ed5d7bc",
+  "dolphin_warmup_review_snapshot_sha256": "da8ef4e91bfbc38a4fc0ed8b5f8016028c7cddbf5f74f118b76d654b426aaa85",
+  "dolphin_withdrawal_raw_prefix_lines": 222,
+  "dolphin_withdrawal_run_end_prefix_lines": 163,
+  "main": {
+    "cohort": "cohort-final-v7",
+    "plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+    "manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859"
+  },
+  "spacefm": {
+    "cohort": "cohort-spacefm-no-saved-tabs-v1",
+    "plan_sha256": "7d2a2430d0101e9f2d922a9d55c40e188fa206478e2e45a20ce2e7310e6baa31",
+    "manifest_sha256": "d6751cbb66c18041973ef4a06c584976dc58a705f6c0bc8fc177731e19548176"
+  },
+  "dolphin_preview": {
+    "cohort": "cohort-dolphin-preview-state-seed-v1",
+    "plan_sha256": "8cfb77660acde3b173651b9076772d344bfddea64f303035ada59dc3316b63d4",
+    "manifest_sha256": "b3b08a2aba7cf19844aca5d8ce93296893559f3684c7cfe57e616103f752a622"
+  },
+  "app_sources": {
+    "caja": "main",
+    "cosmic-files": "main",
+    "dolphin": "main",
+    "doublecmd": "main",
+    "elementary-files": "main",
+    "flea": "main",
+    "gloop": "main",
+    "konqueror": "main",
+    "krusader": "main",
+    "nautilus": "main",
+    "nemo": "main",
+    "pcmanfm": "main",
+    "pcmanfm-qt": "main",
+    "spacefm": "spacefm",
+    "strata": "main",
+    "thunar": "main",
+    "xfe": "main"
+  },
+  "scenario_sources": {
+    "dolphin/preview3png": "dolphin_preview"
+  },
+  "disclosure": "Sixteen apps use the main cohort, except Dolphin's preview case. SpaceFM's whole-app correction and Dolphin's preview-only correction ran in separate cohorts on the same host and measurement method. This is a descriptive same-host comparison, not one balanced experiment.",
+  "declaration_sha256": "3a7aca14d0d48e52826d8abaf6aef0a8cdcf8baebd83b19f5055aa2e7982f3d1",
+  "composer_sha256": "6709bdb7fb08721440c59e7cfdd615be4eba9340444387bdeba93e0e0400566a",
+  "standalone_exports": {
+    "main": {
+      "path": "cohorts/main",
+      "provenance_sha256": "c6913dcdbabffd100e147435f31859470a9fee7243bd810fdbb85dfbf801de6b",
+      "summary_sha256": "4c5746b7a7588e9f2315a70967f33d0c31cc60fd12331c3a5e47dbd60dbc8275"
+    },
+    "spacefm": {
+      "path": "cohorts/spacefm",
+      "provenance_sha256": "6f1218f957304c11e0d277c98047947781ad89a7742def6882b507fd0b7c2bbc",
+      "summary_sha256": "4939aede2c43ebf402ce70ae163f2d47f7e3b8354a5d06330db40ddc3321a680"
+    },
+    "dolphin_preview": {
+      "path": "cohorts/dolphin_preview",
+      "provenance_sha256": "bc8178f1b4554af461917563ead17bcfce1623354ad302653bb598761e79415f",
+      "summary_sha256": "abf0006aed3161cd889c2f5a96d0e31b5410038888f0138188909b5899dbb6dc"
+    }
+  },
+  "withdrawn_main_spacefm_raw_ids": [
+    "cohort-final-v7:14",
+    "cohort-final-v7:31",
+    "cohort-final-v7:47",
+    "cohort-final-v7:64",
+    "cohort-final-v7:89",
+    "cohort-final-v7:100",
+    "cohort-final-v7:112",
+    "cohort-final-v7:138",
+    "cohort-final-v7:161",
+    "cohort-final-v7:164",
+    "cohort-final-v7:189",
+    "cohort-final-v7:211"
+  ],
+  "withdrawn_main_dolphin_preview_raw_ids": [
+    "cohort-final-v7:50",
+    "cohort-final-v7:217",
+    "cohort-final-v7:230",
+    "cohort-final-v7:231",
+    "cohort-final-v7:232"
+  ],
+  "reviewed_terminal_slot_ids": {
+    "main": [],
+    "spacefm": [],
+    "dolphin_preview": []
+  },
+  "final_summary_sha256": "602a8e9977b591d590931f80968e9d23e36593e8979538d557ea090f27d1ea61",
+  "final_csv_sha256": "71284b43f0edc3aaec44e31e0f22cfd747bbd1a4cfa4c7508bf8e3ecd63d7be2",
+  "composite_manifest_sha256": "1bfdc678c3231d69e513a5126827017de77ca5fa956c2c795428546c65d803d5",
+  "public_withdrawal_sha256": "73008f23de246ee0484f126a08f05d12e79e63b8b70b1e9e9a28c6104f336f5c",
+  "public_tab_audit_sha256": "8dd678ba58ba87157d18d3a6c1df61c00b76a21083e6b2cc054ce56f0204eadc",
+  "public_warmup_review_sha256": "88416708f322d2c2fe3c29838ca95f8a2f3b9037c6578a79bdc095ccfa6533f4",
+  "public_independent_warmup_review_sha256": "cc0c6255dbb603c5fcdee9f2aa61c153bb00485b276d134e9c2a86e67e93bf16",
+  "public_warmup_review_snapshot_sha256": "bb8b54476cdc1ef0713904c108c518abc5e72fc10335f70cfc7c1886f4f1b8d7",
+  "public_spacefm_method_sha256": "67faece4c715df7ab2c04e40432c2dad4eb45850fcacbb2969496ac7380c97bf",
+  "public_spacefm_plan_creation_sha256": "65d38ab1bf0ed10c4f1f9994b70eb46f1b91900eb88773c5c55858f1f3c181ac",
+  "public_dolphin_preview_method_sha256": "b43716385d3a31bab52f5b6886916bad460660c79e66119ca8d5d8103f09a19a",
+  "public_dolphin_preview_plan_creation_sha256": "78546dfed69e23c3b457510b2c211d9d937d9907bf388ad95cde26a300d9b11a",
+  "public_dolphin_preview_withdrawal_sha256": "2a58a8683396e3fa0dc216b5306ca43eaa81c6195bb0760e9eb562a90d42b160",
+  "public_dolphin_preview_audit_sha256": "7345b1ebac50d88dd6d355e95220874ab076cd50329b2bcdd6f3d2e6882e5658",
+  "public_dolphin_preview_seed_manifest_sha256": "9f414a557f1b5b261d7ccac9fd1268ae13c41e2100a4858ee203a196e2b41e81",
+  "public_dolphin_preview_warmup_review_sha256": "661a721fa668b0fae4a6b7979a0873adc34840b0d737386349c40379e551b0a0",
+  "public_dolphin_preview_independent_warmup_review_sha256": "66abffdef097b4ca290630d021e987b02a5d7ccbfd82b5f4709a0a418ed5d7bc",
+  "public_dolphin_preview_warmup_review_snapshot_sha256": "da8ef4e91bfbc38a4fc0ed8b5f8016028c7cddbf5f74f118b76d654b426aaa85"
+}

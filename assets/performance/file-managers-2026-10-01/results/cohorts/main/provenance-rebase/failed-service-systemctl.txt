@@ -1,0 +1,9 @@
+Id=gloop-bench-v7-run-0-s1.service
+SubState=failed
+InvocationID=e45e9ffc4e944f7e9021cce465a64061
+MainPID=0
+Result=exit-code
+ExecMainStartTimestamp=Thu 2026-10-01 22:04:04 EDT
+ExecMainExitTimestamp=Thu 2026-10-01 22:04:06 EDT
+ExecMainCode=1
+ExecMainStatus=2

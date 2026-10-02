@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "cohort": "artifacts/performance/file-managers-20261001/cohort-final-v7",
+  "scope": "dolphin/preview3png",
+  "review_result": "main preview ordinal 217 does not show the configured integrated preview and must not be ranked",
+  "warmup": {
+    "ordinal": 50,
+    "raw_line_sha256": "dfbee547a8a3dd48dc5f444bdfd7eee53e8016c621b7b0caaadfb8bc35173d9b",
+    "history_line_sha256": "29fffcf209143e1962ee60e4a40068a1b064d12ba0842ca4a8a1da6af2d32ac3",
+    "capture": {
+      "path": "captures/dolphin-preview3png-warmup.png",
+      "sha256": "deac5adbcac4d774d604bb78d50f07088393ae4038cb560b1e63165501e6e365",
+      "width": 1180,
+      "height": 732,
+      "window": {
+        "activities": "dbus.Array([], signature=dbus.Signature('s'), variant_level=1)",
+        "caption": "3 — Dolphin",
+        "clientMachine": "",
+        "desktopFile": "org.kde.dolphin",
+        "desktops": "dbus.Array([dbus.String('a6cc1262-f45e-44b4-bb9d-e92d8960cc99')], signature=dbus.Signature('s'), variant_level=1)",
+        "excludeFromCapture": "0",
+        "fullscreen": "0",
+        "hasTransientParent": "0",
+        "height": "760.0",
+        "keepAbove": "0",
+        "keepBelow": "0",
+        "layer": "2",
+        "localhost": "1",
+        "maximizeHorizontal": "0",
+        "maximizeVertical": "0",
+        "minimized": "0",
+        "noBorder": "0",
+        "pid": "2257442",
+        "resourceClass": "org.kde.dolphin",
+        "resourceName": "dolphin",
+        "role": "",
+        "skipPager": "0",
+        "skipSwitcher": "0",
+        "skipTaskbar": "0",
+        "type": "0",
+        "uuid": "{854c490b-eeaa-49d3-aad8-df1be807c22f}",
+        "width": "1180.0",
+        "x": "130.0",
+        "y": "70.0"
+      }
+    },
+    "observed": "image-0.png selected with complete image 0 in the integrated Information panel",
+    "profile_state_sha256_at_end": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d"
+  },
+  "measured": {
+    "ordinal": 217,
+    "slot_id": "preview3png/0/dolphin",
+    "raw_line_sha256": "b0e9287eab9349e91793bff8b93089ad7956e105d92bc14ebe63fd4bb23036e9",
+    "history_line_sha256": "f6986e5d4b7917a942723868d6568f82315dee67c7638049503d98be68f099c0",
+    "capture": {
+      "path": "captures/dolphin-preview3png-217.png",
+      "sha256": "16d4d6a2c1c91d72796cb7dd30771d6d2379cb192847f4d185a6b21e0ad5abfb",
+      "width": 1180,
+      "height": 732,
+      "window": {
+        "activities": "dbus.Array([], signature=dbus.Signature('s'), variant_level=1)",
+        "caption": "3 — Dolphin",
+        "clientMachine": "",
+        "desktopFile": "org.kde.dolphin",
+        "desktops": "dbus.Array([dbus.String('e01d74fc-0621-4a98-b27f-8204cb941c9f')], signature=dbus.Signature('s'), variant_level=1)",
+        "excludeFromCapture": "0",
+        "fullscreen": "0",
+        "hasTransientParent": "0",
+        "height": "760.0",
+        "keepAbove": "0",
+        "keepBelow": "0",
+        "layer": "2",
+        "localhost": "1",
+        "maximizeHorizontal": "0",
+        "maximizeVertical": "0",
+        "minimized": "0",
+        "noBorder": "0",
+        "pid": "2498675",
+        "resourceClass": "org.kde.dolphin",
+        "resourceName": "dolphin",
+        "role": "",
+        "skipPager": "0",
+        "skipSwitcher": "0",
+        "skipTaskbar": "0",
+        "type": "0",
+        "uuid": "{4258e735-3f0a-4214-a1dd-88346f353483}",
+        "width": "1180.0",
+        "x": "130.0",
+        "y": "70.0"
+      }
+    },
+    "observed": "image-0.png selected and all three file rows visible, but no Information panel or image canvas",
+    "profile_state_sha256_at_launch": "2b8cdf249c2cbf63a126f02b63e8ad5e31a8b3b2f09b1d4be9c95794e7d49a0d",
+    "profile_state_sha256_at_end": "a61fcc9b82dcb8d5ce247fae8999dc04aeb4b958b939c9fed560956316fd7406",
+    "input": [
+      {
+        "action": {
+          "action": "key",
+          "key": "F11"
+        },
+        "screen_at": null,
+        "input_capture": null,
+        "start_elapsed_s": 0.271764305,
+        "end_elapsed_s": 0.382042604
+      },
+      {
+        "action": {
+          "action": "click",
+          "at": [
+            340,
+            100
+          ]
+        },
+        "screen_at": [
+          470,
+          198
+        ],
+        "input_capture": {
+          "width": 1180,
+          "height": 732,
+          "top_inset": 28,
+          "includes_shadow": false
+        },
+        "start_elapsed_s": 0.382049718,
+        "end_elapsed_s": 0.48560002
+      }
+    ]
+  },
+  "manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859",
+  "plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+  "frozen_scenario": {
+    "files": {
+      "data/dolphin/view_properties/global/.directory": "[Dolphin]\nTimestamp=2026,10,1,20,0,0\nVersion=4\nViewMode=1\n"
+    },
+    "post_launch_input": [
+      {
+        "action": "key",
+        "key": "F11"
+      },
+      {
+        "action": "click",
+        "at": [
+          340,
+          100
+        ]
+      }
+    ]
+  },
+  "actual_current_native_state": {
+    "path": "artifacts/performance/file-managers-20261001/cohort-final-v7/profiles/dolphin/preview3png/state/dolphinstaterc",
+    "sha256": "a61fcc9b82dcb8d5ce247fae8999dc04aeb4b958b939c9fed560956316fd7406",
+    "contents": "[State]\n1440x900 screen: Height=732\n1440x900 screen: Width=1180\nRestorePositionForNextInstance=false\nState=AAAA/wAAAAD9AAAAAwAAAAAAAACQAAACrvwCAAAAAvsAAAAWAGYAbwBsAGQAZQByAHMARABvAGMAawAAAAAA/////wAAAAAA////+wAAABQAcABsAGEAYwBlAHMARABvAGMAawEAAAAuAAACrgAAAFMA////AAAAAQAAALQAAAKu/AIAAAAB+wAAABAAaQBuAGYAbwBEAG8AYwBrCAAAAC4AAAKuAAABCwD///8AAAADAAAAAAAAAAD8AQAAAAH7AAAAGAB0AGUAcgBtAGkAbgBhAGwARABvAGMAawAAAAAA/////wAAAAAA////AAAECwAAAq4AAAAEAAAABAAAAAgAAAAI/AAAAAEAAAACAAAAAQAAABYAbQBhAGkAbgBUAG8AbwBsAEIAYQByAQAAAAD/////AAAAAAAAAAA=\n"
+  },
+  "causal_assessment": "The exact saved warmup native state was reused at measured launch and the same F11 toggle was applied. The pinned upstream source implements F11 with the Information dock toggleViewAction. These observations support a persistent-panel toggle cause. No independent control launch has been performed by this reviewer.",
+  "upstream_sources": [
+    "https://github.com/KDE/dolphin/blob/v26.08.1/src/dolphinmainwindow.cpp#L2150",
+    "https://github.com/KDE/dolphin/blob/v26.08.1/src/dolphinmainwindow.cpp#L2687"
+  ],
+  "notes": [
+    "Raw native-state hashes are captured before scope cleanup, not asserted to be post-close snapshots.",
+    "Other Dolphin scenarios use separate profile namespaces.",
+    "No source, manifest, input, original profile, raw record, history or capture was changed by this audit."
+  ]
+}

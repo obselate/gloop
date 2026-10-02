@@ -1,0 +1,169 @@
+{
+  "corrected_command": [
+    "/usr/bin/bwrap",
+    "--bind",
+    "/",
+    "/",
+    "--overlay-src",
+    "/usr/share",
+    "--tmp-overlay",
+    "/usr/share",
+    "--ro-bind",
+    "${STAGING}/packages/root/usr/share/spacefm",
+    "/usr/share/spacefm",
+    "--overlay-src",
+    "/etc",
+    "--tmp-overlay",
+    "/etc",
+    "--ro-bind",
+    "${STAGING}/packages/root/etc/spacefm",
+    "/etc/spacefm",
+    "--",
+    "{binary}",
+    "--no-saved-tabs",
+    "{folder}"
+  ],
+  "correction_manifest": "artifacts/performance/file-managers-20261001/spacefm-no-saved-tabs-manifest-v1.json",
+  "correction_scope": "fresh isolated SpaceFM profiles; three scenario warmups and nine measured slots only; same binary, fixture, source, host, baseline, timing and capture method",
+  "observed_source_records_at_declaration": [
+    {
+      "ordinal": 14,
+      "scenario": "list100",
+      "slot_id": null,
+      "warmup": true
+    },
+    {
+      "ordinal": 31,
+      "scenario": "list100000",
+      "slot_id": null,
+      "warmup": true
+    },
+    {
+      "ordinal": 47,
+      "scenario": "tiles100000",
+      "slot_id": null,
+      "warmup": true
+    },
+    {
+      "ordinal": 64,
+      "scenario": "list100",
+      "slot_id": "list100/0/spacefm",
+      "warmup": false
+    },
+    {
+      "ordinal": 89,
+      "scenario": "list100",
+      "slot_id": "list100/1/spacefm",
+      "warmup": false
+    },
+    {
+      "ordinal": 100,
+      "scenario": "list100",
+      "slot_id": "list100/2/spacefm",
+      "warmup": false
+    },
+    {
+      "ordinal": 112,
+      "scenario": "list100000",
+      "slot_id": "list100000/0/spacefm",
+      "warmup": false
+    }
+  ],
+  "original_command": [
+    "/usr/bin/bwrap",
+    "--bind",
+    "/",
+    "/",
+    "--overlay-src",
+    "/usr/share",
+    "--tmp-overlay",
+    "/usr/share",
+    "--ro-bind",
+    "${STAGING}/packages/root/usr/share/spacefm",
+    "/usr/share/spacefm",
+    "--overlay-src",
+    "/etc",
+    "--tmp-overlay",
+    "/etc",
+    "--ro-bind",
+    "${STAGING}/packages/root/etc/spacefm",
+    "/etc/spacefm",
+    "--",
+    "{binary}",
+    "{folder}"
+  ],
+  "reason": "The original SpaceFM launch restored a saved 100000-file tab and opened the target again, so its measured GUI workload changed from one populated tab in warmup ordinal 31 to two in measured ordinal 112.",
+  "source_cohort": "artifacts/performance/file-managers-20261001/cohort-final-v7",
+  "source_manifest_sha256": "24d3d5d88eb992002ecc992e511057946016df9070297661ce96929d1000b859",
+  "source_plan_sha256": "ec7d166d2bfd6e458a2925419c6c3118f1c8dcfb042c0aa0826243a153b52283",
+  "source_raw_prefix_sha256_at_declaration": "41e7fa7874a734e118ef8b425ed01f43ec33cb4209927c196bb8bc1f1f6fbd97",
+  "state": "withdrawal_declared_before_corrective_launch",
+  "tab_growth_audit_sha256": "f39cecaad31f7572593e6d91e44e3bee3ce6c64cc798ee1f79f9c707ddd2cd9d",
+  "withdrawal_policy": "Unconditionally exclude every original main-cohort SpaceFM warmup and measured observation from ranking and aggregate statistics, including original slots completed after this declaration. Preserve original raw evidence. The corrective SpaceFM cohort is a separately identified method.",
+  "withdrawn_app": "spacefm",
+  "withdrawn_main_plan_slots": [
+    {
+      "app": "spacefm",
+      "index": 5,
+      "round": 0,
+      "scenario": "list100",
+      "slot_id": "list100/0/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 30,
+      "round": 1,
+      "scenario": "list100",
+      "slot_id": "list100/1/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 40,
+      "round": 2,
+      "scenario": "list100",
+      "slot_id": "list100/2/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 52,
+      "round": 0,
+      "scenario": "list100000",
+      "slot_id": "list100000/0/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 77,
+      "round": 1,
+      "scenario": "list100000",
+      "slot_id": "list100000/1/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 99,
+      "round": 2,
+      "scenario": "list100000",
+      "slot_id": "list100000/2/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 102,
+      "round": 0,
+      "scenario": "tiles100000",
+      "slot_id": "tiles100000/0/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 126,
+      "round": 1,
+      "scenario": "tiles100000",
+      "slot_id": "tiles100000/1/spacefm"
+    },
+    {
+      "app": "spacefm",
+      "index": 148,
+      "round": 2,
+      "scenario": "tiles100000",
+      "slot_id": "tiles100000/2/spacefm"
+    }
+  ]
+}

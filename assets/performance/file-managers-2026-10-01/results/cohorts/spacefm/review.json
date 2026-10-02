@@ -1,0 +1,114 @@
+{
+  "warmups": {
+    "spacefm/list100": true,
+    "spacefm/list100000": true,
+    "spacefm/tiles100000": true
+  },
+  "runs": {
+    "3": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective list100 warmup original. It shows exactly one 100 target tab, a populated detail list, the correct path and native 100-item count. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "ee2f2e2e61c8bd82155dd62c52758a1bb78f53e7d0f2efbd8223aca1331b9375"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "4": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective list100 warmup original. It shows exactly one 100 target tab, a populated detail list, the correct path and native 100-item count. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "ee2f2e2e61c8bd82155dd62c52758a1bb78f53e7d0f2efbd8223aca1331b9375"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "5": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective list100 warmup original. It shows exactly one 100 target tab, a populated detail list, the correct path and native 100-item count. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "ee2f2e2e61c8bd82155dd62c52758a1bb78f53e7d0f2efbd8223aca1331b9375"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "6": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective list100000 warmup original. It shows exactly one 100000 target tab, a populated detail list, the correct path and native 100000-item count. The fixed twenty-second capture has the same bytes and one populated target tab. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268",
+        "late_capture": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "7": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective list100000 warmup original. It shows exactly one 100000 target tab, a populated detail list, the correct path and native 100000-item count. The fixed twenty-second capture has the same bytes and one populated target tab. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268",
+        "late_capture": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "8": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective list100000 warmup original. It shows exactly one 100000 target tab, a populated detail list, the correct path and native 100000-item count. The fixed twenty-second capture has the same bytes and one populated target tab. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268",
+        "late_capture": "599e993a33539a32fac47a364845ac0e5c2a1f57b916974b5ac7a13ab9778268"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "9": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective tiles100000 warmup original. It shows exactly one 100000 target tab, a populated filename and icon grid, the correct path and native 100000-item count. The fixed twenty-second capture has the same bytes and one populated target tab. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d",
+        "late_capture": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "10": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective tiles100000 warmup original. It shows exactly one 100000 target tab, a populated filename and icon grid, the correct path and native 100000-item count. The fixed twenty-second capture has the same bytes and one populated target tab. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d",
+        "late_capture": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    },
+    "11": {
+      "scenario_visible": true,
+      "ready_at_5s": true,
+      "population_validated_by_deadline": true,
+      "note": "Primary actual original view or exact reviewed warmup byte identity and all fresh current proof checks pass. Independent current proof review agrees. Current five-second capture has exact bytes of the directly viewed corrective tiles100000 warmup original. It shows exactly one 100000 target tab, a populated filename and icon grid, the correct path and native 100000-item count. The fixed twenty-second capture has the same bytes and one populated target tab. No restored extra fixture tab is visible.",
+      "capture_sha256": {
+        "capture": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d",
+        "late_capture": "c36979a985ae67cc762af632ccd8f7dfcb4201c53b275a62cd9ac8f3ceaa7c2d"
+      },
+      "primary_proof_audit_sha256": "5c86922f2d69439abbdfb6251e606b8657f7b0d5959a43c53c9530148ff3a889",
+      "independent_measured_review_sha256": "06ae150ea66a6bf9679ea6334aed090f44f24e05baaea0eed73b709c548fe79c"
+    }
+  }
+}
