@@ -270,6 +270,15 @@
     "session_wrapper_source": {
       "path": "scripts/file_manager_session.py",
       "sha256": "1f4e4b5eff12fb4b33642b1ec9118a4bdc217f106e5cdfead2a66dc7c03714ee"
+    },
+    "exporter_before_account_redaction": {
+      "path": "artifacts/performance/file-managers-20261001/setup-sources/export_file_manager_results-before-account-redaction.py",
+      "origin_git_revision": "ff078f6:scripts/export_file_manager_results.py",
+      "sha256": "c7b34c097f81543b9cceb048ace77eaeb3bda04fc443951ca0bb6d0e633d08dc"
+    },
+    "exporter_with_account_redaction": {
+      "path": "scripts/export_file_manager_results.py",
+      "sha256": "073c68b964ce206278ddcf905ebce8d510e03151b50de2c1034b27a86e970170"
     }
   },
   "events": [
@@ -574,6 +583,18 @@
         "planned_fixed_measured_slots": 177
       },
       "disposition": "V7 uses fresh records and profiles and requires functional review before measured launches; this setup event makes no v7 performance claim."
+    },
+    {
+      "id": "export_account_redaction",
+      "sources": ["exporter_before_account_redaction", "exporter_with_account_redaction"],
+      "facts": {
+        "issue": "The previous public exporter left standalone USER and LOGNAME values in raw launch_environment records",
+        "correction": "Redact string USER and LOGNAME fields as account names during structured export",
+        "new_redaction_counter": "account_fields_redacted",
+        "synthetic_regression_check": "USER and LOGNAME are redacted while numeric, boolean, null, hash, and capture-reference values remain unchanged",
+        "cohort_export_run": false
+      },
+      "disposition": "The prior exporter bytes remain archived with Git origin. The corrected exporter is prepared for strict v7 export after runtime completion and full output audit."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
