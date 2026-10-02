@@ -384,6 +384,66 @@
     "v7_recovery39_service_command": {
       "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume39.json",
       "sha256": "074eef8a38ca633da4d8def8a566f663adc7ba98d727f503efc2a1b4ea69d548"
+    },
+    "v7_spacefm_withdrawal_raw_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-archive/raw-first125.jsonl",
+      "sha256": "41e7fa7874a734e118ef8b425ed01f43ec33cb4209927c196bb8bc1f1f6fbd97"
+    },
+    "v7_spacefm_tab_audit": {
+      "path": "artifacts/performance/file-managers-20261001/independent-spacefm-tab-growth-audit-v7.json",
+      "sha256": "f39cecaad31f7572593e6d91e44e3bee3ce6c64cc798ee1f79f9c707ddd2cd9d"
+    },
+    "v7_spacefm_withdrawal": {
+      "path": "artifacts/performance/file-managers-20261001/v7-spacefm-withdrawal.json",
+      "sha256": "9c784dd8625cc336c25ce6d96c882568458367601088c698bd5a88e22b8e3242"
+    },
+    "v7_spacefm_corrective_method": {
+      "path": "artifacts/performance/file-managers-20261001/spacefm-no-saved-tabs-method-v1.json",
+      "sha256": "da39873974a8225d749c7e06d91ccf76d20c3d2155aacb59f8fa6eaa895d9662"
+    },
+    "v7_spacefm_corrective_manifest": {
+      "path": "artifacts/performance/file-managers-20261001/spacefm-no-saved-tabs-manifest-v1.json",
+      "sha256": "d6751cbb66c18041973ef4a06c584976dc58a705f6c0bc8fc177731e19548176"
+    },
+    "v7_recovery64_run_history_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-archive/environment-run-invocations-first66.jsonl",
+      "sha256": "e5978d4c2ccfd5c043d0c5f6115b8a2b583fd52524140300914187b87c84dc4c"
+    },
+    "v7_recovery64_stopped_state": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-archive/resume39-controller-state.json",
+      "sha256": "d5b2f8f4dd52724c606042001c6879c60e5bad5e61f9d55c804f38b0a58253ca"
+    },
+    "v7_recovery64_stopped_log": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-archive/resume39-controller.log",
+      "sha256": "3fd63a41f25e4a8d6e303f687ddb0df00aa4afaf1528d6f5816243ffdc967336"
+    },
+    "v7_recovery64_discarded_result": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-archive/run64-svc1-outer-service-result.json",
+      "sha256": "fd066c5b3e93c8815b0dcf43c99375b6c0bffc387a41a08d1121f64ac9d33052"
+    },
+    "v7_recovery64_archive_index": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-archive/archive-index.json",
+      "sha256": "6af1de09778d19a109557439a35c4c5cc279770d80e0cffd91bf10cd6da860ee"
+    },
+    "v7_recovery64_ledger": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery64-ledger.json",
+      "sha256": "5471bce4c829db1f0f0fca79358561f4a378ecc9777514d4f50f605b88c375a8"
+    },
+    "v7_recovery64_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-resume64-gate.json",
+      "sha256": "93ff89a0e2f07b5d47fe8f8c12f2e44424af56adfc55266ae461e000689c57e7"
+    },
+    "v7_recovery64_commands": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-commands-node2-resume64.json",
+      "sha256": "9f3e95a0e22c733915e4eb5a48e2182ed81ffb0b165f130845f7a358734fd347"
+    },
+    "v7_recovery64_controller": {
+      "path": "artifacts/performance/file-managers-20261001/run-v7-measured-controller-node2-resume64.py",
+      "sha256": "2b4625796048b4ce39e8e477907144629ade4c8553098ea711cbe053ef84dff9"
+    },
+    "v7_recovery64_service_command": {
+      "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume64.json",
+      "sha256": "273dc78e840444f1078cdbe6c49641160d9396b4b11f1a35c4a2f7dece8efdde"
     }
   },
   "events": [
@@ -741,6 +801,41 @@
         "discarded_attempt_used_for_numeric_metrics": false
       },
       "disposition": "The original controller stopped after 39 accepted measured slots when Spectacle appeared during slot 39. The contaminated ordinal 98 and its genuine deferred end remain preserved but are excluded from metrics. The reviewed continuation resumes that slot in a unique service, keeps the fixed plan and prior accepted rows, and skips the discarded ordinal. The raw and run-history references are exact immutable prefixes because the live files continue to grow."
+    },
+    {
+      "id": "v7_spacefm_prospective_withdrawal",
+      "sources": ["v7_spacefm_withdrawal_raw_prefix", "v7_spacefm_tab_audit", "v7_spacefm_withdrawal", "v7_spacefm_corrective_method", "v7_spacefm_corrective_manifest"],
+      "facts": {
+        "withdrawn_app": "spacefm",
+        "withdrawn_main_measured_slots": 9,
+        "main_spacefm_values_used_for_final_metrics": 0,
+        "declaration_raw_prefix_rows": 125,
+        "warmup_tabs_observed": 1,
+        "measured_ordinal_112_tabs_observed": 2,
+        "corrective_option": "--no-saved-tabs",
+        "corrective_warmups_planned": 3,
+        "corrective_measured_slots_planned": 9,
+        "corrective_values_available_at_declaration": false
+      },
+      "disposition": "The main cohort preserves every original SpaceFM observation, including future original slots, but excludes all of them from final metrics. The saved-tab growth audit identified a changed browsing workload before corrective values existed. A separately identified fresh SpaceFM-only cohort will use the same pinned binary, host, fixtures, sampler and windows with saved-tab restoration disabled. This event makes no corrective performance claim."
+    },
+    {
+      "id": "v7_measured_external_contamination_recovery64",
+      "sources": ["v7_spacefm_withdrawal_raw_prefix", "v7_recovery64_run_history_prefix", "v7_recovery64_stopped_state", "v7_recovery64_stopped_log", "v7_recovery64_discarded_result", "v7_recovery64_archive_index", "v7_recovery64_ledger", "v7_recovery64_gate", "v7_recovery64_commands", "v7_recovery64_controller", "v7_recovery64_service_command"],
+      "facts": {
+        "accepted_measured_slots_before_stop": 64,
+        "discarded_raw_ordinal": 124,
+        "discarded_slot_id": "list100000/0/flea",
+        "external_gpu_process": "Spectacle",
+        "discarded_end_status": "deferred_external_contamination",
+        "recovery_resume_index": 64,
+        "replacement_service": "gloop-bench-v7-run-64-s2.service",
+        "raw_ordinal_offset": 2,
+        "discarded_raw_ordinals_preserved": [98, 124],
+        "planned_measured_slots": 177,
+        "discarded_attempt_used_for_numeric_metrics": false
+      },
+      "disposition": "The resume39 controller stopped after 64 accepted measured slots when a new Spectacle GPU process appeared during slot 64. The contaminated ordinal 124 and genuine deferred end remain preserved but excluded. The reviewed continuation resumes the same fixed plan in a unique service and skips both discarded ordinals. The source references are fixed archive bytes, not the growing live raw and run-history files."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
