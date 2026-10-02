@@ -168,7 +168,7 @@ def metric_cards(rows, output):
         for axis, (scenario, label) in zip(axes.flat, SCENARIOS.items()):
             chart(axis, [row for row in rows if row['scenario'] == scenario],
                   key, unit, decimals, label)
-        save_card(figure, output / f'{key}.png', note + '\n* Loading in at least one launch at 5s. + No 5s capture in at least one launch, validated later. Positions apply to this cohort.')
+        save_card(figure, output / f'{key}.png', note + '\n* Loading in at least one launch at 5s. + No 5s capture in at least one launch, validated later.\nSame-host comparison. SpaceFM uses a later corrective cohort.')
 
 
 def footprint_card(apps, output):
@@ -202,7 +202,7 @@ def overview_card(rows, output):
         cell.get_text().set_color(TEXT if row == 0 or column == 0 else GREEN)
         if row == 0 or column == 0:
             cell.get_text().set_weight('bold')
-    save_card(figure, output / 'gloop_positions.png', 'Three warm launches per case. Individual metric cards show every competitor and min/max ranges.\nPositions describe this cohort. View layouts differ. Five-second samples can include loading. CPU, 3 to 5s is not necessarily idle.')
+    save_card(figure, output / 'gloop_positions.png', 'Three warm launches per case. Individual metric cards show every competitor and min/max ranges.\nSame-host comparison. SpaceFM uses a later corrective cohort. Native view layouts differ.\nFive-second samples can include loading. CPU, 3 to 5s is not necessarily idle.')
 
 
 def coverage_card(rows, apps, output):
