@@ -680,6 +680,13 @@
               "io.elementary.files.preferences",
               "default-viewmode",
               "list"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
             ]
           ],
           "files": {
@@ -696,6 +703,13 @@
               "io.elementary.files.preferences",
               "default-viewmode",
               "list"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
             ]
           ],
           "files": {
@@ -712,6 +726,13 @@
               "io.elementary.files.preferences",
               "default-viewmode",
               "icon"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
             ]
           ],
           "files": {
@@ -735,6 +756,13 @@
               "io.elementary.files.preferences",
               "show-file-preview",
               "true"
+            ],
+            [
+              "gsettings",
+              "set",
+              "io.elementary.files.preferences",
+              "restore-tabs",
+              "false"
             ]
           ],
           "post_launch_input": [
@@ -1267,7 +1295,7 @@
   "package_lock": "{workspace}/assets/performance/file-managers-2026-10-01/packages.lock.json",
   "package_lock_sha256": "d3525959c0a1d27e95d8d3e8881b07d935d179ff52784b93f0ccf467e23fd7a4",
   "package_input_manifest_sha256": "a638ce5f978d0b3a3c673195d194c916e3d1b153ff39213eb3beafd23744aff9",
-  "adapter_input_sha256": "241bbe4b66236f966f7567f57b3a7190d227538b9a4c778d88608dcbc2ce14a2",
+  "adapter_input_sha256": "0d41bd1a90bbca7a3e53e34cc5946b86fd5c83191b726cb62a348c448e0f8798",
   "fixture_generator": "{workspace}/scripts/file_manager_fixtures.py",
   "package_fetcher": "{workspace}/scripts/file_manager_packages.py"
 }
