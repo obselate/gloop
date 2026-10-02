@@ -17,6 +17,14 @@ REPO = Path(__file__).resolve().parent.parent
 MANIFEST = REPO / "assets/performance/file-managers-2026-10-01/source-builds.template.json"
 DEFAULT_ROOT = REPO / "artifacts/performance/file-managers-20261001/source-builds"
 MEMORY_LIMIT = 8 * 1024 ** 3
+RUST_APPS = {"cosmic-files", "flea", "strata"}
+CACHE_ENV_KEYS = {"XDG_CACHE_HOME", "CARGO_HOME", "NUGET_PACKAGES",
+                  "NUGET_HTTP_CACHE_PATH", "NUGET_PLUGINS_CACHE_PATH",
+                  "NUGET_SCRATCH", "DOTNET_CLI_HOME", "RUSTUP_HOME",
+                  "RUSTUP_TOOLCHAIN", "RUSTUP_AUTO_INSTALL"}
+UNSAFE_BUILD_ENV_KEYS = {"CARGO_TARGET_DIR", "CARGO_BUILD_TARGET_DIR", "CARGO_BUILD_BUILD_DIR",
+                         "RUSTC", "CARGO_BUILD_RUSTC", "RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER",
+                         "CARGO_BUILD_RUSTC_WRAPPER", "CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER"}
 TOOLS = {
     "cc": ["cc", "--version"],
     "cxx": ["c++", "--version"],
@@ -169,11 +177,11 @@ def environment_from(path):
         if not isinstance(additions, dict) or any(not isinstance(key, str) or not isinstance(value, str)
                                                 for key, value in additions.items()):
             raise ValueError("environment file must be a JSON object of strings")
+        if CACHE_ENV_KEYS & additions.keys():
+            raise ValueError("environment file cannot override isolated dependency cache paths")
         environment.update(additions)
-    cache_controls = {"CARGO_TARGET_DIR", "RUSTC_WRAPPER", "RUSTC_WORKSPACE_WRAPPER",
-                      "CARGO_BUILD_RUSTC_WRAPPER", "CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER"}
     blocked = [key for key, value in environment.items() if value and
-               (key in cache_controls or key.startswith(("CCACHE_", "SCCACHE_"))
+               (key in UNSAFE_BUILD_ENV_KEYS or key.startswith(("CCACHE_", "SCCACHE_"))
                 or key.endswith("_COMPILER_LAUNCHER"))]
     for key in ("CC", "CXX"):
         parts = shlex.split(environment.get(key, ""))
@@ -185,6 +193,46 @@ def environment_from(path):
     return environment
 
 
+def cache_environment(root, app, environment, prefix):
+    if CACHE_ENV_KEYS & app.get("environment", {}).keys():
+        raise ValueError(f"{app['id']}: app environment cannot override isolated dependency cache paths")
+    if UNSAFE_BUILD_ENV_KEYS & app.get("environment", {}).keys():
+        raise ValueError(f"{app['id']}: app environment cannot override the pinned compiler or output path")
+    cache_root = root / "cache" / app["id"]
+    cache_root.mkdir(parents=True, exist_ok=True)
+    if cache_root.resolve() != cache_root:
+        raise ValueError(f"{app['id']}: dependency cache must not be a symlink")
+    isolated = environment.copy()
+    paths = {
+        "XDG_CACHE_HOME": cache_root / "xdg",
+        "CARGO_HOME": cache_root / "cargo",
+        "NUGET_PACKAGES": cache_root / "nuget-packages",
+        "NUGET_HTTP_CACHE_PATH": cache_root / "nuget-http",
+        "NUGET_PLUGINS_CACHE_PATH": cache_root / "nuget-plugins",
+        "NUGET_SCRATCH": cache_root / "nuget-scratch",
+        "DOTNET_CLI_HOME": cache_root / "dotnet-cli",
+    }
+    for key, path in paths.items():
+        path.mkdir(parents=True, exist_ok=True)
+        if path.resolve() != path:
+            raise ValueError(f"{app['id']}: {key} cache must not be a symlink")
+        isolated[key] = str(path)
+    if app.get("rustup_channel"):
+        if prefix is None:
+            raise ValueError(f"{app['id']}: Rust builds require a provisioned --prefix-root")
+        rustup_home = prefix / "rustup"
+        if not rustup_home.is_dir() or rustup_home.resolve() != rustup_home:
+            raise ValueError(f"{app['id']}: provision Rust under --prefix-root/rustup before preparation")
+        toolchain = rustup_home / "toolchains" / f"{app['rustup_channel']}-x86_64-unknown-linux-gnu"
+        if not all((toolchain / "bin" / name).is_file() for name in ("rustc", "cargo")):
+            raise ValueError(f"{app['id']}: exact Rust toolchain is missing from prefix")
+        isolated["RUSTUP_HOME"] = str(rustup_home)
+        isolated["RUSTUP_TOOLCHAIN"] = app["rustup_channel"]
+        isolated["RUSTUP_AUTO_INSTALL"] = "0"
+        isolated["RUSTC"] = str(toolchain / "bin" / "rustc")
+    return isolated, cache_root
+
+
 def environment_hash(environment, app):
     return hash_environment(environment | app.get("environment", {}))
 
@@ -193,7 +241,7 @@ def hash_environment(environment):
     return hashlib.sha256(json.dumps(environment, sort_keys=True).encode()).hexdigest()
 
 
-def host_phase(root, app, phase, environment, prefix_hash, manifest_hash):
+def host_phase(root, app, phase, environment, cache_root, prefix_hash, manifest_hash):
     id = app["id"]
     env_hash = environment_hash(environment, app)
     folder = root / "records" / id
@@ -208,6 +256,7 @@ def host_phase(root, app, phase, environment, prefix_hash, manifest_hash):
     target = folder / f"{phase}.json"
     if target.exists():
         raise RuntimeError(f"{id}: {phase} already attempted; use a new root for another observation")
+    expected_rust_toolchains = None
     if phase == "measure":
         prepared = read_json(folder / "prepare.json")
         if (prepared["status"] != "ok" or prepared["environment_sha256"] != env_hash
@@ -215,15 +264,25 @@ def host_phase(root, app, phase, environment, prefix_hash, manifest_hash):
                 or prepared.get("manifest_sha256") != manifest_hash):
             raise RuntimeError(f"{id}: preparation did not succeed with this environment")
         expected_hash = prepared["prepared_source_sha256"]
+        expected_cache_hash = prepared["dependency_cache_sha256"]
+        if id in RUST_APPS:
+            expected_rust_toolchains = {
+                name: prepared["toolchains"].get(name) for name in ("selected_rustc", "selected_cargo")
+            }
     else:
         expected_hash = fetch_record["extracted_source_sha256"]
+        expected_cache_hash = None
     source_hash = tree_sha256(root / "source" / id)
     if source_hash != expected_hash:
         raise RuntimeError(f"{id}: source tree changed before {phase}")
+    if expected_cache_hash and tree_sha256(cache_root) != expected_cache_hash:
+        raise RuntimeError(f"{id}: dependency cache changed before {phase}")
     cpu_pair = sorted(os.sched_getaffinity(0))[:2]
     if len(cpu_pair) != 2:
         raise RuntimeError("two available logical CPUs are required")
     values = variables(root, app)
+    if id in RUST_APPS:
+        values["cargo"] = str(Path(environment["RUSTC"]).with_name("cargo"))
     if phase == "measure" and find_executable(values.values(), app["expected_executable"]):
         raise RuntimeError(f"{id}: executable exists before the timed build")
     (root / "build" / id).mkdir(parents=True, exist_ok=True)
@@ -234,6 +293,10 @@ def host_phase(root, app, phase, environment, prefix_hash, manifest_hash):
         "log": str(folder / f"{phase}.log"), "environment_sha256": env_hash,
         "manifest_sha256": manifest_hash,
         "prefix_sha256": prefix_hash, "app_environment": app.get("environment", {}),
+        "dependency_cache_root": str(cache_root),
+        "expected_dependency_cache_sha256": expected_cache_hash,
+        "expected_rust_toolchains": expected_rust_toolchains,
+        "expected_rustc_version": app.get("expected_rustc_version"),
         "expected_executable": app["expected_executable"],
         "search_roots": [values["source"], values["build"], values["output"]],
     }
@@ -254,6 +317,7 @@ def host_phase(root, app, phase, environment, prefix_hash, manifest_hash):
         result.pop("source_build_seconds", None)
     if phase == "prepare" and result["status"] == "ok":
         result["prepared_source_sha256"] = tree_sha256(root / "source" / id)
+        result["dependency_cache_sha256"] = tree_sha256(cache_root)
     write_json(target, result)
     print(f"{id}: {result['status']}")
     return result["status"] == "ok"
@@ -285,13 +349,20 @@ def limits():
             "parent_memory_limits_bytes": parent_memory, "verified": valid}
 
 
-def toolchains(environment, source, build):
+def toolchains(environment, source, build, app_id):
     versions = {}
     commands = dict(TOOLS)
+    if app_id in RUST_APPS:
+        commands["rustc"] = [environment["RUSTC"], "--version"]
+        commands["cargo"] = [str(Path(environment["RUSTC"]).with_name("cargo")), "--version"]
     for key, name in (("CC", "cc"), ("CXX", "cxx")):
         if environment.get(key):
             commands[name] = [*shlex.split(environment[key]), "--version"]
     for name, command in commands.items():
+        if name in {"cargo", "rustc"} and app_id not in RUST_APPS:
+            continue
+        if name == "dotnet" and app_id != "gloop":
+            continue
         try:
             result = subprocess.run(command, capture_output=True, text=True, timeout=10,
                                     cwd=source, env=environment)
@@ -302,6 +373,21 @@ def toolchains(environment, source, build):
             }
         except (FileNotFoundError, IndexError, subprocess.TimeoutExpired):
             versions[name] = None
+    if app_id in RUST_APPS:
+        try:
+            selected = subprocess.run([environment["RUSTC"], "--print", "sysroot"], capture_output=True,
+                                      text=True, timeout=10, cwd=source, env=environment)
+            sysroot = Path(selected.stdout.strip()).resolve() if selected.returncode == 0 else None
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            sysroot = None
+        rustup_home = Path(environment["RUSTUP_HOME"]).resolve()
+        for name in ("rustc", "cargo"):
+            executable = (sysroot / "bin" / name).resolve() if sysroot else None
+            versions[f"selected_{name}"] = None if executable is None else {
+                "path": str(executable),
+                "sha256": sha256(executable) if executable and executable.is_file() else None,
+                "inside_rustup_home": executable.is_relative_to(rustup_home),
+            }
     cache = Path(build) / "CMakeCache.txt"
     if cache.exists():
         for line in cache.read_text(errors="replace").splitlines():
@@ -335,16 +421,39 @@ def internal(payload_path):
               "prefix_sha256": payload["prefix_sha256"],
               "manifest_sha256": payload["manifest_sha256"],
               "limits": limits(), "toolchains": toolchains(environment, payload["search_roots"][0],
-                                                         payload["search_roots"][1])}
+                                                         payload["search_roots"][1], payload["id"])}
+    rust_versions = result["toolchains"]
+    rust_selected = [rust_versions.get(name) for name in ("selected_rustc", "selected_cargo")]
+    rust_valid = all(item and item["inside_rustup_home"] and item["sha256"] for item in rust_selected)
+    if payload["id"] in RUST_APPS:
+        if rust_valid:
+            rust_steps = payload["steps"] if payload["phase"] == "prepare" else [payload["build"]]
+            rust_valid = (Path(environment["RUSTC"]).resolve() == Path(rust_selected[0]["path"])
+                          and all(Path(step["argv"][0]).resolve() == Path(rust_selected[1]["path"])
+                                  for step in rust_steps))
+        rustc_version = (rust_versions.get("rustc") or {}).get("version") or ""
+        rust_valid = rust_valid and rustc_version.startswith(
+            f"rustc {payload['expected_rustc_version']} ")
+        expected = payload["expected_rust_toolchains"]
+        if expected:
+            rust_valid = rust_valid and all(
+                rust_versions[name] == expected[name] for name in ("selected_rustc", "selected_cargo"))
     if hash_environment(environment) != payload["environment_sha256"]:
         result.update(status="environment_failed", reason="effective environment differs from recorded environment")
     elif not result["limits"]["verified"]:
         result.update(status="limit_failed", reason="CPU, memory, or affinity limit differs from method")
-    else:
+    elif payload["id"] in RUST_APPS and not rust_valid:
+        result.update(status="toolchain_failed", reason="selected Rust toolchain differs from pinned prefix")
+    if result["status"] == "ok":
         steps = payload["steps"] if payload["phase"] == "prepare" else [payload["build"]]
         with log.open("w") as stream:
             for step in steps:
                 print(json.dumps(step), file=stream, flush=True)
+                if payload["phase"] == "measure":
+                    result["dependency_cache_sha256"] = tree_sha256(Path(payload["dependency_cache_root"]))
+                    if result["dependency_cache_sha256"] != payload["expected_dependency_cache_sha256"]:
+                        result.update(status="cache_changed", reason="dependency cache changed before timed command")
+                        break
                 start = time.perf_counter_ns()
                 try:
                     completed = subprocess.run(step["argv"], cwd=step["cwd"],
@@ -367,6 +476,10 @@ def internal(payload_path):
                         result["source_build_seconds"] = elapsed
                         result["built_executable_sha256"] = sha256(executable)
                         result["built_executable_bytes"] = executable.stat().st_size
+    if payload["phase"] == "measure" and "attempt_elapsed_seconds" in result:
+        result["dependency_cache_after_sha256"] = tree_sha256(Path(payload["dependency_cache_root"]))
+        result["dependency_cache_changed_during_build"] = (
+            result["dependency_cache_after_sha256"] != result["dependency_cache_sha256"])
     if not log.exists():
         log.touch()
     result["log_sha256"] = sha256(log)
@@ -409,12 +522,23 @@ def public_results(root, manifest, manifest_hash):
             executable_bytes = measure_record.get("built_executable_bytes")
             scope_returncode = measure_record.get("scope_returncode")
             measured_limits = measure_record.get("limits")
+            measured_tools = measure_record.get("toolchains") or {}
+            prepared_tools = prepare_record.get("toolchains") or {}
+            rust_proof = app["id"] not in RUST_APPS or all(
+                isinstance(measured_tools.get(name), dict)
+                and measured_tools[name].get("inside_rustup_home") is True
+                and measured_tools[name].get("sha256")
+                and measured_tools[name] == prepared_tools.get(name)
+                for name in ("selected_rustc", "selected_cargo"))
             if status == "ok" and not (
                     type(seconds) in (int, float) and seconds >= 0
                     and measure_record.get("built_executable_sha256")
                     and type(executable_bytes) is int and executable_bytes > 0
                     and type(scope_returncode) is int and scope_returncode == 0
                     and measure_record.get("scope_log_sha256")
+                    and measure_record.get("dependency_cache_sha256")
+                    and measure_record["dependency_cache_sha256"] == prepare_record.get("dependency_cache_sha256")
+                    and rust_proof
                     and isinstance(measured_limits, dict) and measured_limits.get("verified") is True):
                 status = "invalid_measurement"
         elif prepare_path.exists():
@@ -435,12 +559,16 @@ def public_results(root, manifest, manifest_hash):
             "extracted_source_sha256": fetch_record.get("extracted_source_sha256"),
             "prepared_source_sha256": prepare_record.get("prepared_source_sha256"),
             "prefix_sha256": measure_record.get("prefix_sha256", prepare_record.get("prefix_sha256")),
+            "dependency_cache_sha256": measure_record.get("dependency_cache_sha256", prepare_record.get("dependency_cache_sha256")),
+            "dependency_cache_after_sha256": measure_record.get("dependency_cache_after_sha256"),
+            "dependency_cache_changed_during_build": measure_record.get("dependency_cache_changed_during_build"),
             "environment_sha256": measure_record.get("environment_sha256", prepare_record.get("environment_sha256")),
             "status": status,
             "source_build_seconds": measure_record.get("source_build_seconds") if status == "ok" else None,
             "attempt_elapsed_seconds": measure_record.get("attempt_elapsed_seconds") if status != "ok" else None,
             "command": app["build"]["argv"], "scope": app["scope"],
             "app_environment": app.get("environment", {}),
+            "rustup_channel": app.get("rustup_channel"),
             "built_executable_sha256": measure_record.get("built_executable_sha256"),
             "built_executable_bytes": measure_record.get("built_executable_bytes"),
             "toolchains": public_toolchains(measure_record.get("toolchains", prepare_record.get("toolchains"))),
@@ -503,17 +631,22 @@ def main():
     prefix = args.prefix_root.resolve() if args.prefix_root else None
     if prefix and (not prefix.is_relative_to(REPO / "artifacts") or not prefix.is_dir()):
         raise ValueError("prefix root must be an existing directory inside ignored artifacts/")
+    if prefix and (prefix.is_relative_to(root) or root.is_relative_to(prefix)):
+        raise ValueError("prefix root must be separate from the per-app build and cache root")
     prefix_hash = tree_sha256(prefix) if prefix else None
     failed = False
     for app in apps:
+        app_environment = environment
         try:
-            failed = not host_phase(root, app, args.action, environment, prefix_hash, manifest_hash) or failed
+            app_environment, cache_root = cache_environment(root, app, environment, prefix)
+            failed = not host_phase(root, app, args.action, app_environment, cache_root,
+                                    prefix_hash, manifest_hash) or failed
         except Exception as error:
             failed = True
             record = root / "records" / app["id"] / f"{args.action}.json"
             if not record.exists():
                 write_json(record, {"status": f"{args.action}_failed", "reason": str(error),
-                                    "environment_sha256": environment_hash(environment, app),
+                                    "environment_sha256": environment_hash(app_environment, app),
                                     "prefix_sha256": prefix_hash, "manifest_sha256": manifest_hash})
             print(f"{app['id']}: {args.action}_failed: {error}", file=sys.stderr)
     if failed:
