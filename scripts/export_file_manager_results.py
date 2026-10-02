@@ -259,6 +259,65 @@ def provenance_problems(source):
     return problems
 
 
+def closed_quiet_deferral(row, invocation, plan, plan_sha256):
+    pins = plan["pins"]
+    slot = next((item for item in plan["slots"] if item["slot_id"] == row.get("slot_id")), None)
+    session = row.get("session_identity") or {}
+    expected_keys = {"slot_id", "app", "scenario", "round", "warmup", "ordinal", "attempt",
+                     "status", "accepted", "reason", "quiet_before", "session_identity",
+                     "recorded_utc"}
+    if (set(row) != expected_keys or slot is None or
+            any(row[key] != slot[key] for key in ("slot_id", "app", "scenario", "round")) or
+            row["warmup"] is not False or row["status"] != "deferred" or
+            row["accepted"] is not False or type(row["attempt"]) is not int or
+            row["attempt"] < 1 or not isinstance(session, dict) or
+            row["reason"] != "external monitored workload did not become quiet before timeout" or
+            not isinstance(row["quiet_before"], dict) or
+            not isinstance(row["quiet_before"].get("readings"), list) or
+            not row["quiet_before"]["readings"] or
+            invocation.get("execution_status") != "deferred_quiet" or
+            invocation.get("mode") != "run" or
+            invocation.get("plan_sha256") != plan_sha256 or
+            invocation.get("launches_this_invocation") != 0 or
+            invocation.get("invocation_ordinal_start") != row["ordinal"] or
+            invocation.get("invocation_ordinal_end") != row["ordinal"] or
+            invocation.get("session_identity") != row["session_identity"] or
+            invocation.get("wayland_display") != session.get("wayland_display") or
+            invocation.get("compositor_bus") != session.get("bus_address") or
+            ["{private_wayland_socket}" if part == session.get("wayland_display") else part
+             for part in session.get("kwin_command", [])] !=
+            pins["session_method"]["kwin_command"] or
+            invocation.get("session_files_sha256") != invocation.get("session_files_sha256_at_end") or
+            (invocation.get("session_files_sha256") or {}).get("window-size.js") !=
+            pins["session_method"]["window_rules_sha256"] or
+            invocation.get("execution_error") is not None or
+            invocation.get("provenance_drift") is not False or
+            invocation.get("end_snapshot_errors") != []):
+        return False
+    expected = {"manifest_sha256": pins["manifest_sha256"],
+                "adapter_sha256": pins["adapter_sha256"],
+                "host_baseline_sha256": pins["host_baseline_sha256"],
+                "fixture_inventory_at_start": pins["fixture_inventory"],
+                "fixture_inventory_at_end": pins["fixture_inventory"],
+                "source_sha256_at_start": pins["source_sha256"],
+                "source_sha256_at_end": pins["source_sha256"],
+                "host_package_inventory_sha256": pins["host_package_inventory_sha256"],
+                "host_package_inventory_sha256_at_end": pins["host_package_inventory_sha256"],
+                "nvidia_smi": pins["gpu_driver_identity"],
+                "gpu_driver_identity_at_end": pins["gpu_driver_identity"],
+                "monitor_pids": pins["monitor_pids"],
+                "monitor_comms": pins["monitor_comms"],
+                "min_gpu_free_mib": pins["min_gpu_free_mib"],
+                "max_global_gpu_util_percent": pins["max_global_gpu_util_percent"],
+                "quiet_seconds": pins["quiet_seconds"],
+                "input_hashes_at_end": {"manifest_sha256": pins["manifest_sha256"],
+                                        "adapter_sha256": pins["adapter_sha256"],
+                                        "host_baseline_sha256": pins["host_baseline_sha256"],
+                                        "binary_sha256": pins["binary_sha256"]}}
+    return all(invocation.get(key) == value for key, value in expected.items()) and \
+        {app["id"]: app["sha256"] for app in invocation.get("apps", [])} == pins["binary_sha256"]
+
+
 def rebase_evidence(source):
     plan_path = source / "plan.json"
     if not plan_path.is_file():
@@ -390,9 +449,12 @@ def rebase_evidence(source):
                 item.get("provenance_drift") is not False or item.get("end_snapshot_errors") != []:
             raise ValueError("Node rebase measured invocation lacks the new host pin or clean end")
     for row in rows[59:]:
-        if row.get("warmup") is not False or row.get("manifest_sha256") != new_manifest or \
-                sum(item["invocation_ordinal_start"] <= row["ordinal"] <=
-                    item["invocation_ordinal_end"] for item in runs) != 1:
+        covering = [item for item in runs if
+                    item["invocation_ordinal_start"] <= row["ordinal"] <=
+                    item["invocation_ordinal_end"]]
+        if row.get("warmup") is not False or len(covering) != 1 or \
+                (row.get("manifest_sha256") != new_manifest and
+                 not closed_quiet_deferral(row, covering[0], plan, ledger["new_plan_sha256"])):
             raise ValueError("Node rebase measured row lacks a unique new-host invocation")
     summary = json.loads((source / "summary.json").read_text())
     if any(ordinal < 59 for item in summary for key in ("raw_ordinals", "accepted_ordinals")
