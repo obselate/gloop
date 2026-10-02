@@ -344,6 +344,46 @@
     "v7_node_measured_gate": {
       "path": "artifacts/performance/file-managers-20261001/final-v7-measured-node2-gate.json",
       "sha256": "9d9871b5e2f8fa92ace9b45db11e4d46eaa5318df5770b5827cbe50a86b0c9e1"
+    },
+    "v7_recovery39_raw_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery39-archive/raw-first99.jsonl",
+      "sha256": "dbde0139862282bb3a662cd6d74ad53a1bbf09729d209ada1468a9f307fd0ed2"
+    },
+    "v7_recovery39_run_history_prefix": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery39-archive/environment-run-invocations-first40.jsonl",
+      "sha256": "75f9f7d849da10acd7cfb1c020e55eab4dbfd045662cf9eb368465738dbee693"
+    },
+    "v7_recovery39_stopped_state": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-controller-node2-state.json",
+      "sha256": "ee654d7bbdd411d964ee92db1f5ce03e972f72867819e234e813200e4b12501e"
+    },
+    "v7_recovery39_stopped_log": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-controller-node2.log",
+      "sha256": "9eea406fa762183b4551b57907a9125e24240227213bd3316df8e3f3b4bb904b"
+    },
+    "v7_recovery39_discarded_result": {
+      "path": "artifacts/performance/file-managers-20261001/sessions/v7-run-39-svc1/outer-service-result.json",
+      "sha256": "0921b54deb1a6343044d921adaadde7c9a4c986fc152dc313ea951c494ec391b"
+    },
+    "v7_recovery39_ledger": {
+      "path": "artifacts/performance/file-managers-20261001/v7-node2-recovery39-ledger.json",
+      "sha256": "21d47ce98e28b1968d7bbdc8a815a6159b48fbb0986bd3472a55efbd497f0b24"
+    },
+    "v7_recovery39_gate": {
+      "path": "artifacts/performance/file-managers-20261001/final-v7-measured-resume39-gate.json",
+      "sha256": "da2c9d6030b8507c8d72e26d1a868e9219b35577e205ed7e887a8e2a75ebcb60"
+    },
+    "v7_recovery39_commands": {
+      "path": "artifacts/performance/file-managers-20261001/v7-measured-commands-node2-resume39.json",
+      "sha256": "3cd9d23943300e782a1e8a3e806dc2adc46c97a8b05e1a73670d75c2fffa8c2b"
+    },
+    "v7_recovery39_controller": {
+      "path": "artifacts/performance/file-managers-20261001/run-v7-measured-controller-node2-resume39.py",
+      "sha256": "b907c66d6f7bd2fc2571cdf703f8abb24b2b504aed78b7fcd0e9f1923c0d172c"
+    },
+    "v7_recovery39_service_command": {
+      "path": "artifacts/performance/file-managers-20261001/v7-controller-service-command-node2-resume39.json",
+      "sha256": "074eef8a38ca633da4d8def8a566f663adc7ba98d727f503efc2a1b4ea69d548"
     }
   },
   "events": [
@@ -684,6 +724,23 @@
         "public_ledger_export_path": "provenance-rebase/ledger.json"
       },
       "disposition": "The original v7 warmup bytes, histories, failed service, and input/plan evidence were archived before a no-launch preflight and a Node-only host provenance rebase. Warmed profiles were retained with their tree fingerprint recorded. Every measured row must close under the one new host pin. Strict export will validate this boundary and publish sanitized linked evidence after runtime completion."
+    },
+    {
+      "id": "v7_measured_external_contamination_recovery39",
+      "sources": ["v7_recovery39_raw_prefix", "v7_recovery39_run_history_prefix", "v7_recovery39_stopped_state", "v7_recovery39_stopped_log", "v7_recovery39_discarded_result", "v7_recovery39_ledger", "v7_recovery39_gate", "v7_recovery39_commands", "v7_recovery39_controller", "v7_recovery39_service_command"],
+      "facts": {
+        "accepted_measured_slots_before_stop": 39,
+        "discarded_raw_ordinal": 98,
+        "discarded_slot_id": "list100/2/strata",
+        "external_gpu_process": "Spectacle",
+        "discarded_end_status": "deferred_external_contamination",
+        "recovery_resume_index": 39,
+        "replacement_service": "gloop-bench-v7-run-39-s2.service",
+        "raw_ordinal_offset": 1,
+        "planned_measured_slots": 177,
+        "discarded_attempt_used_for_numeric_metrics": false
+      },
+      "disposition": "The original controller stopped after 39 accepted measured slots when Spectacle appeared during slot 39. The contaminated ordinal 98 and its genuine deferred end remain preserved but are excluded from metrics. The reviewed continuation resumes that slot in a unique service, keeps the fixed plan and prior accepted rows, and skips the discarded ordinal. The raw and run-history references are exact immutable prefixes because the live files continue to grow."
     }
   ],
   "privacy": "This file carries selected setup facts and hashes, not raw process arguments, private D-Bus addresses, host paths, core memory, or credentials."
