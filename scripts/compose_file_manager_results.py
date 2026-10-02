@@ -207,8 +207,9 @@ def validate_dolphin_sources(main, dolphin, declaration, withdrawal, audit, seed
             withdrawal["corrected_post_launch_input"] == new["post_launch_input"] and
             old["post_launch_input"] == [{"action": "key", "key": "F11"},
                                          {"action": "click", "at": [340, 100]}] and
-            new["post_launch_input"] == [{"action": "click", "at": [340, 100]}] and
-            new["files"] == {**old["files"], "state/dolphinstaterc": known_on.read_text()} and
+            new == {**old,
+                    "files": {**old["files"], "state/dolphinstaterc": known_on.read_text()},
+                    "post_launch_input": [{"action": "click", "at": [340, 100]}]} and
             seed["correction"]["command_delta"] == "none" and
             corrected["command"] == original["command"],
             "Dolphin known-on seed or click-only delta differs")
