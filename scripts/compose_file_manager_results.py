@@ -244,6 +244,7 @@ def validate_warmup_review(spacefm, plan, review_path, method_path, declaration)
         independent_item = independent_review["warmups"][scenario]
         record = json.loads(raw_lines[ordinal])
         capture = record["capture"]
+        validation = independent_item["validation"]
         path = evidence_path(item["capture_path"])
         target = Path(__file__).resolve().parent.parent / "artifacts/performance/optimization/fixtures" / folder
         require(item["raw_ordinal"] == ordinal and
@@ -269,7 +270,10 @@ def validate_warmup_review(spacefm, plan, review_path, method_path, declaration)
                 independent_item["scenario_visible"] is True and
                 independent_item["population_validated_by_deadline"] is True and
                 independent_item["configured_mode"] ==
-                ("icons" if mode == "tiles" else "detail"),
+                ("icons" if mode == "tiles" else "detail") and
+                validation["owned_gui_pid"] == record["gui_process_pid"] and
+                validation["gui_executable_sha256"] == record["gui_executable_sha256"] and
+                validation["pid_in_saved_5s_tree"] is True,
                 f"corrective {scenario} warmup review is not bound to a one-tab capture")
     return independent_path, snapshot_path
 
