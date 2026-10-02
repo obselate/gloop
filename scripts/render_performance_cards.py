@@ -98,7 +98,7 @@ def base_card(title, subtitle):
 
 def save_card(figure, target, footer):
     figure.text(.045, .04, footer, color=MUTED, fontsize=10, va='bottom')
-    figure.text(.045, .022, '2026-10-01  |  Ryzen 7 3700X  |  RTX 3080  |  CachyOS  |  Method and raw data: README Performance',
+    figure.text(.045, .022, 'Started 2026-10-01  |  Ryzen 7 3700X  |  RTX 3080  |  CachyOS  |  Method and raw data: README Performance',
                 color=MUTED, fontsize=9, va='bottom')
     figure.savefig(target, facecolor=BACKGROUND)
     plt.close(figure)
