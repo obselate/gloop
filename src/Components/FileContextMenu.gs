@@ -26,7 +26,7 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                 OnActivate: value.OnActivate,
                 OnDismiss: value.OnDismiss,
                 Width: 240,
-                MaxHeight: 340,
+                MaxHeight: 420,
                 AccessibilityName: value.Name,
                 CreateRoot: (_, root) -> {
                     root.OnPointerUp = e -> {
