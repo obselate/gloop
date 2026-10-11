@@ -24,11 +24,11 @@ class FileOperationService {
             validateName(name)
             let parent = requireDirectory(directory)
             let destination = Path.Combine(parent, name)
-            requireAbsent(destination)
+            RequireAbsent(destination)
             let staging = temporaryPath(destination)
             try {
                 Directory.CreateDirectory(staging)
-                moveEntry(staging, destination)
+                MoveEntry(staging, destination)
             } catch (failure Exception) {
                 if !cleanup(staging) {
                     throw IOException(failure.Message + ". Partial folder remains at " + staging)
@@ -50,8 +50,8 @@ class FileOperationService {
             if from == destination {
                 return ""
             }
-            requireAbsent(destination)
-            moveEntry(from, destination)
+            RequireAbsent(destination)
+            MoveEntry(from, destination)
             return ""
         } catch (failure Exception) {
             return failure.Message
@@ -67,7 +67,7 @@ class FileOperationService {
             let staging = temporaryPath(destination)
             try {
                 copyEntry(from, staging)
-                moveEntry(staging, destination)
+                MoveEntry(staging, destination)
             } catch (failure Exception) {
                 if !cleanup(staging) {
                     throw IOException(failure.Message + ". Partial copy remains at " + staging)
@@ -86,7 +86,7 @@ class FileOperationService {
             let parent = requireDirectory(destinationDirectory)
             let destination = Path.Combine(parent, Path.GetFileName(from))
             validateDestination(from, parent, destination)
-            moveEntry(from, destination)
+            MoveEntry(from, destination)
             return ""
         } catch (failure Exception) {
             return failure.Message
@@ -96,7 +96,7 @@ class FileOperationService {
     internal func Trash(source string) string {
         try {
             let from = requireEntry(source)
-            let root = trashRoot()
+            let root = TrashRoot()
             let files = Path.Combine(root, "files")
             let info = Path.Combine(root, "info")
             Directory.CreateDirectory(root)
@@ -109,7 +109,7 @@ class FileOperationService {
             let leaf = Path.GetFileName(from)
             var index int32
             var name = trashName(leaf, index)
-            while exists(Path.Combine(files, name)) || exists(Path.Combine(info, name + ".trashinfo")) {
+            while Exists(Path.Combine(files, name)) || Exists(Path.Combine(info, name + ".trashinfo")) {
                 index++
                 name = trashName(leaf, index)
             }
@@ -119,7 +119,7 @@ class FileOperationService {
             try {
                 writeTrashInfo(infoPath, from)
                 metadataCreated = true
-                moveEntry(from, dataPath)
+                MoveEntry(from, dataPath)
             } catch (failure Exception) {
                 if metadataCreated {
                     try {
@@ -161,8 +161,8 @@ class FileOperationService {
         return fullPath
     }
 
-    private func requireAbsent(path string) {
-        if exists(path) {
+    internal func RequireAbsent(path string) {
+        if Exists(path) {
             throw IOException("An item already exists: " + path)
         }
     }
@@ -171,7 +171,7 @@ class FileOperationService {
         if source == destination {
             throw IOException("Source and destination are the same")
         }
-        requireAbsent(destination)
+        RequireAbsent(destination)
         let attributes = File.GetAttributes(source)
         if hasAttribute(attributes, FileAttributes.Directory) &&
             !hasAttribute(attributes, FileAttributes.ReparsePoint) {
@@ -205,8 +205,8 @@ class FileOperationService {
         return current
     }
 
-    private func moveEntry(source string, destination string) {
-        requireAbsent(destination)
+    internal func MoveEntry(source string, destination string) {
+        RequireAbsent(destination)
         if OperatingSystem.IsLinux() {
             if renameNoReplace(-100, source, -100, destination, 1u) != 0 {
                 let error = Marshal.GetLastWin32Error()
@@ -226,7 +226,7 @@ class FileOperationService {
     }
 
     private func copyEntry(source string, destination string) {
-        requireAbsent(destination)
+        RequireAbsent(destination)
         let attributes = File.GetAttributes(source)
         let isDirectory = hasAttribute(attributes, FileAttributes.Directory)
         if hasAttribute(attributes, FileAttributes.ReparsePoint) {
@@ -253,7 +253,7 @@ class FileOperationService {
 
     private func cleanup(path string) bool {
         try {
-            if !exists(path) {
+            if !Exists(path) {
                 return true
             }
             let attributes = File.GetAttributes(path)
@@ -320,7 +320,7 @@ class FileOperationService {
         return leaf.Substring(0, length) + suffix
     }
 
-    private func trashRoot() string {
+    internal func TrashRoot() string {
         var dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME") ?? ""
         if dataHome == "" || !Path.IsPathFullyQualified(dataHome) {
             let home = Environment.GetEnvironmentVariable("HOME") ?? ""
@@ -338,7 +338,7 @@ class FileOperationService {
         }
     }
 
-    private func exists(path string) bool {
+    internal func Exists(path string) bool {
         try {
             File.GetAttributes(path)
             return true

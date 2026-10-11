@@ -41,11 +41,13 @@
     <GooMaterialIcon Include="create_new_folder" />
     <GooMaterialIcon Include="crop_square" />
     <GooMaterialIcon Include="delete" />
+    <GooMaterialIcon Include="delete_forever" />
     <GooMaterialIcon Include="description" />
     <GooMaterialIcon Include="desktop_windows" />
     <GooMaterialIcon Include="download" />
     <GooMaterialIcon Include="draft" />
     <GooMaterialIcon Include="edit" />
+    <GooMaterialIcon Include="eject" />
     <GooMaterialIcon Include="filter_none" />
     <GooMaterialIcon Include="folder" />
     <GooMaterialIcon Include="folder_off" />
@@ -53,6 +55,7 @@
     <GooMaterialIcon Include="folder_zip" />
     <GooMaterialIcon Include="grid_view" />
     <GooMaterialIcon Include="hard_drive" />
+    <GooMaterialIcon Include="history" />
     <GooMaterialIcon Include="home" />
     <GooMaterialIcon Include="hourglass_empty" />
     <GooMaterialIcon Include="image" />
@@ -63,10 +66,12 @@
     <GooMaterialIcon Include="preview" />
     <GooMaterialIcon Include="refresh" />
     <GooMaterialIcon Include="remove" />
+    <GooMaterialIcon Include="restore_from_trash" />
     <GooMaterialIcon Include="search" />
     <GooMaterialIcon Include="settings" />
     <GooMaterialIcon Include="splitscreen_vertical_add" />
     <GooMaterialIcon Include="terminal" />
+    <GooMaterialIcon Include="usb" />
     <GooMaterialIcon Include="video_file" />
     <GooMaterialIcon Include="view_list" />
     <GooMaterialIcon Include="visibility" />
