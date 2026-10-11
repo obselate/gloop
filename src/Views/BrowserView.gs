@@ -83,6 +83,8 @@ partial class BrowserView : Cell {
                 let textEntry = dialog != "Preferences" &&
                     dialog != "Desktop setup" &&
                     dialog != "Move to Trash" &&
+                    dialog != "Delete permanently" &&
+                    dialog != "Empty Trash" &&
                     dialog != "Bookmarks" &&
                     dialog != "Replace file"
                 focusScope = dialogHandle.BeginFocusScope(
@@ -869,7 +871,7 @@ partial class BrowserView : Cell {
         } else {
             total.ToString() + " items"
         }
-        return Container{
+        let bar = Container{
             Height: 26,
             Key: "status",
             FlexShrink: 0,
@@ -883,6 +885,10 @@ partial class BrowserView : Cell {
             Ui.Shortcut(settings.Keybindings["TogglePreview"], "Preview", p),
             Ui.Shortcut(settings.Keybindings["ToggleSplit"], "Split", p),
         }
+        if let space = SpaceStatus() {
+            bar.Children.Insert(1, space)
+        }
+        return bar
     }
 
     private func SplitSize(extent float64, requested float64, minimumFirst float64, minimumSecond float64) float64 {

@@ -160,19 +160,47 @@ partial class BrowserView {
             items.Add(
                 ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden)
             )
+        } else if Model.InTrashView {
+            let atRoot = Model.AtTrashRoot
+            if count > 0 {
+                items.Add(
+                    ContextMenuItem("Open", "Open", "open_in_new", !(Model.SingleSelectedEntry()?.IsDirectory ?? false))
+                )
+                items.Add(MenuItem{Id: "open-separator", Separator: true})
+                items.Add(ContextMenuItem("Restore", "Restore", "restore_from_trash", !atRoot))
+                items.Add(ContextMenuItem("DeletePermanently", "Delete permanently", "delete_forever", !atRoot))
+            } else {
+                items.Add(
+                    ContextMenuItem(
+                        "EmptyTrash",
+                        "Empty Trash",
+                        "delete_forever",
+                        !atRoot || Model.Places.TrashCount == 0
+                    )
+                )
+                items.Add(MenuItem{Id: "trash-separator", Separator: true})
+                items.Add(ContextMenuItem("Refresh", "Refresh", "refresh"))
+                items.Add(
+                    ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden)
+                )
+            }
         } else if count > 0 {
+            let recent = Model.InRecent
             items.Add(ContextMenuItem("Open", "Open", "open_in_new", count != 1))
+            if recent {
+                items.Add(ContextMenuItem("ShowInFolder", "Show in folder", "folder_open", count != 1))
+            }
             items.Add(MenuItem{Id: "open-separator", Separator: true})
             items.Add(ContextMenuItem("Cut", "Cut", "content_cut"))
             items.Add(ContextMenuItem("Copy", "Copy", "content_copy"))
-            items.Add(ContextMenuItem("Paste", "Paste", "content_paste", !Model.HasClipboard))
+            items.Add(ContextMenuItem("Paste", "Paste", "content_paste", recent || !Model.HasClipboard))
             if count == 1 {
                 items.Add(ContextMenuItem("Rename", "Rename", "edit"))
             }
             items.Add(MenuItem{Id: "trash-separator", Separator: true})
             items.Add(ContextMenuItem("Trash", "Move to Trash", "delete"))
         } else {
-            let unavailable = Model.ActivePane().DirectoryPath == "" || Model.ActivePane().Error != ""
+            let unavailable = Model.ActivePane().DirectoryPath == "" || Model.ActivePane().Error != "" || Model.InRecent
             items.Add(ContextMenuItem("NewFolder", "New folder", "create_new_folder", unavailable))
             items.Add(ContextMenuItem("Paste", "Paste", "content_paste", unavailable || !Model.HasClipboard))
             items.Add(MenuItem{Id: "folder-separator", Separator: true})
@@ -221,5 +249,13 @@ partial class BrowserView {
         icon string,
         disabled bool = false,
         checked bool = false
-    ) MenuItem -> FileContextMenu.Item(action, label, icon, settings.Keybindings[action], palette, disabled, checked)
+    ) MenuItem -> FileContextMenu.Item(
+        action,
+        label,
+        icon,
+        settings.Keybindings.GetValueOrDefault(action, ""),
+        palette,
+        disabled,
+        checked
+    )
 }
