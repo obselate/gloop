@@ -12,18 +12,7 @@ class TerminalService {
             if !Directory.Exists(path) {
                 return "Folder does not exist: " + path
             }
-            let candidates = List[string]()
-            let preferred = Environment.GetEnvironmentVariable("TERMINAL") ?? ""
-            if preferred != "" && !preferred.Contains(" ") && !preferred.Contains("\t") {
-                candidates.Add(preferred)
-            }
-            let names = "xdg-terminal-exec,ghostty,konsole,foot,alacritty,kitty,wezterm,gnome-terminal,xfce4-terminal,xterm"
-            for name in names.Split(',') {
-                if !candidates.Contains(name) {
-                    candidates.Add(name)
-                }
-            }
-            for candidate in candidates {
+            for candidate in Candidates() {
                 try {
                     let start = ProcessStartInfo(candidate)
                     start.WorkingDirectory = path
@@ -64,6 +53,23 @@ class TerminalService {
             return "Could not find a desktop terminal"
         } catch (failure Exception) {
             return failure.Message
+        }
+    }
+
+    shared {
+        internal func Candidates() List[string] {
+            let candidates = List[string]()
+            let preferred = Environment.GetEnvironmentVariable("TERMINAL") ?? ""
+            if preferred != "" && !preferred.Contains(" ") && !preferred.Contains("\t") {
+                candidates.Add(preferred)
+            }
+            let names = "xdg-terminal-exec,ghostty,konsole,foot,alacritty,kitty,wezterm,gnome-terminal,xfce4-terminal,xterm"
+            for name in names.Split(',') {
+                if !candidates.Contains(name) {
+                    candidates.Add(name)
+                }
+            }
+            return candidates
         }
     }
 }
