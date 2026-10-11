@@ -163,6 +163,7 @@ partial class BrowserView {
                 )
                 SavePreferences()
                 FocusFiles()
+                revealPending[Model.ActiveIndex] = true
                 Host.Post(() -> RevealSelection(Model.ActiveIndex))
             }
             case "OpenTerminal" {
@@ -393,6 +394,9 @@ partial class BrowserView {
             } else if bottom > offset + viewport {
                 list.JumpTo(0, Math.Max(0, bottom - viewport))
             }
+            revealPending[index] = bottom > list.ScrollRange.Y + viewport
+        } else {
+            revealPending[index] = false
         }
     }
 
