@@ -75,7 +75,7 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
                     Bottom = 8,
                     FontFamily = "monospace, Noto Sans CJK",
                     FontSize = 13,
-                    LineHeight = 1.25,
+                    LineHeight = 1.1,
                     TextWrap = value.WordWrap ? TextWrap.Wrap: TextWrap.NoWrap,
                     ShowLineNumbers = value.LineNumbers,
                     LineNumberColor = p.Muted,
