@@ -1,10 +1,12 @@
 package gloop
 
 import Goo
+import System
 
 class FileClickState {
     internal var Count int32
     internal var Path string = ""
+    internal var Time int64
 }
 
 class FileTransferUi {
@@ -26,7 +28,6 @@ class FileTransferUi {
         ) {
             let activate = clicks.Path == entry.FullPath && clicks.Count == 2
             clicks.Count = 0
-            clicks.Path = ""
             value.OnSelect(index, activate ? false: ctrl, activate ? false: shift)
             if activate {
                 value.OnOpen()
@@ -45,14 +46,12 @@ class FileTransferUi {
                     return
                 }
                 if e.Button == PointerButton.Primary {
-                    clicks.Count = e.ClickCount
+                    let now = Environment.TickCount64
+                    let repeated = clicks.Path == entry.FullPath && now - clicks.Time <= 500
+                    clicks.Count = repeated ? 2: 1
                     clicks.Path = entry.FullPath
-                    value.Host.Post(
-                        () -> {
-                            clicks.Count = 0
-                            clicks.Path = ""
-                        }
-                    )
+                    clicks.Time = repeated ? 0: now
+                    value.Host.Post(() -> clicks.Count = 0)
                 }
                 onPointerUp?.Invoke(e)
             }
