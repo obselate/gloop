@@ -18,6 +18,8 @@ class BrowserController {
     internal var Busy bool
     internal var SelectFirstEntry bool = true
     internal var EntryFilter Func[FileEntry, bool]?
+    internal let Places PlacesService
+    internal let TrashDirectory string = TrashService().FilesDirectory()
 
     private let window Window
     private let settings AppSettings
@@ -74,6 +76,7 @@ class BrowserController {
         operations = OperationWorkQueue()
         transfers = FileTransferService()
         previews = PreviewWorkQueue()
+        Places = PlacesService(window, changed)
         window.MetricsChanged += PreviewWindowMetrics
     }
 
@@ -82,6 +85,21 @@ class BrowserController {
     internal prop IsOperating bool {
         get -> operationCount > 0
     }
+
+    internal prop InRecent bool {
+        get -> Locations.IsRecent(ActivePane().DirectoryPath)
+    }
+
+    internal prop InTrashView bool {
+        get -> InTrash(ActivePane().DirectoryPath)
+    }
+
+    internal prop AtTrashRoot bool {
+        get -> TrashDirectory != "" && ActivePane().DirectoryPath == TrashDirectory
+    }
+
+    internal func InTrash(path string) bool -> TrashDirectory != "" &&
+        (path == TrashDirectory || path.StartsWith(TrashDirectory + "/", StringComparison.Ordinal))
 
     internal func CloseSafely() bool {
         if !IsOperating {
@@ -172,13 +190,37 @@ class BrowserController {
         if path == "" {
             return
         }
+        if Locations.IsRecent(path) {
+            Navigate(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+            return
+        }
         let parent = Path.GetDirectoryName(path)
         if parent != nil && parent != path {
             Navigate(parent)
         }
     }
 
+    internal func ShowInFolder() {
+        guard let entry = SingleSelectedEntry() else {
+            return
+        }
+        if let directory = Path.GetDirectoryName(entry.FullPath) {
+            NavigateTo(directory, ActiveIndex, "push", -1, entry.FullPath)
+        }
+    }
+
+    internal func LeaveMount(mountPath string) {
+        let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+        for index in 0 ... 2 {
+            let path = Pane(index).DirectoryPath
+            if path == mountPath || path.StartsWith(mountPath.TrimEnd('/') + "/", StringComparison.Ordinal) {
+                Navigate(home, index)
+            }
+        }
+    }
+
     internal func Refresh() {
+        Places.Refresh()
         let pane = ActivePane()
         if pane.DirectoryPath != "" {
             NavigateTo(pane.DirectoryPath, ActiveIndex, "refresh", pane.HistoryIndex, FocusedPath(pane))
@@ -350,7 +392,7 @@ class BrowserController {
         }
         if entry.IsDirectory {
             Navigate(entry.FullPath)
-        } else {
+        } else if !InTrashView {
             let owner = window
             let controller = this
             go browserOpen(owner, controller, entry.FullPath)
@@ -486,7 +528,7 @@ class BrowserController {
 
     internal func Paste() {
         let destination = ActivePane().DirectoryPath
-        if clipboardPaths.Count == 0 || destination == "" {
+        if clipboardPaths.Count == 0 || destination == "" || DropBlocked(destination) {
             return
         }
         StartOperation(
@@ -499,7 +541,12 @@ class BrowserController {
     }
 
     internal func CreateFileDrag(paneIndex int32, sourcePath string) DragData? {
-        if disposed || closeRequested || paneIndex < 0 || paneIndex > 1 || (paneIndex == 1 && !Split) {
+        if disposed ||
+            closeRequested ||
+            paneIndex < 0 ||
+            paneIndex > 1 ||
+            (paneIndex == 1 && !Split) ||
+            InTrash(Pane(paneIndex).DirectoryPath) {
             return nil
         }
         transfers.Clear()
@@ -519,14 +566,14 @@ class BrowserController {
     }
 
     internal func FileDropEffect(data DragData, destination string, ctrl bool) DragEffect {
-        if disposed || closeRequested {
+        if disposed || closeRequested || DropBlocked(destination) {
             return DragEffect.None
         }
         return transfers.Effect(data, destination, ctrl)
     }
 
     internal func QueueFileDrop(data DragData, destination string, effect DragEffect) {
-        let valid = effect != DragEffect.None && transfers.Effect(
+        let valid = effect != DragEffect.None && !DropBlocked(destination) && transfers.Effect(
             data,
             destination,
             effect == DragEffect.Copy
@@ -565,11 +612,26 @@ class BrowserController {
         StartOperation("trash", sources, "", "")
     }
 
+    internal func Restore() {
+        TrashOperation("restore")
+    }
+
+    internal func DeletePermanently() {
+        TrashOperation("delete")
+    }
+
+    internal func EmptyTrash() {
+        if AtTrashRoot {
+            StartOperation("empty", TrashDirectory, "", "")
+        }
+    }
+
     internal func Dispose() {
         if disposed {
             return
         }
         disposed = true
+        Places.Dispose()
         window.MetricsChanged -= PreviewWindowMetrics
         previewResizeTimer?.Dispose()
         previewResizeTimer = nil
@@ -597,7 +659,7 @@ class BrowserController {
         let pane = Pane(index)
         var fullPath string
         try {
-            fullPath = Path.GetFullPath(path)
+            fullPath = Locations.IsRecent(path) ? Locations.Recent: Path.GetFullPath(path)
         } catch (failure Exception) {
             pane.Error = failure.Message
             Status = failure.Message
@@ -952,7 +1014,7 @@ class BrowserController {
         if sources.Count == 0 {
             return
         }
-        if kind == "move" || kind == "trash" || kind == "rename" {
+        if TracksSources(kind) {
             for source in sources {
                 if !movingSources.Contains(source) {
                     continue
@@ -976,7 +1038,7 @@ class BrowserController {
             Notify()
             return
         }
-        if kind == "move" || kind == "trash" || kind == "rename" {
+        if TracksSources(kind) {
             for source in sources {
                 movingSources.Add(source)
             }
@@ -997,7 +1059,7 @@ class BrowserController {
         if disposed {
             return
         }
-        if request.Kind == "move" || request.Kind == "trash" || request.Kind == "rename" {
+        if TracksSources(request.Kind) {
             for source in request.Sources {
                 movingSources.Remove(source)
             }
@@ -1029,6 +1091,7 @@ class BrowserController {
         } else if closeFailure == "" {
             Status = "Done"
         }
+        Places.Refresh()
         if closeRequested && operationCount == 0 {
             if closeFailure == "" {
                 window.RequestClose()
@@ -1053,6 +1116,24 @@ class BrowserController {
         terminalOpening = false
         CompleteOpen(error)
     }
+
+    private func TrashOperation(kind string) {
+        if !AtTrashRoot {
+            return
+        }
+        let sources = SelectedPaths()
+        if sources.Count > 0 {
+            StartOperation(kind, sources, "", "")
+        }
+    }
+
+    private func TracksSources(kind string) bool -> kind == "move" ||
+        kind == "trash" ||
+        kind == "rename" ||
+        kind == "restore" ||
+        kind == "delete"
+
+    private func DropBlocked(destination string) bool -> Locations.IsRecent(destination) || InTrash(destination)
 
     private func RefreshLoadedPanes(source string = "", replacement string = "") {
         if First.DirectoryPath != "" {
@@ -1135,6 +1216,7 @@ class BrowserController {
 
     private func Notify() {
         if !disposed {
+            Places.Watch(ActivePane().DirectoryPath)
             changed()
         }
     }

@@ -331,6 +331,7 @@ func browserOperationWorker(window Window, controller BrowserController, queue O
         let succeeded = List[string]()
         let errors = List[string]()
         let operations = FileOperationService()
+        let trash = TrashService()
         for source in request.Sources {
             var error string
             try {
@@ -342,6 +343,12 @@ func browserOperationWorker(window Window, controller BrowserController, queue O
                     error = operations.Copy(source, request.Destination)
                 } else if request.Kind == "move" {
                     error = operations.Move(source, request.Destination)
+                } else if request.Kind == "restore" {
+                    error = trash.Restore(source)
+                } else if request.Kind == "delete" {
+                    error = trash.Delete(source)
+                } else if request.Kind == "empty" {
+                    error = trash.Empty()
                 } else {
                     error = operations.Trash(source)
                 }
