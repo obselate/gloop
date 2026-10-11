@@ -105,7 +105,7 @@ partial class BrowserView {
         let selected = Math.Max(0, pane.Selected)
         let row = selected / columns
         let rowHeight = tiles ? FileTiles.TileHeight + FileTiles.Gap: FileTable.RowHeight
-        let x = bounds.X + 12 + (tiles ? selected % columns * (FileTiles.TileWidth + FileTiles.Gap): 0)
+        let x = bounds.X + 12 + (tiles ? selected % columns * (TileWidth(index) + FileTiles.Gap): 0)
         let y = bounds.Y + (tiles ? 12: 0) + row * rowHeight - viewport.ScrollOffset.Y + rowHeight / 2
         contextMenuPoint = Point{
             X: Math.Clamp(x, bounds.X, bounds.X + bounds.Width),
