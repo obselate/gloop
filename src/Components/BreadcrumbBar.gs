@@ -32,7 +32,9 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let paths = List[string]()
         var destination = "/"
         var rest = value.Path
-        if value.Home.Length > 1 &&
+        if value
+            .Home
+            .Length > 1 &&
             (value.Path == value.Home || value.Path.StartsWith(value.Home + "/", StringComparison.Ordinal)) {
             destination = value.Home
             rest = value.Path.Substring(value.Home.Length)
@@ -130,7 +132,10 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         }
     }
 
-    private func SegmentWidth(name string, destination string) float64 -> if widths.TryGetValue(destination, out var known) {
+    private func SegmentWidth(name string, destination string) float64 -> if widths.TryGetValue(
+        destination,
+        out var known
+    ) {
         known
     } else {
         Math.Min(220, name.Length * 7 + 10)

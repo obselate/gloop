@@ -268,7 +268,9 @@ partial class BrowserView {
                 )
             }
             let columns = width >= 640 ? 2: 1
-            for var index = 0; index < choices.Count; index += columns {
+            for var index = 0;
+            index < choices.Count;
+            index += columns {
                 let pair = Container{FlexDirection: FlexDirection.Row, FlexShrink: 0, Gap: 8}
                 for offset in 0 ... columns {
                     let slot = Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0}

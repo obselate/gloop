@@ -134,7 +134,15 @@ partial class BrowserView {
         let count = Model.SelectedCount()
         if contextMenuColumns {
             items.Add(
-                FileContextMenu.Item("ToggleTypeColumn", "Type column", "view_list", "", palette, false, settings.ShowTypeColumn)
+                FileContextMenu.Item(
+                    "ToggleTypeColumn",
+                    "Type column",
+                    "view_list",
+                    "",
+                    palette,
+                    false,
+                    settings.ShowTypeColumn
+                )
             )
         } else if contextMenuPaths.Length > 0 {
             for path in contextMenuPaths {
