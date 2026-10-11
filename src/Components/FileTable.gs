@@ -234,13 +234,7 @@ open class FileTable : Cell[FileTableInput] {
         )
     }
 
-    private func CellContent(
-        entry FileEntry,
-        column string,
-        selected bool,
-        value FileTableInput,
-        p Palette
-    ) Blob {
+    private func CellContent(entry FileEntry, column string, selected bool, value FileTableInput, p Palette) Blob {
         if column == "name" {
             let label = Ui.Label(
                 entry.Name + if entry.IsSymlink {
@@ -264,7 +258,9 @@ open class FileTable : Cell[FileTableInput] {
             }
         }
         let text = switch column {
-            case "modified": entry.Modified.ToString(entry.Modified.Date == DateTime.Today ? "'Today' HH:mm": "dd MMM yyyy")
+            case "modified": entry.Modified.ToString(
+                entry.Modified.Date == DateTime.Today ? "'Today' HH:mm": "dd MMM yyyy"
+            )
             case "kind": entry.Kind
             default: SizeText(entry, value)
         }

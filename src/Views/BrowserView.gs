@@ -227,6 +227,15 @@ partial class BrowserView : Cell {
         }
     }
 
+    private prop FolderCounts FolderCountService {
+        get {
+            guard let value = folderCounts else {
+                throw InvalidOperationException("Folder counts are not attached")
+            }
+            return value
+        }
+    }
+
     private func Changed() {
         if window != nil {
             Host.Title = ChooserTitle()
@@ -728,7 +737,7 @@ partial class BrowserView : Cell {
                     Compact: compact,
                     ShowType: settings.ShowTypeColumn,
                     ShowHidden: settings.ShowHidden,
-                    Counts: folderCounts!!,
+                    Counts: FolderCounts,
                     OnHeaderMenu: point -> OpenColumnMenu(index, point),
                     Tiles: settings.ViewMode == "tiles",
                     TileWidth: TileWidth(index),
@@ -829,7 +838,9 @@ partial class BrowserView : Cell {
             "Reading folder…"
         } else if selected > 0 {
             let size = Model.SelectedSize()
-            selected.ToString() + " of " + total.ToString() + " selected" + (
+            selected.ToString() + " of " + total.ToString() +
+                " selected" +
+                (
                 if size < 0 {
                     ""
                 } else {
