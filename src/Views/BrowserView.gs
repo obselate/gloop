@@ -70,7 +70,7 @@ partial class BrowserView : Cell {
                 (Math.Abs(width - metrics.ContentBox.Width) > 1 || Math.Abs(height - metrics.ContentBox.Height) > 1) {
                 width = metrics.ContentBox.Width
                 height = metrics.ContentBox.Height
-                if width < 860 && locationEditing && dialog == "" {
+                if locationEditing && dialog == "" && PaneWidth(Model.ActiveIndex) < 360 {
                     OpenDialog("Open location", locationText)
                 } else {
                     Rebuild()
@@ -432,73 +432,11 @@ partial class BrowserView : Cell {
     private func Toolbar() Blob {
         let pane = Model.ActivePane()
         let p = palette
-        let locationLeft = 124.0
-        let locationRight = width - 116 - if width < 860 {
-            204.0
-        } else {
-            174.0
-        }
-        let locationWidth = Math.Min(
-            640,
-            Math.Min(locationRight - locationLeft - 80, Math.Max(64, 2 * (locationRight - width / 2)))
-        )
-        let locationCenter = Math.Clamp(
-            width / 2,
-            locationLeft + 80 + locationWidth / 2,
-            locationRight - locationWidth / 2
-        )
-        var location Blob = Cell.Mount[BreadcrumbInput, BreadcrumbBar](
-            nil,
-            BreadcrumbInput{
-                Path: pane.DirectoryPath,
-                Width: locationWidth,
-                Window: Host,
-                Palette: p,
-                Navigate: destination -> {
-                    Model.Navigate(destination)
-                    FocusFiles()
-                },
-                Edit: () -> EditLocation(),
-            }
-        )
-        if locationEditing {
-            location = TextEntry{
-                Handle: locationHandle,
-                Value: locationText,
-                Controlled: true,
-                Width: locationWidth,
-                MaxWidth: 640,
-                MinWidth: 0,
-                Height: 34,
-                Padding: Edges{Left: 10, Right: 10},
-                BackgroundColor: p.Surface,
-                Color: p.Text,
-                BorderRadius: 6,
-                BorderWidth: 1,
-                BorderColor: p.Accent,
-                FontSize: 12,
-                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "Location"},
-                OnChange: value -> {
-                    locationText = value
-                    Rebuild()
-                },
-                OnSubmit: value -> {
-                    locationEditing = false
-                    Model.Navigate(value)
-                    FocusFiles()
-                },
-            }
-        }
-        let bookmarkNavigation = if width < 860 {
-            Ui.Tool("bookmarks", "Open bookmarks", () -> Invoke("OpenBookmarks"), Host, p)
-        } else {
-            Container{}
-        }
         return Container{
             Key: "toolbar",
             Height: 40,
             FlexShrink: 0,
-            Padding: Edges{Left: 8, Right: 8},
+            Padding: Edges{Left: 8},
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
             Container{
@@ -517,17 +455,18 @@ partial class BrowserView : Cell {
                     false,
                     pane.DirectoryPath == "/"
                 ),
-                Container{Width: 1, Height: 20, Margin: Edges{Left: 8, Right: 8}, BackgroundColor: p.Border},
             },
-            Container{Width: locationCenter - locationWidth / 2 - locationLeft, FlexShrink: 0},
-            location,
             Container{FlexGrow: 1, MinWidth: 0},
             Container{
                 FlexDirection: FlexDirection.Row,
                 AlignItems: AlignItems.Center,
                 FlexShrink: 0,
                 Gap: 3,
-                bookmarkNavigation,
+                if width < 860 {
+                    Ui.Tool("bookmarks", "Open bookmarks", () -> Invoke("OpenBookmarks"), Host, p)
+                } else {
+                    Container{}
+                },
                 if chooser == nil {
                     Ui.Tool(
                         "bookmark",
@@ -545,7 +484,6 @@ partial class BrowserView : Cell {
                     Container{}
                 },
                 Ui.Tool("refresh", "Refresh", () -> Model.Refresh(), Host, p),
-                Container{Width: 6},
                 Ui.Tool("visibility", "Toggle preview", () -> Invoke("TogglePreview"), Host, p, Model.PreviewVisible),
                 if chooser == nil {
                     Ui.Tool(
@@ -568,87 +506,133 @@ partial class BrowserView : Cell {
                     settings.ShowHidden
                 ),
             },
+            Container{Width: 1, Height: 20, Margin: Edges{Left: 8}, FlexShrink: 0, BackgroundColor: p.Border},
         }
+    }
+
+    private func PaneWidth(index int32) float64 {
+        if !Model.Split || BrowsingWidth() < 660 {
+            return BrowsingWidth()
+        }
+        let first = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, 260, 260)
+        return index == 0 ? first: BrowsingWidth() - first - 1
+    }
+
+    private func Location(index int32, crumbWidth float64) Blob {
+        let pane = Model.Pane(index)
+        let p = palette
+        if locationEditing && Model.ActiveIndex == index {
+            return TextEntry{
+                Key: "location-edit",
+                Handle: locationHandle,
+                Value: locationText,
+                Controlled: true,
+                Width: crumbWidth,
+                MinWidth: 0,
+                Height: 30,
+                Padding: Edges{Left: 8, Right: 8},
+                BackgroundColor: p.Surface,
+                Color: p.Text,
+                BorderRadius: 6,
+                BorderWidth: 1,
+                BorderColor: p.Accent,
+                FontSize: 12,
+                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "Location"},
+                OnChange: value -> {
+                    locationText = value
+                    Rebuild()
+                },
+                OnSubmit: value -> {
+                    locationEditing = false
+                    Model.Navigate(value)
+                    FocusFiles()
+                },
+            }
+        }
+        return Cell.Mount[BreadcrumbInput, BreadcrumbBar](
+            "location-" + index.ToString(),
+            BreadcrumbInput{
+                Path: pane.DirectoryPath,
+                Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Width: crumbWidth,
+                Window: Host,
+                Palette: p,
+                Navigate: destination -> {
+                    Model.SetActive(index)
+                    Model.Navigate(destination)
+                    FocusFiles()
+                },
+                Edit: () -> {
+                    Model.SetActive(index)
+                    EditLocation()
+                },
+                More: (paths, point) -> OpenPathMenu(index, paths, point),
+            }
+        )
     }
 
     private func Pane(index int32) Blob {
         let pane = Model.Pane(index)
         let active = Model.ActiveIndex == index
         let p = palette
-        let availableWidth = if Model.Split && BrowsingWidth() >= 660 {
-            let firstWidth = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, 260, 260)
-            if index == 0 {
-                firstWidth
-            } else {
-                BrowsingWidth() - firstWidth - 1
-            }
-        } else {
-            BrowsingWidth()
-        }
+        let availableWidth = PaneWidth(index)
         let compact = availableWidth < 600
         let handle = if index == 0 {
             firstList
         } else {
             secondList
         }
-        let summary = Container{
-            FlexGrow: 1,
-            FlexBasis: 0,
-            MinWidth: 0,
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Gap: 10,
-        }
-        if chooser == nil {
-            summary.Children.Add(
-                Ui.Label(
-                    FolderName(pane.DirectoryPath),
-                    p.Text,
-                    if Model.Split {
-                        15
-                    } else {
-                        18
-                    },
-                    600
-                )
-            )
-        }
-        summary.Children.Add(
-            Ui.Label(
-                if pane.Loading {
-                    "Reading folder…"
-                } else if pane.VisibleEntries.Count == 1 {
-                    "1 item"
-                } else {
-                    pane.VisibleEntries.Count.ToString() + " items"
-                },
-                p.Muted,
-                11
-            )
-        )
-        let header = List[Blob]()
-        header.Add(summary)
+        let tools = List[Blob]()
+        var toolsWidth = 0.0
         if !Model.Split && availableWidth >= 560 {
-            header.Add(
+            toolsWidth = if width < 950 {
+                142
+            } else {
+                188
+            }
+            tools.Add(
                 Cell.Mount[FilterFieldInput, FilterField](
                     nil,
                     FilterFieldInput{
                         Value: pane.Filter,
                         Handle: filterHandle,
                         Palette: p,
-                        Width: if width < 950 {
-                            142
-                        } else {
-                            188
-                        },
+                        Width: toolsWidth,
                         OnChange: value -> Model.SetFilter(value),
                         OnSubmit: () -> FocusFiles(),
                     }
                 )
             )
-            header.Add(Ui.Tool("create_new_folder", "New folder", () -> OpenDialog("New folder", ""), Host, p))
+        } else if availableWidth >= 400 {
+            tools.Add(
+                Ui.Tool(
+                    "search",
+                    "Filter files",
+                    () -> {
+                        Model.SetActive(index)
+                        Invoke("FocusFilter")
+                    },
+                    Host,
+                    p,
+                    pane.Filter != ""
+                )
+            )
         }
-        header.Add(
+        if availableWidth >= 400 {
+            tools.Add(
+                Ui.Tool(
+                    "create_new_folder",
+                    "New folder",
+                    () -> {
+                        Model.SetActive(index)
+                        Invoke("NewFolder")
+                    },
+                    Host,
+                    p
+                )
+            )
+        }
+        tools.Add(
             Ui.Tool(
                 "view_list",
                 "List view",
@@ -661,7 +645,7 @@ partial class BrowserView : Cell {
                 settings.ViewMode == "list"
             )
         )
-        header.Add(
+        tools.Add(
             Ui.Tool(
                 "grid_view",
                 "Tile view",
@@ -675,7 +659,7 @@ partial class BrowserView : Cell {
             )
         )
         if chooser == nil {
-            header.Add(
+            tools.Add(
                 Ui.Tool(
                     "terminal",
                     "Open terminal",
@@ -688,6 +672,7 @@ partial class BrowserView : Cell {
                 )
             )
         }
+        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * 30 + (tools.Count - 1) * 4
         return Container{
             Key: "pane-" + index.ToString(),
             FlexGrow: 1,
@@ -704,15 +689,24 @@ partial class BrowserView : Cell {
             OnFocus: (_) -> Model.SetActive(index),
             Container{
                 Key: "pane-header",
-                Height: chooser != nil ? 36: 44,
+                Height: chooser != nil ? 36: 40,
                 FlexShrink: 0,
-                Padding: Edges{Left: 12, Right: 10},
+                Padding: Edges{Left: 7, Right: 8},
                 Gap: 8,
                 FlexDirection: FlexDirection.Row,
                 AlignItems: AlignItems.Center,
                 BorderWidth: Edges{Bottom: 1},
                 BorderColor: p.Border,
-                Children: header.ToArray(),
+                Opacity: Model.Split && !active ? .6: 1,
+                Location(index, Math.Max(0, availableWidth - 23 - toolsWidth)),
+                Container{
+                    Key: "tools",
+                    FlexDirection: FlexDirection.Row,
+                    AlignItems: AlignItems.Center,
+                    FlexShrink: 0,
+                    Gap: 4,
+                    Children: tools.ToArray(),
+                },
             },
             Cell.Mount[FileTableInput, FileTable](
                 "table-" + index.ToString(),
@@ -808,23 +802,28 @@ partial class BrowserView : Cell {
 
     private func StatusBar() Blob {
         let p = palette
+        let pane = Model.ActivePane()
+        let total = pane.VisibleEntries.Count
+        let selected = Model.SelectedCount()
         let info = if notice != "" {
             notice
         } else if Model.Status != "" {
             Model.Status
-        } else if Model.SelectedCount() > 1 {
-            Model.SelectionSummary()
-        } else if let entry = Model.SelectedEntry() {
-            entry.Name +
-                (
-                if entry.IsDirectory {
-                    " · Folder"
+        } else if pane.Loading && total == 0 {
+            "Reading folder…"
+        } else if selected > 0 {
+            let size = Model.SelectedSize()
+            selected.ToString() + " of " + total.ToString() + " selected" + (
+                if size < 0 {
+                    ""
                 } else {
-                    " · " + FileSystemService.FormatSize(entry.Size)
+                    " · " + FileSystemService.FormatSize(size)
                 }
             )
+        } else if total == 1 {
+            "1 item"
         } else {
-            "Ready"
+            total.ToString() + " items"
         }
         return Container{
             Height: 26,

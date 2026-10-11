@@ -87,7 +87,7 @@ class Ui {
             p Palette,
             active bool = false,
             disabled bool = false
-        ) Blob -> Container{
+        ) Container -> Container{
             Width: 30,
             Height: 30,
             FlexShrink: 0,
