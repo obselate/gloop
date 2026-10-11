@@ -51,7 +51,8 @@ class DialogShell {
                 BackgroundColor: p.Surface,
                 BorderWidth: 1,
                 BorderColor: p.Border,
-                BorderRadius: 8,
+                BorderRadius: 10,
+                BoxShadow: Ui.Shadow(),
                 Accessibility: Accessibility{Role: AccessibilityRole.Dialog, Name: stringTitle},
                 Container{
                     FlexDirection: FlexDirection.Row,

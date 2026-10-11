@@ -42,7 +42,8 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                     panel.Padding = 4
                     panel.BackgroundColor = p.Glass ? p.Surface: p.Background
                     panel.BorderColor = p.Border
-                    panel.BorderRadius = 5
+                    panel.BorderRadius = 10
+                    panel.BoxShadow = Ui.Shadow()
                     panel.ScrollbarY = Ui.ScrollbarStyle(p)
                     return panel
                 },

@@ -1,12 +1,15 @@
 package gloop
 
 import Goo
+import Goo.Svg
 import Goo.Widgets
 import Goo.Widgets.Actions
 import Goo.Widgets.Colors
 import Goo.Widgets.Icons
 import Goo.Widgets.Layout
 import System
+import System.IO
+import System.Text
 
 class Palette {
     internal let Background Color
@@ -27,6 +30,7 @@ class Palette {
     internal let Sidebar Color
     internal let Preview Color
     internal let Hover Color
+    internal let Bar Color
 
     internal init(theme ThemePalette) {
         let preset = ThemePresets.Match(theme)
@@ -43,6 +47,7 @@ class Palette {
         Sidebar = Glass ? Color.White.WithAlpha(.015): Surface
         Preview = Glass ? Color.Rgba(0, 0, 0, 46): Surface
         Hover = Glass ? Color.White.WithAlpha(.012): Surface
+        Bar = Glass ? Color.Transparent: Surface
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
         let syntax = switch preset {
             case "": []string{theme.Accent, theme.Text, theme.MutedText, theme.Accent}
@@ -64,10 +69,60 @@ class Palette {
         Number = Color.Parse(syntax[2])
         Type = Color.Parse(syntax[3])
     }
+
+    internal func IconColor(icon string) Color -> switch icon {
+        case "folder": Accent
+        case "image": Type
+        case "code": Keyword
+        case "folder_zip": Number
+        case "audio_file" or "video_file": String
+        default: Muted
+    }
 }
 
 class Ui {
     shared {
+        private let folder VectorAsset = Svg.Load(
+            MemoryStream(
+                Encoding.UTF8.GetBytes(
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 -960 960 960\"><path d=\"M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h240l80 80h320q33 0 56.5 23.5T880-640v400q0 33-23.5 56.5T800-160H160Z\"/></svg>"
+                )
+            )
+        )
+
+        internal func FileIcon(icon string, p Palette, size float64) Blob {
+            if icon != "folder" {
+                return Icon(icon, p.IconColor(icon), size)
+            }
+            let scale = size / float64(folder.ViewBoxWidth)
+            return Shape{
+                Path: folder.PathForNode(1),
+                Width: size,
+                Height: size,
+                FlexShrink: 0,
+                Fit: ShapeFit.Contain,
+                Transform: PanelTransform{
+                    TranslateX: -float64(folder.ViewBoxX) * scale,
+                    TranslateY: -float64(folder.ViewBoxY) * scale,
+                },
+                BackgroundColor: p.Accent,
+                Accessibility: Accessibility{Hidden: true},
+            }
+        }
+
+        internal func Shadow() BoxShadow -> BoxShadow{OffsetY: 12, Blur: 32, Color: Color.Black.WithAlpha(.6)}
+
+        internal func BubbleStyle(p Palette) Style -> Style{
+            BackgroundColor: p.Surface,
+            BorderColor: p.Border,
+            BorderWidth: 1,
+            Color: p.Text,
+            FontSize: 11,
+            Padding: Edges{Left: 9, Right: 9, Top: 6, Bottom: 6},
+            BorderRadius: 6,
+            BoxShadow: BoxShadow{OffsetY: 4, Blur: 12, Color: Color.Black.WithAlpha(.5)},
+        }
+
         internal func Label(
             value string,
             color Color,
@@ -113,15 +168,7 @@ class Ui {
                     Window: window,
                     Content: Label(label, p.Text, 11),
                     Placement: PortalPlacement.Bottom,
-                    BubbleStyle: Style{
-                        BackgroundColor: p.Surface,
-                        BorderColor: p.Border,
-                        BorderWidth: 1,
-                        Color: p.Text,
-                        FontSize: 11,
-                        Padding: Edges{Left: 9, Right: 9, Top: 6, Bottom: 6},
-                        BorderRadius: 5,
-                    },
+                    BubbleStyle: BubbleStyle(p),
                     Target: IconButton{
                         Icon: Icon(
                             name,

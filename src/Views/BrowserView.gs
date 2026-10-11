@@ -928,6 +928,7 @@ partial class BrowserView : Cell {
             Gap: 14,
             BorderWidth: Edges{Top: 1},
             BorderColor: p.Border,
+            BackgroundColor: p.Bar,
             Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(info, p.Muted, 11)},
             Ui.Shortcut(settings.Keybindings["TogglePreview"], "Preview", p),
             Ui.Shortcut(settings.Keybindings["ToggleSplit"], "Split", p),

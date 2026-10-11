@@ -132,7 +132,7 @@ open class FileTiles : Cell[FileTableInput] {
         let tile = Container{
             Padding: 6,
             Gap: 5,
-            BorderRadius: 5,
+            BorderRadius: 6,
             BackgroundColor: if selected {
                 p.Selection
             } else {

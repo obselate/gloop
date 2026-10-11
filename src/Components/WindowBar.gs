@@ -11,7 +11,7 @@ class WindowBar {
             LeadingContent: Container{Width: Math.Max(0, width - 108), toolbar},
             Height: 40,
             ControlWidth: 36,
-            BackgroundColor: p.Canvas,
+            BackgroundColor: p.Bar,
             BorderColor: p.Border,
             ControlColor: p.Muted,
             HoverBackgroundColor: p.Border,
@@ -30,13 +30,7 @@ class WindowBar {
                         Window: window,
                         Content: Ui.Label(name, p.Text, 11),
                         Placement: PortalPlacement.Bottom,
-                        BubbleStyle: Style{
-                            BackgroundColor: p.Surface,
-                            BorderColor: p.Border,
-                            BorderWidth: 1,
-                            Padding: Edges{Left: 9, Right: 9, Top: 6, Bottom: 6},
-                            BorderRadius: 5,
-                        },
+                        BubbleStyle: Ui.BubbleStyle(p),
                         Target: Container{
                             Width: 36,
                             Height: 40,
