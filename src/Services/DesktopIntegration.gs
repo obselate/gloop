@@ -8,7 +8,7 @@ import System.Text
 
 internal class DesktopIntegration {
     shared {
-        private const AppId string = "io.github.obselate.gloop"
+        internal const AppId string = "io.github.obselate.gloop"
 
         internal func Install() string {
             if !OperatingSystem.IsLinux() || RuntimeFeature.IsDynamicCodeSupported {
