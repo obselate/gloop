@@ -150,7 +150,8 @@ class PlacesSidebar {
                         window,
                         p,
                         size: 22,
-                        iconSize: 16
+                        iconSize: 16,
+                        hoverColor: p.Selection
                     )
                 }
                 places.Add(

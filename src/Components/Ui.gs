@@ -88,7 +88,8 @@ class Ui {
             active bool = false,
             disabled bool = false,
             size float64 = 30,
-            iconSize float64 = 20
+            iconSize float64 = 20,
+            hoverColor Color? = nil
         ) Container -> Container{
             Width: size,
             Height: size,
@@ -127,7 +128,7 @@ class Ui {
                         BorderRadius: 6,
                         BackgroundColor: Color.Transparent,
                         ActiveBackgroundColor: p.Selection,
-                        HoverBackgroundColor: p.Border,
+                        HoverBackgroundColor: hoverColor ?? p.Border,
                         ShowFocusHighlight: true,
                         FocusOutlineColor: p.Accent,
                     }.Build(),
