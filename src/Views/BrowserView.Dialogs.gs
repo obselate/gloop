@@ -26,6 +26,9 @@ partial class BrowserView {
         if dialog == "Desktop setup" {
             return SetupDialog()
         }
+        if dialog == "Properties" {
+            return PropertiesDialog()
+        }
         if dialog == "Bookmarks" {
             return DialogShell.Build(
                 dialog,

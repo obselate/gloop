@@ -413,9 +413,16 @@ class BrowserController {
         Notify()
     }
 
-    internal func OpenTerminal() {
-        let directory = ActivePane().DirectoryPath
-        if disposed || directory == "" || terminalOpening {
+    internal func OpenTerminal(inSelection bool = true) {
+        var directory = ActivePane().DirectoryPath
+        if inSelection {
+            if let entry = SingleSelectedEntry() {
+                if entry.IsDirectory {
+                    directory = entry.FullPath
+                }
+            }
+        }
+        if disposed || directory == "" || Locations.IsRecent(directory) || terminalOpening {
             return
         }
         terminalOpening = true
@@ -1179,7 +1186,7 @@ class BrowserController {
         return selected == "" ? pane.PendingFocusPath: selected
     }
 
-    private func SelectedPaths() List[string] {
+    internal func SelectedPaths() List[string] {
         let pane = ActivePane()
         let sources = List[string]()
         for entry in pane.VisibleEntries {

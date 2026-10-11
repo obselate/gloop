@@ -25,6 +25,7 @@
     <EmbeddedResource Include="src/Resources/ThirdPartyNotices.txt" LogicalName="gloop.ThirdPartyNotices.txt" />
     <EmbeddedResource Include="assets/gloop.png" LogicalName="gloop.Icon.png" />
     <EmbeddedResource Include="assets/io.github.obselate.gloop.metainfo.xml" LogicalName="gloop.Metainfo.xml" />
+    <GooMaterialIcon Include="apps" />
     <GooMaterialIcon Include="arrow_back" />
     <GooMaterialIcon Include="arrow_forward" />
     <GooMaterialIcon Include="arrow_upward" />
@@ -59,6 +60,8 @@
     <GooMaterialIcon Include="home" />
     <GooMaterialIcon Include="hourglass_empty" />
     <GooMaterialIcon Include="image" />
+    <GooMaterialIcon Include="info" />
+    <GooMaterialIcon Include="link" />
     <GooMaterialIcon Include="menu" />
     <GooMaterialIcon Include="movie" />
     <GooMaterialIcon Include="music_note" />
