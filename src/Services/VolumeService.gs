@@ -104,7 +104,7 @@ class VolumeService {
                     volume.Device = mount.Source
                 }
             }
-            return withSpace(volume, fullPath)
+            return withSpace(volume, volume.MountPath != "" ? volume.MountPath: fullPath)
         } catch (failure Exception) {
             return volume
         }

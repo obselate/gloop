@@ -48,18 +48,9 @@ partial class BrowserView {
             contents.Add(
                 Text{Content: "You can restore these items from your desktop's Trash.", FontSize: 12, Color: p.Muted}
             )
-        } else if dialog == "Delete permanently" {
+        } else if dialog == "Delete permanently" || dialog == "Empty Trash" {
             contents.Add(Text{Content: "Delete " + dialogValue + " permanently?", FontSize: 14, Color: p.Text})
             contents.Add(Text{Content: "This cannot be undone.", FontSize: 12, Color: p.Muted})
-        } else if dialog == "Empty Trash" {
-            contents.Add(Text{Content: "Empty Trash?", FontSize: 14, Color: p.Text})
-            contents.Add(
-                Text{
-                    Content: "Delete " + dialogValue + " permanently. This cannot be undone.",
-                    FontSize: 12,
-                    Color: p.Muted
-                }
-            )
         } else if dialog == "Replace file" {
             contents.Add(
                 Text{Content: "A file already exists at this location. Replace it?", FontSize: 14, Color: p.Text}

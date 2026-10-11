@@ -37,7 +37,7 @@ class PlacesService {
     }
 
     internal func Watch(path string) {
-        if path != spacePath && !Locations.IsRecent(path) {
+        if path != "" && path != spacePath && !Locations.IsRecent(path) {
             Submit(false, path)
         }
     }
