@@ -7,6 +7,7 @@ import System.Globalization
 import System.IO
 import System.IO.Enumeration
 import System.Text
+import System.Text.Unicode
 
 class FileSystemService {
     internal func List(path string, showHidden bool) DirectorySnapshot {
@@ -61,7 +62,7 @@ class FileSystemService {
             if isImage(extension) {
                 return PreviewData{Kind: "image", Text: FormatSize(size), Path: fullPath}
             }
-            if !isText(extension) {
+            if !isText(extension) && !hasTextPrefix(fullPath, size) {
                 return PreviewData{Kind: "metadata", Text: FormatSize(size), Path: fullPath}
             }
             if size == 0 {
@@ -175,6 +176,23 @@ class FileSystemService {
             return PreviewData{Kind: "metadata", Text: "Binary file", Path: path}
         } catch (failure Exception) {
             return PreviewData{Kind: "error", Text: "", Path: path, Error: failure.Message}
+        }
+    }
+
+    private func hasTextPrefix(path string, size int64) bool {
+        if size == 0 {
+            return false
+        }
+        try {
+            using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+            let buffer = [8192]uint8
+            var count = stream.Read(buffer, 0, buffer.Length)
+            if size > int64(count) {
+                count = completeUtf8Length(buffer, count)
+            }
+            return Array.IndexOf(buffer, uint8(0), 0, count) < 0 && Utf8.IsValid(ReadOnlySpan[uint8](buffer, 0, count))
+        } catch (failure Exception) {
+            return false
         }
     }
 
