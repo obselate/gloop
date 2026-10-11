@@ -241,6 +241,7 @@ class VolumeService {
 
     private func isUserFuse(mount MountEntry) bool -> mount.Type.StartsWith("fuse.", StringComparison.Ordinal) &&
         mount.Type != "fuse.portal" &&
+        mount.Type != "fuse.gvfsd-fuse" &&
         !mount.ReadOnly
 
     private func holds(mountPath string, path string) bool {
