@@ -42,6 +42,8 @@ internal class SettingsService {
                 }
                 if property.Name == "showHidden" {
                     settings.ShowHidden = readBool(property.Value, property.Name)
+                } else if property.Name == "showTypeColumn" {
+                    settings.ShowTypeColumn = readBool(property.Value, property.Name)
                 } else if property.Name == "showPreview" {
                     settings.ShowPreview = readBool(property.Value, property.Name)
                 } else if property.Name == "previewWordWrap" {
@@ -125,6 +127,7 @@ internal class SettingsService {
                 using let writer = Utf8JsonWriter(stream, JsonWriterOptions{Indented: true})
                 writer.WriteStartObject()
                 writer.WriteBoolean("showHidden", settings.ShowHidden)
+                writer.WriteBoolean("showTypeColumn", settings.ShowTypeColumn)
                 writer.WriteBoolean("showPreview", settings.ShowPreview)
                 writer.WriteBoolean("previewWordWrap", settings.PreviewWordWrap)
                 writer.WriteBoolean("previewLineNumbers", settings.PreviewLineNumbers)

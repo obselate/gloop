@@ -10,6 +10,7 @@ partial class BrowserView {
     private var contextMenuPoint Point
     private var contextMenuBookmark string = ""
     private var contextMenuPaths[]string = []string{}
+    private var contextMenuColumns bool
 
     private func DismissContextMenuOnBlur(focused bool) {
         if !focused {
@@ -50,6 +51,19 @@ partial class BrowserView {
         Model.SetActive(index)
         contextMenuBookmark = ""
         contextMenuPaths = paths
+        contextMenuPoint = point
+        contextMenuOpen = true
+        Rebuild()
+    }
+
+    private func OpenColumnMenu(index int32, point Point) {
+        if dialog != "" {
+            return
+        }
+        Model.SetActive(index)
+        contextMenuBookmark = ""
+        contextMenuPaths = []string{}
+        contextMenuColumns = true
         contextMenuPoint = point
         contextMenuOpen = true
         Rebuild()
@@ -111,13 +125,18 @@ partial class BrowserView {
         contextMenuOpen = false
         contextMenuBookmark = ""
         contextMenuPaths = []string{}
+        contextMenuColumns = false
         Rebuild()
     }
 
     private func ContextMenu() Blob {
         let items = List[MenuItem]()
         let count = Model.SelectedCount()
-        if contextMenuPaths.Length > 0 {
+        if contextMenuColumns {
+            items.Add(
+                FileContextMenu.Item("ToggleTypeColumn", "Type column", "view_list", "", palette, false, settings.ShowTypeColumn)
+            )
+        } else if contextMenuPaths.Length > 0 {
             for path in contextMenuPaths {
                 items.Add(FileContextMenu.Item("Navigate:" + path, FolderName(path), "folder", "", palette))
             }
