@@ -9,6 +9,7 @@ import System.Collections.Generic
 internal data struct FileTableInput {
     var Host Window
     var Pane BrowserPane
+    var Location string
     var Compact bool
     var ShowType bool
     var ShowHidden bool
@@ -98,7 +99,7 @@ open class FileTable : Cell[FileTableInput] {
                 ScrollbarVisibilityX: ScrollbarVisibility.Auto,
                 ScrollbarY: Ui.ScrollbarStyle(p, 8),
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                EmptyContent: Empty(pane, p, value.Choosing, value.DirectoriesOnly),
+                EmptyContent: Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly),
                 Selection: DataGridSelection.Multiple,
                 SelectedIds: selected,
                 ActiveRowId: if pane.Selected >= 0 && pane.Selected < pane.VisibleEntries.Count {
@@ -295,7 +296,13 @@ open class FileTable : Cell[FileTableInput] {
     }
 
     shared {
-        internal func Empty(pane BrowserPane, p Palette, choosing bool = false, directoriesOnly bool = false) Blob {
+        internal func Empty(
+            pane BrowserPane,
+            p Palette,
+            location string,
+            choosing bool = false,
+            directoriesOnly bool = false
+        ) Blob {
             if pane.Loading {
                 return Ui.Empty("hourglass_empty", "Opening folder", "Reading the directory…", p)
             }
@@ -305,7 +312,11 @@ open class FileTable : Cell[FileTableInput] {
             let empty = pane.Filter == "" && (!choosing || pane.Entries.Count == 0)
             return Ui.Empty(
                 "folder_open",
-                if empty {
+                if empty && location == "recent" {
+                    "No recent files"
+                } else if empty && location == "trash" {
+                    "Trash is empty"
+                } else if empty {
                     "This folder is empty"
                 } else if directoriesOnly {
                     "No matching folders"
@@ -316,6 +327,10 @@ open class FileTable : Cell[FileTableInput] {
                     "Create a folder here."
                 } else if choosing && pane.Filter == "" {
                     "Choose another folder or file type."
+                } else if pane.Filter == "" && location == "recent" {
+                    "Files you open appear here."
+                } else if pane.Filter == "" && location == "trash" {
+                    "Deleted items appear here."
                 } else if pane.Filter == "" {
                     "Create a folder or paste files here."
                 } else {

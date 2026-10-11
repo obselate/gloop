@@ -97,7 +97,7 @@ open class FileTiles : Cell[FileTableInput] {
             },
         }
         if pane.VisibleEntries.Count == 0 {
-            root.Children.Add(FileTable.Empty(pane, p, value.Choosing, value.DirectoriesOnly))
+            root.Children.Add(FileTable.Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly))
             return root
         }
         let grid = VirtualItems(

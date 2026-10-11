@@ -86,10 +86,12 @@ class Ui {
             window Window,
             p Palette,
             active bool = false,
-            disabled bool = false
+            disabled bool = false,
+            size float64 = 30,
+            iconSize float64 = 20
         ) Container -> Container{
-            Width: 30,
-            Height: 30,
+            Width: size,
+            Height: size,
             FlexShrink: 0,
             Cell.Mount[TooltipInput, Tooltip](
                 label,
@@ -113,14 +115,15 @@ class Ui {
                                 p.Accent
                             } else {
                                 p.Muted
-                            }
+                            },
+                            iconSize
                         ),
                         AccessibilityName: label,
                         OnClick: action,
                         Active: active,
                         Disabled: disabled,
-                        Width: 30,
-                        Height: 30,
+                        Width: size,
+                        Height: size,
                         BorderRadius: 6,
                         BackgroundColor: Color.Transparent,
                         ActiveBackgroundColor: p.Selection,
