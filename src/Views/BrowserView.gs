@@ -22,6 +22,7 @@ partial class BrowserView : Cell {
     private let listViewport[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
     private let tileViewport[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
     private let selections[]string = []string{"", ""}
+    private let revealPending[]bool = []bool{false, false}
     private let locationHandle ElementHandle = ElementHandle()
     private let filterHandle ElementHandle = ElementHandle()
     private let dialogHandle ElementHandle = ElementHandle()
@@ -243,7 +244,10 @@ partial class BrowserView : Cell {
             let selection = pane.DirectoryPath + "\0" + pane.Selected.ToString()
             if selections[index] != selection {
                 selections[index] = selection
-                Host.Post(() -> RevealSelection(index))
+                if !pane.Refreshing {
+                    revealPending[index] = true
+                    Host.Post(() -> RevealSelection(index))
+                }
             }
         }
     }
@@ -260,7 +264,9 @@ partial class BrowserView : Cell {
             if viewport != metrics.ContentBox.Height || scrollRange != metrics.ScrollRange.Y {
                 viewport = metrics.ContentBox.Height
                 scrollRange = metrics.ScrollRange.Y
-                RevealSelection(index)
+                if revealPending[index] {
+                    RevealSelection(index)
+                }
             }
         }
     }

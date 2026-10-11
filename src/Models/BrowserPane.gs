@@ -14,6 +14,7 @@ class BrowserPane {
     internal var SortColumn string
     internal var Descending bool
     internal var Loading bool
+    internal var Refreshing bool
     internal var Error string
     internal let History List[string]
     internal var HistoryIndex int32

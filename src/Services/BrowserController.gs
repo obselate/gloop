@@ -603,15 +603,16 @@ class BrowserController {
         pane.PendingFocusPath = selectedPath
         pane.Loading = true
         pane.Error = ""
-        pane.Entries = List[FileEntry]()
-        pane.VisibleEntries = List[FileEntry]()
-        pane.Selected = -1
-        if mode != "refresh" {
+        pane.Refreshing = mode == "refresh"
+        if !pane.Refreshing {
+            pane.Entries = List[FileEntry]()
+            pane.VisibleEntries = List[FileEntry]()
+            pane.Selected = -1
             pane.SelectedPaths.Clear()
             pane.SelectionAnchorPath = ""
-        }
-        if index == ActiveIndex {
-            QueuePreview()
+            if index == ActiveIndex {
+                QueuePreview()
+            }
         }
         UpdateBusy()
         Notify()
@@ -662,10 +663,18 @@ class BrowserController {
         }
         if snapshot.Error != "" {
             pane.Loading = false
+            pane.Refreshing = false
             pane.PendingFocusPath = ""
+            pane.Entries = List[FileEntry]()
+            pane.VisibleEntries = List[FileEntry]()
+            pane.Selected = -1
+            pane.SelectedPaths.Clear()
             pane.Error = snapshot.Error
             Status = snapshot.Error
             UpdateBusy()
+            if index == ActiveIndex {
+                QueuePreview()
+            }
             Notify()
             return
         }
@@ -692,6 +701,7 @@ class BrowserController {
                 QueuePreview()
             }
             Notify()
+            pane.Refreshing = false
             return
         }
         pane.Loading = true
@@ -731,16 +741,21 @@ class BrowserController {
         if error == "" && pane.Filter == "" && EntryFilter == nil {
             pane.Entries = entries
         }
-        pane.Selected = entries.Count == 0 ? -1: 0
+        let previous = pane.Refreshing ? pane.Selected: 0
+        pane.Selected = entries.Count == 0 ? -1: Math.Clamp(previous, 0, entries.Count - 1)
         pane.PendingFocusPath = ""
         let missing = HashSet[string](pane.SelectedPaths, StringComparer.Ordinal)
         var focused = focusPath == ""
+        var fallback = -1
         var anchorVisible = false
         for i in 0 ... entries.Count {
             let path = entries[i].FullPath
             if !focused && path == focusPath {
                 pane.Selected = i
                 focused = true
+            }
+            if path == selectedPath {
+                fallback = i
             }
             if missing.Count > 0 {
                 missing.Remove(path)
@@ -749,8 +764,15 @@ class BrowserController {
                 anchorVisible = true
             }
         }
+        if !focused && fallback >= 0 {
+            pane.Selected = fallback
+            pane.Refreshing = false
+        }
         for path in missing {
             pane.SelectedPaths.Remove(path)
+        }
+        if missing.Count > 0 && pane.SelectedPaths.Count == 0 && pane.Selected >= 0 {
+            pane.SelectedPaths.Add(entries[pane.Selected].FullPath)
         }
         if SelectFirstEntry && pane.SelectedPaths.Count == 0 && pane.SelectionAnchorPath == "" && pane.Selected >= 0 {
             pane.SelectedPaths.Add(entries[pane.Selected].FullPath)
@@ -766,6 +788,7 @@ class BrowserController {
             QueuePreview()
         }
         Notify()
+        pane.Refreshing = false
     }
 
     private func QueuePreview() {
