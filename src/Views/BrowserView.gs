@@ -128,6 +128,8 @@ partial class BrowserView : Cell {
         browser = BrowserController(value, settings, () -> Changed())
         thumbnails = ThumbnailService(value)
         folderCounts = FolderCountService(value, () -> Rebuild())
+        value.FocusChanged += RefreshPlacesOnFocus
+        Model.Places.Refresh()
         if launch.ChooserRequest == nil {
             settingsWriter = SettingsWriter(
                 value,
@@ -155,6 +157,7 @@ partial class BrowserView : Cell {
     internal func Shutdown() {
         if let attached = window {
             attached.FocusChanged -= DismissContextMenuOnBlur
+            attached.FocusChanged -= RefreshPlacesOnFocus
         }
         if let done = setupCompletion {
             <-done
@@ -401,7 +404,13 @@ partial class BrowserView : Cell {
                     bookmarkDrop,
                     bookmarkDropIndex,
                     bookmarkMenu,
-                    bookmarkMenuKey
+                    bookmarkMenuKey,
+                    Model.Places.Volumes,
+                    OpenVolume,
+                    EjectVolume,
+                    Model.TrashDirectory,
+                    Model.Places.TrashCount,
+                    chooser == nil
                 )
             } else {
                 nil
@@ -498,7 +507,8 @@ partial class BrowserView : Cell {
                         () -> Invoke("ToggleBookmark"),
                         Host,
                         p,
-                        settings.IsBookmarked(pane.DirectoryPath)
+                        settings.IsBookmarked(pane.DirectoryPath),
+                        Model.InRecent
                     )
                 } else {
                     Container{}
@@ -573,6 +583,7 @@ partial class BrowserView : Cell {
             "location-" + index.ToString(),
             BreadcrumbInput{
                 Path: pane.DirectoryPath,
+                Trash: Model.TrashDirectory,
                 Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 Width: crumbWidth,
                 Window: Host,
@@ -602,6 +613,7 @@ partial class BrowserView : Cell {
         } else {
             secondList
         }
+        let location = LocationKind(pane)
         let tools = List[Blob]()
         var toolsWidth = 0.0
         if !Model.Split && availableWidth >= 560 {
@@ -648,7 +660,9 @@ partial class BrowserView : Cell {
                         Invoke("NewFolder")
                     },
                     Host,
-                    p
+                    p,
+                    false,
+                    location != ""
                 )
             )
         }
@@ -688,7 +702,9 @@ partial class BrowserView : Cell {
                         Invoke("OpenTerminal")
                     },
                     Host,
-                    p
+                    p,
+                    false,
+                    location == "recent"
                 )
             )
         }
@@ -734,6 +750,7 @@ partial class BrowserView : Cell {
                     Host: Host,
                     WordWrap: settings.PreviewWordWrap,
                     Pane: pane,
+                    Location: location,
                     Compact: compact,
                     ShowType: settings.ShowTypeColumn,
                     ShowHidden: settings.ShowHidden,

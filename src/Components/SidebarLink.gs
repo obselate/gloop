@@ -13,6 +13,8 @@ internal data struct SidebarLinkInput {
     var OnContextMenuKey Action[KeyEvent, Point]?
     var DropTarget DropTarget?
     var DropActive bool
+    var Muted bool
+    var Trailing Blob?
     var Palette Palette
 }
 
@@ -68,7 +70,7 @@ open class SidebarLink : Cell[SidebarLinkInput] {
             ),
             Ui.Label(
                 value.Label,
-                p.Text,
+                value.Muted ? p.Muted: p.Text,
                 13,
                 if value.Active {
                     600
@@ -76,6 +78,10 @@ open class SidebarLink : Cell[SidebarLinkInput] {
                     400
                 }
             ),
+        }
+        if let trailing = value.Trailing {
+            button.Children.Add(Container{FlexGrow: 1})
+            button.Children.Add(trailing)
         }
         WidgetKeyBindings.BindActivation(button)
         return button

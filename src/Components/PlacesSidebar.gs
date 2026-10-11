@@ -23,7 +23,13 @@ class PlacesSidebar {
             bookmarkDrop Func[int32, DropTarget]? = nil,
             bookmarkDropIndex int32 = -1,
             bookmarkMenu Action[string, Point]? = nil,
-            bookmarkMenuKey Action[string, KeyEvent, Point]? = nil
+            bookmarkMenuKey Action[string, KeyEvent, Point]? = nil,
+            volumes IReadOnlyList[Volume]? = nil,
+            openVolume Action[Volume]? = nil,
+            ejectVolume Action[Volume]? = nil,
+            trashPath string = "",
+            trashCount int32 = 0,
+            showVirtual bool = true
         ) Blob {
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let places = List[Blob]()
@@ -41,6 +47,16 @@ class PlacesSidebar {
                         default: "movie"
                     }
                     places.Add(Place(icon, name, location, path, navigate, p, drop, dropPath))
+                }
+            }
+            if showVirtual {
+                places.Add(Place("history", "Recent", Locations.Recent, path, navigate, p))
+                if trashPath != "" {
+                    var count Blob? = nil
+                    if trashCount > 0 {
+                        count = Ui.Label(trashCount.ToString(), p.Muted, 11)
+                    }
+                    places.Add(Place("delete", "Trash", trashPath, path, navigate, p, trailing: count))
                 }
             }
             let saved = Container{
@@ -118,8 +134,40 @@ class PlacesSidebar {
                 }
             }
             places.Add(saved)
-            places.Add(Ui.Section("THIS COMPUTER", p))
+            places.Add(Ui.Section("DEVICES", p))
             places.Add(Place("hard_drive", "File system", "/", path, navigate, p, drop, dropPath))
+            for volume in volumes ?? List[Volume]() {
+                if volume.MountPath == "/" {
+                    continue
+                }
+                let mounted = volume.MountPath != ""
+                var eject Blob? = nil
+                if mounted && volume.Ejectable {
+                    eject = Ui.Tool(
+                        "eject",
+                        "Eject " + volume.Name,
+                        () -> ejectVolume?.Invoke(volume),
+                        window,
+                        p,
+                        size: 22,
+                        iconSize: 16
+                    )
+                }
+                places.Add(
+                    Place(
+                        volume.Removable ? "usb": "hard_drive",
+                        volume.Name,
+                        volume.MountPath,
+                        path,
+                        _ -> openVolume?.Invoke(volume),
+                        p,
+                        mounted ? drop: nil,
+                        dropPath,
+                        muted: !mounted,
+                        trailing: eject
+                    )
+                )
+            }
             return Container{
                 Width: Percent(100),
                 Height: Percent(100),
@@ -187,19 +235,23 @@ class PlacesSidebar {
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
             contextMenu Action[Point]? = nil,
-            contextMenuKey Action[KeyEvent, Point]? = nil
+            contextMenuKey Action[KeyEvent, Point]? = nil,
+            muted bool = false,
+            trailing Blob? = nil
         ) Blob -> Cell
             .Mount[SidebarLinkInput, SidebarLink](
             nil,
             SidebarLinkInput{
                 Icon: icon,
                 Label: name,
-                Active: current == destination,
+                Active: destination != "" && current == destination,
                 Action: () -> navigate(destination),
                 OnContextMenu: contextMenu,
                 OnContextMenuKey: contextMenuKey,
                 DropTarget: drop?.Invoke(destination),
                 DropActive: destination != "" && destination == dropPath,
+                Muted: muted,
+                Trailing: trailing,
                 Palette: p,
             }
         )
