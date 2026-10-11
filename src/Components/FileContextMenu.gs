@@ -78,19 +78,21 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
             p Palette,
             disabled bool = false,
             checked bool = false
-        ) MenuItem -> MenuItem{
-            Id: action,
-            Label: label,
-            Disabled: disabled,
-            Content: Container{
+        ) MenuItem {
+            let content = Container{
                 Opacity: disabled ? 0.45: 1,
                 FlexDirection: FlexDirection.Row,
                 AlignItems: AlignItems.Center,
                 Gap: 8,
-                Ui.Icon(checked ? "check": icon, p.Text, 16),
-                Container{FlexGrow: 1, MinWidth: 0, Ui.Label(label, p.Text, 13)},
-                Ui.Label(shortcut, p.Muted, 11),
-            },
+            }
+            if icon != "" || checked {
+                content.Children.Add(Ui.Icon(checked ? "check": icon, p.Text, 16))
+            }
+            content.Children.Add(Container{FlexGrow: 1, MinWidth: 0, Ui.Label(label, p.Text, 13)})
+            if shortcut != "" {
+                content.Children.Add(Ui.Label(shortcut, p.Muted, 11))
+            }
+            return MenuItem{Id: action, Label: label, Disabled: disabled, Content: content}
         }
     }
 }
