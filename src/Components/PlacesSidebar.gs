@@ -174,7 +174,7 @@ class PlacesSidebar {
                 Height: Percent(100),
                 MinWidth: 0,
                 MinHeight: 0,
-                BackgroundColor: p.Surface,
+                BackgroundColor: p.Sidebar,
                 Padding: Edges{Left: 6, Right: 6},
                 Container{
                     FlexGrow: 1,

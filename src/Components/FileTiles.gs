@@ -149,7 +149,7 @@ open class FileTiles : Cell[FileTableInput] {
                 BackgroundColor: if selected {
                     p.Selection
                 } else {
-                    p.Surface
+                    p.Hover
                 }
             },
             OnPointerDown: e -> {

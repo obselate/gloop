@@ -14,13 +14,13 @@ internal class ThemePalette {
     internal var Selection string
 
     internal init() {
-        Background = "#1E1E2E"
-        Surface = "#313244"
-        Text = "#CDD6F4"
-        MutedText = "#A6ADC8"
-        Accent = "#89B4FA"
-        Border = "#45475A"
-        Selection = "#585B70"
+        Background = "#090B10"
+        Surface = "#11141B"
+        Text = "#ECEDED"
+        MutedText = "#B8BFC9"
+        Accent = "#478AD1"
+        Border = "#2A303B"
+        Selection = "#17273A"
     }
 
     internal func Clone() ThemePalette {
@@ -96,7 +96,7 @@ internal class AppSettings {
         SmoothScrolling = true
         ScrollSpeed = 1.5
         Theme = ThemePalette()
-        ThemeName = "Catppuccin Mocha"
+        ThemeName = "Glass"
         CustomTheme = Theme.Clone()
         Keybindings = Dictionary[string, string](StringComparer.Ordinal)
         Bookmarks = List[string]()

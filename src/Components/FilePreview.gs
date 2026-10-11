@@ -54,7 +54,7 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
                 2
             },
             BackgroundColor: if value.Tile && !entry.IsDirectory {
-                p.Background
+                p.Canvas
             } else {
                 Color.Transparent
             },

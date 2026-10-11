@@ -34,6 +34,7 @@ partial class BrowserView : Cell {
     private let scrollSpeedRow ElementHandle = ElementHandle()
     private let themeEditorHandle ElementHandle = ElementHandle()
     private var focusScope FocusScope?
+    private const WindowRadius float64 = 12
     private var width float64 = 1180
     private var height float64 = 760
     private var firstWidths Dictionary[string, float64] = Dictionary[string, float64]()
@@ -126,6 +127,9 @@ partial class BrowserView : Cell {
     internal func Attach(value Window) {
         window = value
         value.FocusChanged += DismissContextMenuOnBlur
+        value.MetricsChanged += WindowResized
+        value.StateChanged += WindowStateChanged
+        ApplyBackdrop()
         value.WheelScrollScale = float32(settings.ScrollSpeed)
         value.SmoothScrolling = settings.SmoothScrolling
         browser = BrowserController(value, settings, () -> Changed())
@@ -158,9 +162,43 @@ partial class BrowserView : Cell {
         }
     }
 
+    private func Rounded() bool -> palette.Glass && window?.State != WindowState.Maximized
+    && window?.State != WindowState.Fullscreen
+
+    private func ApplyBackdrop() {
+        guard let host = window else {
+            return
+        }
+        host.Background = palette.Glass ? Color.Transparent: palette.Background
+        host.BackdropFallbackColor = palette.Background
+        host.Backdrop = palette.Glass ? WindowBackdrop.Blur: WindowBackdrop.None
+        UpdateBackdropRegion()
+    }
+
+    private func UpdateBackdropRegion() {
+        guard let host = window else {
+            return
+        }
+        host.WaylandBackdrop = Rounded() ? WaylandBackdropOptions{
+            Region: ElementRect{X: 1, Y: 1, Width: Math.Max(0, host.Width - 2), Height: Math.Max(0, host.Height - 2)},
+            CornerRadius: WindowRadius - 1,
+        }: WaylandBackdropOptions{}
+    }
+
+    private func WindowResized(metrics WindowMetrics) {
+        UpdateBackdropRegion()
+    }
+
+    private func WindowStateChanged(state WindowState) {
+        UpdateBackdropRegion()
+        Rebuild()
+    }
+
     internal func Shutdown() {
         if let attached = window {
             attached.FocusChanged -= DismissContextMenuOnBlur
+            attached.MetricsChanged -= WindowResized
+            attached.StateChanged -= WindowStateChanged
             attached.FocusChanged -= RefreshPlacesOnFocus
         }
         if let done = setupCompletion {
@@ -301,7 +339,7 @@ partial class BrowserView : Cell {
 
     override func Build() Blob {
         if browser == nil {
-            return Container{BackgroundColor: palette.Background}
+            return Container{BackgroundColor: palette.Window}
         }
         let p = palette
         let browsing = Splitter(
@@ -448,12 +486,17 @@ partial class BrowserView : Cell {
             children.Add(Dialog())
         }
         children.Add(ContextMenu())
+        let rounded = Rounded()
         return Container{
             Handle: rootHandle,
             Width: Percent(100),
             Height: Percent(100),
             MinHeight: 0,
-            BackgroundColor: p.Background,
+            BackgroundColor: p.Window,
+            BorderRadius: rounded ? WindowRadius: 0,
+            BorderWidth: rounded ? 1: 0,
+            BorderColor: Color.Rgba(184, 191, 201, 35),
+            Overflow: rounded ? Overflow.Hidden: Overflow.Visible,
             Color: p.Text,
             FontFamily: "sans-serif, Noto Sans CJK",
             FontSize: 13,

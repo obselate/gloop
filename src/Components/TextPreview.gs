@@ -111,7 +111,7 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
-            BackgroundColor: p.Background,
+            BackgroundColor: p.Canvas,
             Children: children.ToArray(),
         }
     }

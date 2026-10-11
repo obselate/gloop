@@ -11,7 +11,7 @@ class WindowBar {
             LeadingContent: Container{Width: Math.Max(0, width - 108), toolbar},
             Height: 40,
             ControlWidth: 36,
-            BackgroundColor: p.Background,
+            BackgroundColor: p.Canvas,
             BorderColor: p.Border,
             ControlColor: p.Muted,
             HoverBackgroundColor: p.Border,
