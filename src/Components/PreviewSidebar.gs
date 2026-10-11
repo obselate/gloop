@@ -103,7 +103,7 @@ class PreviewSidebar {
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
                 Ui.Icon(FileTable.IconName(entry), p.Accent, 48),
                 Ui.Label(entry.Kind, p.Text, 13),
-                Metadata(
+                PropertyRow.Build(
                     "Size",
                     if entry.IsDirectory {
                         "Folder"
@@ -112,16 +112,9 @@ class PreviewSidebar {
                     },
                     p
                 ),
-                Metadata("Modified", entry.Modified.ToString("dd MMM yyyy, HH:mm"), p),
+                PropertyRow.Build("Modified", entry.Modified.ToString("dd MMM yyyy, HH:mm"), p),
                 Text{Content: detail, Color: p.Muted, FontSize: 12, TextWrap: TextWrap.Wrap},
             }
-        }
-
-        private func Metadata(label string, value string, p Palette) Blob -> Container{
-            FlexDirection: FlexDirection.Row,
-            Gap: 8,
-            Container{Width: 62, FlexShrink: 0, Ui.Label(label, p.Muted, 11)},
-            Ui.Label(value, p.Text, 11),
         }
     }
 }
