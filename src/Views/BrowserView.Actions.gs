@@ -41,6 +41,8 @@ partial class BrowserView {
                 Host.PlatformInput.MoveFocus(true)
             } else if action == "FocusPrevious" {
                 Host.PlatformInput.MoveFocus(false)
+            } else if action == "Open" && dialog == "Move to Trash" {
+                SubmitDialog()
             } else {
                 return
             }
