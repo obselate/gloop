@@ -153,6 +153,10 @@ partial class BrowserView {
                 Model.ToggleHidden()
                 SavePreferences()
             }
+            case "ToggleTypeColumn" {
+                settings.ShowTypeColumn = !settings.ShowTypeColumn
+                SavePreferences()
+            }
             case "ViewList" or "ViewTiles" {
                 Model.SetViewMode(
                     if action == "ViewTiles" {

@@ -15,6 +15,7 @@ partial class BrowserView : Cell {
     private var window Window?
     private var browser BrowserController?
     private var thumbnails ThumbnailService?
+    private var folderCounts FolderCountService?
     private var settingsWriter SettingsWriter?
     private let rootHandle ElementHandle = ElementHandle()
     private let listFocus[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
@@ -126,6 +127,7 @@ partial class BrowserView : Cell {
         value.SmoothScrolling = settings.SmoothScrolling
         browser = BrowserController(value, settings, () -> Changed())
         thumbnails = ThumbnailService(value)
+        folderCounts = FolderCountService(value, () -> Rebuild())
         if launch.ChooserRequest == nil {
             settingsWriter = SettingsWriter(
                 value,
@@ -161,6 +163,7 @@ partial class BrowserView : Cell {
         settingsWriter?.Dispose()
         browser?.Dispose()
         thumbnails?.Dispose()
+        folderCounts?.Dispose()
     }
 
     internal func CloseSafely() bool -> !setupBusy && Model.CloseSafely()
@@ -715,6 +718,10 @@ partial class BrowserView : Cell {
                     WordWrap: settings.PreviewWordWrap,
                     Pane: pane,
                     Compact: compact,
+                    ShowType: settings.ShowTypeColumn,
+                    ShowHidden: settings.ShowHidden,
+                    Counts: folderCounts!!,
+                    OnHeaderMenu: point -> OpenColumnMenu(index, point),
                     Tiles: settings.ViewMode == "tiles",
                     Active: active,
                     AutoFocus: active && !(chooser?.Saving ?? false),

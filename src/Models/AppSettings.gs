@@ -71,6 +71,7 @@ internal class ThemePalette {
 
 internal class AppSettings {
     internal var ShowHidden bool
+    internal var ShowTypeColumn bool
     internal var ShowPreview bool
     internal var PreviewWordWrap bool
     internal var PreviewLineNumbers bool
@@ -86,6 +87,7 @@ internal class AppSettings {
 
     internal init() {
         ShowHidden = false
+        ShowTypeColumn = false
         ShowPreview = false
         PreviewWordWrap = true
         PreviewLineNumbers = true
@@ -203,6 +205,7 @@ internal class AppSettings {
             return
         }
         ShowHidden = source.ShowHidden
+        ShowTypeColumn = source.ShowTypeColumn
         ShowPreview = source.ShowPreview
         PreviewWordWrap = source.PreviewWordWrap
         PreviewLineNumbers = source.PreviewLineNumbers

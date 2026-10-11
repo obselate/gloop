@@ -10,6 +10,10 @@ internal data struct FileTableInput {
     var Host Window
     var Pane BrowserPane
     var Compact bool
+    var ShowType bool
+    var ShowHidden bool
+    var Counts FolderCountService
+    var OnHeaderMenu Action[Point]
     var Tiles bool
     var WordWrap bool
     var Active bool
@@ -69,6 +73,8 @@ open class FileTable : Cell[FileTableInput] {
         columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: 150, Sortable: true})
         if !value.Compact {
             columns.Add(DataGridColumn{Id: "modified", Label: "Modified", Width: 136, Minimum: 90, Sortable: true})
+        }
+        if !value.Compact && value.ShowType {
             columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: 104, Minimum: 70, Sortable: true})
         }
         columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: 88, Minimum: 60, Sortable: true})
@@ -121,7 +127,7 @@ open class FileTable : Cell[FileTableInput] {
                 HeaderHeight: 28,
                 BackgroundColor: p.Background,
                 TextColor: p.Text,
-                SelectedColor: p.Selection,
+                SelectedColor: value.Active ? p.Selection: p.Surface,
                 AccessibilityName: "Files in " + pane.DirectoryPath,
                 HeaderStyle: Style{BackgroundColor: p.Background, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
                 ResizeHandleStyle: Style{
@@ -156,6 +162,14 @@ open class FileTable : Cell[FileTableInput] {
                 CreateHeader: (_, column, _) -> Container{
                     Width: Percent(100),
                     MinWidth: 0,
+                    Opacity: value.Active ? 1: .6,
+                    OnPointerUp: e -> {
+                        if e.Button == PointerButton.Secondary {
+                            e.PreventDefault()
+                            e.StopPropagation()
+                            value.OnHeaderMenu(e.WindowPosition)
+                        }
+                    },
                     AlignItems: if column.Id == "size" {
                         AlignItems.FlexEnd
                     } else {
@@ -194,7 +208,7 @@ open class FileTable : Cell[FileTableInput] {
                     pane.VisibleEntries[indices[(row.Id ?? "")]],
                     (column.Id ?? ""),
                     pane.SelectedPaths.Contains(row.Id ?? ""),
-                    value.Thumbnails,
+                    value,
                     p
                 ),
                 CreateRow: (_, row, root) -> {
@@ -223,7 +237,7 @@ open class FileTable : Cell[FileTableInput] {
         entry FileEntry,
         column string,
         selected bool,
-        thumbnails ThumbnailService,
+        value FileTableInput,
         p Palette
     ) Blob {
         if column == "name" {
@@ -243,19 +257,15 @@ open class FileTable : Cell[FileTableInput] {
                 Gap: 8,
                 Cell.Mount[FilePreviewInput, FilePreview](
                     "thumbnail",
-                    FilePreviewInput{Entry: entry, Service: thumbnails, Tile: false, Palette: p}
+                    FilePreviewInput{Entry: entry, Service: value.Thumbnails, Tile: false, Palette: p}
                 ),
                 label,
             }
         }
         let text = switch column {
-            case "modified": entry.Modified.ToString("dd MMM yyyy")
+            case "modified": entry.Modified.ToString(entry.Modified.Date == DateTime.Today ? "'Today' HH:mm": "dd MMM yyyy")
             case "kind": entry.Kind
-            default: if entry.IsDirectory {
-                "—"
-            } else {
-                FileSystemService.FormatSize(entry.Size)
-            }
+            default: SizeText(entry, value)
         }
         return Container{
             MinWidth: 0,
@@ -274,6 +284,17 @@ open class FileTable : Cell[FileTableInput] {
                 12
             ),
         }
+    }
+
+    private func SizeText(entry FileEntry, value FileTableInput) string {
+        if !entry.IsDirectory {
+            return FileSystemService.FormatSize(entry.Size)
+        }
+        let count = value.Counts.Count(entry, value.ShowHidden)
+        if count < 0 {
+            return count == -1 ? "": "—"
+        }
+        return count == 1 ? "1 item": count.ToString() + " items"
     }
 
     shared {
