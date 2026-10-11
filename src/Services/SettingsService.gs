@@ -92,6 +92,9 @@ internal class SettingsService {
                     preset
                 }
             }
+            if ThemePresets.Contains(settings.ThemeName) {
+                settings.Theme = ThemePresets.Create(settings.ThemeName)
+            }
             if !hasCustomTheme && settings.ThemeName == "Custom" {
                 settings.CustomTheme.ApplyFrom(settings.Theme)
             }
