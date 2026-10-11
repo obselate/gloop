@@ -429,7 +429,7 @@ partial class BrowserView {
     }
 
     private func EditLocation() {
-        if width < 860 {
+        if PaneWidth(Model.ActiveIndex) < 360 {
             OpenDialog("Open location", Model.ActivePane().DirectoryPath)
             return
         }

@@ -9,6 +9,7 @@ partial class BrowserView {
     private var contextMenuOpen bool
     private var contextMenuPoint Point
     private var contextMenuBookmark string = ""
+    private var contextMenuPaths[]string = []string{}
 
     private func DismissContextMenuOnBlur(focused bool) {
         if !focused {
@@ -21,6 +22,7 @@ partial class BrowserView {
             return
         }
         contextMenuBookmark = path
+        contextMenuPaths = []string{}
         contextMenuPoint = point
         contextMenuOpen = true
         Rebuild()
@@ -41,6 +43,18 @@ partial class BrowserView {
         }
     }
 
+    private func OpenPathMenu(index int32, paths[]string, point Point) {
+        if dialog != "" {
+            return
+        }
+        Model.SetActive(index)
+        contextMenuBookmark = ""
+        contextMenuPaths = paths
+        contextMenuPoint = point
+        contextMenuOpen = true
+        Rebuild()
+    }
+
     private func OpenContextMenu(index int32, row int32, point Point) {
         if dialog != "" {
             return
@@ -58,6 +72,7 @@ partial class BrowserView {
         }
         FocusFiles()
         contextMenuBookmark = ""
+        contextMenuPaths = []string{}
         contextMenuPoint = point
         contextMenuOpen = true
         Rebuild()
@@ -84,6 +99,7 @@ partial class BrowserView {
         }
         FocusFiles()
         contextMenuBookmark = ""
+        contextMenuPaths = []string{}
         contextMenuOpen = true
         Rebuild()
     }
@@ -94,13 +110,18 @@ partial class BrowserView {
         }
         contextMenuOpen = false
         contextMenuBookmark = ""
+        contextMenuPaths = []string{}
         Rebuild()
     }
 
     private func ContextMenu() Blob {
         let items = List[MenuItem]()
         let count = Model.SelectedCount()
-        if contextMenuBookmark != "" {
+        if contextMenuPaths.Length > 0 {
+            for path in contextMenuPaths {
+                items.Add(FileContextMenu.Item("Navigate:" + path, FolderName(path), "folder", "", palette))
+            }
+        } else if contextMenuBookmark != "" {
             items.Add(FileContextMenu.Item("RemoveBookmark", "Remove bookmark", "bookmark_remove", "", palette))
         } else if chooser != nil {
             if count > 0 {
@@ -152,6 +173,9 @@ partial class BrowserView {
                                 notice = settingsWriter?.RemoveBookmark(settings, bookmark) ?? ""
                                 FocusFiles()
                                 Rebuild()
+                            } else if action.StartsWith("Navigate:", StringComparison.Ordinal) {
+                                Model.Navigate(action.Substring(9))
+                                FocusFiles()
                             } else if chooser != nil && action == "Open" {
                                 OpenBrowserSelection(true)
                             } else {

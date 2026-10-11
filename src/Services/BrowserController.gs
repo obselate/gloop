@@ -118,6 +118,17 @@ class BrowserController {
         return nil
     }
 
+    internal func SelectedSize() int64 {
+        let pane = ActivePane()
+        var size int64 = -1
+        for entry in pane.VisibleEntries {
+            if !entry.IsDirectory && pane.SelectedPaths.Contains(entry.FullPath) {
+                size = Math.Max(size, 0) + entry.Size
+            }
+        }
+        return size
+    }
+
     internal func SelectionSummary() string {
         if let entry = SingleSelectedEntry() {
             return entry.Name
