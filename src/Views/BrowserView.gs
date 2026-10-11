@@ -751,6 +751,10 @@ partial class BrowserView : Cell {
                         }
                         Rebuild()
                     },
+                    OnFocusRow: row -> {
+                        Model.SetActive(index)
+                        Model.MoveTo(row, true)
+                    },
                     OnSelect: (row, ctrl, shift) -> {
                         Model.SetActive(index)
                         let multiple = ChooserAllowsMultiple()
