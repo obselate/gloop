@@ -86,6 +86,7 @@ partial class BrowserView : Cell {
                     dialog != "Delete permanently" &&
                     dialog != "Empty Trash" &&
                     dialog != "Bookmarks" &&
+                    dialog != "Properties" &&
                     dialog != "Replace file"
                 focusScope = dialogHandle.BeginFocusScope(
                     FocusScopeOptions{
@@ -129,6 +130,7 @@ partial class BrowserView : Cell {
         value.SmoothScrolling = settings.SmoothScrolling
         browser = BrowserController(value, settings, () -> Changed())
         thumbnails = ThumbnailService(value)
+        selectionInfo = SelectionInfoService(value)
         folderCounts = FolderCountService(value, () -> Rebuild())
         value.FocusChanged += RefreshPlacesOnFocus
         Model.Places.Refresh()
@@ -169,6 +171,7 @@ partial class BrowserView : Cell {
         browser?.Dispose()
         thumbnails?.Dispose()
         folderCounts?.Dispose()
+        selectionInfo?.Dispose()
     }
 
     internal func CloseSafely() bool -> !setupBusy && Model.CloseSafely()
@@ -701,7 +704,8 @@ partial class BrowserView : Cell {
                     "Open terminal",
                     () -> {
                         Model.SetActive(index)
-                        Invoke("OpenTerminal")
+                        notice = ""
+                        Model.OpenTerminal(false)
                     },
                     Host,
                     p,

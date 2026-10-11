@@ -173,6 +173,12 @@ partial class BrowserView {
             case "OpenTerminal" {
                 Model.OpenTerminal()
             }
+            case "CopyPath" {
+                CopyPaths()
+            }
+            case "Properties" {
+                OpenProperties()
+            }
             case "SelectAll" {
                 if ChooserAllowsMultiple() {
                     Model.SelectAll()
@@ -268,7 +274,10 @@ partial class BrowserView {
                 action == "Trash"
         }
         return Model.InRecent &&
-            (action == "NewFolder" || action == "Paste" || action == "OpenTerminal" || action == "ToggleBookmark")
+            (
+            action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
+            || (action == "OpenTerminal" && !(Model.SingleSelectedEntry()?.IsDirectory ?? false))
+        )
     }
 
     private func IsMovement(action string) bool -> action == "MoveUp" || action == "MoveDown"
@@ -565,6 +574,7 @@ partial class BrowserView {
             return
         }
         CommitPreferenceBindings()
+        Selection.CancelDescribe()
         focusScope?.Dispose()
         focusScope = nil
         dialog = ""
