@@ -348,6 +348,15 @@ partial class BrowserView {
         )
     }
 
+    private func TileWidth(index int32) float64 {
+        let room = tileViewport[index].ContentBox.Width
+        if room <= 0 {
+            return FileTiles.TileWidth
+        }
+        let columns = Math.Max(1, Math.Floor((room + FileTiles.Gap) / (FileTiles.TileWidth + FileTiles.Gap)))
+        return Math.Floor((room - (columns - 1) * FileTiles.Gap) / columns)
+    }
+
     private func ListKey(e KeyEvent) {
         if e.IsComposing {
             return

@@ -258,11 +258,19 @@ partial class BrowserView : Cell {
     private func WatchList(handle ElementHandle, index int32) {
         var viewport float64 = -1
         var scrollRange float64 = -1
+        var room float64 = -1
         handle.MetricsChanged += (metrics) -> {
             if !metrics.IsMounted {
                 viewport = -1
                 scrollRange = -1
+                room = -1
                 return
+            }
+            if room != metrics.ContentBox.Width {
+                room = metrics.ContentBox.Width
+                if settings.ViewMode == "tiles" {
+                    Rebuild()
+                }
             }
             if viewport != metrics.ContentBox.Height || scrollRange != metrics.ScrollRange.Y {
                 viewport = metrics.ContentBox.Height
@@ -723,6 +731,7 @@ partial class BrowserView : Cell {
                     Counts: folderCounts!!,
                     OnHeaderMenu: point -> OpenColumnMenu(index, point),
                     Tiles: settings.ViewMode == "tiles",
+                    TileWidth: TileWidth(index),
                     Active: active,
                     AutoFocus: active && !(chooser?.Saving ?? false),
                     Choosing: chooser != nil,

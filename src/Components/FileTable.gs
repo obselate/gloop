@@ -15,6 +15,7 @@ internal data struct FileTableInput {
     var Counts FolderCountService
     var OnHeaderMenu Action[Point]
     var Tiles bool
+    var TileWidth float64
     var WordWrap bool
     var Active bool
     var AutoFocus bool

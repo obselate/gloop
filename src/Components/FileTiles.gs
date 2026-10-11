@@ -102,7 +102,7 @@ open class FileTiles : Cell[FileTableInput] {
         }
         let grid = VirtualItems(
             FileTileSource(value),
-            TileWidth,
+            value.TileWidth,
             TileHeight,
             item -> item.Entry.FullPath,
             item -> Tile(item, value)
