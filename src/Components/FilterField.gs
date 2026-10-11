@@ -28,7 +28,7 @@ open class FilterField : Cell[FilterFieldInput] {
             BackgroundColor: p.Surface,
             BorderRadius: 6,
             BorderWidth: 1,
-            BorderColor: focused ? p.Accent: Color.Transparent,
+            BorderColor: focused ? p.Accent: p.Border,
             OnFocus: (_) -> {
                 focused = true
                 Rebuild()

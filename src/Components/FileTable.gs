@@ -186,7 +186,7 @@ open class FileTable : Cell[FileTableInput] {
                     },
                     Container{
                         FlexDirection: FlexDirection.Row,
-                        Gap: 6,
+                        Gap: pane.SortColumn == column.Id ? 6: 0,
                         Ui.Label(column.Label ?? "", pane.SortColumn == column.Id ? p.Text: p.Muted, 11, 500),
                         Ui.Label(pane.SortColumn != column.Id ? "": pane.Descending ? "↓": "↑", p.Accent, 11, 700),
                     },
@@ -219,7 +219,7 @@ open class FileTable : Cell[FileTableInput] {
                 },
             }
         )
-        return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6, Right: 6}, grid,}
+        return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6}, grid,}
     }
 
     private func CellContent(entry FileEntry, column string, selected bool, value FileTableInput, p Palette) Blob {
