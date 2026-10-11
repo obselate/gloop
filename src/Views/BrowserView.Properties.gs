@@ -88,6 +88,8 @@ partial class BrowserView {
                 Gap: 6,
                 OverflowY: Overflow.Scroll,
                 ScrollbarY: Ui.ScrollbarStyle(p),
+                ScrollbarVisibilityY: ScrollbarVisibility.Always,
+                Padding: Edges{Right: 12},
                 Children: rows.ToArray(),
             },
             Container{
