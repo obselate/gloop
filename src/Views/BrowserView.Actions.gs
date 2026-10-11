@@ -221,7 +221,7 @@ partial class BrowserView {
                 if Model.AtTrashRoot && Model.Places.TrashCount > 0 {
                     OpenDialog(
                         "Empty Trash",
-                        Model.Places.TrashCount == 1 ? "1 item": Model.Places.TrashCount.ToString() + " items"
+                        Model.Places.TrashCount == 1 ? "1 item": "all " + Model.Places.TrashCount.ToString() + " items"
                     )
                 }
             }

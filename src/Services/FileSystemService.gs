@@ -23,6 +23,9 @@ class FileSystemService {
         }
         try {
             snapshot.DirectoryPath = Path.GetFullPath(path)
+            if snapshot.DirectoryPath == TrashService().FilesDirectory() && !Directory.Exists(snapshot.DirectoryPath) {
+                return snapshot
+            }
             let kinds = Dictionary[string, string](StringComparer.OrdinalIgnoreCase)
             let options = EnumerationOptions()
             options.AttributesToSkip = FileAttributes(0)
