@@ -495,7 +495,7 @@ partial class BrowserView : Cell {
             BackgroundColor: p.Window,
             BorderRadius: rounded ? WindowRadius: 0,
             BorderWidth: rounded ? 1: 0,
-            BorderColor: Color.Rgba(184, 191, 201, 35),
+            BorderColor: Color.Rgba(184, 191, 201, 46),
             Overflow: rounded ? Overflow.Hidden: Overflow.Visible,
             Color: p.Text,
             FontFamily: "sans-serif, Noto Sans CJK",

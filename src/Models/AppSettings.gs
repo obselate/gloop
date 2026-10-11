@@ -15,7 +15,7 @@ internal class ThemePalette {
 
     internal init() {
         Background = "#090B10"
-        Surface = "#11141B"
+        Surface = "#161A22"
         Text = "#ECEDED"
         MutedText = "#B8BFC9"
         Accent = "#478AD1"

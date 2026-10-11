@@ -36,13 +36,13 @@ class Palette {
         Text = Color.Parse(theme.Text)
         Muted = Color.Parse(theme.MutedText)
         Accent = Color.Parse(theme.Accent)
-        Border = Glass ? Color.Rgba(255, 255, 255, 18): Color.Parse(theme.Border)
-        Selection = Glass ? Accent.WithAlpha(.22): Color.Parse(theme.Selection)
+        Border = Color.Parse(theme.Border)
+        Selection = Glass ? Accent.WithAlpha(.38): Color.Parse(theme.Selection)
         Window = Glass ? Background.WithAlpha(.78): Background
         Canvas = Glass ? Color.Transparent: Background
-        Sidebar = Glass ? Color.White.WithAlpha(.01): Surface
+        Sidebar = Glass ? Color.White.WithAlpha(.015): Surface
         Preview = Glass ? Color.Rgba(0, 0, 0, 46): Surface
-        Hover = Glass ? Color.White.WithAlpha(.02): Surface
+        Hover = Glass ? Color.White.WithAlpha(.012): Surface
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
         let syntax = switch preset {
             case "": []string{theme.Accent, theme.Text, theme.MutedText, theme.Accent}
