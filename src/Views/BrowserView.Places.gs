@@ -1,7 +1,6 @@
 package gloop
 
 import Goo
-import System
 
 partial class BrowserView {
     private func RefreshPlacesOnFocus(focused bool) {
