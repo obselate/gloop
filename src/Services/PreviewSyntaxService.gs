@@ -23,12 +23,25 @@ class PreviewSyntaxService {
             case ".yaml" or ".yml" or ".toml": "config"
             case ".xml" or ".html": "markup"
             case ".css": "css"
+            case ".md" or ".markdown": "markdown"
             default: "plain"
+        }
+
+        internal func DetectLanguage(extension string, text string) string {
+            let language = LanguageFor(extension)
+            return if language == "plain" && extension != ".txt" && extension != ".log" {
+                guessLanguage(text)
+            } else {
+                language
+            }
         }
 
         internal func Highlight(text string, language string, cancelled Func[bool]) PreviewHighlight {
             if language == "plain" || text.Length == 0 {
                 return PreviewHighlight{Spans: []PreviewStyleSpan{}}
+            }
+            if language == "markdown" {
+                return highlightMarkdown(text, cancelled)
             }
             let keywords = HashSet[string](
                 keywordText(language).Split(' ', StringSplitOptions.RemoveEmptyEntries),
@@ -121,6 +134,177 @@ class PreviewSyntaxService {
                 }
             }
             return PreviewHighlight{Spans: styles.ToArray()}
+        }
+
+        private func guessLanguage(text string) string {
+            if text.StartsWith("#!", StringComparison.Ordinal) {
+                return shebangLanguage(text.Substring(2, endOfLine(text, 0) - 2))
+            }
+            let first = skipSpace(text, 0)
+            if first >= text.Length {
+                return "plain"
+            }
+            let next = if first + 1 < text.Length {
+                text[first + 1]
+            } else {
+                ' '
+            }
+            if text[first] == '<' && (Char.IsLetter(next) || next == '!' || next == '?') {
+                return "markup"
+            }
+            if text[first] == '{' || text[first] == '[' {
+                let inner = skipSpace(text, first + 1)
+                if inner < text.Length && ("\"{[]}-".IndexOf(text[inner]) >= 0 || Char.IsDigit(text[inner])) {
+                    return "json"
+                }
+            }
+            return "plain"
+        }
+
+        private func shebangLanguage(line string) string {
+            for word in line.Replace('/', ' ').Split(' ', StringSplitOptions.RemoveEmptyEntries) {
+                if word.StartsWith("python", StringComparison.Ordinal) {
+                    return "python"
+                }
+                let language = switch word {
+                    case "sh" or "bash" or "zsh" or "fish" or "dash" or "ksh" or "ash": "shell"
+                    case "node" or "nodejs" or "deno" or "bun": "javascript"
+                    default: "plain"
+                }
+                if language != "plain" {
+                    return language
+                }
+            }
+            return "plain"
+        }
+
+        private func skipSpace(text string, start int32) int32 {
+            var index = start
+            while index < text.Length && Char.IsWhiteSpace(text[index]) {
+                index++
+            }
+            return index
+        }
+
+        private func highlightMarkdown(text string, cancelled Func[bool]) PreviewHighlight {
+            let styles = List[PreviewStyleSpan]()
+            var fence = ""
+            var blockStart = 0
+            var lineStart = 0
+            var lastCheck = 0
+            while lineStart < text.Length {
+                if lineStart - lastCheck >= 16384 {
+                    if cancelled() {
+                        throw OperationCanceledException()
+                    }
+                    lastCheck = lineStart
+                }
+                if styles.Count >= 32768 {
+                    return PreviewHighlight{Spans: styles.ToArray(), Limited: true}
+                }
+                let lineEnd = endOfLine(text, lineStart)
+                var marker = lineStart
+                while marker < lineEnd && (text[marker] == ' ' || text[marker] == '\t') {
+                    marker++
+                }
+                let run = runLength(text, marker, lineEnd)
+                let indented = marker - lineStart >= 4
+                if fence.Length > 0 {
+                    if run >= fence.Length && text[marker] == fence[0] {
+                        add(styles, blockStart, lineEnd, "string")
+                        fence = ""
+                    }
+                } else if run >= 3 &&
+                    (
+                    text[marker] == '~' ||
+                        (text[marker] == '`' && text.IndexOf('`', marker + run, lineEnd - marker - run) < 0)
+                ) {
+                    fence = text.Substring(marker, run)
+                    blockStart = lineStart
+                } else if !indented &&
+                    run > 0 &&
+                    text[marker] == '#' &&
+                    run <= 6 &&
+                    (marker + run == lineEnd || text[marker + run] == ' ') {
+                    add(styles, marker, lineEnd, "keyword")
+                } else if !indented && run > 0 && text[marker] == '>' {
+                    add(styles, marker, lineEnd, "comment")
+                } else {
+                    let content = listMarkerEnd(text, marker, lineEnd)
+                    add(styles, marker, content, "number")
+                    highlightMarkdownInline(text, content, lineEnd, styles)
+                }
+                lineStart = lineEnd + 1
+            }
+            if fence.Length > 0 {
+                add(styles, blockStart, text.Length, "string")
+            }
+            return PreviewHighlight{Spans: styles.ToArray()}
+        }
+
+        private func highlightMarkdownInline(text string, start int32, end int32, styles List[PreviewStyleSpan]) {
+            var index = start
+            var linkText = false
+            while index < end {
+                if text[index] == '`' {
+                    let ticks = runLength(text, index, end)
+                    let close = text.IndexOf(
+                        text.Substring(index, ticks),
+                        index + ticks,
+                        end - index - ticks,
+                        StringComparison.Ordinal
+                    )
+                    if close >= 0 {
+                        add(styles, index, close + ticks, "string")
+                        index = close + ticks
+                    } else {
+                        index += ticks
+                    }
+                } else if text[index] == '[' {
+                    linkText = true
+                    index++
+                } else if text[index] == ']' && linkText && index + 1 < end && text[index + 1] == '(' {
+                    index += 2
+                    let url = index
+                    while index < end && text[index] != ')' && text[index] != ' ' {
+                        index++
+                    }
+                    if index < end {
+                        add(styles, url, index, "type")
+                    }
+                    linkText = false
+                } else {
+                    index++
+                }
+            }
+        }
+
+        private func listMarkerEnd(text string, start int32, end int32) int32 {
+            var index = start
+            if index < end && (text[index] == '-' || text[index] == '*' || text[index] == '+') {
+                index++
+            } else {
+                while index < end && index - start < 9 && Char.IsAsciiDigit(text[index]) {
+                    index++
+                }
+                if index == start || index >= end || (text[index] != '.' && text[index] != ')') {
+                    return start
+                }
+                index++
+            }
+            return if index < end && text[index] == ' ' {
+                index
+            } else {
+                start
+            }
+        }
+
+        private func runLength(text string, start int32, end int32) int32 {
+            var index = start
+            while index < end && text[index] == text[start] {
+                index++
+            }
+            return index - start
         }
 
         private func starts(text string, index int32, value string) bool ->

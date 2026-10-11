@@ -150,7 +150,7 @@ class FileSystemService {
                 index++
             }
             let content = normalized.ToString()
-            let language = PreviewSyntaxService.LanguageFor(extension)
+            let language = PreviewSyntaxService.DetectLanguage(extension, content)
             let highlighting = PreviewSyntaxService.Highlight(content, language, cancelled)
             var warning = ""
             if sourceTruncated {
