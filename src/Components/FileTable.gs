@@ -22,6 +22,7 @@ internal data struct FileTableInput {
     var Keys[]KeyBinding
     var ColumnWidths IReadOnlyDictionary[string, float64]
     var OnFittedColumnWidthsChange Action[IReadOnlyDictionary[string, float64]]
+    var OnFocusRow Action[int32]
     var OnSelect Action[int32, bool, bool]
     var OnDrag((string) -> DragData?)
     var OnDragEnd Action
@@ -97,6 +98,11 @@ open class FileTable : Cell[FileTableInput] {
                     pane.VisibleEntries[pane.Selected].FullPath
                 } else {
                     nil
+                },
+                OnActiveRowChange: id -> {
+                    if indices.TryGetValue(id, out var index) {
+                        value.OnFocusRow(index)
+                    }
                 },
                 OnSelectionRequest: (id, ctrl, shift) -> {
                     if indices.TryGetValue(id, out var index) {
