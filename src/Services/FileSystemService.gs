@@ -12,6 +12,15 @@ import System.Text.Unicode
 class FileSystemService {
     internal func List(path string, showHidden bool) DirectorySnapshot {
         let snapshot = DirectorySnapshot{}
+        if Locations.IsRecent(path) {
+            snapshot.DirectoryPath = Locations.Recent
+            for entry in RecentService().List(200) {
+                if showHidden || !entry.Name.StartsWith('.') {
+                    snapshot.Entries.Add(entry)
+                }
+            }
+            return snapshot
+        }
         try {
             snapshot.DirectoryPath = Path.GetFullPath(path)
             let kinds = Dictionary[string, string](StringComparer.OrdinalIgnoreCase)

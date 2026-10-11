@@ -9,8 +9,8 @@ class TrashService {
 
     internal func FilesDirectory() string {
         try {
-            return Path.Combine(operations.TrashRoot(), "files")
-        } catch (failure IOException) {
+            return Path.GetFullPath(Path.Combine(operations.TrashRoot(), "files"))
+        } catch (failure Exception) {
             return ""
         }
     }
