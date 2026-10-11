@@ -17,6 +17,27 @@ partial class BrowserView {
         return Model.InTrash(pane.DirectoryPath) ? "trash": ""
     }
 
+    private func SpaceStatus() Blob? {
+        let space = Model.Places.Space
+        if width < 760 || space.TotalBytes <= 0 || Model.InRecent {
+            return nil
+        }
+        return Container{
+            FlexDirection: FlexDirection.Row,
+            AlignItems: AlignItems.Center,
+            FlexShrink: 0,
+            Gap: 5,
+            Ui.Icon("hard_drive", palette.Muted, 14),
+            Ui.Label(
+                FileSystemService.FormatSize(space.FreeBytes) + " free of " + FileSystemService.FormatSize(
+                    space.TotalBytes
+                ),
+                palette.Muted,
+                11
+            ),
+        }
+    }
+
     private func OpenVolume(volume Volume) {
         if volume.MountPath != "" {
             Model.Navigate(volume.MountPath)

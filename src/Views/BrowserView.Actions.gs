@@ -73,7 +73,7 @@ partial class BrowserView {
     }
 
     private func Invoke(action string) {
-        if chooser != nil && !ChooserActionAllowed(action) {
+        if (chooser != nil && !ChooserActionAllowed(action)) || ActionBlocked(action) {
             return
         }
         notice = ""
@@ -209,6 +209,25 @@ partial class BrowserView {
                     OpenDialog("Move to Trash", Model.SelectionSummary())
                 }
             }
+            case "Restore" {
+                Model.Restore()
+            }
+            case "DeletePermanently" {
+                if Model.AtTrashRoot && Model.SelectedCount() > 0 {
+                    OpenDialog("Delete permanently", Model.SelectionSummary())
+                }
+            }
+            case "EmptyTrash" {
+                if Model.AtTrashRoot && Model.Places.TrashCount > 0 {
+                    OpenDialog(
+                        "Empty Trash",
+                        Model.Places.TrashCount == 1 ? "1 item": Model.Places.TrashCount.ToString() + " items"
+                    )
+                }
+            }
+            case "ShowInFolder" {
+                Model.ShowInFolder()
+            }
             case "OpenSettings" {
                 OpenPreferences()
             }
@@ -237,6 +256,19 @@ partial class BrowserView {
             }
         }
         Rebuild()
+    }
+
+    private func ActionBlocked(action string) bool {
+        if Model.InTrashView {
+            return action == "NewFolder" ||
+                action == "Rename" ||
+                action == "Copy" ||
+                action == "Cut" ||
+                action == "Paste" ||
+                action == "Trash"
+        }
+        return Model.InRecent &&
+            (action == "NewFolder" || action == "Paste" || action == "OpenTerminal" || action == "ToggleBookmark")
     }
 
     private func IsMovement(action string) bool -> action == "MoveUp" || action == "MoveDown"
@@ -553,6 +585,10 @@ partial class BrowserView {
             Model.Rename(dialogValue)
         } else if dialog == "Move to Trash" {
             Model.Trash()
+        } else if dialog == "Delete permanently" {
+            Model.DeletePermanently()
+        } else if dialog == "Empty Trash" {
+            Model.EmptyTrash()
         } else if dialog == "Filter files" {
             Model.SetFilter(dialogValue)
         } else if dialog == "Open location" {
