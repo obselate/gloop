@@ -32,13 +32,13 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
         let p = Palette(theme)
         let button = Button{
             Handle: handle,
-            Height: 52,
+            Height: 44,
             FlexShrink: 0,
             MinWidth: 0,
-            Padding: Edges{Left: 12, Right: 12},
+            Padding: Edges{Left: 10, Right: 10},
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
-            Gap: 12,
+            Gap: 6,
             BorderWidth: 1,
             BorderRadius: 4,
             BorderColor: if selected {

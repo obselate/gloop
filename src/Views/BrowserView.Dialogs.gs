@@ -133,7 +133,7 @@ partial class BrowserView {
             Host,
             p,
             if dialog == "Preferences" {
-                Math.Max(360, width * .3)
+                Math.Clamp(width - 80, 360, 600)
             } else if dialog == "Open location" {
                 520
             } else {
@@ -237,7 +237,8 @@ partial class BrowserView {
                 }
             )
         } else {
-            rows.Add(
+            let choices = List[Blob]()
+            choices.Add(
                 ThemeChoice.Build(
                     "Custom",
                     values.CustomTheme,
@@ -250,6 +251,34 @@ partial class BrowserView {
                     }
                 )
             )
+            for name in ThemePresets.Names() {
+                let presetName = name
+                choices.Add(
+                    ThemeChoice.Build(
+                        name,
+                        ThemePresets.Create(name),
+                        name == values.ThemeName,
+                        () -> {
+                            values.ThemeName = presetName
+                            values.Theme = ThemePresets.Create(presetName)
+                            revealThemeEditor = false
+                            ApplyPreferences()
+                        }
+                    )
+                )
+            }
+            let columns = width >= 640 ? 2: 1
+            for var index = 0; index < choices.Count; index += columns {
+                let pair = Container{FlexDirection: FlexDirection.Row, FlexShrink: 0, Gap: 8}
+                for offset in 0 ... columns {
+                    let slot = Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0}
+                    if index + offset < choices.Count {
+                        slot.Children.Add(choices[index + offset])
+                    }
+                    pair.Children.Add(slot)
+                }
+                rows.Add(pair)
+            }
             if values.ThemeName == "Custom" {
                 for role in ThemePresets.Roles() {
                     let selectedRole = role
@@ -314,22 +343,6 @@ partial class BrowserView {
                         rows.Add(roleRow)
                     }
                 }
-            }
-            for name in ThemePresets.Names() {
-                let presetName = name
-                rows.Add(
-                    ThemeChoice.Build(
-                        name,
-                        ThemePresets.Create(name),
-                        name == values.ThemeName,
-                        () -> {
-                            values.ThemeName = presetName
-                            values.Theme = ThemePresets.Create(presetName)
-                            revealThemeEditor = false
-                            ApplyPreferences()
-                        }
-                    )
-                )
             }
         }
         let tabs = Container{FlexDirection: FlexDirection.Row, Gap: 6}
