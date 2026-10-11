@@ -22,7 +22,7 @@ class PreviewSidebar {
                 Height: Percent(100),
                 MinWidth: 0,
                 MinHeight: 0,
-                BackgroundColor: p.Surface,
+                BackgroundColor: p.Preview,
                 Container{
                     Height: 40,
                     FlexShrink: 0,
@@ -44,7 +44,7 @@ class PreviewSidebar {
                     FlexBasis: 0,
                     MinWidth: 0,
                     MinHeight: 0,
-                    BackgroundColor: p.Background,
+                    BackgroundColor: p.Canvas,
                     Image{
                         Source: source,
                         Position: PositionType.Absolute,
@@ -72,7 +72,7 @@ class PreviewSidebar {
                     FlexGrow: 1,
                     FlexBasis: 0,
                     MinHeight: 0,
-                    BackgroundColor: p.Background,
+                    BackgroundColor: p.Canvas,
                     Padding: 12,
                     Ui.Label("Loading…", p.Muted, 12),
                 }

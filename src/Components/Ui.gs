@@ -21,19 +21,32 @@ class Palette {
     internal let String Color
     internal let Number Color
     internal let Type Color
+    internal let Glass bool
+    internal let Window Color
+    internal let Canvas Color
+    internal let Sidebar Color
+    internal let Preview Color
+    internal let Hover Color
 
     internal init(theme ThemePalette) {
+        let preset = ThemePresets.Match(theme)
+        Glass = preset == "Glass"
         Background = Color.Parse(theme.Background)
         Surface = Color.Parse(theme.Surface)
         Text = Color.Parse(theme.Text)
         Muted = Color.Parse(theme.MutedText)
         Accent = Color.Parse(theme.Accent)
-        Border = Color.Parse(theme.Border)
-        Selection = Color.Parse(theme.Selection)
+        Border = Glass ? Color.Rgba(255, 255, 255, 18): Color.Parse(theme.Border)
+        Selection = Glass ? Accent.WithAlpha(.22): Color.Parse(theme.Selection)
+        Window = Glass ? Background.WithAlpha(.78): Background
+        Canvas = Glass ? Color.Transparent: Background
+        Sidebar = Glass ? Color.White.WithAlpha(.01): Surface
+        Preview = Glass ? Color.Rgba(0, 0, 0, 46): Surface
+        Hover = Glass ? Color.White.WithAlpha(.02): Surface
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
-        let preset = ThemePresets.Match(theme)
         let syntax = switch preset {
             case "": []string{theme.Accent, theme.Text, theme.MutedText, theme.Accent}
+            case "Glass": []string{"#C3A6FF", "#8FD694", "#F0A56B", "#E8CF8A"}
             case "Tokyo Night": []string{"#BB9AF7", "#9ECE6A", "#FF9E64", "#E0AF68"}
             case "Nord": []string{"#81A1C1", "#A3BE8C", "#B48EAD", "#EBCB8B"}
             case "Gruvbox Dark": []string{"#FB4934", "#B8BB26", "#D3869B", "#FABD2F"}
@@ -194,7 +207,7 @@ class Ui {
             Inset: inset,
             MinThumbLength: 28,
             ReserveSpace: true,
-            Track: Container{BackgroundColor: p.Surface},
+            Track: Container{BackgroundColor: p.Hover},
             Thumb: Container{BackgroundColor: p.Muted, BorderRadius: 3, Hover: Style{BackgroundColor: p.Accent},},
         }
 

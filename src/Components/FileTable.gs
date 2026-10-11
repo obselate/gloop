@@ -127,11 +127,11 @@ open class FileTable : Cell[FileTableInput] {
                 Height: Percent(100),
                 RowHeight: RowHeight,
                 HeaderHeight: 28,
-                BackgroundColor: p.Background,
+                BackgroundColor: p.Canvas,
                 TextColor: p.Text,
-                SelectedColor: value.Active ? p.Selection: p.Surface,
+                SelectedColor: value.Active ? p.Selection: p.Hover,
                 AccessibilityName: "Files in " + pane.DirectoryPath,
-                HeaderStyle: Style{BackgroundColor: p.Background, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
+                HeaderStyle: Style{BackgroundColor: p.Canvas, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
                 ResizeHandleStyle: Style{
                     BackgroundColor: Color.Transparent,
                     BorderWidth: Edges{Left: 1},
@@ -226,7 +226,7 @@ open class FileTable : Cell[FileTableInput] {
                         BackgroundColor: if selectedRow {
                             p.Selection
                         } else {
-                            p.Surface
+                            p.Hover
                         }
                     }
                     return FileTransferUi.Bind(root, pane.VisibleEntries[indices[(row.Id ?? "")]], value, clicks)

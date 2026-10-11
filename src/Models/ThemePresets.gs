@@ -3,6 +3,7 @@ package gloop
 internal class ThemePresets {
     shared {
         internal func Names()[]string -> []string{
+            "Glass",
             "Catppuccin Mocha",
             "Tokyo Night",
             "Nord",
@@ -27,6 +28,9 @@ internal class ThemePresets {
         }
 
         internal func Create(name string) ThemePalette {
+            if name == "Catppuccin Mocha" {
+                return Make("#1E1E2E", "#313244", "#CDD6F4", "#A6ADC8", "#89B4FA", "#45475A", "#585B70")
+            }
             if name == "Tokyo Night" {
                 return Make("#1A1B26", "#24283B", "#C0CAF5", "#A9B1D6", "#7AA2F7", "#414868", "#283457")
             }
@@ -57,7 +61,7 @@ internal class ThemePresets {
             if name == "Ayu Mirage" {
                 return Make("#1F2430", "#171B24", "#CCCAC2", "#A6A5A0", "#73D0FF", "#343B4A", "#334968")
             }
-            return Make("#1E1E2E", "#313244", "#CDD6F4", "#A6ADC8", "#89B4FA", "#45475A", "#585B70")
+            return ThemePalette()
         }
 
         internal func Contains(name string) bool {

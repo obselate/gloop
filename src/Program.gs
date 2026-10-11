@@ -77,6 +77,7 @@ func Main(args[]string) int32 {
         Title: launch.ChooserRequest?.Title ?? launch.DirectoryPath,
         IconPng: AppIcon.Bytes(),
         Decorated: false,
+        Transparent: true,
         ForeignParentHandle: parent,
         Modal: (launch.ChooserRequest?.Modal ?? false) && parent != "",
         NativeFileDropEnabled: launch.ChooserRequest == nil,
@@ -86,7 +87,6 @@ func Main(args[]string) int32 {
         MinHeight: 400,
         Root: view,
         OnClosing: () -> view.CloseSafely(),
-        Background: Color.Parse(settings.Theme.Background),
     }
     view.Attach(window)
     try {
