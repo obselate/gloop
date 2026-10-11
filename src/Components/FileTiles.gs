@@ -1,6 +1,7 @@
 package gloop
 
 import Goo
+import Goo.Widgets.Data
 import System
 import System.Collections
 import System.Collections.Generic
@@ -99,7 +100,7 @@ open class FileTiles : Cell[FileTableInput] {
             root.Children.Add(FileTable.Empty(pane, p, value.Choosing, value.DirectoriesOnly))
             return root
         }
-        let grid = Virtual(
+        let grid = VirtualItems(
             FileTileSource(value),
             TileWidth,
             TileHeight,
