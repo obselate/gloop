@@ -37,7 +37,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
             FlexShrink: 0,
             BorderWidth: Edges{Top: 1},
             BorderColor: p.Border,
-            BackgroundColor: p.Canvas,
+            BackgroundColor: p.Bar,
         }
         let fields = Container{FlexDirection: FlexDirection.Row, AlignItems: AlignItems.Center, Gap: 8, MinWidth: 0}
         if request.Method == "SaveFile" {

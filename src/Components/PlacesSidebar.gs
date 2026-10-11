@@ -54,7 +54,17 @@ class PlacesSidebar {
                 if trashPath != "" {
                     var count Blob? = nil
                     if trashCount > 0 {
-                        count = Ui.Label(trashCount.ToString(), p.Muted, 11)
+                        count = Container{
+                            Height: 18,
+                            MinWidth: 18,
+                            FlexShrink: 0,
+                            Padding: Edges{Left: 6, Right: 6},
+                            BorderRadius: 9,
+                            BackgroundColor: p.Border,
+                            AlignItems: AlignItems.Center,
+                            JustifyContent: JustifyContent.Center,
+                            Ui.Label(trashCount.ToString(), p.Text, 11),
+                        }
                     }
                     places.Add(Place("delete", "Trash", trashPath, path, navigate, p, trailing: count))
                 }
@@ -219,7 +229,7 @@ class PlacesSidebar {
                     Window: window,
                     Text: path,
                     Placement: placement,
-                    BubbleStyle: Style{BackgroundColor: p.Surface, BorderColor: p.Border, BorderWidth: 1, Padding: 8,},
+                    BubbleStyle: Ui.BubbleStyle(p),
                     Content: Text{Content: path, Color: p.Text, FontSize: 11, MaxWidth: 320, TextWrap: TextWrap.Wrap,},
                     Target: Place(icon, label, path, current, navigate, p, drop, dropPath, contextMenu, contextMenuKey),
                 }

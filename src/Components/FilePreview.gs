@@ -84,21 +84,7 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
                 }
             )
         } else {
-            canvas.Children.Add(
-                Ui.Icon(
-                    FileTable.IconName(entry),
-                    if entry.IsDirectory {
-                        p.Accent
-                    } else {
-                        p.Muted
-                    },
-                    if value.Tile {
-                        48
-                    } else {
-                        18
-                    }
-                )
-            )
+            canvas.Children.Add(Ui.FileIcon(FileTable.IconName(entry), p, value.Tile ? 48: 18))
         }
         return canvas
     }

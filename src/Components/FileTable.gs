@@ -82,7 +82,7 @@ open class FileTable : Cell[FileTableInput] {
         columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: 88, Minimum: 60, Sortable: true})
         let selected = [pane.SelectedPaths.Count]string
         pane.SelectedPaths.CopyTo(selected)
-        return Cell.Mount[DataGridInput, DataGrid](
+        let grid = Cell.Mount[DataGridInput, DataGrid](
             "grid",
             DataGridInput{
                 Columns: columns.ToArray(),
@@ -97,7 +97,7 @@ open class FileTable : Cell[FileTableInput] {
                 OnKeyDown: value.OnKey,
                 ScrollbarX: Ui.ScrollbarStyle(p),
                 ScrollbarVisibilityX: ScrollbarVisibility.Auto,
-                ScrollbarY: Ui.ScrollbarStyle(p, 8),
+                ScrollbarY: Ui.ScrollbarStyle(p, 2),
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
                 EmptyContent: Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly),
                 Selection: DataGridSelection.Multiple,
@@ -179,32 +179,17 @@ open class FileTable : Cell[FileTableInput] {
                     },
                     Padding: Edges{
                         Left: if column.Id == "name" {
-                            26
+                            30
                         } else {
                             0
                         }
                     },
-                    Ui.Label(
-                        (column.Label ?? "") +
-                            (
-                            if pane.SortColumn == column.Id {
-                                if pane.Descending {
-                                    "  ↓"
-                                } else {
-                                    "  ↑"
-                                }
-                            } else {
-                                ""
-                            }
-                        ),
-                        if pane.SortColumn == column.Id {
-                            p.Text
-                        } else {
-                            p.Muted
-                        },
-                        11,
-                        500
-                    ),
+                    Container{
+                        FlexDirection: FlexDirection.Row,
+                        Gap: 6,
+                        Ui.Label(column.Label ?? "", pane.SortColumn == column.Id ? p.Text: p.Muted, 11, 500),
+                        Ui.Label(pane.SortColumn != column.Id ? "": pane.Descending ? "↓": "↑", p.Accent, 11, 700),
+                    },
                 },
                 CreateCell: (_, row, column, _) -> CellContent(
                     pane.VisibleEntries[indices[(row.Id ?? "")]],
@@ -222,6 +207,7 @@ open class FileTable : Cell[FileTableInput] {
                         0
                     }
                     root.OutlineColor = p.Accent
+                    root.BorderRadius = 6
                     root.Hover = Style{
                         BackgroundColor: if selectedRow {
                             p.Selection
@@ -233,6 +219,7 @@ open class FileTable : Cell[FileTableInput] {
                 },
             }
         )
+        return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6, Right: 6}, grid,}
     }
 
     private func CellContent(entry FileEntry, column string, selected bool, value FileTableInput, p Palette) Blob {
@@ -258,6 +245,7 @@ open class FileTable : Cell[FileTableInput] {
                 label,
             }
         }
+        let today = column == "modified" && entry.Modified.Date == DateTime.Today
         let text = switch column {
             case "modified": entry.Modified.ToString(
                 entry.Modified.Date == DateTime.Today ? "'Today' HH:mm": "dd MMM yyyy"
@@ -272,15 +260,7 @@ open class FileTable : Cell[FileTableInput] {
             } else {
                 AlignItems.FlexStart
             },
-            Ui.Label(
-                text,
-                if selected {
-                    p.Text
-                } else {
-                    p.Muted
-                },
-                12
-            ),
+            Ui.Label(text, selected || today ? p.Text: p.Muted, 12, today ? 600: 400),
         }
     }
 

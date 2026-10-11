@@ -189,7 +189,14 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent, OutlineOffset: -1},
             OnClick: () -> value.Navigate(destination),
             Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: "Open " + destination},
-            Ui.Label(label, last ? p.Text: p.Muted, 13, last ? 600: 400),
+            Container{
+                MinWidth: 0,
+                FlexShrink: 1,
+                Padding: Edges{Top: 4, Bottom: 2},
+                BorderWidth: Edges{Bottom: last ? 2: 0},
+                BorderColor: p.Accent,
+                Ui.Label(label, last ? p.Text: p.Muted, 13, last ? 600: 400),
+            },
         }
         WidgetKeyBindings.BindActivation(button)
         return Cell.Mount[TooltipInput, Tooltip](
@@ -205,7 +212,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                     MaxWidth: 320,
                     TextWrap: TextWrap.Wrap
                 },
-                BubbleStyle: Style{BackgroundColor: p.Surface, BorderColor: p.Border, BorderWidth: 1, Padding: 8},
+                BubbleStyle: Ui.BubbleStyle(p),
                 Target: button,
             }
         )
