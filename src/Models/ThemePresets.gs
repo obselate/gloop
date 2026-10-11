@@ -47,7 +47,7 @@ internal class ThemePresets {
                 return Make("#191724", "#26233A", "#E0DEF4", "#908CAA", "#C4A7E7", "#403D52", "#423A53")
             }
             if name == "Rose Pine Dawn" {
-                return Make("#FAF4ED", "#F2E9E1", "#575279", "#6E6A86", "#7A6593", "#DFDAD9", "#D6CCD4")
+                return Make("#FAF4ED", "#F2E9E1", "#575279", "#6E6A86", "#7A6593", "#DFDAD9", "#C7BBC9")
             }
             if name == "Dracula" {
                 return Make("#282A36", "#21222C", "#F8F8F2", "#BFBFC6", "#BD93F9", "#44475A", "#4C4365")
