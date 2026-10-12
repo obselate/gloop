@@ -416,7 +416,7 @@ partial class BrowserView : Cell {
             "preview-split",
             browsing,
             if Model.PreviewVisible {
-                PreviewSidebar.Build(Model, settings, () -> Invoke("TogglePreview"), Host, p)
+                PreviewSidebar.Build(PreviewInput(), Host, p)
             } else {
                 nil
             },
@@ -475,6 +475,7 @@ partial class BrowserView : Cell {
                     chooser == nil ? settings.Keybindings["ToggleBookmark"]: "",
                     Host,
                     p,
+                    Model.Places.StandardPlaces,
                     destination -> FileDropTarget(destination),
                     dropPath,
                     chooser == nil,
@@ -837,8 +838,7 @@ partial class BrowserView : Cell {
                     Location: location,
                     Compact: compact,
                     ShowType: settings.ShowTypeColumn,
-                    ShowHidden: settings.ShowHidden,
-                    Counts: FolderCounts,
+                    SizeText: FileSizeText,
                     OnHeaderMenu: point -> OpenColumnMenu(index, point),
                     Tiles: settings.ViewMode == "tiles",
                     TileWidth: TileWidth(index),
@@ -901,7 +901,7 @@ partial class BrowserView : Cell {
                     },
                     DropTarget: destination -> FileDropTarget(destination),
                     DropPath: dropPath,
-                    Thumbnails: Thumbnails,
+                    AcquireThumbnail: Thumbnails.Acquire,
                     OnClear: () -> {
                         Model.SetActive(index)
                         Model.ClearSelection()
@@ -924,6 +924,17 @@ partial class BrowserView : Cell {
                 }
             ),
         }
+    }
+
+    private func FileSizeText(entry FileEntry) string {
+        if !entry.IsDirectory {
+            return FileSystemService.FormatSize(entry.Size)
+        }
+        let count = FolderCounts.Count(entry, settings.ShowHidden)
+        if count < 0 {
+            return count == -1 ? "": "—"
+        }
+        return count == 1 ? "1 item": count.ToString() + " items"
     }
 
     private func StatusBar() Blob {

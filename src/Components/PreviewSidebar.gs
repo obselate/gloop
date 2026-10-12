@@ -3,42 +3,41 @@ package gloop
 import Goo
 import System
 
+internal data struct PreviewSidebarInput {
+    var Title string
+    var Preview PreviewData
+    var Image ImageSource?
+    var Entry FileEntry?
+    var SizeText string
+    var Detail string
+    var WordWrap bool
+    var LineNumbers bool
+    var Close Action
+}
+
 class PreviewSidebar {
     shared {
-        internal func Build(
-            browser BrowserController,
-            settings AppSettings,
-            close Action,
-            window Window,
-            p Palette
-        ) Blob {
-            let title = if let entry = browser.SelectedEntry() {
-                entry.Name
-            } else {
-                "Preview"
-            }
-            return Container{
-                Width: Percent(100),
-                Height: Percent(100),
-                MinWidth: 0,
-                MinHeight: 0,
-                BackgroundColor: p.Preview,
-                Container{
-                    Height: 40,
-                    FlexShrink: 0,
-                    Padding: Edges{Left: 12, Right: 8},
-                    Gap: 8,
-                    FlexDirection: FlexDirection.Row,
-                    AlignItems: AlignItems.Center,
-                    Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(title, p.Text, 13, 600)},
-                    Ui.Tool("close", "Close preview", close, window, p),
-                },
-                Content(browser, settings, p),
-            }
+        internal func Build(value PreviewSidebarInput, window Window, p Palette) Blob -> Container{
+            Width: Percent(100),
+            Height: Percent(100),
+            MinWidth: 0,
+            MinHeight: 0,
+            BackgroundColor: p.Preview,
+            Container{
+                Height: 40,
+                FlexShrink: 0,
+                Padding: Edges{Left: 12, Right: 8},
+                Gap: 8,
+                FlexDirection: FlexDirection.Row,
+                AlignItems: AlignItems.Center,
+                Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(value.Title, p.Text, 13, 600)},
+                Ui.Tool("close", "Close preview", value.Close, window, p),
+            },
+            Content(value, p),
         }
 
-        private func Content(browser BrowserController, settings AppSettings, p Palette) Blob {
-            if let source = browser.PreviewImage {
+        private func Content(value PreviewSidebarInput, p Palette) Blob {
+            if let source = value.Image {
                 return Container{
                     FlexGrow: 1,
                     FlexBasis: 0,
@@ -56,18 +55,18 @@ class PreviewSidebar {
                     },
                 }
             }
-            if browser.Preview.Kind == "text" {
+            if value.Preview.Kind == "text" {
                 return Cell.Mount[TextPreviewInput, TextPreview](
                     nil,
                     TextPreviewInput{
-                        Preview: browser.Preview,
+                        Preview: value.Preview,
                         Palette: p,
-                        WordWrap: settings.PreviewWordWrap,
-                        LineNumbers: settings.PreviewLineNumbers,
+                        WordWrap: value.WordWrap,
+                        LineNumbers: value.LineNumbers,
                     }
                 )
             }
-            if browser.Preview.Kind == "loading" {
+            if value.Preview.Kind == "loading" {
                 return Container{
                     FlexGrow: 1,
                     FlexBasis: 0,
@@ -77,20 +76,11 @@ class PreviewSidebar {
                     Ui.Label("Loading…", p.Muted, 12),
                 }
             }
-            if browser.Preview.Kind == "error" {
-                return Ui.Empty("image", "Preview unavailable", browser.Preview.Error, p)
+            if value.Preview.Kind == "error" {
+                return Ui.Empty("image", "Preview unavailable", value.Preview.Error, p)
             }
-            guard let entry = browser.SelectedEntry() else {
+            guard let entry = value.Entry else {
                 return Ui.Empty("preview", "Nothing selected", "Select a file to take a closer look.", p)
-            }
-            let detail = if browser.Preview.Error != "" {
-                browser.Preview.Error
-            } else if browser.Preview.Text != "Folder" && browser.Preview.Text != FileSystemService.FormatSize(
-                entry.Size
-            ) {
-                browser.Preview.Text
-            } else {
-                ""
             }
             return Container{
                 FlexGrow: 1,
@@ -103,17 +93,9 @@ class PreviewSidebar {
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
                 Ui.Icon(FileTable.IconName(entry), p.Accent, 48),
                 Ui.Label(entry.Kind, p.Text, 13),
-                PropertyRow.Build(
-                    "Size",
-                    if entry.IsDirectory {
-                        "Folder"
-                    } else {
-                        FileSystemService.FormatSize(entry.Size)
-                    },
-                    p
-                ),
+                PropertyRow.Build("Size", value.SizeText, p),
                 PropertyRow.Build("Modified", entry.Modified.ToString("dd MMM yyyy, HH:mm"), p),
-                Text{Content: detail, Color: p.Muted, FontSize: 12, TextWrap: TextWrap.Wrap},
+                Text{Content: value.Detail, Color: p.Muted, FontSize: 12, TextWrap: TextWrap.Wrap},
             }
         }
     }

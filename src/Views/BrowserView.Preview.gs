@@ -10,6 +10,33 @@ partial class BrowserView {
     private var previewVersion int32 = -1
     private var previewSource ImageSource?
 
+    private func PreviewInput() PreviewSidebarInput {
+        let entry = Model.SelectedEntry()
+        let sizeText = if let selected = entry {
+            FileSystemService.FormatSize(selected.Size)
+        } else {
+            ""
+        }
+        let preview = Model.Preview
+        return PreviewSidebarInput{
+            Title: entry?.Name ?? "Preview",
+            Preview: preview,
+            Image: Model.PreviewImage,
+            Entry: entry,
+            SizeText: entry?.IsDirectory == true ? "Folder": sizeText,
+            Detail: if preview.Error != "" {
+                preview.Error
+            } else if preview.Text != "Folder" && preview.Text != sizeText {
+                preview.Text
+            } else {
+                ""
+            },
+            WordWrap: settings.PreviewWordWrap,
+            LineNumbers: settings.PreviewLineNumbers,
+            Close: () -> Invoke("TogglePreview"),
+        }
+    }
+
     private func PreviewWindowMetrics(metrics WindowMetrics) {
         if metrics.FramebufferWidth <= 0 || metrics.FramebufferHeight <= 0 {
             return

@@ -3,6 +3,7 @@ package gloop
 import Goo
 import System
 import System.Collections.Generic
+import System.IO
 
 data struct PlacesRequest {
     internal var Volumes bool
@@ -24,6 +25,7 @@ class PlacesService {
     private var deviceBusy bool
     private var closed bool
     internal var Volumes List[Volume] = List[Volume]()
+    internal var StandardPlaces List[KeyValuePair[string, string]] = List[KeyValuePair[string, string]]()
     internal var TrashCount int32
     internal var Space Volume = Volume{}
 
@@ -70,9 +72,18 @@ class PlacesService {
 
     internal func Process(request PlacesRequest) {
         var volumes = List[Volume]()
+        let places = List[KeyValuePair[string, string]]()
         var trashCount int32
         var space = Volume{}
         if request.Volumes {
+            let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+            places.Add(KeyValuePair[string, string]("Home", home))
+            for name in[]string{"Desktop", "Documents", "Downloads", "Pictures", "Music", "Videos"} {
+                let location = Path.Combine(home, name)
+                if Directory.Exists(location) {
+                    places.Add(KeyValuePair[string, string](name, location))
+                }
+            }
             volumes = VolumeService().List()
             trashCount = TrashService().Count()
         }
@@ -80,7 +91,7 @@ class PlacesService {
             space = VolumeService().Space(request.SpacePath)
         }
         try {
-            window.Post(() -> Apply(request, volumes, trashCount, space))
+            window.Post(() -> Apply(request, places, volumes, trashCount, space))
         } catch (failure Exception) { }
     }
 
@@ -126,11 +137,18 @@ class PlacesService {
         }
     }
 
-    private func Apply(request PlacesRequest, volumes List[Volume], trashCount int32, space Volume) {
+    private func Apply(
+        request PlacesRequest,
+        places List[KeyValuePair[string, string]],
+        volumes List[Volume],
+        trashCount int32,
+        space Volume
+    ) {
         if closed {
             return
         }
         if request.Volumes && request.VolumesGeneration == volumesGeneration {
+            StandardPlaces = places
             Volumes = volumes
             TrashCount = trashCount
         }

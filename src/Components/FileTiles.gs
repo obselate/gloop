@@ -171,7 +171,7 @@ open class FileTiles : Cell[FileTableInput] {
                 "thumbnail",
                 FilePreviewInput{
                     Entry: entry,
-                    Service: value.Thumbnails,
+                    Acquire: value.AcquireThumbnail,
                     Tile: true,
                     Palette: p,
                     WordWrap: item.WordWrap
