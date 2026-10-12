@@ -42,7 +42,7 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                     panel.Padding = 4
                     panel.BackgroundColor = p.Glass ? p.Overlay: p.Background
                     panel.BackdropBlur = p.Blur
-                    panel.BorderColor = p.Border
+                    panel.BorderColor = p.Edge
                     panel.BorderRadius = 10
                     panel.BoxShadow = Ui.Shadow()
                     panel.ScrollbarY = Ui.ScrollbarStyle(p)
