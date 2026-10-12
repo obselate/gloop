@@ -2,7 +2,6 @@ package gloop
 
 import System
 import System.Collections.Generic
-import System.IO
 
 data struct MimeAppsFile {
     internal var Defaults Dictionary[string, string]
@@ -14,34 +13,21 @@ class MimeAssociations {
     private let files List[MimeAppsFile] = List[MimeAppsFile]()
     private let caches List[Dictionary[string, string]] = List[Dictionary[string, string]]()
 
-    /// Loads the mimeapps.list files in the order of the XDG MIME Applications specification, then every mimeinfo.cache.
-    internal init() {
-        let names = List[string]()
-        for desktop in(Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "").Split(
-            ':',
-            StringSplitOptions.RemoveEmptyEntries
-        ) {
-            names.Add(desktop.ToLowerInvariant() + "-mimeapps.list")
+    internal init(
+        groups List[Dictionary[string, Dictionary[string, string]]],
+        cacheGroups List[Dictionary[string, Dictionary[string, string]]]
+    ) {
+        for group in groups {
+            files.Add(
+                MimeAppsFile{
+                    Defaults: section(group, "Default Applications"),
+                    Added: section(group, "Added Associations"),
+                    Removed: section(group, "Removed Associations"),
+                }
+            )
         }
-        names.Add("mimeapps.list")
-        let directories = Xdg.ConfigDirs()
-        for root in Xdg.DataDirs() {
-            directories.Add(Path.Combine(root, "applications"))
-        }
-        for directory in directories {
-            for name in names {
-                let groups = Xdg.Groups(Path.Combine(directory, name))
-                files.Add(
-                    MimeAppsFile{
-                        Defaults: section(groups, "Default Applications"),
-                        Added: section(groups, "Added Associations"),
-                        Removed: section(groups, "Removed Associations"),
-                    }
-                )
-            }
-        }
-        for root in Xdg.DataDirs() {
-            caches.Add(section(Xdg.Groups(Path.Combine(root, "applications", "mimeinfo.cache")), "MIME Cache"))
+        for group in cacheGroups {
+            caches.Add(section(group, "MIME Cache"))
         }
     }
 

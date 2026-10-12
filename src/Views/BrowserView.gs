@@ -134,7 +134,15 @@ partial class BrowserView : Cell {
         ApplyBackdrop()
         value.WheelScrollScale = float32(settings.ScrollSpeed)
         value.SmoothScrolling = settings.SmoothScrolling
-        browser = BrowserController(value, settings, () -> Changed())
+        browser = BrowserController(
+            value,
+            settings,
+            () -> Changed(),
+            () -> ResetTypeSelect(),
+            Math.Max(1, value.Width),
+            Math.Max(1, value.Height)
+        )
+        value.MetricsChanged += PreviewWindowMetrics
         thumbnails = ThumbnailService(value)
         selectionInfo = SelectionInfoService(value)
         folderCounts = FolderCountService(value, () -> Rebuild())
@@ -216,6 +224,7 @@ partial class BrowserView : Cell {
         if let attached = window {
             attached.FocusChanged -= DismissContextMenuOnBlur
             attached.MetricsChanged -= WindowResized
+            attached.MetricsChanged -= PreviewWindowMetrics
             attached.StateChanged -= WindowStateChanged
             attached.KeyPressed -= KeyPressed
             attached.FocusChanged -= RefreshPlacesOnFocus
@@ -224,6 +233,8 @@ partial class BrowserView : Cell {
             <-done
         }
         CommitPreferenceBindings()
+        previewResizeTimer?.Dispose()
+        previewResizeTimer = nil
         settingsWriter?.Dispose()
         browser?.Dispose()
         thumbnails?.Dispose()
@@ -303,6 +314,10 @@ partial class BrowserView : Cell {
 
     private func Changed() {
         if window != nil {
+            PreviewChanged()
+            if Model.ReadyToClose {
+                Host.RequestClose()
+            }
             Host.Title = ChooserTitle()
         }
         if let picker = chooser {
@@ -401,7 +416,7 @@ partial class BrowserView : Cell {
             "preview-split",
             browsing,
             if Model.PreviewVisible {
-                PreviewSidebar.Build(Model, settings, () -> Invoke("TogglePreview"), Host, p)
+                PreviewSidebar.Build(PreviewInput(), Host, p)
             } else {
                 nil
             },
@@ -460,6 +475,7 @@ partial class BrowserView : Cell {
                     chooser == nil ? settings.Keybindings["ToggleBookmark"]: "",
                     Host,
                     p,
+                    Model.Places.StandardPlaces,
                     destination -> FileDropTarget(destination),
                     dropPath,
                     chooser == nil,
@@ -822,8 +838,7 @@ partial class BrowserView : Cell {
                     Location: location,
                     Compact: compact,
                     ShowType: settings.ShowTypeColumn,
-                    ShowHidden: settings.ShowHidden,
-                    Counts: FolderCounts,
+                    SizeText: FileSizeText,
                     OnHeaderMenu: point -> OpenColumnMenu(index, point),
                     Tiles: settings.ViewMode == "tiles",
                     TileWidth: TileWidth(index),
@@ -878,15 +893,15 @@ partial class BrowserView : Cell {
                             return nil
                         }
                         Model.SetActive(index)
-                        return Model.CreateFileDrag(index, path)
+                        return CreateFileDrag(index, path)
                     },
                     OnDragEnd: () -> {
-                        Model.ClearFileDropCache()
+                        transfers.Clear()
                         ClearDropTarget()
                     },
                     DropTarget: destination -> FileDropTarget(destination),
                     DropPath: dropPath,
-                    Thumbnails: Thumbnails,
+                    AcquireThumbnail: Thumbnails.Acquire,
                     OnClear: () -> {
                         Model.SetActive(index)
                         Model.ClearSelection()
@@ -903,12 +918,23 @@ partial class BrowserView : Cell {
                     },
                     OnText: text -> {
                         Model.SetActive(index)
-                        Model.TypeSelect(text)
+                        TypeSelect(text)
                     },
                     Palette: p,
                 }
             ),
         }
+    }
+
+    private func FileSizeText(entry FileEntry) string {
+        if !entry.IsDirectory {
+            return FileSystemService.FormatSize(entry.Size)
+        }
+        let count = FolderCounts.Count(entry, settings.ShowHidden)
+        if count < 0 {
+            return count == -1 ? "": "—"
+        }
+        return count == 1 ? "1 item": count.ToString() + " items"
     }
 
     private func StatusBar() Blob {

@@ -21,8 +21,6 @@ partial class BrowserView {
 
     private func SelectionMenuItems(items List[MenuItem], count int32) {
         let recent = Model.InRecent
-        let folder = Model.SingleSelectedEntry()?.IsDirectory ?? false
-        let unavailable = recent ? !folder: Model.ActivePane().DirectoryPath == "" || Model.ActivePane().Error != ""
         items.Add(ContextMenuItem("Open", "Open", "open_in_new", count != 1))
         items.Add(OpenWithItem(count))
         if recent {
@@ -31,7 +29,7 @@ partial class BrowserView {
         items.Add(MenuItem{Id: "open-separator", Separator: true})
         items.Add(ContextMenuItem("Cut", "Cut", "content_cut"))
         items.Add(ContextMenuItem("Copy", "Copy", "content_copy"))
-        items.Add(ContextMenuItem("Paste", "Paste", "content_paste", recent || !Model.HasClipboard))
+        items.Add(ContextMenuItem("Paste", "Paste", "content_paste", !Model.HasClipboard))
         items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
         items.Add(MenuItem{Id: "copy-separator", Separator: true})
         if count == 1 {
@@ -39,7 +37,7 @@ partial class BrowserView {
         }
         items.Add(ContextMenuItem("Trash", "Move to Trash", "delete"))
         items.Add(MenuItem{Id: "trash-separator", Separator: true})
-        items.Add(ContextMenuItem("OpenTerminal", "Open terminal here", "terminal", unavailable))
+        items.Add(ContextMenuItem("OpenTerminal", "Open terminal here", "terminal"))
         items.Add(ContextMenuItem("Properties", "Properties", "info"))
     }
 

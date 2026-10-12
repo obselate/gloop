@@ -12,8 +12,7 @@ internal data struct FileTableInput {
     var Location string
     var Compact bool
     var ShowType bool
-    var ShowHidden bool
-    var Counts FolderCountService
+    var SizeText Func[FileEntry, string]
     var OnHeaderMenu Action[Point]
     var Tiles bool
     var TileWidth float64
@@ -36,7 +35,7 @@ internal data struct FileTableInput {
     var DropPath string
     var OnClear Action
     var OnContextMenu Action[int32, Point]
-    var Thumbnails ThumbnailService
+    var AcquireThumbnail Func[FileEntry, int32, Action, ThumbnailLease]
     var OnOpen Action
     var OnSort Action[string]
     var OnText Action[string]
@@ -240,7 +239,7 @@ open class FileTable : Cell[FileTableInput] {
                 Gap: 8,
                 Cell.Mount[FilePreviewInput, FilePreview](
                     "thumbnail",
-                    FilePreviewInput{Entry: entry, Service: value.Thumbnails, Tile: false, Palette: p}
+                    FilePreviewInput{Entry: entry, Acquire: value.AcquireThumbnail, Tile: false, Palette: p}
                 ),
                 label,
             }
@@ -251,7 +250,7 @@ open class FileTable : Cell[FileTableInput] {
                 entry.Modified.Date == DateTime.Today ? "'Today' HH:mm": "dd MMM yyyy"
             )
             case "kind": entry.Kind
-            default: SizeText(entry, value)
+            default: value.SizeText(entry)
         }
         return Container{
             MinWidth: 0,
@@ -262,17 +261,6 @@ open class FileTable : Cell[FileTableInput] {
             },
             Ui.Label(text, selected || today ? p.Text: p.Muted, 12, today ? 600: 400),
         }
-    }
-
-    private func SizeText(entry FileEntry, value FileTableInput) string {
-        if !entry.IsDirectory {
-            return FileSystemService.FormatSize(entry.Size)
-        }
-        let count = value.Counts.Count(entry, value.ShowHidden)
-        if count < 0 {
-            return count == -1 ? "": "—"
-        }
-        return count == 1 ? "1 item": count.ToString() + " items"
     }
 
     shared {

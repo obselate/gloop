@@ -75,7 +75,7 @@ partial class BrowserView {
     }
 
     private func Invoke(action string) {
-        if (chooser != nil && !ChooserActionAllowed(action)) || ActionBlocked(action) {
+        if !(chooser?.Allows(action) ?? true) || !Model.CanRun(action) {
             return
         }
         notice = ""
@@ -245,22 +245,6 @@ partial class BrowserView {
         Rebuild()
     }
 
-    private func ActionBlocked(action string) bool {
-        if Model.InTrashView {
-            return action == "NewFolder" ||
-                action == "Rename" ||
-                action == "Copy" ||
-                action == "Cut" ||
-                action == "Paste" ||
-                action == "Trash"
-        }
-        return Model.InRecent &&
-            (
-            action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
-            || (action == "OpenTerminal" && !(Model.SingleSelectedEntry()?.IsDirectory ?? false))
-        )
-    }
-
     private func IsMovement(action string) bool -> action == "MoveUp" || action == "MoveDown"
     || action == "MoveLeft" || action == "MoveRight" || action == "MoveFirst" || action == "MoveLast"
     || action == "PageUp" || action == "PageDown"
@@ -272,15 +256,15 @@ partial class BrowserView {
                 continue
             }
             let action = pair.Key
-            let parts = pair.Value.Split('+')
+            let shortcut = Shortcut.Parse(pair.Value)
             var key Key
-            if !Enum.TryParse[Key](parts[parts.Length - 1], out key) {
+            if !Enum.TryParse[Key](shortcut.Key, out key) {
                 continue
             }
-            let baseCtrl = pair.Value.Contains("Ctrl+")
-            let baseShift = pair.Value.Contains("Shift+")
-            let alt = pair.Value.Contains("Alt+")
-            let super = pair.Value.Contains("Super+")
+            let baseCtrl = shortcut.Ctrl
+            let baseShift = shortcut.Shift
+            let alt = shortcut.Alt
+            let super = shortcut.Super
             for variant in 0 ... 4 {
                 let ctrl = variant == 1 || variant == 3
                 let shift = variant >= 2
@@ -590,22 +574,13 @@ partial class BrowserView {
     }
 
     private func ResetPreferencesTab() {
-        let defaults = AppSettings()
         if preferenceTab == "Shortcuts" {
-            settings.Keybindings.Clear()
+            settings.ResetShortcuts()
             preferenceInputs.Clear()
-            for binding in defaults.Keybindings {
-                settings.Keybindings[binding.Key] = binding.Value
-            }
         } else if preferenceTab == "Behavior" {
-            settings.SmoothScrolling = defaults.SmoothScrolling
-            settings.ScrollSpeed = defaults.ScrollSpeed
-            settings.PreviewWordWrap = defaults.PreviewWordWrap
-            settings.PreviewLineNumbers = defaults.PreviewLineNumbers
+            settings.ResetBehavior()
         } else {
-            settings.Theme = defaults.Theme
-            settings.ThemeName = defaults.ThemeName
-            settings.CustomTheme = defaults.CustomTheme
+            settings.ResetAppearance()
             themeColorRole = "Background"
             revealThemeEditor = false
         }

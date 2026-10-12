@@ -5,7 +5,7 @@ import System
 
 internal data struct FilePreviewInput {
     var Entry FileEntry
-    var Service ThumbnailService
+    var Acquire Func[FileEntry, int32, Action, ThumbnailLease]
     var Tile bool
     var Palette Palette
     var WordWrap bool
@@ -33,7 +33,7 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
             modified = entry.Modified.Ticks
         }
         if !entry.IsDirectory && lease == nil {
-            lease = value.Service.Acquire(entry, 160, () -> Rebuild())
+            lease = value.Acquire(entry, 160, () -> Rebuild())
         }
         let data = lease?.Data
         let canvas = Container{

@@ -17,6 +17,7 @@ class PlacesSidebar {
             bookmarkKey string,
             window Window,
             p Palette,
+            standardPlaces IReadOnlyList[KeyValuePair[string, string]],
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
             showPreferences bool = true,
@@ -31,23 +32,19 @@ class PlacesSidebar {
             trashCount int32 = 0,
             showVirtual bool = true
         ) Blob {
-            let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let places = List[Blob]()
             places.Add(Ui.Section("PLACES", p))
-            places.Add(Place("home", "Home", home, path, navigate, p, drop, dropPath))
-            for name in[]string{"Desktop", "Documents", "Downloads", "Pictures", "Music", "Videos"} {
-                let location = Path.Combine(home, name)
-                if Directory.Exists(location) {
-                    let icon = switch name {
-                        case "Desktop": "desktop_windows"
-                        case "Documents": "description"
-                        case "Downloads": "download"
-                        case "Pictures": "image"
-                        case "Music": "music_note"
-                        default: "movie"
-                    }
-                    places.Add(Place(icon, name, location, path, navigate, p, drop, dropPath))
+            for place in standardPlaces {
+                let icon = switch place.Key {
+                    case "Home": "home"
+                    case "Desktop": "desktop_windows"
+                    case "Documents": "description"
+                    case "Downloads": "download"
+                    case "Pictures": "image"
+                    case "Music": "music_note"
+                    default: "movie"
                 }
+                places.Add(Place(icon, place.Key, place.Value, path, navigate, p, drop, dropPath))
             }
             if showVirtual {
                 places.Add(Place("history", "Recent", Locations.Recent, path, navigate, p))
