@@ -80,27 +80,6 @@ partial class BrowserView {
         }
         notice = ""
         switch action {
-            case "MoveUp" {
-                MoveFiles(action, false, false)
-            }
-            case "MoveDown" {
-                MoveFiles(action, false, false)
-            }
-            case "MoveLeft" or "MoveRight" {
-                MoveFiles(action, false, false)
-            }
-            case "MoveFirst" {
-                Model.Select(0)
-            }
-            case "MoveLast" {
-                Model.Select(Model.ActivePane().VisibleEntries.Count - 1)
-            }
-            case "PageUp" {
-                Model.MoveSelection(-PageSize())
-            }
-            case "PageDown" {
-                Model.MoveSelection(PageSize())
-            }
             case "Open" {
                 OpenBrowserSelection()
             }

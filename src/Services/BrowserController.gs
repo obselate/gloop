@@ -15,7 +15,6 @@ class BrowserController {
     internal var Preview PreviewData
     internal var PreviewImage ImageSource?
     internal var Status string
-    internal var Busy bool
     internal var SelectFirstEntry bool = true
     internal var EntryFilter Func[FileEntry, bool]?
     internal let Places PlacesService
@@ -62,7 +61,6 @@ class BrowserController {
         PreviewVisible = settings.ShowPreview
         Preview = PreviewData{Kind: "", Text: "", Path: "", Error: ""}
         Status = ""
-        Busy = false
         clipboardPaths = List[string]()
         closeFailure = ""
         typedPrefix = ""
@@ -701,7 +699,6 @@ class BrowserController {
                 QueuePreview()
             }
         }
-        UpdateBusy()
         Notify()
         let queue = loads[index]
         if queue.Submit(
@@ -758,7 +755,6 @@ class BrowserController {
             pane.SelectedPaths.Clear()
             pane.Error = snapshot.Error
             Status = snapshot.Error
-            UpdateBusy()
             if index == ActiveIndex {
                 QueuePreview()
             }
@@ -783,7 +779,6 @@ class BrowserController {
             pane.SelectionAnchorPath = ""
             pane.PendingFocusPath = ""
             pane.Loading = false
-            UpdateBusy()
             if index == ActiveIndex {
                 QueuePreview()
             }
@@ -792,7 +787,6 @@ class BrowserController {
             return
         }
         pane.Loading = true
-        UpdateBusy()
         let queue = views[index]
         if queue.Submit(
             ViewRequest{
@@ -870,7 +864,6 @@ class BrowserController {
         if error != "" {
             Status = error
         }
-        UpdateBusy()
         if index == ActiveIndex {
             QueuePreview()
         }
@@ -1058,7 +1051,6 @@ class BrowserController {
             }
         }
         operationCount++
-        UpdateBusy()
         Status = "Working…"
         Notify()
         if admission == OperationAdmission.StartWorker {
@@ -1079,7 +1071,6 @@ class BrowserController {
             }
         }
         operationCount--
-        UpdateBusy()
         if request.Kind == OperationKind.Move && request.ClipboardVersion == clipboardGeneration {
             for source in succeeded {
                 clipboardPaths.Remove(source)
@@ -1222,10 +1213,6 @@ class BrowserController {
     private func ResetTypeSelect() {
         typedPrefix = ""
         typedAt = 0
-    }
-
-    private func UpdateBusy() {
-        Busy = operationCount > 0 || First.Loading || Second.Loading
     }
 
     private func Notify() {

@@ -97,7 +97,7 @@ open class FileTable : Cell[FileTableInput] {
                 OnKeyDown: value.OnKey,
                 ScrollbarX: Ui.ScrollbarStyle(p),
                 ScrollbarVisibilityX: ScrollbarVisibility.Auto,
-                ScrollbarY: Ui.ScrollbarStyle(p, 2),
+                ScrollbarY: Ui.ScrollbarStyle(p),
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
                 EmptyContent: Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly),
                 Selection: DataGridSelection.Multiple,
