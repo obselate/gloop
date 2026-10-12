@@ -174,7 +174,7 @@ class BrowserController {
     internal func Back() {
         let pane = ActivePane()
         if pane.CanBack() {
-            NavigateTo(pane.History[pane.HistoryIndex - 1], ActiveIndex, "history", pane.HistoryIndex - 1, "")
+            NavigateTo(pane.History[pane.HistoryIndex - 1], ActiveIndex, "history", pane.HistoryIndex - 1, pane.DirectoryPath)
         }
     }
 
@@ -196,7 +196,7 @@ class BrowserController {
         }
         let parent = Path.GetDirectoryName(path)
         if parent != nil && parent != path {
-            Navigate(parent)
+            NavigateTo(parent, ActiveIndex, "push", -1, path)
         }
     }
 
