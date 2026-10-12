@@ -376,7 +376,7 @@ class ThumbnailService : IDisposable {
                     0
                 }
                 let text = UTF8Encoding(false, true).GetString(buffer, start, count - start)
-                return snippet(text, Path.GetExtension(item.Entry.Name).ToLowerInvariant())
+                return snippet(text)
             } catch (failure DecoderFallbackException) {
                 if count < limit - 3 {
                     return ThumbnailData{}
@@ -387,7 +387,7 @@ class ThumbnailService : IDisposable {
         return ThumbnailData{}
     }
 
-    private func snippet(text string, extension string) ThumbnailData {
+    private func snippet(text string) ThumbnailData {
         let output = StringBuilder()
         var lines int32 = 0
         var columns int32 = 0
@@ -420,7 +420,7 @@ class ThumbnailService : IDisposable {
         if value == "" {
             return ThumbnailData{}
         }
-        return ThumbnailData{Kind: "text", Text: value, Language: PreviewSyntaxService.LanguageFor(extension)}
+        return ThumbnailData{Kind: "text", Text: value}
     }
 
     private func imageExtension(extension string) bool ->

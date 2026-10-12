@@ -5,7 +5,6 @@ data struct PreviewData {
     internal var Text string = ""
     internal var Path string = ""
     internal var Error string = ""
-    internal var Language string = ""
     internal var Warning string = ""
     internal var Styles[]PreviewStyleSpan = []PreviewStyleSpan{}
 }

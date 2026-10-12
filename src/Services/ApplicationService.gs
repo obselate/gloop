@@ -74,16 +74,6 @@ class ApplicationService {
         }
     }
 
-    /// Returns the argument vectors that Launch would start without starting them. A failure yields none.
-    internal func Commands(id string, paths List[string]) List[List[string]] {
-        try {
-            if let app = find(id) {
-                return plan(app, paths)
-            }
-        } catch (failure Exception) { }
-        return List[List[string]]()
-    }
-
     private func database() MimeDatabase {
         lock gate {
             if let loaded = mime {

@@ -1,7 +1,6 @@
 package gloop
 
 import System
-import System.Globalization
 import System.IO
 
 class TrashService {
@@ -26,16 +25,6 @@ class TrashService {
             return 0
         }
     }
-
-    internal func Info(trashPath string) TrashItem {
-        try {
-            return describe(locate(trashPath))
-        } catch (failure Exception) {
-            return TrashItem{TrashPath: trashPath}
-        }
-    }
-
-    internal func OriginalPath(trashPath string) string -> Info(trashPath).OriginalPath
 
     internal func Restore(trashPath string) string {
         try {
@@ -131,7 +120,7 @@ class TrashService {
     ? Directory.GetFileSystemEntries(directory): Array.Empty[string]()
 
     private func describe(source string) TrashItem {
-        var item = TrashItem{Name: Path.GetFileName(source), TrashPath: source}
+        var item = TrashItem{TrashPath: source}
         try {
             let infoPath = infoFile(source)
             if FileInfo(infoPath).Length > 65536 {
@@ -146,15 +135,6 @@ class TrashService {
                     if Path.IsPathRooted(path) {
                         item.OriginalPath = Path.GetFullPath(path)
                     }
-                } else if section && line.StartsWith("DeletionDate=", StringComparison.Ordinal) {
-                    DateTime.TryParseExact(
-                        line.Substring(13),
-                        "yyyy-MM-ddTHH:mm:ss",
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.None,
-                        out var deleted
-                    )
-                    item.Deleted = deleted
                 }
             }
         } catch (failure Exception) { }

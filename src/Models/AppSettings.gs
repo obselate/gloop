@@ -153,14 +153,6 @@ internal class AppSettings {
         Keybindings["OpenSettings"] = "Ctrl+Comma"
     }
 
-    internal func ActionFor(key string, ctrl bool, alt bool, shift bool) string -> ActionFor(
-        key,
-        ctrl,
-        alt,
-        shift,
-        false
-    )
-
     internal func ActionFor(key string, ctrl bool, alt bool, shift bool, super bool) string {
         let name = Shortcut.KeyName(key)
         if name == "" {

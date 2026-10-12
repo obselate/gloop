@@ -21,7 +21,7 @@ class VolumeService {
     private const DriveInterface string = "org.freedesktop.UDisks2.Drive"
     private const FilesystemInterface string = "org.freedesktop.UDisks2.Filesystem"
     private const MaxVolumes int32 = 64
-    internal var Timeout TimeSpan = TimeSpan.FromSeconds(10)
+    private let Timeout TimeSpan = TimeSpan.FromSeconds(10)
 
     internal func List() List[Volume] {
         let volumes = System.Collections.Generic.List[Volume]()

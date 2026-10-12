@@ -78,12 +78,7 @@ class FileSystemService {
                 return PreviewData{Kind: "metadata", Text: FormatSize(size), Path: fullPath}
             }
             if size == 0 {
-                return PreviewData{
-                    Kind: "text",
-                    Text: "",
-                    Path: fullPath,
-                    Language: PreviewSyntaxService.LanguageFor(extension),
-                }
+                return PreviewData{Kind: "text", Text: "", Path: fullPath,}
             }
             let limit = int32(Math.Min(size, int64(4194304)))
             let buffer = [limit]uint8
@@ -178,7 +173,6 @@ class FileSystemService {
                 Kind: "text",
                 Text: content,
                 Path: fullPath,
-                Language: language,
                 Warning: warning.Trim(),
                 Styles: highlighting.Spans,
             }
