@@ -68,6 +68,7 @@ func Main(args[]string) int32 {
         settings.SplitView = false
     }
     if launch.ShowHidden {
+        settings.LaunchShowHiddenOriginal = settings.ShowHidden
         settings.ShowHidden = true
     }
     Window.ConfigureApplication("Gloop", CommandLine.AppVersion(), "io.github.obselate.gloop")

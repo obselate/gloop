@@ -3,6 +3,7 @@ package gloop
 import System
 import System.Collections.Generic
 import System.IO
+import System.Text.Json
 
 internal class ThemePalette {
     internal var Background string
@@ -71,6 +72,7 @@ internal class ThemePalette {
 
 internal class AppSettings {
     internal var ShowHidden bool
+    internal var LaunchShowHiddenOriginal bool?
     internal var ShowTypeColumn bool
     internal var ShowPreview bool
     internal var PreviewWordWrap bool
@@ -80,6 +82,8 @@ internal class AppSettings {
     internal var SmoothScrolling bool
     internal var ScrollSpeed float64
     internal let Keybindings Dictionary[string, string]
+    internal let UnknownKeybindings Dictionary[string, string]
+    internal let UnknownSettings Dictionary[string, JsonElement]
     internal let Bookmarks List[string]
     internal var Theme ThemePalette
     internal var ThemeName string
@@ -99,6 +103,8 @@ internal class AppSettings {
         ThemeName = "Glass"
         CustomTheme = Theme.Clone()
         Keybindings = Dictionary[string, string](StringComparer.Ordinal)
+        UnknownKeybindings = Dictionary[string, string](StringComparer.Ordinal)
+        UnknownSettings = Dictionary[string, JsonElement](StringComparer.Ordinal)
         Bookmarks = List[string]()
         Keybindings["MoveUp"] = "Up"
         Keybindings["MoveDown"] = "Down"
@@ -211,6 +217,7 @@ internal class AppSettings {
             return
         }
         ShowHidden = source.ShowHidden
+        LaunchShowHiddenOriginal = source.LaunchShowHiddenOriginal
         ShowTypeColumn = source.ShowTypeColumn
         ShowPreview = source.ShowPreview
         PreviewWordWrap = source.PreviewWordWrap
@@ -225,6 +232,14 @@ internal class AppSettings {
         Keybindings.Clear()
         for binding in source.Keybindings {
             Keybindings[binding.Key] = binding.Value
+        }
+        UnknownKeybindings.Clear()
+        for binding in source.UnknownKeybindings {
+            UnknownKeybindings[binding.Key] = binding.Value
+        }
+        UnknownSettings.Clear()
+        for setting in source.UnknownSettings {
+            UnknownSettings[setting.Key] = setting.Value
         }
         Bookmarks.Clear()
         for bookmark in source.Bookmarks {

@@ -407,6 +407,7 @@ class BrowserController {
 
     internal func ToggleHidden() {
         settings.ShowHidden = !settings.ShowHidden
+        settings.LaunchShowHiddenOriginal = nil
         RefreshLoadedPanes()
         Notify()
     }
