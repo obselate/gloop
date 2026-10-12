@@ -9,7 +9,7 @@ class LatestWork {
     private var running bool
     private var closed bool
 
-    internal func Submit(job Action[int32]) {
+    internal func Submit(job Action[int32], failed Action[int32, Exception]) {
         var start bool
         lock gate {
             if closed {
@@ -17,7 +17,13 @@ class LatestWork {
             }
             generation++
             let current = generation
-            pending = () -> job(current)
+            pending = () -> {
+                try {
+                    job(current)
+                } catch (failure Exception) {
+                    failed(current, failure)
+                }
+            }
             start = !running
             running = true
         }
@@ -61,8 +67,6 @@ class LatestWork {
 
 func latestWorker(work LatestWork) {
     while let job = work.Take() {
-        try {
-            job()
-        } catch (failure Exception) { }
+        job()
     }
 }
