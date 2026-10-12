@@ -79,6 +79,8 @@ internal class SettingsService {
                 } else if property.Name == "customTheme" {
                     readTheme(settings.CustomTheme, property.Value)
                     hasCustomTheme = true
+                } else {
+                    settings.UnknownSettings[property.Name] = property.Value.Clone()
                 }
             }
             if isLegacyDefaultTheme(settings.Theme) {
@@ -129,7 +131,7 @@ internal class SettingsService {
                 using let stream = File.Create(temporary)
                 using let writer = Utf8JsonWriter(stream, JsonWriterOptions{Indented: true})
                 writer.WriteStartObject()
-                writer.WriteBoolean("showHidden", settings.ShowHidden)
+                writer.WriteBoolean("showHidden", settings.LaunchShowHiddenOriginal ?? settings.ShowHidden)
                 writer.WriteBoolean("showTypeColumn", settings.ShowTypeColumn)
                 writer.WriteBoolean("showPreview", settings.ShowPreview)
                 writer.WriteBoolean("previewWordWrap", settings.PreviewWordWrap)
@@ -147,12 +149,20 @@ internal class SettingsService {
                 for binding in settings.Keybindings {
                     writer.WriteString(binding.Key, binding.Value)
                 }
+                for binding in settings.UnknownKeybindings {
+                    writer.WriteString(binding.Key, binding.Value)
+                }
                 writer.WriteEndObject()
                 writer.WriteString("themeName", settings.ThemeName)
                 writeTheme(writer, "theme", settings.Theme)
                 writeTheme(writer, "customTheme", settings.CustomTheme)
+                for setting in settings.UnknownSettings {
+                    writer.WritePropertyName(setting.Key)
+                    setting.Value.WriteTo(writer)
+                }
                 writer.WriteEndObject()
                 writer.Flush()
+                stream.Flush(true)
             }
             File.Move(temporary, FilePath, true)
             return ""
@@ -211,6 +221,19 @@ internal class SettingsService {
                     return "Duplicate shortcut: " + binding.Value
                 }
             }
+            used.Clear()
+            for binding in settings.UnknownKeybindings {
+                if defaults.Keybindings.ContainsKey(binding.Key) {
+                    return "Known action in unknown bindings: " + binding.Key
+                }
+                let normalized = Shortcut.Normalize(binding.Value)
+                if normalized == "" || normalized != binding.Value {
+                    return "Invalid shortcut for " + binding.Key
+                }
+                if !used.Add(binding.Value) {
+                    return "Duplicate shortcut: " + binding.Value
+                }
+            }
             if settings.ThemeName != "Custom" && !ThemePresets.Contains(settings.ThemeName) {
                 return "Unknown theme: " + settings.ThemeName
             }
@@ -260,9 +283,6 @@ internal class SettingsService {
                 if !seen.Add(property.Name) {
                     throw FormatException("Duplicate action: " + property.Name)
                 }
-                if !settings.Keybindings.ContainsKey(property.Name) {
-                    throw FormatException("Unknown action: " + property.Name)
-                }
                 if property.Value.ValueKind != JsonValueKind.String {
                     throw FormatException("Shortcut for " + property.Name + " must be a string")
                 }
@@ -270,10 +290,17 @@ internal class SettingsService {
                 if shortcut == "" {
                     throw FormatException("Invalid shortcut for " + property.Name)
                 }
-                settings.Keybindings[property.Name] = shortcut
+                if settings.Keybindings.ContainsKey(property.Name) {
+                    settings.Keybindings[property.Name] = shortcut
+                } else {
+                    settings.UnknownKeybindings[property.Name] = shortcut
+                }
             }
             let assigned = HashSet[string](StringComparer.Ordinal)
             for action in seen {
+                if !settings.Keybindings.ContainsKey(action) {
+                    continue
+                }
                 let shortcut = settings.Keybindings[action]
                 if !assigned.Add(shortcut) {
                     throw FormatException("Duplicate shortcut: " + shortcut)

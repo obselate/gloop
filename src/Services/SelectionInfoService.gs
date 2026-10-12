@@ -19,7 +19,7 @@ class SelectionInfoService {
         properties = PropertiesService(applications)
     }
 
-    internal func LoadApplications(path string, done Action[List[AppChoice]]) {
+    internal func LoadApplications(path string, done Action[List[AppChoice], string]) {
         let work = applicationWork
         let service = applications
         let owner = window
@@ -27,8 +27,14 @@ class SelectionInfoService {
             generation -> {
                 let choices = service.Applications(path)
                 choices.RemoveAll(choice -> choice.Id == DesktopIntegration.AppId + ".desktop")
-                deliver(owner, work, generation, () -> done(choices))
-            }
+                deliver(owner, work, generation, () -> done(choices, ""))
+            },
+            (generation, failure) -> deliver(
+                owner,
+                work,
+                generation,
+                () -> done(List[AppChoice](), "Cannot load applications for " + path + ": " + failure.Message)
+            )
         )
     }
 
@@ -48,7 +54,13 @@ class SelectionInfoService {
                     partial -> deliver(owner, work, generation, () -> early(partial))
                 )
                 deliver(owner, work, generation, () -> done(result))
-            }
+            },
+            (generation, failure) -> deliver(
+                owner,
+                work,
+                generation,
+                () -> done(FileProperties{Count: paths.Count, Error: failure.Message})
+            )
         )
     }
 

@@ -76,9 +76,12 @@ partial class BrowserView {
         }
         Selection.LoadApplications(
             entry.FullPath,
-            choices -> {
+            (choices, error) -> {
                 contextApplications = choices
                 contextApplicationsReady = true
+                if error != "" {
+                    notice = error
+                }
                 Rebuild()
             }
         )

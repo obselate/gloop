@@ -67,8 +67,14 @@ class PropertiesService {
     private func describe(path string, ref result FileProperties) {
         let buffer = Marshal.AllocHGlobal(256)
         try {
-            if readStat(-100, path, 256, 2075u, buffer) != 0 || (Marshal.ReadInt32(buffer, 0) & 27) != 27 {
+            if readStat(-100, path, 256, 2075u, buffer) != 0 {
                 result.Error = Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path
+                return
+            }
+            if (Marshal.ReadInt32(buffer, 0) & 27) != 27 {
+                result.Error = "Cannot read properties for " +
+                    path +
+                    ": the filesystem did not report required metadata"
                 return
             }
             result.Permissions = permissions(int32(Marshal.ReadInt16(buffer, 28)))

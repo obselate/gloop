@@ -7,7 +7,7 @@ import System.IO
 import System.Runtime.InteropServices
 import System.Text
 
-class FileOperationService {
+unsafe class FileOperationService {
     shared {
         @DllImport("libc", EntryPoint: "renameat2", CharSet: CharSet.Ansi, SetLastError: true)
         private func renameNoReplace(
@@ -17,6 +17,9 @@ class FileOperationService {
             destination string,
             flags uint32
         ) int32;
+
+        @DllImport("libc", EntryPoint: "statx", CharSet: CharSet.Ansi, SetLastError: true)
+        private func readStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
     }
 
     internal func CreateFolder(directory string, name string) string {
@@ -213,6 +216,11 @@ class FileOperationService {
                 if error == 18 {
                     throw IOException("Move across filesystems is unavailable")
                 }
+                if error == 22 {
+                    throw IOException(
+                        "Cannot rename " + source + ": the filesystem does not support a safe no-replace rename"
+                    )
+                }
                 throw IOException(Win32Exception(error).Message)
             }
             return
@@ -247,6 +255,19 @@ class FileOperationService {
                 copyEntry(child, Path.Combine(destination, Path.GetFileName(child)))
             }
             return
+        }
+        if OperatingSystem.IsLinux() {
+            let buffer *uint8 = stackalloc[256]uint8
+            let pointer = IntPtr(buffer)
+            if readStat(-100, source, 256, 1u, pointer) != 0 {
+                throw IOException("Cannot copy " + source + ": " + Win32Exception(Marshal.GetLastWin32Error()).Message)
+            }
+            if (Marshal.ReadInt32(pointer, 0) & 1) == 0 {
+                throw IOException("Cannot copy " + source + ": the filesystem did not report the file type")
+            }
+            if (int32(Marshal.ReadInt16(pointer, 28)) & 61440) != 32768 {
+                throw IOException("Cannot copy non-regular file: " + source)
+            }
         }
         File.Copy(source, destination, false)
     }
