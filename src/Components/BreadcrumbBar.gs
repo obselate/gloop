@@ -90,7 +90,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 BackgroundColor: p.Hover,
                 BorderRadius: 4,
                 Hover: Style{BackgroundColor: p.Border},
-                Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent, OutlineOffset: -1},
+                Focus: p.Ring(-1),
                 OnClick: () -> value.More(
                     hidden,
                     Point{X: more.BorderBox.X, Y: more.BorderBox.Y + more.BorderBox.Height + 2}
@@ -186,7 +186,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             BackgroundColor: Color.Transparent,
             BorderRadius: 4,
             Hover: Style{BackgroundColor: p.Hover},
-            Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent, OutlineOffset: -1},
+            Focus: p.Ring(-1),
             OnClick: () -> value.Navigate(destination),
             Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: "Open " + destination},
             Container{

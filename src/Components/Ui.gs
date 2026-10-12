@@ -31,8 +31,10 @@ class Palette {
     internal let Preview Color
     internal let Hover Color
     internal let Bar Color
+    internal let Keyboard bool
 
-    internal init(theme ThemePalette) {
+    internal init(theme ThemePalette, keyboard bool = false) {
+        Keyboard = keyboard
         let preset = ThemePresets.Match(theme)
         Glass = preset == "Glass"
         Background = Color.Parse(theme.Background)
@@ -68,6 +70,18 @@ class Palette {
         String = Color.Parse(syntax[1])
         Number = Color.Parse(syntax[2])
         Type = Color.Parse(syntax[3])
+    }
+
+    internal func Ring(offset float64 = 0, width float64 = 1) Style -> if Keyboard {
+        Style{OutlineWidth: width, OutlineColor: Accent, OutlineOffset: offset}
+    } else {
+        Style{}
+    }
+
+    internal func FocusBorder() Style -> if Keyboard {
+        Style{BorderColor: Accent}
+    } else {
+        Style{}
     }
 
     internal func IconColor(icon string) Color -> switch icon {
@@ -189,7 +203,7 @@ class Ui {
                         BackgroundColor: Color.Transparent,
                         ActiveBackgroundColor: p.Selection,
                         HoverBackgroundColor: hoverColor ?? p.Border,
-                        ShowFocusHighlight: true,
+                        ShowFocusHighlight: p.Keyboard,
                         FocusOutlineColor: p.Accent,
                     }.Build(),
                 }
@@ -216,7 +230,7 @@ class Ui {
                     p.Border
                 },
                 Hover: Style{Opacity: 0.82},
-                Focus: Style{OutlineWidth: 2, OutlineColor: p.Accent, OutlineOffset: 2},
+                Focus: p.Ring(2, 2),
                 OnClick: action,
                 Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: label},
                 Label(

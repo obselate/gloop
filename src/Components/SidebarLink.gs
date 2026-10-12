@@ -39,7 +39,7 @@ open class SidebarLink : Cell[SidebarLinkInput] {
                 Color.Transparent
             },
             Hover: Style{BackgroundColor: p.Border},
-            Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent},
+            Focus: p.Ring(),
             OnFocus: (_) -> handle.ScrollIntoView(),
             OnClick: value.Action,
             OnPointerUp: e -> {

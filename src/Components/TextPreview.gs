@@ -90,7 +90,7 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
                     ScrollbarVisibilityX = ScrollbarVisibility.Always,
                     ScrollbarVisibilityY = ScrollbarVisibility.Always,
                     Accessibility = Accessibility{Role: AccessibilityRole.TextInput, Name: "Text preview"},
-                    Focus = Style{OutlineWidth: 1, OutlineColor: p.Accent, OutlineOffset: 2},
+                    Focus = p.Ring(2),
                 },
             }
         )

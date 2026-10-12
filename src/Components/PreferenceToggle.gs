@@ -23,7 +23,7 @@ class PreferenceToggle {
                 ThumbColor: p.Text,
                 OnThumbColor: p.Background,
                 BorderColor: p.Border,
-                ShowFocusHighlight: true,
+                ShowFocusHighlight: p.Keyboard,
                 FocusBorderColor: p.Text,
             }.Build(),
         }

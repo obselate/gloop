@@ -54,7 +54,7 @@ class WindowBar {
                         p.Border
                     }
                 },
-                Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent, OutlineOffset: -2},
+                Focus: p.Ring(-2),
             },
         }.Build()
     }
