@@ -83,24 +83,8 @@ internal class SettingsService {
                     settings.UnknownSettings[property.Name] = property.Value.Clone()
                 }
             }
-            if isLegacyDefaultTheme(settings.Theme) {
-                settings.Theme = ThemePalette()
-            }
-            if !hasThemeName {
-                let preset = ThemePresets.Match(settings.Theme)
-                settings.ThemeName = if preset == "" {
-                    "Custom"
-                } else {
-                    preset
-                }
-            }
-            if ThemePresets.Contains(settings.ThemeName) {
-                settings.Theme = ThemePresets.Create(settings.ThemeName)
-            }
-            if !hasCustomTheme && settings.ThemeName == "Custom" {
-                settings.CustomTheme.ApplyFrom(settings.Theme)
-            }
-            let error = Validate(settings)
+            settings.ResolveTheme(hasThemeName, hasCustomTheme)
+            let error = AppSettings.Validate(settings)
             if error != "" {
                 throw FormatException(error)
             }
@@ -111,7 +95,7 @@ internal class SettingsService {
     }
 
     internal func Save(settings AppSettings) string {
-        let error = Validate(settings)
+        let error = AppSettings.Validate(settings)
         if error != "" {
             return error
         }
@@ -187,67 +171,6 @@ internal class SettingsService {
             return SettingsService(Path.Combine(configHome, "gloop", "settings.json"))
         }
 
-        internal func Validate(settings AppSettings) string {
-            if settings.ViewMode != "list" && settings.ViewMode != "tiles" {
-                return "View mode must be list or tiles"
-            }
-            if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < 0.25
-            || settings.ScrollSpeed > 4.0 {
-                return "Scroll speed must be between 0.25 and 4.0"
-            }
-            let seenBookmarks = HashSet[string](StringComparer.Ordinal)
-            for bookmark in settings.Bookmarks {
-                if BookmarkPath.Normalize(bookmark) != bookmark {
-                    return "Bookmark paths must be normalized absolute paths"
-                }
-                if !seenBookmarks.Add(bookmark) {
-                    return "Duplicate bookmark: " + bookmark
-                }
-            }
-            let defaults = AppSettings()
-            if settings.Keybindings.Count != defaults.Keybindings.Count {
-                return "Every action needs a binding"
-            }
-            let used = HashSet[string](StringComparer.Ordinal)
-            for binding in settings.Keybindings {
-                if !defaults.Keybindings.ContainsKey(binding.Key) {
-                    return "Unknown action: " + binding.Key
-                }
-                let normalized = Shortcut.Normalize(binding.Value)
-                if normalized == "" || normalized != binding.Value {
-                    return "Invalid shortcut for " + binding.Key
-                }
-                if !used.Add(binding.Value) {
-                    return "Duplicate shortcut: " + binding.Value
-                }
-            }
-            used.Clear()
-            for binding in settings.UnknownKeybindings {
-                if defaults.Keybindings.ContainsKey(binding.Key) {
-                    return "Known action in unknown bindings: " + binding.Key
-                }
-                let normalized = Shortcut.Normalize(binding.Value)
-                if normalized == "" || normalized != binding.Value {
-                    return "Invalid shortcut for " + binding.Key
-                }
-                if !used.Add(binding.Value) {
-                    return "Duplicate shortcut: " + binding.Value
-                }
-            }
-            if settings.ThemeName != "Custom" && !ThemePresets.Contains(settings.ThemeName) {
-                return "Unknown theme: " + settings.ThemeName
-            }
-            if !validTheme(settings.Theme) || !validTheme(settings.CustomTheme) {
-                return "Theme colors must be #RRGGBB"
-            }
-            return ""
-        }
-
-        private func validTheme(theme ThemePalette) bool ->
-        validColor(theme.Background) && validColor(theme.Surface) && validColor(theme.Text)
-        && validColor(theme.MutedText) && validColor(theme.Accent)
-        && validColor(theme.Border) && validColor(theme.Selection)
-
         private func writeTheme(writer Utf8JsonWriter, name string, theme ThemePalette) {
             writer.WriteStartObject(name)
             writer.WriteString("background", theme.Background)
@@ -274,95 +197,28 @@ internal class SettingsService {
             if value.ValueKind != JsonValueKind.Object {
                 throw FormatException("keybindings must be an object")
             }
-            let seen = HashSet[string](StringComparer.Ordinal)
-            let reserved = HashSet[string](StringComparer.Ordinal)
-            for binding in settings.Keybindings {
-                reserved.Add(binding.Value)
-            }
+            let bindings = Dictionary[string, string](StringComparer.Ordinal)
             for property in value.EnumerateObject() {
-                if !seen.Add(property.Name) {
+                if bindings.ContainsKey(property.Name) {
                     throw FormatException("Duplicate action: " + property.Name)
                 }
                 if property.Value.ValueKind != JsonValueKind.String {
                     throw FormatException("Shortcut for " + property.Name + " must be a string")
                 }
-                let shortcut = Shortcut.Normalize(property.Value.GetString() ?? "")
-                if shortcut == "" {
-                    throw FormatException("Invalid shortcut for " + property.Name)
-                }
-                if settings.Keybindings.ContainsKey(property.Name) {
-                    settings.Keybindings[property.Name] = shortcut
-                } else {
-                    settings.UnknownKeybindings[property.Name] = shortcut
-                }
+                bindings[property.Name] = property.Value.GetString() ?? ""
             }
-            let assigned = HashSet[string](StringComparer.Ordinal)
-            for action in seen {
-                if !settings.Keybindings.ContainsKey(action) {
-                    continue
-                }
-                let shortcut = settings.Keybindings[action]
-                if !assigned.Add(shortcut) {
-                    throw FormatException("Duplicate shortcut: " + shortcut)
-                }
-            }
-            let inherited = List[string]()
-            for binding in settings.Keybindings {
-                if !seen.Contains(binding.Key) {
-                    inherited.Add(binding.Key)
-                }
-            }
-            inherited.Sort(StringComparer.Ordinal)
-            for action in inherited {
-                let shortcut = settings.Keybindings[action]
-                if assigned.Add(shortcut) {
-                    continue
-                }
-                let fallback = availableShortcut(shortcut, assigned, reserved)
-                settings.Keybindings[action] = fallback
-                assigned.Add(fallback)
-            }
-        }
-
-        private func availableShortcut(preferred string, assigned HashSet[string], reserved HashSet[string]) string {
-            let key = preferred.Substring(preferred.LastIndexOf(char(43)) + 1)
-            let first = "Ctrl+Shift+" + key
-            if Shortcut.Normalize(first) == first && !assigned.Contains(first)
-            && !reserved.Contains(first) {
-                return first
-            }
-            for code in 65 ... 91 {
-                let candidate = "Ctrl+Shift+" + char(code).ToString()
-                if !assigned.Contains(candidate) && !reserved.Contains(candidate) {
-                    return candidate
-                }
-            }
-            for number in 1 ... 26 {
-                let candidate = "Ctrl+Shift+F" + number.ToString()
-                if !assigned.Contains(candidate) && !reserved.Contains(candidate) {
-                    return candidate
-                }
-            }
-            throw FormatException("No shortcut available for " + preferred)
+            settings.ReadBindings(bindings)
         }
 
         private func readBookmarks(settings AppSettings, value JsonElement) {
             if value.ValueKind != JsonValueKind.Array {
                 throw FormatException("bookmarks must be an array")
             }
-            let seen = HashSet[string](StringComparer.Ordinal)
             for entry in value.EnumerateArray() {
                 if entry.ValueKind != JsonValueKind.String {
                     throw FormatException("bookmarks must contain folder paths")
                 }
-                let path = BookmarkPath.Normalize(entry.GetString() ?? "")
-                if path == "" {
-                    throw FormatException("Bookmark must be an absolute folder path")
-                }
-                if !seen.Add(path) {
-                    throw FormatException("Duplicate bookmark: " + path)
-                }
-                settings.Bookmarks.Add(path)
+                settings.Bookmarks.Add(BookmarkPath.Normalize(entry.GetString() ?? ""))
             }
         }
 
@@ -379,7 +235,7 @@ internal class SettingsService {
                     throw FormatException("Theme color " + property.Name + " must be a string")
                 }
                 let color = property.Value.GetString() ?? ""
-                if !validColor(color) {
+                if !AppSettings.ValidColor(color) {
                     throw FormatException("Invalid theme color: " + property.Name)
                 }
                 if property.Name == "background" {
@@ -401,29 +257,5 @@ internal class SettingsService {
                 }
             }
         }
-
-        private func validColor(value string) bool {
-            if value.Length != 7 || value[0] != char(35) {
-                return false
-            }
-            for i in 1 ... value.Length {
-                let c = value[i]
-                if !(c >= char(48) && c <= char(57))
-                && !(c >= char(65) && c <= char(70))
-                && !(c >= char(97) && c <= char(102)) {
-                    return false
-                }
-            }
-            return true
-        }
-
-        private func isLegacyDefaultTheme(theme ThemePalette) bool ->
-        String.Equals(theme.Background, "#111418", StringComparison.OrdinalIgnoreCase)
-        && String.Equals(theme.Surface, "#181D23", StringComparison.OrdinalIgnoreCase)
-        && String.Equals(theme.Text, "#E8EDF2", StringComparison.OrdinalIgnoreCase)
-        && String.Equals(theme.MutedText, "#919CAA", StringComparison.OrdinalIgnoreCase)
-        && String.Equals(theme.Accent, "#8DD9C4", StringComparison.OrdinalIgnoreCase)
-        && String.Equals(theme.Border, "#2A323D", StringComparison.OrdinalIgnoreCase)
-        && String.Equals(theme.Selection, "#25493F", StringComparison.OrdinalIgnoreCase)
     }
 }

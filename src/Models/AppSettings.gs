@@ -238,6 +238,213 @@ internal class AppSettings {
             Bookmarks.Add(bookmark)
         }
     }
+
+    internal func ResetShortcuts() {
+        let defaults = AppSettings()
+        Keybindings.Clear()
+        for binding in defaults.Keybindings {
+            Keybindings[binding.Key] = binding.Value
+        }
+    }
+
+    internal func ResetBehavior() {
+        let defaults = AppSettings()
+        SmoothScrolling = defaults.SmoothScrolling
+        ScrollSpeed = defaults.ScrollSpeed
+        PreviewWordWrap = defaults.PreviewWordWrap
+        PreviewLineNumbers = defaults.PreviewLineNumbers
+    }
+
+    internal func ResetAppearance() {
+        let defaults = AppSettings()
+        Theme = defaults.Theme
+        ThemeName = defaults.ThemeName
+        CustomTheme = defaults.CustomTheme
+    }
+
+    internal func SelectTheme(name string) {
+        ThemeName = name
+        if name == "Custom" {
+            Theme.ApplyFrom(CustomTheme)
+        } else {
+            Theme = ThemePresets.Create(name)
+        }
+    }
+
+    internal func SetCustomColor(role string, color string) {
+        CustomTheme.SetColor(role, color)
+        Theme.SetColor(role, color)
+    }
+
+    internal func ResolveTheme(hasThemeName bool, hasCustomTheme bool) {
+        if isLegacyDefaultTheme(Theme) {
+            Theme = ThemePalette()
+        }
+        if !hasThemeName {
+            let preset = ThemePresets.Match(Theme)
+            ThemeName = if preset == "" {
+                "Custom"
+            } else {
+                preset
+            }
+        }
+        if ThemePresets.Contains(ThemeName) {
+            Theme = ThemePresets.Create(ThemeName)
+        }
+        if !hasCustomTheme && ThemeName == "Custom" {
+            CustomTheme.ApplyFrom(Theme)
+        }
+    }
+
+    internal func ReadBindings(bindings Dictionary[string, string]) {
+        let reserved = HashSet[string](Keybindings.Values, StringComparer.Ordinal)
+        for binding in bindings {
+            let shortcut = Shortcut.Normalize(binding.Value)
+            if shortcut == "" {
+                throw FormatException("Invalid shortcut for " + binding.Key)
+            }
+            if Keybindings.ContainsKey(binding.Key) {
+                Keybindings[binding.Key] = shortcut
+            } else {
+                UnknownKeybindings[binding.Key] = shortcut
+            }
+        }
+        let assigned = HashSet[string](StringComparer.Ordinal)
+        for binding in bindings {
+            if !Keybindings.ContainsKey(binding.Key) {
+                continue
+            }
+            let shortcut = Keybindings[binding.Key]
+            if !assigned.Add(shortcut) {
+                throw FormatException("Duplicate shortcut: " + shortcut)
+            }
+        }
+        let inherited = List[string]()
+        for binding in Keybindings {
+            if !bindings.ContainsKey(binding.Key) {
+                inherited.Add(binding.Key)
+            }
+        }
+        inherited.Sort(StringComparer.Ordinal)
+        for action in inherited {
+            let shortcut = Keybindings[action]
+            if assigned.Add(shortcut) {
+                continue
+            }
+            let fallback = availableShortcut(shortcut, assigned, reserved)
+            Keybindings[action] = fallback
+            assigned.Add(fallback)
+        }
+    }
+
+    shared {
+        internal func Validate(settings AppSettings) string {
+            if settings.ViewMode != "list" && settings.ViewMode != "tiles" {
+                return "View mode must be list or tiles"
+            }
+            if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < 0.25
+            || settings.ScrollSpeed > 4.0 {
+                return "Scroll speed must be between 0.25 and 4.0"
+            }
+            let seenBookmarks = HashSet[string](StringComparer.Ordinal)
+            for bookmark in settings.Bookmarks {
+                if bookmark == "" || BookmarkPath.Normalize(bookmark) != bookmark {
+                    return "Bookmark paths must be normalized absolute paths"
+                }
+                if !seenBookmarks.Add(bookmark) {
+                    return "Duplicate bookmark: " + bookmark
+                }
+            }
+            let defaults = AppSettings()
+            if settings.Keybindings.Count != defaults.Keybindings.Count {
+                return "Every action needs a binding"
+            }
+            let used = HashSet[string](StringComparer.Ordinal)
+            for binding in settings.Keybindings {
+                if !defaults.Keybindings.ContainsKey(binding.Key) {
+                    return "Unknown action: " + binding.Key
+                }
+                let normalized = Shortcut.Normalize(binding.Value)
+                if normalized == "" || normalized != binding.Value {
+                    return "Invalid shortcut for " + binding.Key
+                }
+                if !used.Add(binding.Value) {
+                    return "Duplicate shortcut: " + binding.Value
+                }
+            }
+            used.Clear()
+            for binding in settings.UnknownKeybindings {
+                if defaults.Keybindings.ContainsKey(binding.Key) {
+                    return "Known action in unknown bindings: " + binding.Key
+                }
+                let normalized = Shortcut.Normalize(binding.Value)
+                if normalized == "" || normalized != binding.Value {
+                    return "Invalid shortcut for " + binding.Key
+                }
+                if !used.Add(binding.Value) {
+                    return "Duplicate shortcut: " + binding.Value
+                }
+            }
+            if settings.ThemeName != "Custom" && !ThemePresets.Contains(settings.ThemeName) {
+                return "Unknown theme: " + settings.ThemeName
+            }
+            if !validTheme(settings.Theme) || !validTheme(settings.CustomTheme) {
+                return "Theme colors must be #RRGGBB"
+            }
+            return ""
+        }
+
+        private func validTheme(theme ThemePalette) bool ->
+        ValidColor(theme.Background) && ValidColor(theme.Surface) && ValidColor(theme.Text)
+        && ValidColor(theme.MutedText) && ValidColor(theme.Accent)
+        && ValidColor(theme.Border) && ValidColor(theme.Selection)
+
+        internal func ValidColor(value string) bool {
+            if value.Length != 7 || value[0] != char(35) {
+                return false
+            }
+            for i in 1 ... value.Length {
+                let c = value[i]
+                if !(c >= char(48) && c <= char(57))
+                && !(c >= char(65) && c <= char(70))
+                && !(c >= char(97) && c <= char(102)) {
+                    return false
+                }
+            }
+            return true
+        }
+
+        private func availableShortcut(preferred string, assigned HashSet[string], reserved HashSet[string]) string {
+            let key = preferred.Substring(preferred.LastIndexOf(char(43)) + 1)
+            let first = "Ctrl+Shift+" + key
+            if Shortcut.Normalize(first) == first && !assigned.Contains(first)
+            && !reserved.Contains(first) {
+                return first
+            }
+            for code in 65 ... 91 {
+                let candidate = "Ctrl+Shift+" + char(code).ToString()
+                if !assigned.Contains(candidate) && !reserved.Contains(candidate) {
+                    return candidate
+                }
+            }
+            for number in 1 ... 26 {
+                let candidate = "Ctrl+Shift+F" + number.ToString()
+                if !assigned.Contains(candidate) && !reserved.Contains(candidate) {
+                    return candidate
+                }
+            }
+            throw FormatException("No shortcut available for " + preferred)
+        }
+
+        private func isLegacyDefaultTheme(theme ThemePalette) bool ->
+        String.Equals(theme.Background, "#111418", StringComparison.OrdinalIgnoreCase)
+        && String.Equals(theme.Surface, "#181D23", StringComparison.OrdinalIgnoreCase)
+        && String.Equals(theme.Text, "#E8EDF2", StringComparison.OrdinalIgnoreCase)
+        && String.Equals(theme.MutedText, "#919CAA", StringComparison.OrdinalIgnoreCase)
+        && String.Equals(theme.Accent, "#8DD9C4", StringComparison.OrdinalIgnoreCase)
+        && String.Equals(theme.Border, "#2A323D", StringComparison.OrdinalIgnoreCase)
+        && String.Equals(theme.Selection, "#25493F", StringComparison.OrdinalIgnoreCase)
+    }
 }
 
 internal class BookmarkPath {
@@ -254,189 +461,6 @@ internal class BookmarkPath {
             } catch (e Exception) {
                 return ""
             }
-        }
-    }
-}
-
-internal class Shortcut {
-    shared {
-        internal func Normalize(value string) string {
-            let parts = value.Split(char(43))
-            if parts.Length == 0 {
-                return ""
-            }
-            var ctrl = false
-            var alt = false
-            var shift = false
-            var super = false
-            for i in 0 ... parts.Length {
-                let part = parts[i].Trim().ToUpperInvariant()
-                if i == parts.Length - 1 {
-                    let key = KeyName(part)
-                    if key == "" {
-                        return ""
-                    }
-                    return (ctrl ? "Ctrl+": "") + (alt ? "Alt+": "")
-                    + (shift ? "Shift+": "") + (super ? "Super+": "") + key
-                }
-                if (part == "CTRL" || part == "CONTROL") && !ctrl {
-                    ctrl = true
-                } else if part == "ALT" && !alt {
-                    alt = true
-                } else if part == "SHIFT" && !shift {
-                    shift = true
-                } else if (part == "SUPER" || part == "META") && !super {
-                    super = true
-                } else {
-                    return ""
-                }
-            }
-            return ""
-        }
-
-        internal func KeyName(value string) string {
-            let key = value.Trim().ToUpperInvariant()
-            if key.Length == 1 {
-                let letter = key[0]
-                if letter >= char(65) && letter <= char(90) {
-                    return key
-                }
-            }
-            if key == "," || key == "COMMA" {
-                return "Comma"
-            }
-            if key == "SPACE" {
-                return "Space"
-            }
-            if key == "RETURN" || key == "ENTER" {
-                return "Enter"
-            }
-            if key == "ESC" || key == "ESCAPE" {
-                return "Escape"
-            }
-            if key == "DEL" || key == "DELETE" {
-                return "Delete"
-            }
-            if key == "ARROWUP" || key == "UP" {
-                return "Up"
-            }
-            if key == "ARROWDOWN" || key == "DOWN" {
-                return "Down"
-            }
-            if key == "ARROWLEFT" || key == "LEFT" {
-                return "Left"
-            }
-            if key == "ARROWRIGHT" || key == "RIGHT" {
-                return "Right"
-            }
-            if key == "TAB" {
-                return "Tab"
-            }
-            if key == "HOME" {
-                return "Home"
-            }
-            if key == "END" {
-                return "End"
-            }
-            if key == "PAGEUP" {
-                return "PageUp"
-            }
-            if key == "PAGEDOWN" {
-                return "PageDown"
-            }
-            if key == "BACKSPACE" {
-                return "Backspace"
-            }
-            if key == "INSERT" {
-                return "Insert"
-            }
-            if key == "'" || key == "APOSTROPHE" {
-                return "Apostrophe"
-            }
-            if key == "-" || key == "MINUS" {
-                return "Minus"
-            }
-            if key == "." || key == "PERIOD" {
-                return "Period"
-            }
-            if key == "/" || key == "SLASH" {
-                return "Slash"
-            }
-            if key == ";" || key == "SEMICOLON" {
-                return "Semicolon"
-            }
-            if key == "=" || key == "EQUAL" {
-                return "Equal"
-            }
-            if key == "[" || key == "LEFTBRACKET" {
-                return "LeftBracket"
-            }
-            if key == "\\" || key == "BACKSLASH" {
-                return "BackSlash"
-            }
-            if key == "]" || key == "RIGHTBRACKET" {
-                return "RightBracket"
-            }
-            if key == "`" || key == "GRAVEACCENT" {
-                return "GraveAccent"
-            }
-            if key == "CAPSLOCK" {
-                return "CapsLock"
-            }
-            if key == "SCROLLLOCK" {
-                return "ScrollLock"
-            }
-            if key == "NUMLOCK" {
-                return "NumLock"
-            }
-            if key == "PRINTSCREEN" {
-                return "PrintScreen"
-            }
-            if key == "PAUSE" {
-                return "Pause"
-            }
-            if key == "MENU" {
-                return "Menu"
-            }
-            if key.Length >= 2 && key[0] == char(70) {
-                var number int32
-                if Int32.TryParse(key.Substring(1), out number) && number >= 1 && number <= 25 {
-                    return "F" + number.ToString()
-                }
-            }
-            if key.Length == 1 && key[0] >= char(48) && key[0] <= char(57) {
-                return "Number" + key
-            }
-            if key.Length == 7 && key.StartsWith("NUMBER")
-            && key[6] >= char(48) && key[6] <= char(57) {
-                return "Number" + key.Substring(6, 1)
-            }
-            if key.Length == 7 && key.StartsWith("KEYPAD")
-            && key[6] >= char(48) && key[6] <= char(57) {
-                return "Keypad" + key.Substring(6, 1)
-            }
-            if key == "KEYPADENTER" {
-                return "KeypadEnter"
-            }
-            if key == "KEYPADDECIMAL" {
-                return "KeypadDecimal"
-            }
-            if key == "KEYPADDIVIDE" {
-                return "KeypadDivide"
-            }
-            if key == "KEYPADMULTIPLY" {
-                return "KeypadMultiply"
-            }
-            if key == "KEYPADSUBTRACT" {
-                return "KeypadSubtract"
-            }
-            if key == "KEYPADADD" {
-                return "KeypadAdd"
-            }
-            if key == "KEYPADEQUAL" {
-                return "KeypadEqual"
-            }
-            return ""
         }
     }
 }

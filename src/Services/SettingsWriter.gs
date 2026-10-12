@@ -28,7 +28,7 @@ internal class SettingsWriter {
     }
 
     internal func Save(settings AppSettings) string {
-        let error = SettingsService.Validate(settings)
+        let error = AppSettings.Validate(settings)
         if error != "" {
             return error
         }

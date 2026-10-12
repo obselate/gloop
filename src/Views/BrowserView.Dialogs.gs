@@ -251,8 +251,7 @@ partial class BrowserView {
                     values.ThemeName == "Custom",
                     p.Keyboard,
                     () -> {
-                        values.ThemeName = "Custom"
-                        values.Theme.ApplyFrom(values.CustomTheme)
+                        values.SelectTheme("Custom")
                         revealThemeEditor = true
                         ApplyPreferences()
                     }
@@ -267,8 +266,7 @@ partial class BrowserView {
                         name == values.ThemeName,
                         p.Keyboard,
                         () -> {
-                            values.ThemeName = presetName
-                            values.Theme = ThemePresets.Create(presetName)
+                            values.SelectTheme(presetName)
                             revealThemeEditor = false
                             ApplyPreferences()
                         }
@@ -342,8 +340,7 @@ partial class BrowserView {
                                         p.Keyboard,
                                         value -> {
                                             let color = "#" + ColorMath.Hex(value)
-                                            values.CustomTheme.SetColor(selectedRole, color)
-                                            values.Theme.SetColor(selectedRole, color)
+                                            values.SetCustomColor(selectedRole, color)
                                             ApplyPreferences()
                                         },
                                     )
