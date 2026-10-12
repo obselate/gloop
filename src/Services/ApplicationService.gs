@@ -37,7 +37,7 @@ class ApplicationService {
         let choices = List[AppChoice]()
         try {
             let types = database()
-            let associations = MimeAssociations()
+            let associations = associationDatabase()
             let kind = MimeType(path)
             let chain = List[string]{kind}
             chain.AddRange(types.Ancestors(kind))
@@ -79,10 +79,68 @@ class ApplicationService {
             if let loaded = mime {
                 return loaded
             }
-            let created = MimeDatabase(Xdg.DataDirs())
+            let files = List[MimeDataFile]()
+            for root in Xdg.DataDirs() {
+                files.Add(
+                    MimeDataFile{
+                        Globs: Xdg.ReadLines(Path.Combine(root, "mime", "globs2")),
+                        Aliases: Xdg.ReadLines(Path.Combine(root, "mime", "aliases")),
+                        Subclasses: Xdg.ReadLines(Path.Combine(root, "mime", "subclasses")),
+                    }
+                )
+            }
+            let created = MimeDatabase(files)
             mime = created
             return created
         }
+    }
+
+    private func associationDatabase() MimeAssociations {
+        let names = List[string]()
+        for desktop in(Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "").Split(
+            ':',
+            StringSplitOptions.RemoveEmptyEntries
+        ) {
+            names.Add(desktop.ToLowerInvariant() + "-mimeapps.list")
+        }
+        names.Add("mimeapps.list")
+        let roots = Xdg.DataDirs()
+        let directories = Xdg.ConfigDirs()
+        for root in roots {
+            directories.Add(Path.Combine(root, "applications"))
+        }
+        let groups = List[Dictionary[string, Dictionary[string, string]]]()
+        for directory in directories {
+            for name in names {
+                groups.Add(Xdg.Groups(Path.Combine(directory, name)))
+            }
+        }
+        let caches = List[Dictionary[string, Dictionary[string, string]]]()
+        for root in roots {
+            caches.Add(Xdg.Groups(Path.Combine(root, "applications", "mimeinfo.cache")))
+        }
+        return MimeAssociations(groups, caches)
+    }
+
+    private func locales() List[string] {
+        let keys = List[string]()
+        let sources = List[string]((Environment.GetEnvironmentVariable("LANGUAGE") ?? "").Split(':'))
+        for variable in[]string{"LC_ALL", "LC_MESSAGES", "LANG"} {
+            let value = Environment.GetEnvironmentVariable(variable) ?? ""
+            if value != "" {
+                sources.Add(value)
+                break
+            }
+        }
+        for source in sources {
+            let modifier = source.IndexOf('@') >= 0 ? source.Substring(source.IndexOf('@')): ""
+            let locale = source.Split('@')[0].Split('.')[0]
+            let language = locale.Split('_')[0]
+            if language != "" && language != "C" && language != "POSIX" {
+                keys.AddRange([]string{locale + modifier, locale, language + modifier, language})
+            }
+        }
+        return keys
     }
 
     private func isText(path string) bool {
@@ -109,7 +167,14 @@ class ApplicationService {
         for root in Xdg.DataDirs() {
             let file = locate(Path.Combine(root, "applications"), id)
             if file != "" {
-                return DesktopApp.Read(file)
+                return DesktopApp.Parse(
+                    file,
+                    Path.GetFileNameWithoutExtension(file),
+                    Xdg.Groups(file),
+                    (Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "").Split(':'),
+                    locales(),
+                    name -> Xdg.FindExecutable(name)
+                )
             }
         }
         return nil
@@ -135,7 +200,11 @@ class ApplicationService {
     }
 
     private func plan(app DesktopApp, paths List[string]) List[List[string]] {
-        let commands = app.Commands(paths)
+        let files = List[string]()
+        for path in paths {
+            files.Add(Path.GetFullPath(path))
+        }
+        let commands = app.Commands(files)
         if app.Terminal {
             for index in 0 ... commands.Count {
                 commands[index] = inTerminal(commands[index])

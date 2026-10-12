@@ -2,7 +2,6 @@ package gloop
 
 import System
 import System.Collections.Generic
-import System.IO
 
 data struct MimeGlob {
     internal var Pattern string
@@ -11,18 +10,23 @@ data struct MimeGlob {
     internal var Weight int32
 }
 
+data struct MimeDataFile {
+    internal var Globs List[string]
+    internal var Aliases List[string]
+    internal var Subclasses List[string]
+}
+
 class MimeDatabase {
     private let globs List[MimeGlob] = List[MimeGlob]()
     private let canonical Dictionary[string, string] = Dictionary[string, string]()
     private let synonyms Dictionary[string, List[string]] = Dictionary[string, List[string]]()
     private let parents Dictionary[string, List[string]] = Dictionary[string, List[string]]()
 
-    /// Loads the shared-mime-info files from data directories given in priority order.
-    internal init(roots List[string]) {
+    internal init(files List[MimeDataFile]) {
         let cleared = HashSet[string]()
-        for root in roots {
+        for file in files {
             let own = HashSet[string]()
-            for line in Xdg.ReadLines(Path.Combine(root, "mime", "globs2")) {
+            for line in file.Globs {
                 let fields = line.Split(':')
                 if fields.Length >= 3 && !line.StartsWith('#') && Int32.TryParse(fields[0], out var weight) {
                     let sensitive = fields.Length > 3 && fields[3].Contains("cs")
@@ -41,14 +45,14 @@ class MimeDatabase {
                 }
             }
             cleared.UnionWith(own)
-            for line in Xdg.ReadLines(Path.Combine(root, "mime", "aliases")) {
+            for line in file.Aliases {
                 let fields = line.Split(' ')
                 if fields.Length == 2 && !line.StartsWith('#') {
                     canonical.TryAdd(fields[0], fields[1])
                     link(synonyms, fields[1], fields[0])
                 }
             }
-            for line in Xdg.ReadLines(Path.Combine(root, "mime", "subclasses")) {
+            for line in file.Subclasses {
                 let fields = line.Split(' ')
                 if fields.Length == 2 && !line.StartsWith('#') {
                     link(parents, fields[0], fields[1])

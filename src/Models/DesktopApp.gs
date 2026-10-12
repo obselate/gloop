@@ -2,7 +2,6 @@ package gloop
 
 import System
 import System.Collections.Generic
-import System.IO
 import System.Text
 
 class DesktopApp {
@@ -32,23 +31,29 @@ class DesktopApp {
     shared {
         private const MaxFiles int32 = 128
 
-        /// Reads a desktop entry. Returns nil unless it is a launchable application that this desktop may show.
-        internal func Read(source string) DesktopApp? {
-            if !Xdg.Groups(source).TryGetValue("Desktop Entry", out var entry) {
+        internal func Parse(
+            source string,
+            fallbackName string,
+            groups Dictionary[string, Dictionary[string, string]],
+            desktops[]string,
+            locales List[string],
+            findExecutable Func[string, string]
+        ) DesktopApp? {
+            if !groups.TryGetValue("Desktop Entry", out var entry) {
                 return nil
             }
             let exec = unescape(get(entry, "Exec"))
-            let listed = get(entry, "Hidden") != "true" && get(entry, "NoDisplay") != "true" && shown(entry)
+            let listed = get(entry, "Hidden") != "true" && get(entry, "NoDisplay") != "true" && shown(entry, desktops)
             let tryExec = unescape(get(entry, "TryExec"))
             if get(entry, "Type") != "Application" || exec.Trim() == "" ||
                 !listed ||
-                (tryExec != "" && Xdg.FindExecutable(tryExec) == "") {
+                (tryExec != "" && findExecutable(tryExec) == "") {
                 return nil
             }
-            let name = localizedName(entry)
+            let name = localizedName(entry, locales)
             return DesktopApp(
                 source,
-                name == "" ? Path.GetFileNameWithoutExtension(source): name,
+                name == "" ? fallbackName: name,
                 unescape(get(entry, "Icon")),
                 unescape(get(entry, "Path")),
                 get(entry, "Terminal") == "true",
@@ -61,42 +66,20 @@ class DesktopApp {
             out var value
         ) ? value: ""
 
-        private func shown(entry Dictionary[string, string]) bool {
-            let current = (Environment.GetEnvironmentVariable("XDG_CURRENT_DESKTOP") ?? "").Split(':')
+        private func shown(entry Dictionary[string, string], current[]string) bool {
             let only = get(entry, "OnlyShowIn").Split(';', StringSplitOptions.RemoveEmptyEntries)
             let hidden = get(entry, "NotShowIn").Split(';', StringSplitOptions.RemoveEmptyEntries)
             let allowed = only.Length == 0 || Array.Exists(only, name -> Array.IndexOf(current, name) >= 0)
             return allowed && !Array.Exists(hidden, name -> Array.IndexOf(current, name) >= 0)
         }
 
-        private func localizedName(entry Dictionary[string, string]) string {
-            for locale in locales() {
+        private func localizedName(entry Dictionary[string, string], locales List[string]) string {
+            for locale in locales {
                 if entry.TryGetValue("Name[" + locale + "]", out var name) {
                     return unescape(name)
                 }
             }
             return unescape(get(entry, "Name"))
-        }
-
-        private func locales() List[string] {
-            let keys = List[string]()
-            let sources = List[string]((Environment.GetEnvironmentVariable("LANGUAGE") ?? "").Split(':'))
-            for variable in[]string{"LC_ALL", "LC_MESSAGES", "LANG"} {
-                let value = Environment.GetEnvironmentVariable(variable) ?? ""
-                if value != "" {
-                    sources.Add(value)
-                    break
-                }
-            }
-            for source in sources {
-                let modifier = source.IndexOf('@') >= 0 ? source.Substring(source.IndexOf('@')): ""
-                let locale = source.Split('@')[0].Split('.')[0]
-                let language = locale.Split('_')[0]
-                if language != "" && language != "C" && language != "POSIX" {
-                    keys.AddRange([]string{locale + modifier, locale, language + modifier, language})
-                }
-            }
-            return keys
         }
 
         private func unescape(value string) string {
@@ -180,10 +163,7 @@ class DesktopApp {
         if paths.Count > 0 && !multiple && !uses("fu") {
             throw InvalidOperationException(Name + " does not open files")
         }
-        let files = List[string]()
-        for path in paths {
-            files.Add(Path.GetFullPath(path))
-        }
+        let files = paths
         let groups = List[List[string]]()
         if multiple || files.Count == 0 {
             groups.Add(files)
