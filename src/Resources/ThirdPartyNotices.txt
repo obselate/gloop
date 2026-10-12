@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-Goo 0.7.29 and Goo.Svg 0.7.29 | MIT
+Goo 0.7.30 and Goo.Svg 0.7.30 | MIT
 ========================================================================
 
 MIT License
@@ -1121,11 +1121,11 @@ IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
 ========================================================================
-StbImageSharp 2.30.16 | public domain or MIT
-Source: https://github.com/StbSharp/StbImageSharp/blob/125af70cb557033f2c46aec8e82eaaf72ac49817/README.md
+stb_image 2.30 | MIT or Unlicense
+Source: https://github.com/nothings/stb/blob/013ac3beddff3dbffafd5177e7972067cd2b5083/stb_image.h
 ========================================================================
 
-The upstream source declares Public Domain or MIT. This build uses the public-domain alternative. It is a C# port of stb_image.h by Sean Barrett.
+The upstream source declares MIT or Unlicense. This build uses the Unlicense alternative. Goo builds it into its goo-harfbuzz-gpu native library.
 
 ========================================================================
 Tmds.DBus.Protocol 0.95.1 | MIT

@@ -387,7 +387,13 @@ func browserPreview(window Window, controller BrowserController, queue PreviewWo
                 let cancellation = CancellationTokenSource()
                 if queue.BeginImage(request.Generation, cancellation) {
                     try {
-                        source = ImageSource.LoadThumbnail(data.Path, request.Width, request.Height, cancellation.Token)
+                        source = ImageSource.LoadThumbnail(
+                            data.Path,
+                            request.Width,
+                            request.Height,
+                            ThumbnailService.ImageLimits,
+                            cancellation.Token
+                        )
                     } finally {
                         queue.FinishImage(cancellation)
                     }
@@ -396,8 +402,9 @@ func browserPreview(window Window, controller BrowserController, queue PreviewWo
                 }
             }
         } catch (failure Exception) {
-            let error = if data.Kind == "image" &&
-                (failure is InvalidDataException || failure is NotSupportedException) {
+            let error = if data.Kind == "image" && failure is ImageLimitException {
+                "This image is too large to preview."
+            } else if data.Kind == "image" && (failure is InvalidDataException || failure is NotSupportedException) {
                 "This image could not be read. It may be damaged or use an unsupported format."
             } else {
                 failure.Message
