@@ -238,7 +238,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 CreatePopup: (_, panel) -> {
                     panel.BackgroundColor = p.Overlay
                     panel.BackdropBlur = p.Blur
-                    panel.BorderColor = p.Border
+                    panel.BorderColor = p.Edge
                     return panel
                 },
                 CreateRow: (input, item, row) -> {
