@@ -174,7 +174,13 @@ class BrowserController {
     internal func Back() {
         let pane = ActivePane()
         if pane.CanBack() {
-            NavigateTo(pane.History[pane.HistoryIndex - 1], ActiveIndex, "history", pane.HistoryIndex - 1, pane.DirectoryPath)
+            NavigateTo(
+                pane.History[pane.HistoryIndex - 1],
+                ActiveIndex,
+                "history",
+                pane.HistoryIndex - 1,
+                pane.DirectoryPath
+            )
         }
     }
 
