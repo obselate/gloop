@@ -16,6 +16,7 @@ if [[ ! -f "$feed_dir/Gsharp.NET.Sdk.$gsharp_version.nupkg" ]]; then
     if [[ ! -d "$gsharp_dir/.git" ]]; then
         git clone --quiet https://github.com/DavidObando/gsharp.git "$gsharp_dir"
     fi
+    git -C "$gsharp_dir" fetch --quiet origin "$gsharp_commit"
     git -C "$gsharp_dir" checkout --quiet --detach "$gsharp_commit"
     [[ "$(git -C "$gsharp_dir" rev-parse HEAD)" == "$gsharp_commit" ]]
     dotnet restore "$gsharp_dir/GSharp.sln" --locked-mode --configfile "$gsharp_dir/nuget.config"
