@@ -67,6 +67,13 @@ class ThumbnailItem {
 }
 
 class ThumbnailService : IDisposable {
+    shared {
+        internal let ImageLimits ImageDecodeLimits = ImageDecodeLimits{
+            MaxEncodedBytes: 268435456,
+            MaxPixelsPerSide: 16384
+        }
+    }
+
     private let window Window
     private let gate object = Object()
     private let items Dictionary[string, ThumbnailItem] = Dictionary[string, ThumbnailItem](StringComparer.Ordinal)
@@ -330,7 +337,13 @@ class ThumbnailService : IDisposable {
         guard let cancellation = item.Cancellation else {
             return ThumbnailData{}
         }
-        let source = ImageSource.LoadThumbnail(item.Entry.FullPath, item.Edge, item.Edge, cancellation.Token)
+        let source = ImageSource.LoadThumbnail(
+            item.Entry.FullPath,
+            item.Edge,
+            item.Edge,
+            ImageLimits,
+            cancellation.Token
+        )
         return ThumbnailData{Kind: "image", Source: source}
     }
 
