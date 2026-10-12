@@ -31,8 +31,19 @@ data struct ViewRequest {
     internal var SelectedPath string
 }
 
+enum OperationKind {
+    CreateFolder;
+    Rename;
+    Copy;
+    Move;
+    Trash;
+    Restore;
+    Delete;
+    Empty;
+}
+
 data struct OperationRequest {
-    internal var Kind string
+    internal var Kind OperationKind
     internal var Sources List[string]
     internal var Destination string
     internal var Name string

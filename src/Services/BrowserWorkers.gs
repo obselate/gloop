@@ -335,22 +335,16 @@ func browserOperationWorker(window Window, controller BrowserController, queue O
         for source in request.Sources {
             var error string
             try {
-                if request.Kind == "mkdir" {
-                    error = operations.CreateFolder(source, request.Name)
-                } else if request.Kind == "rename" {
-                    error = operations.Rename(source, request.Name)
-                } else if request.Kind == "copy" {
-                    error = operations.Copy(source, request.Destination)
-                } else if request.Kind == "move" {
-                    error = operations.Move(source, request.Destination)
-                } else if request.Kind == "restore" {
-                    error = trash.Restore(source)
-                } else if request.Kind == "delete" {
-                    error = trash.Delete(source)
-                } else if request.Kind == "empty" {
-                    error = trash.Empty()
-                } else {
-                    error = operations.Trash(source)
+                error = switch request.Kind {
+                    case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
+                    case OperationKind.Rename: operations.Rename(source, request.Name)
+                    case OperationKind.Copy: operations.Copy(source, request.Destination)
+                    case OperationKind.Move: operations.Move(source, request.Destination)
+                    case OperationKind.Trash: operations.Trash(source)
+                    case OperationKind.Restore: trash.Restore(source)
+                    case OperationKind.Delete: trash.Delete(source)
+                    case OperationKind.Empty: trash.Empty()
+                    default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
                 }
             } catch (failure Exception) {
                 error = failure.Message

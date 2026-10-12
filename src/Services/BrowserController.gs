@@ -546,7 +546,7 @@ class BrowserController {
             return
         }
         StartOperation(
-            clipboardCut ? "move": "copy",
+            clipboardCut ? OperationKind.Move: OperationKind.Copy,
             List[string](clipboardPaths),
             destination,
             "",
@@ -601,13 +601,13 @@ class BrowserController {
         if !valid || sources.Count == 0 {
             return
         }
-        StartOperation(effect == DragEffect.Copy ? "copy": "move", sources, destination, "")
+        StartOperation(effect == DragEffect.Copy ? OperationKind.Copy: OperationKind.Move, sources, destination, "")
     }
 
     internal func CreateFolder(name string) {
         let directory = ActivePane().DirectoryPath
         if directory != "" {
-            StartOperation("mkdir", directory, "", name)
+            StartOperation(OperationKind.CreateFolder, directory, "", name)
         }
     }
 
@@ -615,7 +615,7 @@ class BrowserController {
         guard let entry = SingleSelectedEntry() else {
             return
         }
-        StartOperation("rename", entry.FullPath, "", name)
+        StartOperation(OperationKind.Rename, entry.FullPath, "", name)
     }
 
     internal func Trash() {
@@ -623,20 +623,20 @@ class BrowserController {
         if sources.Count == 0 {
             return
         }
-        StartOperation("trash", sources, "", "")
+        StartOperation(OperationKind.Trash, sources, "", "")
     }
 
     internal func Restore() {
-        TrashOperation("restore")
+        TrashOperation(OperationKind.Restore)
     }
 
     internal func DeletePermanently() {
-        TrashOperation("delete")
+        TrashOperation(OperationKind.Delete)
     }
 
     internal func EmptyTrash() {
         if AtTrashRoot {
-            StartOperation("empty", TrashDirectory, "", "")
+            StartOperation(OperationKind.Empty, TrashDirectory, "", "")
         }
     }
 
@@ -1004,7 +1004,7 @@ class BrowserController {
     }
 
     private func StartOperation(
-        kind string,
+        kind OperationKind,
         source string,
         destination string,
         name string,
@@ -1016,7 +1016,7 @@ class BrowserController {
     }
 
     private func StartOperation(
-        kind string,
+        kind OperationKind,
         sources List[string],
         destination string,
         name string,
@@ -1080,13 +1080,13 @@ class BrowserController {
         }
         operationCount--
         UpdateBusy()
-        if request.Kind == "move" && request.ClipboardVersion == clipboardGeneration {
+        if request.Kind == OperationKind.Move && request.ClipboardVersion == clipboardGeneration {
             for source in succeeded {
                 clipboardPaths.Remove(source)
             }
         }
         if succeeded.Count > 0 {
-            if request.Kind == "rename" {
+            if request.Kind == OperationKind.Rename {
                 let source = succeeded[0]
                 let destination = Path.Combine(Path.GetDirectoryName(source) ?? "", request.Name)
                 RetargetSelection(First, source, destination)
@@ -1131,7 +1131,7 @@ class BrowserController {
         CompleteOpen(error)
     }
 
-    private func TrashOperation(kind string) {
+    private func TrashOperation(kind OperationKind) {
         if !AtTrashRoot {
             return
         }
@@ -1141,11 +1141,11 @@ class BrowserController {
         }
     }
 
-    private func TracksSources(kind string) bool -> kind == "move" ||
-        kind == "trash" ||
-        kind == "rename" ||
-        kind == "restore" ||
-        kind == "delete"
+    private func TracksSources(kind OperationKind) bool -> kind == OperationKind.Move ||
+        kind == OperationKind.Trash ||
+        kind == OperationKind.Rename ||
+        kind == OperationKind.Restore ||
+        kind == OperationKind.Delete
 
     private func DropBlocked(destination string) bool -> Locations.IsRecent(destination) || InTrash(destination)
 
