@@ -3,7 +3,6 @@ package gloop
 import Goo
 import System
 import System.Collections.Generic
-import System.Diagnostics
 import System.IO
 
 class BrowserController {
@@ -23,21 +22,20 @@ class BrowserController {
     private let window Window
     private let settings AppSettings
     private let changed Action
+    private let resetTypeSelect Action
     private let loads[]DirectoryWorkQueue
     private let views[]ViewWorkQueue
     private let operations OperationWorkQueue
-    private let transfers FileTransferService
     private let previews PreviewWorkQueue
     private var previewGeneration int32
     private var previewWidth int32
     private var previewHeight int32
+    private var targetPreviewWidth int32
+    private var targetPreviewHeight int32
     private var loadedPreviewWidth int32
     private var loadedPreviewHeight int32
     private var previewAtOriginalSize bool
     private var previewResizeError string = ""
-    private var framebufferWidth int32
-    private var framebufferHeight int32
-    private var previewResizeTimer WindowTimer?
     private var operationCount int32
     private let clipboardPaths List[string]
     private var clipboardCut bool
@@ -45,15 +43,25 @@ class BrowserController {
     private let movingSources HashSet[string]
     private var closeRequested bool
     private var closeFailure string
-    private var typedPrefix string
-    private var typedAt int64
     private var terminalOpening bool
     private var disposed bool
 
-    internal init(window Window, settings AppSettings, changed Action) {
+    internal init(
+        window Window,
+        settings AppSettings,
+        changed Action,
+        resetTypeSelect Action,
+        previewWidth int32,
+        previewHeight int32
+    ) {
         this.window = window
         this.settings = settings
         this.changed = changed
+        this.resetTypeSelect = resetTypeSelect
+        this.previewWidth = previewWidth
+        this.previewHeight = previewHeight
+        targetPreviewWidth = previewWidth
+        targetPreviewHeight = previewHeight
         First = BrowserPane()
         Second = BrowserPane()
         ActiveIndex = 0
@@ -63,7 +71,6 @@ class BrowserController {
         Status = ""
         clipboardPaths = List[string]()
         closeFailure = ""
-        typedPrefix = ""
         movingSources = HashSet[string](StringComparer.Ordinal)
         loads = [2]DirectoryWorkQueue
         loads[0] = DirectoryWorkQueue()
@@ -72,16 +79,34 @@ class BrowserController {
         views[0] = ViewWorkQueue()
         views[1] = ViewWorkQueue()
         operations = OperationWorkQueue()
-        transfers = FileTransferService()
         previews = PreviewWorkQueue()
         Places = PlacesService(window, changed)
-        window.MetricsChanged += PreviewWindowMetrics
     }
 
     internal func ActivePane() BrowserPane -> Pane(ActiveIndex)
 
     internal prop IsOperating bool {
         get -> operationCount > 0
+    }
+
+    internal prop ReadyToClose bool {
+        get -> closeRequested && !IsOperating && closeFailure == ""
+    }
+
+    internal prop AcceptingOperations bool {
+        get -> !disposed && !closeRequested
+    }
+
+    internal prop IsDisposed bool {
+        get -> disposed
+    }
+
+    internal prop PreviewVersion int32 {
+        get -> previewGeneration
+    }
+
+    internal prop PreviewResizeFailed bool {
+        get -> previewResizeError != ""
     }
 
     internal prop InRecent bool {
@@ -236,61 +261,8 @@ class BrowserController {
         SelectIndex(index, ctrl, shift, false)
     }
 
-    internal func TypeSelect(text string) bool {
-        if disposed || text == "" || text.Length > 256 {
-            return false
-        }
-        for letter in text {
-            if Char.IsControl(letter) {
-                return false
-            }
-        }
-        let pane = ActivePane()
-        if pane.Loading || pane.VisibleEntries.Count == 0 {
-            ResetTypeSelect()
-            return false
-        }
-        let now = Stopwatch.GetTimestamp()
-        let fresh = typedPrefix == "" || Stopwatch.GetElapsedTime(typedAt, now).TotalMilliseconds > 1000
-        var repeated = !fresh && text.Length == 1
-        if repeated {
-            for letter in typedPrefix {
-                if Char.ToUpperInvariant(letter) != Char.ToUpperInvariant(text[0]) {
-                    repeated = false
-                    break
-                }
-            }
-        }
-        var prefix = if fresh || repeated {
-            text
-        } else {
-            typedPrefix + text
-        }
-        var start = if fresh || repeated {
-            pane.Selected + 1
-        } else {
-            pane.Selected
-        }
-        if prefix.Length > 256 {
-            prefix = text
-            start = pane.Selected + 1
-        }
-        var index = FindPrefix(pane, prefix, start)
-        if index < 0 && !fresh && !repeated {
-            prefix = text
-            index = FindPrefix(pane, prefix, pane.Selected + 1)
-        }
-        typedAt = now
-        typedPrefix = if index >= 0 {
-            prefix
-        } else {
-            ""
-        }
-        if index < 0 {
-            return false
-        }
+    internal func SelectPrefix(index int32) {
         SelectIndex(index, false, false, false)
-        return true
     }
 
     private func SelectIndex(index int32, ctrl bool, shift bool, focusOnly bool) {
@@ -552,54 +524,23 @@ class BrowserController {
         )
     }
 
-    internal func CreateFileDrag(paneIndex int32, sourcePath string) DragData? {
-        if disposed ||
-            closeRequested ||
-            paneIndex < 0 ||
-            paneIndex > 1 ||
-            (paneIndex == 1 && !Split) ||
-            InTrash(Pane(paneIndex).DirectoryPath) {
-            return nil
+    internal func CanDrag(paneIndex int32) bool -> AcceptingOperations &&
+        paneIndex >= 0 &&
+        paneIndex <= 1 &&
+        (paneIndex == 0 || Split) &&
+        !InTrash(Pane(paneIndex).DirectoryPath)
+
+    internal func CanDrop(destination string) bool -> AcceptingOperations && !DropBlocked(destination)
+
+    internal func QueueFileDrop(sources List[string], destination string, copy bool) {
+        if CanDrop(destination) && sources.Count > 0 {
+            StartOperation(copy ? OperationKind.Copy: OperationKind.Move, sources, destination, "")
         }
-        transfers.Clear()
-        guard let payload = transfers.Snapshot(Pane(paneIndex), sourcePath) else {
-            return nil
-        }
-        if NativeFileDrag.TryCreate(payload.Paths, out var native) {
-            return DragData(payload, DragEffect.Copy | DragEffect.Move, native)
-        }
+    }
+
+    internal func DragTooLarge() {
         Status = "Selection is too large to drag into another app"
         Notify()
-        return DragData(payload, DragEffect.Copy | DragEffect.Move)
-    }
-
-    internal func ClearFileDropCache() {
-        transfers.Clear()
-    }
-
-    internal func FileDropEffect(data DragData, destination string, ctrl bool) DragEffect {
-        if disposed || closeRequested || DropBlocked(destination) {
-            return DragEffect.None
-        }
-        return transfers.Effect(data, destination, ctrl)
-    }
-
-    internal func QueueFileDrop(data DragData, destination string, effect DragEffect) {
-        let valid = effect != DragEffect.None && !DropBlocked(destination) && transfers.Effect(
-            data,
-            destination,
-            effect == DragEffect.Copy
-        ) == effect
-        let sources = if valid {
-            transfers.Sources(data)
-        } else {
-            List[string]()
-        }
-        transfers.Clear()
-        if !valid || sources.Count == 0 {
-            return
-        }
-        StartOperation(effect == DragEffect.Copy ? OperationKind.Copy: OperationKind.Move, sources, destination, "")
     }
 
     internal func CreateFolder(name string) {
@@ -644,11 +585,7 @@ class BrowserController {
         }
         disposed = true
         Places.Dispose()
-        window.MetricsChanged -= PreviewWindowMetrics
-        previewResizeTimer?.Dispose()
-        previewResizeTimer = nil
         closeRequested = false
-        transfers.Clear()
         for queue in loads {
             queue.Close()
         }
@@ -872,15 +809,13 @@ class BrowserController {
     }
 
     private func QueuePreview() {
-        previewResizeTimer?.Dispose()
-        previewResizeTimer = nil
         if Status == previewResizeError && previewResizeError != "" {
             Status = ""
         }
         previewResizeError = ""
         previewGeneration++
-        previewWidth = 0
-        previewHeight = 0
+        previewWidth = targetPreviewWidth
+        previewHeight = targetPreviewHeight
         loadedPreviewWidth = 0
         loadedPreviewHeight = 0
         previewAtOriginalSize = false
@@ -898,8 +833,6 @@ class BrowserController {
             return
         }
         Preview = PreviewData{Kind: "loading", Path: entry.FullPath}
-        previewWidth = framebufferWidth > 0 ? framebufferWidth: Math.Max(1, window.Width)
-        previewHeight = framebufferHeight > 0 ? framebufferHeight: Math.Max(1, window.Height)
         if previews.Submit(entry.FullPath, previewGeneration, previewWidth, previewHeight) {
             let owner = window
             let controller = this
@@ -908,29 +841,20 @@ class BrowserController {
         }
     }
 
-    private func PreviewWindowMetrics(metrics WindowMetrics) {
-        if metrics.FramebufferWidth <= 0 || metrics.FramebufferHeight <= 0 {
-            return
-        }
-        framebufferWidth = metrics.FramebufferWidth
-        framebufferHeight = metrics.FramebufferHeight
-        if PreviewImage != nil &&
-            !previewAtOriginalSize &&
-            Preview.Kind == "image" &&
-            (framebufferWidth > previewWidth || framebufferHeight > previewHeight) {
-            previewResizeTimer?.Dispose()
-            previewResizeTimer = window.SetTimeout(() -> RefreshPreviewBounds(), 180)
-        }
+    internal func NeedsPreviewResize(width int32, height int32) bool -> !disposed &&
+        PreviewVisible &&
+        PreviewImage != nil &&
+        !previewAtOriginalSize &&
+        Preview.Kind == "image" &&
+        (width > previewWidth || height > previewHeight)
+
+    internal func SetPreviewSize(width int32, height int32) {
+        targetPreviewWidth = width
+        targetPreviewHeight = height
     }
 
-    private func RefreshPreviewBounds() {
-        previewResizeTimer = nil
-        if disposed ||
-            !PreviewVisible ||
-            PreviewImage == nil ||
-            previewAtOriginalSize ||
-            Preview.Kind != "image" ||
-            (framebufferWidth <= previewWidth && framebufferHeight <= previewHeight) {
+    internal func RefreshPreviewBounds(width int32, height int32) {
+        if !NeedsPreviewResize(width, height) {
             return
         }
         guard let entry = SelectedEntry() else {
@@ -940,8 +864,8 @@ class BrowserController {
             return
         }
         previewGeneration++
-        previewWidth = Math.Max(previewWidth, framebufferWidth)
-        previewHeight = Math.Max(previewHeight, framebufferHeight)
+        previewWidth = Math.Max(previewWidth, width)
+        previewHeight = Math.Max(previewHeight, height)
         if previews.Submit(entry.FullPath, previewGeneration, previewWidth, previewHeight) {
             let owner = window
             let controller = this
@@ -958,8 +882,6 @@ class BrowserController {
             return
         }
         if data.Kind == "error" && PreviewImage != nil && Preview.Path == request.Path {
-            previewResizeTimer?.Dispose()
-            previewResizeTimer = nil
             previewWidth = loadedPreviewWidth
             previewHeight = loadedPreviewHeight
             previewResizeError = "Preview resize failed: " + data.Error
@@ -986,14 +908,6 @@ class BrowserController {
         Preview = data
         PreviewImage = source
         Notify()
-        if source != nil &&
-            !previewAtOriginalSize &&
-            (framebufferWidth > previewWidth || framebufferHeight > previewHeight) &&
-            framebufferWidth > 0 &&
-            framebufferHeight > 0 {
-            previewResizeTimer?.Dispose()
-            previewResizeTimer = window.SetTimeout(() -> RefreshPreviewBounds(), 180)
-        }
     }
 
     private func StartOperation(
@@ -1098,9 +1012,7 @@ class BrowserController {
         }
         Places.Refresh()
         if closeRequested && operationCount == 0 {
-            if closeFailure == "" {
-                window.RequestClose()
-            } else {
+            if closeFailure != "" {
                 closeRequested = false
                 Status = closeFailure
                 closeFailure = ""
@@ -1195,7 +1107,7 @@ class BrowserController {
         return sources
     }
 
-    private func FindPrefix(pane BrowserPane, prefix string, start int32) int32 {
+    internal func FindPrefix(pane BrowserPane, prefix string, start int32) int32 {
         let count = pane.VisibleEntries.Count
         if count == 0 {
             return -1
@@ -1211,8 +1123,7 @@ class BrowserController {
     }
 
     private func ResetTypeSelect() {
-        typedPrefix = ""
-        typedAt = 0
+        resetTypeSelect()
     }
 
     private func Notify() {

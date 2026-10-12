@@ -1,44 +1,26 @@
 package gloop
 
-import Goo
 import System
 import System.Collections.Generic
 import System.IO
 
 internal class BookmarkDropService {
-    private var lastValue object?
+    private var lastPaths IReadOnlyList[string]?
     private var lastValid bool
 
-    internal func Effect(data DragData) DragEffect {
-        if (int32(data.AllowedEffects) & int32(DragEffect.Copy)) == 0 {
-            return DragEffect.None
+    internal func Valid(paths IReadOnlyList[string], preview bool) bool {
+        if preview {
+            return true
         }
-        if let incoming = data.Value as NativeFileDrop? {
-            if incoming.IsPreview {
-                return DragEffect.Copy
-            }
+        if !Object.ReferenceEquals(lastPaths, paths) {
+            lastPaths = paths
+            lastValid = NormalizePaths(paths) != nil
         }
-        if !Object.ReferenceEquals(lastValue, data.Value) {
-            lastValue = data.Value
-            lastValid = Paths(data).Count > 0
-        }
-        return lastValid ? DragEffect.Copy: DragEffect.None
-    }
-
-    internal func Paths(data DragData) List[string] {
-        if let payload = data.Value as FileDragPayload? {
-            return NormalizePaths(payload.Paths) ?? List[string]()
-        }
-        if let incoming = data.Value as NativeFileDrop? {
-            if !incoming.IsPreview {
-                return NormalizePaths(incoming.Paths) ?? List[string]()
-            }
-        }
-        return List[string]()
+        return lastValid
     }
 
     internal func Clear() {
-        lastValue = nil
+        lastPaths = nil
         lastValid = false
     }
 

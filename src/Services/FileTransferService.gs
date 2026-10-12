@@ -1,17 +1,16 @@
 package gloop
 
-import Goo
 import System
 import System.Collections.Generic
 import System.IO
 
 class FileTransferService {
-    private var lastValue object?
+    private var lastPaths IReadOnlyList[string]?
     private var lastDestination string
     private var lastValid bool
 
     internal func Clear() {
-        lastValue = nil
+        lastPaths = nil
         lastDestination = ""
         lastValid = false
     }
@@ -40,48 +39,13 @@ class FileTransferService {
         return FileDragPayload(paths)
     }
 
-    internal func Effect(data DragData, destination string, copy bool) DragEffect {
-        if let payload = data.Value as FileDragPayload? {
-            if !ValidTarget(data.Value, payload.Paths, destination, false) {
-                return DragEffect.None
-            }
-            let effect = copy ? DragEffect.Copy: DragEffect.Move
-            return (int32(data.AllowedEffects) & int32(effect)) != 0 ? effect: DragEffect.None
-        }
-        if let incoming = data.Value as NativeFileDrop? {
-            if (int32(data.AllowedEffects) & int32(DragEffect.Copy)) == 0 {
-                return DragEffect.None
-            }
-            if !ValidTarget(data.Value, incoming.Paths, destination, incoming.IsPreview) {
-                return DragEffect.None
-            }
-            return DragEffect.Copy
-        }
-        return DragEffect.None
-    }
-
-    internal func Sources(data DragData) List[string] {
-        if let payload = data.Value as FileDragPayload? {
-            return List[string](payload.Paths)
-        }
-        let paths = List[string]()
-        if let incoming = data.Value as NativeFileDrop? {
-            if !incoming.IsPreview {
-                for path in incoming.Paths {
-                    paths.Add(path)
-                }
-            }
-        }
-        return paths
-    }
-
-    private func ValidTarget(value object, paths IReadOnlyList[string], destination string, preview bool) bool {
-        if Object.ReferenceEquals(lastValue, value) && lastDestination == destination {
+    internal func ValidTarget(paths IReadOnlyList[string], destination string, preview bool) bool {
+        if Object.ReferenceEquals(lastPaths, paths) && lastDestination == destination {
             return lastValid
         }
         let valid = Path.IsPathFullyQualified(destination) && Directory.Exists(destination)
         && (preview || (paths.Count > 0 && ValidPaths(paths, destination)))
-        lastValue = value
+        lastPaths = paths
         lastDestination = destination
         lastValid = valid
         return valid
