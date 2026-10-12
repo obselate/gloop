@@ -62,7 +62,6 @@
     <GooMaterialIcon Include="image" />
     <GooMaterialIcon Include="info" />
     <GooMaterialIcon Include="link" />
-    <GooMaterialIcon Include="menu" />
     <GooMaterialIcon Include="movie" />
     <GooMaterialIcon Include="music_note" />
     <GooMaterialIcon Include="open_in_new" />

@@ -123,9 +123,8 @@ class PlacesSidebar {
                         navigate,
                         window,
                         p,
-                        PortalPlacement.Right,
-                        drop,
-                        dropPath,
+                        drop: drop,
+                        dropPath: dropPath,
                         contextMenu: openMenu,
                         contextMenuKey: openMenuKey
                     )
@@ -218,7 +217,6 @@ class PlacesSidebar {
             placement PortalPlacement = PortalPlacement.Right,
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
-            icon string = "bookmark",
             contextMenu Action[Point]? = nil,
             contextMenuKey Action[KeyEvent, Point]? = nil
         ) Blob -> Container{
@@ -231,7 +229,18 @@ class PlacesSidebar {
                     Placement: placement,
                     BubbleStyle: Ui.BubbleStyle(p),
                     Content: Text{Content: path, Color: p.Text, FontSize: 11, MaxWidth: 320, TextWrap: TextWrap.Wrap,},
-                    Target: Place(icon, label, path, current, navigate, p, drop, dropPath, contextMenu, contextMenuKey),
+                    Target: Place(
+                        "bookmark",
+                        label,
+                        path,
+                        current,
+                        navigate,
+                        p,
+                        drop,
+                        dropPath,
+                        contextMenu,
+                        contextMenuKey
+                    ),
                 }
             ),
         }

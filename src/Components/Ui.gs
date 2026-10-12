@@ -144,18 +144,11 @@ class Ui {
             BoxShadow: BoxShadow{OffsetY: 4, Blur: 12, Color: Color.Black.WithAlpha(.5)},
         }
 
-        internal func Label(
-            value string,
-            color Color,
-            size float64 = 13,
-            weight float64 = 400,
-            align TextAlign = TextAlign.Start
-        ) Text -> Text{
+        internal func Label(value string, color Color, size float64 = 13, weight float64 = 400) Text -> Text{
             Content: value,
             Color: color,
             FontSize: size,
             FontWeight: weight,
-            TextAlign: align,
             TextWrap: TextWrap.NoWrap,
             TextTrimming: TextTrimming.Ellipsis,
             MinWidth: 0,
