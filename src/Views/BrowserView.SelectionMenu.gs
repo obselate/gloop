@@ -69,7 +69,7 @@ partial class BrowserView {
         if chooser != nil || Model.InTrashView {
             return
         }
-        guard let entry = Model.SingleSelectedEntry() else {
+        guard let entry = Model.ActivePane().SingleSelectedEntry() else {
             return
         }
         Selection.LoadApplications(
@@ -86,7 +86,7 @@ partial class BrowserView {
     }
 
     private func LaunchApplication(id string) {
-        let paths = Model.SelectedPaths()
+        let paths = Model.ActivePane().SelectionPaths()
         if paths.Count == 0 {
             return
         }
@@ -103,7 +103,7 @@ partial class BrowserView {
     }
 
     private func CopyPaths() {
-        let paths = Model.SelectedPaths()
+        let paths = Model.ActivePane().SelectionPaths()
         if paths.Count == 0 && !Model.InRecent && Model.ActivePane().DirectoryPath != "" {
             paths.Add(Model.ActivePane().DirectoryPath)
         }

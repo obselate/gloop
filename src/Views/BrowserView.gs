@@ -242,7 +242,7 @@ partial class BrowserView : Cell {
         selectionInfo?.Dispose()
     }
 
-    internal func CloseSafely() bool -> !setupBusy && Model.CloseSafely()
+    internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
 
     private prop firstFocus ElementHandle {
         get -> if settings.ViewMode == "tiles" {
@@ -315,7 +315,7 @@ partial class BrowserView : Cell {
     private func Changed() {
         if window != nil {
             PreviewChanged()
-            if Model.ReadyToClose {
+            if Model.Operations.ReadyToClose {
                 Host.RequestClose()
             }
             Host.Title = ChooserTitle()
@@ -941,7 +941,7 @@ partial class BrowserView : Cell {
         let p = palette
         let pane = Model.ActivePane()
         let total = pane.VisibleEntries.Count
-        let selected = Model.SelectedCount()
+        let selected = Model.ActivePane().SelectedPaths.Count
         let info = if notice != "" {
             notice
         } else if Model.Status != "" {
@@ -949,7 +949,7 @@ partial class BrowserView : Cell {
         } else if pane.Loading && total == 0 {
             "Reading folder…"
         } else if selected > 0 {
-            let size = Model.SelectedSize()
+            let size = Model.ActivePane().SelectedSize()
             selected.ToString() + " of " + total.ToString() +
                 " selected" +
                 (

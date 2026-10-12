@@ -178,7 +178,7 @@ partial class BrowserView {
                 OpenDialog("New folder", "")
             }
             case "Rename" {
-                if let entry = Model.SingleSelectedEntry() {
+                if let entry = Model.ActivePane().SingleSelectedEntry() {
                     OpenDialog("Rename", entry.Name)
                 }
             }
@@ -192,16 +192,16 @@ partial class BrowserView {
                 Model.Paste()
             }
             case "Trash" {
-                if Model.SelectedCount() > 0 {
-                    OpenDialog("Move to Trash", Model.SelectionSummary())
+                if Model.ActivePane().SelectedPaths.Count > 0 {
+                    OpenDialog("Move to Trash", Model.ActivePane().SelectionSummary())
                 }
             }
             case "Restore" {
                 Model.Restore()
             }
             case "DeletePermanently" {
-                if Model.AtTrashRoot && Model.SelectedCount() > 0 {
-                    OpenDialog("Delete permanently", Model.SelectionSummary())
+                if Model.AtTrashRoot && Model.ActivePane().SelectedPaths.Count > 0 {
+                    OpenDialog("Delete permanently", Model.ActivePane().SelectionSummary())
                 }
             }
             case "EmptyTrash" {

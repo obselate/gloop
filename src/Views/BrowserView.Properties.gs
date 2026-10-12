@@ -13,7 +13,7 @@ partial class BrowserView {
     private var propertiesStage int32
 
     private func OpenProperties() {
-        let paths = Model.SelectedPaths()
+        let paths = Model.ActivePane().SelectionPaths()
         if paths.Count == 0 {
             let folder = Model.ActivePane().DirectoryPath
             if folder == "" || Model.InRecent {

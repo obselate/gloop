@@ -31,6 +31,13 @@ data struct ViewRequest {
     internal var SelectedPath string
 }
 
+enum OperationAdmission {
+    Closed;
+    Full;
+    Queued;
+    StartWorker
+}
+
 enum OperationKind {
     CreateFolder;
     Rename;

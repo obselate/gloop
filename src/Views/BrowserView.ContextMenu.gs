@@ -96,7 +96,7 @@ partial class BrowserView {
     private func OpenKeyboardContextMenu() {
         let index = Model.ActiveIndex
         let pane = Model.ActivePane()
-        if let entry = Model.SingleSelectedEntry() {
+        if let entry = Model.ActivePane().SingleSelectedEntry() {
             Model.MoveTo(pane.VisibleEntries.IndexOf(entry), true)
         }
         let viewport = index == 0 ? firstList: secondList
@@ -134,7 +134,7 @@ partial class BrowserView {
 
     private func ContextMenu() Blob {
         let items = List[MenuItem]()
-        let count = Model.SelectedCount()
+        let count = Model.ActivePane().SelectedPaths.Count
         if contextMenuColumns {
             items.Add(
                 FileContextMenu.Item(
