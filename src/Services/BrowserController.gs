@@ -124,6 +124,48 @@ class BrowserController {
     internal func InTrash(path string) bool -> TrashDirectory != "" &&
         (path == TrashDirectory || path.StartsWith(TrashDirectory + "/", StringComparison.Ordinal))
 
+    internal func CanRun(action string, menu bool = false) bool {
+        if InTrashView {
+            if action == "NewFolder" || action == "Rename" || action == "Copy"
+            || action == "Cut" || action == "Paste" || action == "Trash" {
+                return false
+            }
+            if menu {
+                if action == "Open" {
+                    return SingleSelectedEntry()?.IsDirectory ?? false
+                }
+                if action == "Restore" || action == "DeletePermanently" {
+                    return AtTrashRoot
+                }
+                if action == "EmptyTrash" {
+                    return AtTrashRoot && Places.TrashCount > 0
+                }
+            }
+            return true
+        }
+        if InRecent &&
+            (
+            action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
+            || (action == "OpenTerminal" && !(SingleSelectedEntry()?.IsDirectory ?? false))
+        ) {
+            return false
+        }
+        if !menu {
+            return true
+        }
+        let empty = SelectedCount() == 0
+        if InRecent {
+            return !empty || (action != "CopyPath" && action != "Properties")
+        }
+        if ActivePane().DirectoryPath == "" || ActivePane().Error != "" {
+            return action != "OpenTerminal" &&
+                (
+                !empty || (action != "NewFolder" && action != "Paste" && action != "CopyPath" && action != "Properties")
+            )
+        }
+        return true
+    }
+
     internal func CloseSafely() bool {
         if !IsOperating {
             return true

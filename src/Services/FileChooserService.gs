@@ -51,6 +51,11 @@ class FileChooserService {
         InitialName = name
     }
 
+    internal func Allows(action string) bool -> action != "Cut" && action != "Copy"
+    && action != "Paste" && action != "Trash" && action != "Rename" && action != "ToggleSplit"
+    && action != "NextPane" && action != "OpenTerminal" && action != "ToggleBookmark" && action != "OpenSettings"
+    && action != "Restore" && action != "DeletePermanently" && action != "EmptyTrash"
+
     internal func CreateEntryFilter(filter PortalFilter?) Func[FileEntry, bool] {
         let directoriesOnly = (Request.Method == "OpenFile" && Request.Directory) || SavingMany
         let patterns = List[ChooserPattern]()

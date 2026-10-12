@@ -206,11 +206,6 @@ partial class BrowserView {
         Host.RequestClose()
     }
 
-    private func ChooserActionAllowed(action string) bool -> action != "Cut" && action != "Copy"
-    && action != "Paste" && action != "Trash" && action != "Rename" && action != "ToggleSplit"
-    && action != "NextPane" && action != "OpenTerminal" && action != "ToggleBookmark" && action != "OpenSettings"
-    && action != "Restore" && action != "DeletePermanently" && action != "EmptyTrash"
-
     private func ChooserAllowsMultiple() bool -> chooser == nil ||
         (chooser?.Request.Method == "OpenFile" && (chooser?.Request.Multiple ?? false))
 

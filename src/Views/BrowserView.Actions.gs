@@ -75,7 +75,7 @@ partial class BrowserView {
     }
 
     private func Invoke(action string) {
-        if (chooser != nil && !ChooserActionAllowed(action)) || ActionBlocked(action) {
+        if !(chooser?.Allows(action) ?? true) || !Model.CanRun(action) {
             return
         }
         notice = ""
@@ -243,22 +243,6 @@ partial class BrowserView {
             }
         }
         Rebuild()
-    }
-
-    private func ActionBlocked(action string) bool {
-        if Model.InTrashView {
-            return action == "NewFolder" ||
-                action == "Rename" ||
-                action == "Copy" ||
-                action == "Cut" ||
-                action == "Paste" ||
-                action == "Trash"
-        }
-        return Model.InRecent &&
-            (
-            action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
-            || (action == "OpenTerminal" && !(Model.SingleSelectedEntry()?.IsDirectory ?? false))
-        )
     }
 
     private func IsMovement(action string) bool -> action == "MoveUp" || action == "MoveDown"
