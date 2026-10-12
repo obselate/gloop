@@ -139,7 +139,7 @@ open class FileTable : Cell[FileTableInput] {
                 },
                 CreateResizeHandle: (_, _, handle) -> {
                     handle.Hover = Style{BorderColor: p.Accent}
-                    handle.Focus = Style{BorderColor: p.Accent}
+                    handle.Focus = p.FocusBorder()
                     return handle
                 },
                 CreateRoot: (_, root) -> {
@@ -201,7 +201,7 @@ open class FileTable : Cell[FileTableInput] {
                 CreateRow: (_, row, root) -> {
                     let selectedRow = pane.SelectedPaths.Contains(row.Id ?? "")
                     let focused = pane.Selected >= 0 && pane.VisibleEntries[pane.Selected].FullPath == row.Id
-                    root.OutlineWidth = if focused && value.Active {
+                    root.OutlineWidth = if focused && value.Active && p.Keyboard {
                         1
                     } else {
                         0

@@ -11,6 +11,7 @@ internal data struct ThemeColorEditorInput {
     var WheelSize float64
     var Gap float64
     var FocusColor Color
+    var ShowFocus bool
     var Change Action[int32]
 }
 
@@ -27,7 +28,7 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
             WheelSize: value.WheelSize,
             Gap: value.Gap,
             AccessibilityName: value.Role,
-            ShowFocusHighlight: true,
+            ShowFocusHighlight: value.ShowFocus,
             FocusOutlineColor: value.FocusColor,
             OnValueChanged: value.Change,
             CreateRoot: (input, wheel, slider) -> Container{
@@ -47,6 +48,7 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
             wheelSize float64,
             gap float64,
             focusColor Color,
+            showFocus bool,
             change Action[int32]
         ) Blob ->
         Cell.Mount[ThemeColorEditorInput, ThemeColorEditor](
@@ -57,6 +59,7 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
                 WheelSize: wheelSize,
                 Gap: gap,
                 FocusColor: focusColor,
+                ShowFocus: showFocus,
                 Change: change,
             }
         )

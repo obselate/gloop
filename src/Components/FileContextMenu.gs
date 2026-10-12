@@ -53,12 +53,7 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                     row.BorderRadius = 3
                     row.BackgroundColor = Color.Transparent
                     row.Hover = Style{BackgroundColor: item.Disabled ? Color.Transparent: p.Selection}
-                    row.Focus = Style{
-                        BackgroundColor: p.Selection,
-                        OutlineWidth: 1,
-                        OutlineColor: p.Accent,
-                        OutlineOffset: -1,
-                    }
+                    row.Focus = Style{BackgroundColor: p.Selection, BasedOn: p.Ring(-1)}
                     return row
                 },
                 CreateSeparator: (_, _) -> Container{

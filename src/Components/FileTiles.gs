@@ -138,7 +138,7 @@ open class FileTiles : Cell[FileTableInput] {
             } else {
                 Color.Transparent
             },
-            OutlineWidth: if focused || item.DropActive {
+            OutlineWidth: if focused && p.Keyboard || item.DropActive {
                 1
             } else {
                 0

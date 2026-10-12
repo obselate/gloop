@@ -232,7 +232,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     row.BackgroundColor = p.Surface
                     row.BorderColor = p.Border
                     row.BorderRadius = 4
-                    row.Focus = Style{BorderColor: p.Accent}
+                    row.Focus = p.FocusBorder()
                     return row
                 },
                 CreatePopup: (_, panel) -> {

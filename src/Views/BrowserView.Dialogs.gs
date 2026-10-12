@@ -236,7 +236,7 @@ partial class BrowserView {
                             ThumbBorderColor: p.Surface,
                             TrackThickness: 4,
                             ThumbSize: 14,
-                            ShowFocusHighlight: true,
+                            ShowFocusHighlight: p.Keyboard,
                             FocusOutlineColor: p.Accent,
                         }
                     ),
@@ -249,6 +249,7 @@ partial class BrowserView {
                     "Custom",
                     values.CustomTheme,
                     values.ThemeName == "Custom",
+                    p.Keyboard,
                     () -> {
                         values.ThemeName = "Custom"
                         values.Theme.ApplyFrom(values.CustomTheme)
@@ -264,6 +265,7 @@ partial class BrowserView {
                         name,
                         ThemePresets.Create(name),
                         name == values.ThemeName,
+                        p.Keyboard,
                         () -> {
                             values.ThemeName = presetName
                             values.Theme = ThemePresets.Create(presetName)
@@ -337,6 +339,7 @@ partial class BrowserView {
                                             12
                                         },
                                         p.Accent,
+                                        p.Keyboard,
                                         value -> {
                                             let color = "#" + ColorMath.Hex(value)
                                             values.CustomTheme.SetColor(selectedRole, color)

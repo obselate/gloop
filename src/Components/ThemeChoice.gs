@@ -8,6 +8,7 @@ internal data struct ThemeChoiceInput {
     var Name string
     var Theme ThemePalette
     var Selected bool
+    var Keyboard bool
     var Choose Action
 }
 
@@ -18,18 +19,20 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
         value.Name,
         value.Theme,
         value.Selected,
+        value.Keyboard,
         value.Choose
     )
 
     shared {
-        internal func Build(name string, theme ThemePalette, selected bool, choose Action) Blob -> Cell.Mount[
-            ThemeChoiceInput,
-            ThemeChoice
-        ](nil, ThemeChoiceInput{Name: name, Theme: theme, Selected: selected, Choose: choose,})
+        internal func Build(name string, theme ThemePalette, selected bool, keyboard bool, choose Action) Blob -> Cell
+            .Mount[ThemeChoiceInput, ThemeChoice](
+            nil,
+            ThemeChoiceInput{Name: name, Theme: theme, Selected: selected, Keyboard: keyboard, Choose: choose,}
+        )
     }
 
-    private func Choice(name string, theme ThemePalette, selected bool, choose Action) Blob {
-        let p = Palette(theme)
+    private func Choice(name string, theme ThemePalette, selected bool, keyboard bool, choose Action) Blob {
+        let p = Palette(theme, keyboard)
         let button = Button{
             Handle: handle,
             Height: 44,
@@ -48,7 +51,7 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
             },
             BackgroundColor: p.Background,
             Hover: Style{BorderColor: p.Accent},
-            Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent},
+            Focus: p.Ring(),
             Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: name, Selected: selected},
             OnClick: choose,
             OnFocus: (_) -> handle.ScrollIntoView(),

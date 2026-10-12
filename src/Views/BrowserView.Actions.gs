@@ -512,7 +512,7 @@ partial class BrowserView {
     }
 
     private func ApplyPreferences() {
-        palette = Palette(settings.Theme)
+        palette = Palette(settings.Theme, keyboardFocus)
         ApplyBackdrop()
         Host.WheelScrollScale = float32(settings.ScrollSpeed)
         Host.SmoothScrolling = settings.SmoothScrolling

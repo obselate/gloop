@@ -12,6 +12,7 @@ partial class BrowserView : Cell {
     private let settingsService SettingsService
     private let launch LaunchOptions
     private var palette Palette
+    private var keyboardFocus bool
     private var window Window?
     private var browser BrowserController?
     private var thumbnails ThumbnailService?
@@ -129,6 +130,7 @@ partial class BrowserView : Cell {
         value.FocusChanged += DismissContextMenuOnBlur
         value.MetricsChanged += WindowResized
         value.StateChanged += WindowStateChanged
+        value.KeyPressed += KeyPressed
         ApplyBackdrop()
         value.WheelScrollScale = float32(settings.ScrollSpeed)
         value.SmoothScrolling = settings.SmoothScrolling
@@ -185,6 +187,22 @@ partial class BrowserView : Cell {
         }: WaylandBackdropOptions{}
     }
 
+    private func KeyPressed(key Key, modifiers KeyModifiers) {
+        let modifier = key is Key.ShiftLeft or Key.ShiftRight or Key.ControlLeft or Key.ControlRight or Key.AltLeft
+        or Key.AltRight or Key.SuperLeft or Key.SuperRight
+        if !modifier && !modifiers.Ctrl && !modifiers.Alt && !modifiers.Super {
+            SetKeyboardFocus(true)
+        }
+    }
+
+    private func SetKeyboardFocus(value bool) {
+        if keyboardFocus != value {
+            keyboardFocus = value
+            palette = Palette(settings.Theme, value)
+            Rebuild()
+        }
+    }
+
     private func WindowResized(metrics WindowMetrics) {
         UpdateBackdropRegion()
     }
@@ -199,6 +217,7 @@ partial class BrowserView : Cell {
             attached.FocusChanged -= DismissContextMenuOnBlur
             attached.MetricsChanged -= WindowResized
             attached.StateChanged -= WindowStateChanged
+            attached.KeyPressed -= KeyPressed
             attached.FocusChanged -= RefreshPlacesOnFocus
         }
         if let done = setupCompletion {
@@ -501,6 +520,7 @@ partial class BrowserView : Cell {
             FontFamily: "sans-serif, Noto Sans CJK",
             FontSize: 13,
             OnKeyDown: HandleKey,
+            OnPointerDown: (_) -> SetKeyboardFocus(false),
             KeyBindings: WidgetKeyBindings.Editing(window?.PlatformInput),
             Children: children.ToArray(),
         }
@@ -1026,7 +1046,7 @@ partial class BrowserView : Cell {
                 }
                 divider.BorderColor = palette.Border
                 divider.Hover = Style{BorderColor: palette.Accent}
-                divider.Focus = Style{BorderColor: palette.Accent}
+                divider.Focus = palette.FocusBorder()
                 if enabled {
                     divider.Children.Add(
                         Container{

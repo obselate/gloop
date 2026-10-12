@@ -35,7 +35,7 @@ open class ThemeColorRole : Cell[ThemeColorRoleInput] {
             },
             BackgroundColor: p.Background,
             Hover: Style{BorderColor: p.Accent},
-            Focus: Style{OutlineWidth: 1, OutlineColor: p.Accent},
+            Focus: p.Ring(),
             Accessibility: Accessibility{
                 Role: AccessibilityRole.Button,
                 Name: value.Role + " color " + value.Value,
