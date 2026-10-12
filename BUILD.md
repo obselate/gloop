@@ -21,10 +21,10 @@ bash scripts/verify.sh
 dotnet run
 ```
 
-The verification script fetches and builds the pinned public G# compiler,
-restores locked packages, runs strict lint and builds Release with warnings
-as errors. No sibling repositories are needed. The first build needs internet
-access to GitHub and NuGet.
+The verification script restores locked packages, including the pinned G# SDK
+from NuGet, runs strict lint and builds Release with warnings as errors. No
+sibling repositories are needed. The first build needs internet access to
+NuGet.
 
 ## Publish one executable
 
