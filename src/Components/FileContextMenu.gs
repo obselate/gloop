@@ -40,7 +40,8 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                 },
                 CreatePanel: (_, panel) -> {
                     panel.Padding = 4
-                    panel.BackgroundColor = p.Glass ? p.Surface: p.Background
+                    panel.BackgroundColor = p.Glass ? p.Overlay: p.Background
+                    panel.BackdropBlur = p.Blur
                     panel.BorderColor = p.Border
                     panel.BorderRadius = 10
                     panel.BoxShadow = Ui.Shadow()
