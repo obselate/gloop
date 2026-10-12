@@ -236,7 +236,8 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     return row
                 },
                 CreatePopup: (_, panel) -> {
-                    panel.BackgroundColor = p.Surface
+                    panel.BackgroundColor = p.Overlay
+                    panel.BackdropBlur = p.Blur
                     panel.BorderColor = p.Border
                     return panel
                 },
@@ -289,7 +290,8 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     Window: value.Host,
                     Content: Text{Content: label, Color: p.Text, FontSize: 12, MaxWidth: 320, TextWrap: TextWrap.Wrap},
                     BubbleStyle: Style{
-                        BackgroundColor: p.Surface,
+                        BackgroundColor: p.Overlay,
+                        BackdropBlur: p.Blur,
                         Padding: 8,
                         BorderWidth: 1,
                         BorderColor: p.Border,

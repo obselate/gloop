@@ -48,7 +48,8 @@ class DialogShell {
                 } else {
                     14
                 },
-                BackgroundColor: p.Surface,
+                BackgroundColor: p.Overlay,
+                BackdropBlur: p.Blur,
                 BorderWidth: 1,
                 BorderColor: p.Border,
                 BorderRadius: 10,

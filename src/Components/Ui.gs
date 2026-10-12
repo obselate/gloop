@@ -31,6 +31,8 @@ class Palette {
     internal let Preview Color
     internal let Hover Color
     internal let Bar Color
+    internal let Overlay Color
+    internal let Blur float64
     internal let Keyboard bool
 
     internal init(theme ThemePalette, keyboard bool = false) {
@@ -50,6 +52,8 @@ class Palette {
         Preview = Glass ? Color.Rgba(0, 0, 0, 46): Surface
         Hover = Glass ? Color.White.WithAlpha(.012): Surface
         Bar = Glass ? Color.Transparent: Surface
+        Overlay = Glass ? Surface.WithAlpha(.45): Surface
+        Blur = Glass ? 24: 0
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
         let syntax = switch preset {
             case "": []string{theme.Accent, theme.Text, theme.MutedText, theme.Accent}
@@ -127,7 +131,8 @@ class Ui {
         internal func Shadow() BoxShadow -> BoxShadow{OffsetY: 12, Blur: 32, Color: Color.Black.WithAlpha(.6)}
 
         internal func BubbleStyle(p Palette) Style -> Style{
-            BackgroundColor: p.Surface,
+            BackgroundColor: p.Overlay,
+            BackdropBlur: p.Blur,
             BorderColor: p.Border,
             BorderWidth: 1,
             Color: p.Text,
