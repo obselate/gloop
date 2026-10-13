@@ -6,8 +6,7 @@ import System.Collections.Generic
 import System.IO
 
 class BrowserController {
-    internal let First BrowserPane
-    internal let Second BrowserPane
+    internal let Panes List[BrowserPane] = List[BrowserPane]()
     internal var ActiveIndex int32
     internal var Split bool
     internal var PreviewVisible bool
@@ -42,8 +41,10 @@ class BrowserController {
         this.settings = settings
         this.changed = changed
         this.resetTypeSelect = resetTypeSelect
-        First = BrowserPane()
-        Second = BrowserPane()
+        Panes.Add(BrowserPane())
+        if settings.SplitView {
+            Panes.Add(BrowserPane())
+        }
         ActiveIndex = 0
         Split = settings.SplitView
         PreviewVisible = settings.ShowPreview
@@ -56,6 +57,10 @@ class BrowserController {
     }
 
     internal func ActivePane() BrowserPane -> Pane(ActiveIndex)
+
+    internal prop VisiblePaneCount int32 {
+        get -> Split ? Math.Min(2, Panes.Count): 1
+    }
 
     internal prop IsDisposed bool {
         get -> disposed
@@ -118,12 +123,11 @@ class BrowserController {
         return true
     }
 
-    internal func Pane(index int32) BrowserPane -> index == 1 ? Second: First
+    internal func Pane(index int32) BrowserPane -> Panes[index]
 
     internal func Start(path string, selectedPath string = "") {
-        Directories.NavigateTo(path, 0, "push", -1, selectedPath)
-        if Split {
-            Directories.NavigateTo(path, 1, "push", -1, "")
+        for pane in Panes {
+            Directories.NavigateTo(path, pane, "push", -1, pane == ActivePane() ? selectedPath: "")
         }
     }
 
@@ -133,7 +137,7 @@ class BrowserController {
         } else {
             paneIndex
         }
-        Directories.NavigateTo(path, index, "push", -1, "")
+        Directories.NavigateTo(path, Pane(index), "push", -1, "")
     }
 
     internal func Back() {
@@ -141,7 +145,7 @@ class BrowserController {
         if pane.CanBack() {
             Directories.NavigateTo(
                 pane.History[pane.HistoryIndex - 1],
-                ActiveIndex,
+                pane,
                 "history",
                 pane.HistoryIndex - 1,
                 pane.DirectoryPath
@@ -152,13 +156,7 @@ class BrowserController {
     internal func Forward() {
         let pane = ActivePane()
         if pane.CanForward() {
-            Directories.NavigateTo(
-                pane.History[pane.HistoryIndex + 1],
-                ActiveIndex,
-                "history",
-                pane.HistoryIndex + 1,
-                ""
-            )
+            Directories.NavigateTo(pane.History[pane.HistoryIndex + 1], pane, "history", pane.HistoryIndex + 1, "")
         }
     }
 
@@ -173,7 +171,7 @@ class BrowserController {
         }
         let parent = Path.GetDirectoryName(path)
         if parent != nil && parent != path {
-            Directories.NavigateTo(parent, ActiveIndex, "push", -1, path)
+            Directories.NavigateTo(parent, ActivePane(), "push", -1, path)
         }
     }
 
@@ -182,16 +180,16 @@ class BrowserController {
             return
         }
         if let directory = Path.GetDirectoryName(entry.FullPath) {
-            Directories.NavigateTo(directory, ActiveIndex, "push", -1, entry.FullPath)
+            Directories.NavigateTo(directory, ActivePane(), "push", -1, entry.FullPath)
         }
     }
 
     internal func LeaveMount(mountPath string) {
         let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-        for index in 0 ... 2 {
-            let path = Pane(index).DirectoryPath
+        for pane in Panes {
+            let path = pane.DirectoryPath
             if path == mountPath || path.StartsWith(mountPath.TrimEnd('/') + "/", StringComparison.Ordinal) {
-                Navigate(home, index)
+                Directories.NavigateTo(home, pane, "push", -1, "")
             }
         }
     }
@@ -200,7 +198,7 @@ class BrowserController {
         Places.Refresh()
         let pane = ActivePane()
         if pane.DirectoryPath != "" {
-            Directories.NavigateTo(pane.DirectoryPath, ActiveIndex, "refresh", pane.HistoryIndex, pane.FocusedPath())
+            Directories.NavigateTo(pane.DirectoryPath, pane, "refresh", pane.HistoryIndex, pane.FocusedPath())
         }
     }
 
@@ -322,10 +320,17 @@ class BrowserController {
         ResetTypeSelect()
         Split = !Split
         settings.SplitView = Split
-        if Split && Second.DirectoryPath == "" && First.DirectoryPath != "" {
-            Directories.NavigateTo(First.DirectoryPath, 1, "push", -1, "")
-        }
-        if !Split {
+        if Split {
+            if Panes.Count < 2 {
+                let pane = BrowserPane()
+                Panes.Add(pane)
+                Directories.AddPane(pane)
+            }
+            let pane = Panes[1]
+            if pane.DirectoryPath == "" && ActivePane().DirectoryPath != "" {
+                Directories.NavigateTo(ActivePane().DirectoryPath, pane, "push", -1, "")
+            }
+        } else {
             ActiveIndex = 0
         }
         Previews.QueuePreview()
@@ -334,12 +339,12 @@ class BrowserController {
 
     internal func SwitchPane() {
         if Split {
-            SetActive(1 - ActiveIndex)
+            SetActive((ActiveIndex + 1) % VisiblePaneCount)
         }
     }
 
     internal func SetActive(index int32) {
-        if index < 0 || index > 1 || (!Split && index == 1) || index == ActiveIndex {
+        if index < 0 || index >= VisiblePaneCount || index == ActiveIndex {
             return
         }
         ActiveIndex = index
@@ -350,10 +355,9 @@ class BrowserController {
 
     internal func SetEntryFilter(value Func[FileEntry, bool]?) {
         EntryFilter = value
-        for index in 0 ... 2 {
-            let pane = Pane(index)
+        for pane in Panes {
             if pane.Entries.Count > 0 {
-                Directories.RequestView(index, pane.SelectionPath())
+                Directories.RequestView(pane, pane.SelectionPath())
             }
         }
         Notify()
@@ -370,7 +374,7 @@ class BrowserController {
             Notify()
             return
         }
-        Directories.RequestView(ActiveIndex, pane.SelectionPath())
+        Directories.RequestView(pane, pane.SelectionPath())
         Notify()
     }
 
@@ -390,7 +394,7 @@ class BrowserController {
             Notify()
             return
         }
-        Directories.RequestView(ActiveIndex, pane.SelectionPath())
+        Directories.RequestView(pane, pane.SelectionPath())
         Notify()
     }
 
@@ -429,8 +433,7 @@ class BrowserController {
 
     internal func CanDrag(paneIndex int32) bool -> Operations.AcceptingOperations &&
         paneIndex >= 0 &&
-        paneIndex <= 1 &&
-        (paneIndex == 0 || Split) &&
+        paneIndex < VisiblePaneCount &&
         !InTrash(Pane(paneIndex).DirectoryPath)
 
     internal func CanDrop(destination string) bool -> Operations.AcceptingOperations && !DropBlocked(destination)
@@ -493,10 +496,12 @@ class BrowserController {
         Previews.Close()
     }
 
-    internal func CompleteClipboardMove(request OperationRequest, succeeded List[string]) {
+    internal func CompleteClipboardMove(request OperationRequest, results List[OperationResult]) {
         if request.Kind == OperationKind.Move && request.ClipboardVersion == clipboardGeneration {
-            for source in succeeded {
-                clipboardPaths.Remove(source)
+            for result in results {
+                if result.Error == "" {
+                    clipboardPaths.Remove(result.Source)
+                }
             }
         }
     }

@@ -11,7 +11,7 @@ data struct PreviewRequest {
 }
 
 data struct DirectoryRequest {
-    internal var Index int32
+    internal var Pane BrowserPane
     internal var Generation int32
     internal var Path string
     internal var ShowHidden bool
@@ -21,7 +21,7 @@ data struct DirectoryRequest {
 }
 
 data struct ViewRequest {
-    internal var Index int32
+    internal var Pane BrowserPane
     internal var Generation int32
     internal var Entries List[FileEntry]
     internal var Filter string
@@ -55,4 +55,10 @@ data struct OperationRequest {
     internal var Destination string
     internal var Name string
     internal var ClipboardVersion int32
+}
+
+data struct OperationResult {
+    internal var Source string
+    internal var FinalPath string
+    internal var Error string
 }

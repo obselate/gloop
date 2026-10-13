@@ -3,7 +3,6 @@ package gloop
 import Goo
 import System
 import System.Collections.Generic
-import System.IO
 
 class FileOperationQueue {
     private let window Window
@@ -145,7 +144,7 @@ class FileOperationQueue {
         }
     }
 
-    internal func CompleteOperation(request OperationRequest, succeeded List[string], errors List[string]) {
+    internal func CompleteOperation(request OperationRequest, results List[OperationResult]) {
         if controller.IsDisposed {
             return
         }
@@ -155,21 +154,32 @@ class FileOperationQueue {
             }
         }
         operationCount--
-        controller.CompleteClipboardMove(request, succeeded)
-        if succeeded.Count > 0 {
-            if request.Kind == OperationKind.Rename {
-                let source = succeeded[0]
-                let destination = Path.Combine(Path.GetDirectoryName(source) ?? "", request.Name)
-                controller.First.RetargetSelection(source, destination)
-                controller.Second.RetargetSelection(source, destination)
-                controller.Directories.RefreshLoadedPanes(source, destination)
-            } else {
-                controller.Directories.RefreshLoadedPanes()
+        controller.CompleteClipboardMove(request, results)
+        var succeeded int32
+        var failed int32
+        var firstError = ""
+        for result in results {
+            if result.Error != "" {
+                failed++
+                if firstError == "" {
+                    firstError = result.Source + ": " + result.Error
+                }
+                continue
+            }
+            succeeded++
+            if succeeded == 1 && request.Kind == OperationKind.Rename {
+                for pane in controller.Panes {
+                    pane.RetargetSelection(result.Source, result.FinalPath)
+                }
+                controller.Directories.RefreshLoadedPanes(result.Source, result.FinalPath)
             }
         }
-        if errors.Count > 0 {
-            controller.Status = succeeded.Count.ToString() + " done, " + errors.Count.ToString()
-            + " failed: " + errors[0]
+        if succeeded > 0 && request.Kind != OperationKind.Rename {
+            controller.Directories.RefreshLoadedPanes()
+        }
+        if failed > 0 {
+            controller.Status = succeeded.ToString() + " done, " + failed.ToString()
+            + " failed: " + firstError
             if closeRequested && closeFailure == "" {
                 closeFailure = controller.Status
             }
@@ -196,14 +206,13 @@ class FileOperationQueue {
 
 func fileOperationWorker(window Window, queue FileOperationQueue) {
     while let request = queue.Take() {
-        let succeeded = List[string]()
-        let errors = List[string]()
+        let results = List[OperationResult](request.Sources.Count)
         let operations = FileOperationService()
         let trash = TrashService()
         for source in request.Sources {
-            var error string
+            var result OperationResult
             try {
-                error = switch request.Kind {
+                result = switch request.Kind {
                     case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
                     case OperationKind.Rename: operations.Rename(source, request.Name)
                     case OperationKind.Copy: operations.Copy(source, request.Destination)
@@ -215,16 +224,12 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                     default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
                 }
             } catch (failure Exception) {
-                error = failure.Message
+                result = OperationResult{Source: source, FinalPath: "", Error: failure.Message}
             }
-            if error == "" {
-                succeeded.Add(source)
-            } else {
-                errors.Add(source + ": " + error)
-            }
+            results.Add(result)
         }
         try {
-            window.Post(() -> queue.CompleteOperation(request, succeeded, errors))
+            window.Post(() -> queue.CompleteOperation(request, results))
         } catch (failure Exception) { }
     }
 }

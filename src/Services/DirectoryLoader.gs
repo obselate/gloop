@@ -10,35 +10,36 @@ class DirectoryLoader {
     private let window Window
     private let controller BrowserController
     private let settings AppSettings
-    private let loads[]LatestWork
-    private let views[]LatestWork
+    private let loads Dictionary[BrowserPane, LatestWork] = Dictionary[BrowserPane, LatestWork]()
+    private let views Dictionary[BrowserPane, LatestWork] = Dictionary[BrowserPane, LatestWork]()
 
     internal init(window Window, controller BrowserController, settings AppSettings) {
         this.window = window
         this.controller = controller
         this.settings = settings
-        loads = [2]LatestWork
-        loads[0] = LatestWork()
-        loads[1] = LatestWork()
-        views = [2]LatestWork
-        views[0] = LatestWork()
-        views[1] = LatestWork()
+        for pane in controller.Panes {
+            AddPane(pane)
+        }
     }
 
     internal func Close() {
-        for queue in loads {
+        for queue in loads.Values {
             queue.Close()
         }
-        for queue in views {
+        for queue in views.Values {
             queue.Close()
         }
     }
 
-    internal func NavigateTo(path string, index int32, mode string, historyIndex int32, selectedPath string) {
-        if controller.IsDisposed || index < 0 || index > 1 {
+    internal func AddPane(pane BrowserPane) {
+        loads.Add(pane, LatestWork())
+        views.Add(pane, LatestWork())
+    }
+
+    internal func NavigateTo(path string, pane BrowserPane, mode string, historyIndex int32, selectedPath string) {
+        if controller.IsDisposed || !controller.Panes.Contains(pane) {
             return
         }
-        let pane = controller.Pane(index)
         var fullPath string
         try {
             fullPath = Locations.IsRecent(path) ? Locations.Recent: Path.GetFullPath(path)
@@ -50,8 +51,8 @@ class DirectoryLoader {
         }
         pane.LoadGeneration++
         pane.ViewGeneration++
-        views[index].Cancel()
-        if index == controller.ActiveIndex {
+        views[pane].Cancel()
+        if pane == controller.ActivePane() {
             controller.ResetTypeSelect()
         }
         pane.DirectoryPath = fullPath
@@ -65,14 +66,14 @@ class DirectoryLoader {
             pane.Selected = -1
             pane.SelectedPaths.Clear()
             pane.SelectionAnchorPath = ""
-            if index == controller.ActiveIndex {
+            if pane == controller.ActivePane() {
                 controller.Previews.QueuePreview()
             }
         }
         controller.Notify()
-        let queue = loads[index]
+        let queue = loads[pane]
         let request = DirectoryRequest{
-            Index: index,
+            Pane: pane,
             Generation: pane.LoadGeneration,
             Path: fullPath,
             ShowHidden: settings.ShowHidden,
@@ -87,7 +88,7 @@ class DirectoryLoader {
                 try {
                     window.Post(
                         () -> ApplyDirectory(
-                            request.Index,
+                            request.Pane,
                             request.Generation,
                             snapshot,
                             request.Mode,
@@ -101,17 +102,16 @@ class DirectoryLoader {
     }
 
     internal func ApplyDirectory(
-        index int32,
+        pane BrowserPane,
         generation int32,
         snapshot DirectorySnapshot,
         mode string,
         historyIndex int32,
         selectedPath string
     ) {
-        if controller.IsDisposed {
+        if controller.IsDisposed || !controller.Panes.Contains(pane) {
             return
         }
-        let pane = controller.Pane(index)
         if generation != pane.LoadGeneration {
             return
         }
@@ -127,7 +127,7 @@ class DirectoryLoader {
             pane.SelectedPaths.Clear()
             pane.Error = snapshot.Error
             controller.Status = snapshot.Error
-            if index == controller.ActiveIndex {
+            if pane == controller.ActivePane() {
                 controller.Previews.QueuePreview()
             }
             controller.Notify()
@@ -137,21 +137,23 @@ class DirectoryLoader {
         if mode != "refresh" {
             controller.Status = ""
         }
-        RequestView(index, selectedPath)
+        RequestView(pane, selectedPath)
     }
 
-    internal func RequestView(index int32, selectedPath string) {
-        let pane = controller.Pane(index)
+    internal func RequestView(pane BrowserPane, selectedPath string) {
+        if controller.IsDisposed || !controller.Panes.Contains(pane) {
+            return
+        }
         pane.ViewGeneration++
         if pane.Entries.Count == 0 {
-            views[index].Cancel()
+            views[pane].Cancel()
             pane.VisibleEntries = List[FileEntry]()
             pane.Selected = -1
             pane.SelectedPaths.Clear()
             pane.SelectionAnchorPath = ""
             pane.PendingFocusPath = ""
             pane.Loading = false
-            if index == controller.ActiveIndex {
+            if pane == controller.ActivePane() {
                 controller.Previews.QueuePreview()
             }
             controller.Notify()
@@ -159,9 +161,9 @@ class DirectoryLoader {
             return
         }
         pane.Loading = true
-        let queue = views[index]
+        let queue = views[pane]
         let request = ViewRequest{
-            Index: index,
+            Pane: pane,
             Generation: pane.ViewGeneration,
             Entries: pane.Entries,
             Filter: pane.Filter,
@@ -176,7 +178,7 @@ class DirectoryLoader {
                 try {
                     window.Post(
                         () -> ApplyView(
-                            request.Index,
+                            request.Pane,
                             request.Generation,
                             List[FileEntry](),
                             request.SelectedPath,
@@ -188,11 +190,16 @@ class DirectoryLoader {
         )
     }
 
-    internal func ApplyView(index int32, generation int32, entries List[FileEntry], selectedPath string, error string) {
-        if controller.IsDisposed {
+    internal func ApplyView(
+        pane BrowserPane,
+        generation int32,
+        entries List[FileEntry],
+        selectedPath string,
+        error string
+    ) {
+        if controller.IsDisposed || !controller.Panes.Contains(pane) {
             return
         }
-        let pane = controller.Pane(index)
         if generation != pane.ViewGeneration {
             return
         }
@@ -206,7 +213,7 @@ class DirectoryLoader {
         if error != "" {
             controller.Status = error
         }
-        if index == controller.ActiveIndex {
+        if pane == controller.ActivePane() {
             controller.Previews.QueuePreview()
         }
         controller.Notify()
@@ -214,25 +221,17 @@ class DirectoryLoader {
     }
 
     internal func RefreshLoadedPanes(source string = "", replacement string = "") {
-        if controller.First.DirectoryPath != "" {
-            let selected = controller.First.FocusedPath()
-            NavigateTo(
-                controller.First.DirectoryPath,
-                0,
-                "refresh",
-                controller.First.HistoryIndex,
-                selected == source ? replacement: selected
-            )
-        }
-        if controller.Second.DirectoryPath != "" {
-            let selected = controller.Second.FocusedPath()
-            NavigateTo(
-                controller.Second.DirectoryPath,
-                1,
-                "refresh",
-                controller.Second.HistoryIndex,
-                selected == source ? replacement: selected
-            )
+        for pane in controller.Panes {
+            if pane.DirectoryPath != "" {
+                let selected = pane.FocusedPath()
+                NavigateTo(
+                    pane.DirectoryPath,
+                    pane,
+                    "refresh",
+                    pane.HistoryIndex,
+                    selected == source ? replacement: selected
+                )
+            }
         }
     }
 
@@ -244,7 +243,7 @@ class DirectoryLoader {
         try {
             window.Post(
                 () -> ApplyDirectory(
-                    request.Index,
+                    request.Pane,
                     request.Generation,
                     snapshot,
                     request.Mode,
@@ -297,7 +296,7 @@ class DirectoryLoader {
             return
         }
         try {
-            window.Post(() -> ApplyView(request.Index, request.Generation, visible, request.SelectedPath, error))
+            window.Post(() -> ApplyView(request.Pane, request.Generation, visible, request.SelectedPath, error))
         } catch (failure Exception) { }
     }
 }

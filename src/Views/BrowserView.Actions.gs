@@ -148,8 +148,9 @@ partial class BrowserView {
                 )
                 SavePreferences()
                 FocusFiles()
-                revealPending[Model.ActiveIndex] = true
-                Host.Post(() -> RevealSelection(Model.ActiveIndex))
+                let state = paneViews[Model.ActiveIndex]
+                state.RevealPending = true
+                Host.Post(() -> RevealSelection(state))
             }
             case "OpenTerminal" {
                 Model.OpenTerminal()
@@ -343,11 +344,7 @@ partial class BrowserView {
     }
 
     private func TileColumns(index int32) int32 {
-        let list = if index == 0 {
-            firstList
-        } else {
-            secondList
-        }
+        let list = PaneViewport(index)
         return Math.Max(
             1,
             int32(Math.Floor((list.ContentBox.Width + FileTiles.Gap) / (FileTiles.TileWidth + FileTiles.Gap)))
@@ -355,7 +352,7 @@ partial class BrowserView {
     }
 
     private func TileWidth(index int32) float64 {
-        let room = tileViewport[index].ContentBox.Width
+        let room = paneViews[index].TileViewport.ContentBox.Width
         if room <= 0 {
             return FileTiles.TileWidth
         }
@@ -381,14 +378,14 @@ partial class BrowserView {
         }
     }
 
-    private func RevealSelection(index int32) {
-        let pane = Model.Pane(index)
+    private func RevealSelection(state BrowserPaneViewState) {
+        let index = Model.Panes.IndexOf(state.Pane)
+        if index < 0 {
+            return
+        }
+        let pane = state.Pane
         if pane.Selected >= 0 {
-            let list = if index == 0 {
-                firstList
-            } else {
-                secondList
-            }
+            let list = PaneViewport(index)
             let tiles = settings.ViewMode == "tiles"
             let row = if tiles {
                 pane.Selected / TileColumns(index)
@@ -413,18 +410,14 @@ partial class BrowserView {
             } else if bottom > offset + viewport {
                 list.JumpTo(0, Math.Max(0, bottom - viewport))
             }
-            revealPending[index] = bottom > list.ScrollRange.Y + viewport
+            state.RevealPending = bottom > list.ScrollRange.Y + viewport
         } else {
-            revealPending[index] = false
+            state.RevealPending = false
         }
     }
 
     private func PageSize() int32 {
-        let list = if Model.ActiveIndex == 0 {
-            firstList
-        } else {
-            secondList
-        }
+        let list = PaneViewport(Model.ActiveIndex)
         let tiles = settings.ViewMode == "tiles"
         let rowHeight = if tiles {
             FileTiles.TileHeight + FileTiles.Gap
@@ -439,12 +432,7 @@ partial class BrowserView {
     }
 
     private func FocusFiles() {
-        let handle = if Model.ActiveIndex == 0 {
-            firstFocus
-        } else {
-            secondFocus
-        }
-        handle.Focus()
+        PaneFocus(Model.ActiveIndex).Focus()
     }
 
     private func EditLocation() {

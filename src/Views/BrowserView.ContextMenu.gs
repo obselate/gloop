@@ -99,7 +99,7 @@ partial class BrowserView {
         if let entry = Model.ActivePane().SingleSelectedEntry() {
             Model.MoveTo(pane.VisibleEntries.IndexOf(entry), true)
         }
-        let viewport = index == 0 ? firstList: secondList
+        let viewport = PaneViewport(index)
         let bounds = viewport.ContentBox
         let tiles = settings.ViewMode == "tiles"
         let columns = tiles ? TileColumns(index): 1

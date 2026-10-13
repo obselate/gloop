@@ -26,7 +26,8 @@ class TrashService {
         }
     }
 
-    internal func Restore(trashPath string) string {
+    internal func Restore(trashPath string) OperationResult {
+        var finalPath = ""
         try {
             let source = locate(trashPath)
             let target = describe(source).OriginalPath
@@ -36,29 +37,30 @@ class TrashService {
             operations.RequireAbsent(target)
             Directory.CreateDirectory(Path.GetDirectoryName(target) ?? "/")
             operations.MoveEntry(source, target)
+            finalPath = target
             try {
                 File.Delete(infoFile(source))
             } catch (failure Exception) {
                 throw IOException("Restored " + target + ". Trash metadata remains: " + failure.Message)
             }
-            return ""
+            return OperationResult{Source: trashPath, FinalPath: finalPath, Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: trashPath, FinalPath: finalPath, Error: failure.Message}
         }
     }
 
-    internal func Delete(trashPath string) string {
+    internal func Delete(trashPath string) OperationResult {
         try {
             let source = locate(trashPath)
             remove(source)
             File.Delete(infoFile(source))
-            return ""
+            return OperationResult{Source: trashPath, FinalPath: "", Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: trashPath, FinalPath: "", Error: failure.Message}
         }
     }
 
-    internal func Empty() string {
+    internal func Empty() OperationResult {
         var result = ""
         try {
             let files = requireStore()
@@ -82,9 +84,9 @@ class TrashService {
                 }
             }
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: FilesDirectory(), FinalPath: "", Error: failure.Message}
         }
-        return result
+        return OperationResult{Source: FilesDirectory(), FinalPath: "", Error: result}
     }
 
     private func requireStore() string {
