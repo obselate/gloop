@@ -3,6 +3,7 @@ package gloop
 enum DialogKind {
     None;
     Preferences;
+    Shortcuts;
     DesktopSetup;
     Properties;
     Bookmarks;

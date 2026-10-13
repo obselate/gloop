@@ -83,6 +83,7 @@ partial class BrowserView : Cell {
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
                 let textEntry = dialog != DialogKind.Preferences &&
+                    dialog != DialogKind.Shortcuts &&
                     dialog != DialogKind.DesktopSetup &&
                     dialog != DialogKind.MoveToTrash &&
                     dialog != DialogKind.DeletePermanently &&

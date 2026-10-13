@@ -324,6 +324,7 @@ internal class AppSettings {
             "Dismiss": KeybindingAction{Label: "Dismiss", Default: "Escape"},
             "Quit": KeybindingAction{Label: "Quit", Default: "Ctrl+Q"},
             "OpenSettings": KeybindingAction{Label: "Open Settings", Default: "Ctrl+Comma"},
+            "ShowShortcuts": KeybindingAction{Label: "Show Shortcuts", Default: "F1"},
         }
 
         internal const CustomThemeName string = "Custom"

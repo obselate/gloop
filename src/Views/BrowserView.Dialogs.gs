@@ -12,6 +12,7 @@ partial class BrowserView {
 
     private func DialogTitle(kind DialogKind) string -> switch kind {
         case DialogKind.Preferences: "Preferences"
+        case DialogKind.Shortcuts: AppSettings.ActionCatalog["ShowShortcuts"].Label
         case DialogKind.DesktopSetup: "Desktop setup"
         case DialogKind.Properties: "Properties"
         case DialogKind.Bookmarks: "Bookmarks"
@@ -76,7 +77,7 @@ partial class BrowserView {
             p,
             if dialog == DialogKind.Preferences {
                 Math.Clamp(width - 80, 360, 600)
-            } else if dialog == DialogKind.OpenLocation {
+            } else if dialog == DialogKind.OpenLocation || dialog == DialogKind.Shortcuts {
                 520
             } else {
                 440
@@ -91,6 +92,8 @@ partial class BrowserView {
 
         if dialog == DialogKind.Preferences {
             contents.Add(PreferencesContent())
+        } else if dialog == DialogKind.Shortcuts {
+            contents.Add(ShortcutsContent(p))
         } else if dialog == DialogKind.MoveToTrash {
             contents.Add(Text{Content: "Move " + dialogValue + " to Trash?", FontSize: 14, Color: p.Text})
             contents.Add(
@@ -126,12 +129,22 @@ partial class BrowserView {
 
         let content = Container{
             MinHeight: 0,
-            FlexShrink: dialog == DialogKind.Preferences ? 1: 0,
+            FlexShrink: dialog == DialogKind.Preferences || dialog == DialogKind.Shortcuts ? 1: 0,
             Gap: 14,
             Children: contents.ToArray(),
         }
 
         return content
+    }
+
+    private func ShortcutsContent(p Palette) Blob {
+        let rows = List[Blob](settings.Keybindings.Count)
+
+        for binding in settings.Keybindings {
+            rows.Add(PropertyRow.Build(binding.Value, AppSettings.ActionCatalog[binding.Key].Label, p, 130, 13, true))
+        }
+
+        return DialogShell.ScrollColumn(rows.ToArray(), p)
     }
 
     private func DialogActions(p Palette) Blob {
@@ -143,11 +156,13 @@ partial class BrowserView {
             let close = DialogButton("Close", () -> CloseDialog(), p)
             close.Accessibility = Accessibility{Role: AccessibilityRole.Button, Name: "Close preferences"}
             buttons.Add(close)
+        } else if dialog == DialogKind.Shortcuts {
+            buttons.Add(DialogButton("Close", () -> CloseDialog(), p))
         } else {
             buttons.Add(DialogButton("Cancel", () -> CloseDialog(), p))
         }
 
-        if dialog != DialogKind.Preferences {
+        if dialog != DialogKind.Preferences && dialog != DialogKind.Shortcuts {
             buttons.Add(
                 DialogButton(
                     if dialog == DialogKind.MoveToTrash ||

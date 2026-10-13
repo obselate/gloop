@@ -36,7 +36,7 @@ partial class BrowserView {
         }
 
         if dialog != DialogKind.None {
-            if action == "Dismiss" {
+            if action == "Dismiss" || (action == "ShowShortcuts" && dialog == DialogKind.Shortcuts) {
                 CloseDialog()
             } else if action == "Quit" {
                 Host.RequestClose()
@@ -344,6 +344,10 @@ partial class BrowserView {
             }
             case "OpenSettings" {
                 OpenPreferences()
+                return true
+            }
+            case "ShowShortcuts" {
+                OpenDialog(DialogKind.Shortcuts, "")
                 return true
             }
         }
