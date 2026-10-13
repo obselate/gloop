@@ -45,7 +45,7 @@ class TrashService {
                 writeTrashInfo(infoPath, from)
                 metadataCreated = true
 
-                operations.MoveEntry(from, dataPath)
+                operations.MoveEntry(from, dataPath, false)
             } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 if metadataCreated {
                     try {
@@ -99,7 +99,7 @@ class TrashService {
             operations.RequireAbsent(target)
 
             Directory.CreateDirectory(Path.GetDirectoryName(target) ?? "/")
-            operations.MoveEntry(source, target)
+            operations.MoveEntry(source, target, false)
             finalPath = target
 
             try {

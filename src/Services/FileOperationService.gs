@@ -198,7 +198,7 @@ unsafe class FileOperationService {
         return current
     }
 
-    internal func MoveEntry(source string, destination string) {
+    internal func MoveEntry(source string, destination string, allowCrossDevice bool = true) {
         RequireAbsent(destination)
 
         if OperatingSystem.IsLinux() {
@@ -212,7 +212,27 @@ unsafe class FileOperationService {
                 let error = Marshal.GetLastWin32Error()
 
                 if error == CrossDeviceError {
-                    throw IOException("Move across filesystems is unavailable")
+                    if !allowCrossDevice {
+                        throw IOException("Move across filesystems is unavailable")
+                    }
+
+                    let staging = temporaryPath(destination)
+
+                    try {
+                        copyEntry(source, staging)
+                        MoveEntry(staging, destination, false)
+                    } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+                        let message = "Cannot move " + source + ": " + failure.Message
+
+                        if !cleanup(staging) {
+                            throw IOException(message + ". Partial copy remains at " + staging)
+                        }
+
+                        throw IOException(message)
+                    }
+
+                    FileSystemService.Remove(source)
+                    return
                 }
                 if error == InvalidArgumentError {
                     throw IOException(

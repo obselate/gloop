@@ -37,8 +37,8 @@ Run `./gloop --help` for optional desktop integration and folder or file dialog 
 | Navigate | Bookmarks, optional split panes, and a terminal in the current folder. |
 | Customize | Theme presets, an OKLCH color wheel, rebindable shortcuts, and settings that apply immediately. |
 
-Copy works across filesystems. Cross-filesystem move and Trash report an error
-and preserve the source. Remote filesystems are not implemented.
+Copy works across filesystems. Cross-filesystem move copies then deletes the source.
+Cross-filesystem Trash reports an error and preserves the source. Remote filesystems are not implemented.
 
 ## Requirements
 
