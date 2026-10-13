@@ -232,11 +232,10 @@ class FileOperationQueue {
         }
 
         if succeeded > 0 {
-            if request.Kind == OperationKind.Rename {
-                controller.Directories.RefreshLoadedPanes(results[0].Source, results[0].FinalPath)
-            } else {
-                controller.Directories.RefreshLoadedPanes()
-            }
+            controller.Directories.RefreshLoadedPanes(
+                request.Kind == OperationKind.Rename || request.Kind == OperationKind.BulkRename
+                ? results: default(List[OperationResult]?)
+            )
         }
 
         if failed > 0 && request.Kind != OperationKind.Permissions {
@@ -285,25 +284,11 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
         let operations = FileOperationService()
         let trash = TrashService()
 
-        var validationError = ""
-
-        if request.Kind == OperationKind.BulkRename {
-            try {
-                operations.ValidateRenames(request.Sources, request.Names)
-            } catch (failure Exception) {
-                validationError = failure.Message
-            }
-        }
-
         for index in 0 ... request.Sources.Count {
             let source = request.Sources[index]
             var result OperationResult
 
             try {
-                if validationError != "" {
-                    throw System.IO.IOException(validationError)
-                }
-
                 result = switch request.Kind {
                     case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
                     case OperationKind.Rename: operations.Rename(source, request.Name)

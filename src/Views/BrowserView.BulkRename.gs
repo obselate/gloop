@@ -44,7 +44,9 @@ partial class BrowserView {
                     break
                 }
             }
-        } catch (failure Exception) when failure is IOException || failure is ArgumentException {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             dialogError = failure.Message
         }
 
@@ -82,42 +84,37 @@ partial class BrowserView {
         }
 
         return Container{
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Gap: 12,
-            Container{
-                Gap: 4,
-                Container{Key: "bulk-case-label", Ui.Label("Case", p.Muted, 12)},
-                Cell.Mount[ComboBoxInput, ComboBox](
-                    "bulk-case",
-                    ComboBoxInput{
-                        Items: options,
-                        SelectedId: bulkOptions.Case,
-                        OnSelect: value -> {
-                            bulkOptions.Case = value
-                            UpdateBulkPreview()
-                        },
-                        AccessibilityName: "Case",
-                        OverlayHost: rootHandle,
-                        Width: 160,
-                        RowHeight: 30,
-                        CreateTrigger: (_, row) -> {
-                            row.BasedOn = TextField.FieldStyle(p)
-                            row.Focus = p.FocusBorder()
-                            return row
-                        },
-                        CreatePopup: (_, panel) -> {
-                            panel.BasedOn = p.PopupStyle()
-                            return panel
-                        },
-                        CreateRow: (input, item, row) -> {
-                            row.BackgroundColor = input.SelectedId == item.Id ? p.Selection: Color.Transparent
-                            row.Hover = Style{BackgroundColor: p.Selection}
-                            return row
-                        },
-                    }
-                ),
-            },
+            Gap: 4,
+            Container{Key: "bulk-case-label", Ui.Label("Case", p.Muted, 12)},
+            Cell.Mount[ComboBoxInput, ComboBox](
+                "bulk-case",
+                ComboBoxInput{
+                    Items: options,
+                    SelectedId: bulkOptions.Case,
+                    OnSelect: value -> {
+                        bulkOptions.Case = value
+                        UpdateBulkPreview()
+                    },
+                    AccessibilityName: "Case",
+                    OverlayHost: rootHandle,
+                    Width: 160,
+                    RowHeight: 30,
+                    CreateTrigger: (_, row) -> {
+                        row.BasedOn = TextField.FieldStyle(p)
+                        row.Focus = p.FocusBorder()
+                        return row
+                    },
+                    CreatePopup: (_, panel) -> {
+                        panel.BasedOn = p.PopupStyle()
+                        return panel
+                    },
+                    CreateRow: (input, item, row) -> {
+                        row.BackgroundColor = input.SelectedId == item.Id ? p.Selection: Color.Transparent
+                        row.Hover = Style{BackgroundColor: p.Selection}
+                        return row
+                    },
+                }
+            ),
         }
     }
 
@@ -128,7 +125,7 @@ partial class BrowserView {
         if !bulkBusy && bulkResults == nil {
             rows.Add(
                 Text{
-                    Content: "Changes apply to the full name, including its extension. Numbering follows selection order.",
+                    Content: "Changes apply to the full name, including its extension. Numbering follows list order.",
                     Color: p.Muted,
                     FontSize: 12,
                     TextWrap: TextWrap.Wrap
@@ -240,6 +237,7 @@ partial class BrowserView {
     private func BulkPreviewRows(rows List[Blob], p Palette) {
         let preview = Container{FlexShrink: 0, MinWidth: 0, Gap: 0, Padding: Edges{Top: 4}}
         rows.Add(preview)
+        var resultIndex int32
 
         for index in 0 ... bulkSources.Count {
             let source = bulkSources[index]
@@ -250,12 +248,11 @@ partial class BrowserView {
             var failure = ""
 
             if let results = bulkResults {
-                for result in results {
-                    if result.Source == source {
-                        status = result.Error == "" ? " (renamed)": ""
-                        failure = result.Error
-                        break
-                    }
+                if resultIndex < results.Count && results[resultIndex].Source == source {
+                    let result = results[resultIndex]
+                    status = result.Error == "" ? " (renamed)": ""
+                    failure = result.Error
+                    resultIndex++
                 }
             }
 

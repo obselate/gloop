@@ -31,10 +31,13 @@ class BulkRenameOptions {
             var name = Path.GetFileName(sources[index])
 
             if Pattern != "" {
+                let dot = name.LastIndexOf('.')
+                let extension = dot > 0 ? name.Substring(dot): ""
+
                 name = Pattern
                     .Replace("{n}", (start + int64(index)).ToString(CultureInfo.InvariantCulture).PadLeft(padding, '0'))
-                    .Replace("{ext}", Path.GetExtension(name))
-                    .Replace("{name}", Path.GetFileNameWithoutExtension(name))
+                    .Replace("{ext}", extension)
+                    .Replace("{name}", name.Substring(0, name.Length - extension.Length))
             }
             if Find != "" {
                 name = name.Replace(Find, Replace, StringComparison.Ordinal)

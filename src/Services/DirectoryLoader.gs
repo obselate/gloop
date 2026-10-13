@@ -319,18 +319,21 @@ class DirectoryLoader {
         pane.Refreshing = false
     }
 
-    internal func RefreshLoadedPanes(source string = "", replacement string = "") {
+    internal func RefreshLoadedPanes(renames List[OperationResult]? = nil) {
         for pane in controller.Panes {
             if pane.DirectoryPath != "" {
-                let selected = pane.FocusedPath()
+                var selected = pane.FocusedPath()
 
-                NavigateTo(
-                    pane.DirectoryPath,
-                    pane,
-                    DirectoryMode.Refresh,
-                    pane.HistoryIndex,
-                    selected == source ? replacement: selected
-                )
+                if let results = renames {
+                    for result in results {
+                        if result.Error == "" && result.Source == selected {
+                            selected = result.FinalPath
+                            break
+                        }
+                    }
+                }
+
+                NavigateTo(pane.DirectoryPath, pane, DirectoryMode.Refresh, pane.HistoryIndex, selected)
             }
         }
     }
