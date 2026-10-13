@@ -14,7 +14,8 @@ assets/gloop.prompt.txt
 deps/nuget/README.md
 scripts/benchmark*
 scripts/benchmarks/
-scripts/create_preview_fixture.py
+scripts/*.py
+assets/performance/
 CONSTITUTION.md
 CONVENTIONS.md
 TODO.md
