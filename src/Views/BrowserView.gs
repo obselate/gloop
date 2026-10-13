@@ -19,12 +19,7 @@ partial class BrowserView : Cell {
     private var folderCounts FolderCountService?
     private var settingsWriter SettingsWriter?
     private let rootHandle ElementHandle = ElementHandle()
-    private let listFocus[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
-    private let tileFocus[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
-    private let listViewport[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
-    private let tileViewport[]ElementHandle = []ElementHandle{ElementHandle(), ElementHandle()}
-    private let selections[]string = []string{"", ""}
-    private let revealPending[]bool = []bool{false, false}
+    private let paneViews List[BrowserPaneViewState] = List[BrowserPaneViewState]()
     private let locationHandle ElementHandle = ElementHandle()
     private let filterHandle ElementHandle = ElementHandle()
     private let dialogHandle ElementHandle = ElementHandle()
@@ -38,8 +33,6 @@ partial class BrowserView : Cell {
     private const WindowRadius float64 = 12
     private var width float64 = 1180
     private var height float64 = 760
-    private var firstWidths Dictionary[string, float64] = Dictionary[string, float64]()
-    private var secondWidths Dictionary[string, float64] = Dictionary[string, float64]()
     private var placesWidth float64 = 180
     private var paneRatio float64 = .5
     private var previewRatio float64 = .5
@@ -64,10 +57,6 @@ partial class BrowserView : Cell {
         this.launch = launch
         palette = Palette(settings.Theme)
         notice = warning
-        for index in 0 ... 2 {
-            WatchList(listViewport[index], index)
-            WatchList(tileViewport[index], index)
-        }
         rootHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted &&
                 (Math.Abs(width - metrics.ContentBox.Width) > 1 || Math.Abs(height - metrics.ContentBox.Height) > 1) {
@@ -142,6 +131,7 @@ partial class BrowserView : Cell {
             Math.Max(1, value.Width),
             Math.Max(1, value.Height)
         )
+        SyncPaneViews()
         value.MetricsChanged += PreviewWindowMetrics
         thumbnails = ThumbnailService(value)
         selectionInfo = SelectionInfoService(value)
@@ -242,37 +232,27 @@ partial class BrowserView : Cell {
         selectionInfo?.Dispose()
     }
 
-    internal func CloseSafely() bool -> !setupBusy && Model.CloseSafely()
+    internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
 
-    private prop firstFocus ElementHandle {
-        get -> if settings.ViewMode == "tiles" {
-            tileFocus[0]
-        } else {
-            listFocus[0]
+    private func PaneFocus(index int32) ElementHandle -> settings.ViewMode == "tiles" ?
+    paneViews[index].TileFocus: paneViews[index].ListFocus
+
+    private func PaneViewport(index int32) ElementHandle -> settings.ViewMode == "tiles" ?
+    paneViews[index].TileViewport: paneViews[index].ListViewport
+
+    private func SyncPaneViews() {
+        var stateIndex = paneViews.Count - 1
+        while stateIndex >= 0 {
+            if !Model.Panes.Contains(paneViews[stateIndex].Pane) {
+                paneViews.RemoveAt(stateIndex)
+            }
+            stateIndex--
         }
-    }
-
-    private prop secondFocus ElementHandle {
-        get -> if settings.ViewMode == "tiles" {
-            tileFocus[1]
-        } else {
-            listFocus[1]
-        }
-    }
-
-    private prop firstList ElementHandle {
-        get -> if settings.ViewMode == "tiles" {
-            tileViewport[0]
-        } else {
-            listViewport[0]
-        }
-    }
-
-    private prop secondList ElementHandle {
-        get -> if settings.ViewMode == "tiles" {
-            tileViewport[1]
-        } else {
-            listViewport[1]
+        for index in paneViews.Count ... Model.Panes.Count {
+            let state = BrowserPaneViewState(Model.Pane(index))
+            paneViews.Add(state)
+            WatchList(state.ListViewport, state)
+            WatchList(state.TileViewport, state)
         }
     }
 
@@ -313,9 +293,10 @@ partial class BrowserView : Cell {
     }
 
     private func Changed() {
+        SyncPaneViews()
         if window != nil {
             PreviewChanged()
-            if Model.ReadyToClose {
+            if Model.Operations.ReadyToClose {
                 Host.RequestClose()
             }
             Host.Title = ChooserTitle()
@@ -331,20 +312,20 @@ partial class BrowserView : Cell {
             }
         }
         Rebuild()
-        for index in 0 ... 2 {
-            let pane = Model.Pane(index)
+        for state in paneViews {
+            let pane = state.Pane
             let selection = pane.DirectoryPath + "\0" + pane.Selected.ToString()
-            if selections[index] != selection {
-                selections[index] = selection
+            if state.Selection != selection {
+                state.Selection = selection
                 if !pane.Refreshing {
-                    revealPending[index] = true
-                    Host.Post(() -> RevealSelection(index))
+                    state.RevealPending = true
+                    Host.Post(() -> RevealSelection(state))
                 }
             }
         }
     }
 
-    private func WatchList(handle ElementHandle, index int32) {
+    private func WatchList(handle ElementHandle, state BrowserPaneViewState) {
         var viewport float64 = -1
         var scrollRange float64 = -1
         var room float64 = -1
@@ -364,8 +345,8 @@ partial class BrowserView : Cell {
             if viewport != metrics.ContentBox.Height || scrollRange != metrics.ScrollRange.Y {
                 viewport = metrics.ContentBox.Height
                 scrollRange = metrics.ScrollRange.Y
-                if revealPending[index] {
-                    RevealSelection(index)
+                if state.RevealPending {
+                    RevealSelection(state)
                 }
             }
         }
@@ -628,8 +609,8 @@ partial class BrowserView : Cell {
         if !Model.Split || BrowsingWidth() < 660 {
             return BrowsingWidth()
         }
-        let first = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, 260, 260)
-        return index == 0 ? first: BrowsingWidth() - first - 1
+        let leadingWidth = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, 260, 260)
+        return index == Model.Panes.Count - 1 ? BrowsingWidth() - leadingWidth - 1: leadingWidth
     }
 
     private func Location(index int32, crumbWidth float64) Blob {
@@ -667,6 +648,7 @@ partial class BrowserView : Cell {
             "location-" + index.ToString(),
             BreadcrumbInput{
                 Path: pane.DirectoryPath,
+                Kind: pane.Kind,
                 Trash: Model.TrashDirectory,
                 Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 Width: crumbWidth,
@@ -692,12 +674,9 @@ partial class BrowserView : Cell {
         let p = palette
         let availableWidth = PaneWidth(index)
         let compact = availableWidth < 600
-        let handle = if index == 0 {
-            firstList
-        } else {
-            secondList
-        }
-        let location = LocationKind(pane)
+        let state = paneViews[index]
+        let handle = PaneViewport(index)
+        let location = pane.Kind
         let tools = List[Blob]()
         var toolsWidth = 0.0
         if !Model.Split && availableWidth >= 560 {
@@ -746,7 +725,7 @@ partial class BrowserView : Cell {
                     Host,
                     p,
                     false,
-                    location != ""
+                    location != LocationKind.Folder
                 )
             )
         }
@@ -789,7 +768,7 @@ partial class BrowserView : Cell {
                     Host,
                     p,
                     false,
-                    location == "recent"
+                    location == LocationKind.Recent
                 )
             )
         }
@@ -847,34 +826,16 @@ partial class BrowserView : Cell {
                     Choosing: chooser != nil,
                     DirectoriesOnly: (chooser?.Request.Directory ?? false) || (chooser?.SavingMany ?? false),
                     ViewportHandle: handle,
-                    FocusHandle: if index == 0 {
-                        firstFocus
-                    } else {
-                        secondFocus
-                    },
+                    FocusHandle: PaneFocus(index),
                     OnKey: ListKey,
                     Keys: ListKeys(),
-                    ColumnWidths: if index == 0 {
-                        firstWidths
-                    } else {
-                        secondWidths
-                    },
+                    ColumnWidths: state.ColumnWidths,
                     OnFittedColumnWidthsChange: widths -> {
-                        let merged = Dictionary[string, float64](
-                            if index == 0 {
-                                firstWidths
-                            } else {
-                                secondWidths
-                            }
-                        )
+                        let merged = Dictionary[string, float64](state.ColumnWidths)
                         for pair in widths {
                             merged[pair.Key] = pair.Value
                         }
-                        if index == 0 {
-                            firstWidths = merged
-                        } else {
-                            secondWidths = merged
-                        }
+                        state.ColumnWidths = merged
                         Rebuild()
                     },
                     OnFocusRow: row -> {
@@ -941,7 +902,7 @@ partial class BrowserView : Cell {
         let p = palette
         let pane = Model.ActivePane()
         let total = pane.VisibleEntries.Count
-        let selected = Model.SelectedCount()
+        let selected = Model.ActivePane().SelectedPaths.Count
         let info = if notice != "" {
             notice
         } else if Model.Status != "" {
@@ -949,7 +910,7 @@ partial class BrowserView : Cell {
         } else if pane.Loading && total == 0 {
             "Reading folder…"
         } else if selected > 0 {
-            let size = Model.SelectedSize()
+            let size = Model.ActivePane().SelectedSize()
             selected.ToString() + " of " + total.ToString() +
                 " selected" +
                 (
@@ -1123,5 +1084,20 @@ partial class BrowserView : Cell {
             return "Home"
         }
         return Path.GetFileName(directory)
+    }
+}
+
+class BrowserPaneViewState {
+    internal let Pane BrowserPane
+    internal let ListFocus ElementHandle = ElementHandle()
+    internal let TileFocus ElementHandle = ElementHandle()
+    internal let ListViewport ElementHandle = ElementHandle()
+    internal let TileViewport ElementHandle = ElementHandle()
+    internal var ColumnWidths Dictionary[string, float64] = Dictionary[string, float64]()
+    internal var Selection string = ""
+    internal var RevealPending bool
+
+    internal init(pane BrowserPane) {
+        Pane = pane
     }
 }

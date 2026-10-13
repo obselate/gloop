@@ -22,7 +22,7 @@ unsafe class FileOperationService {
         private func readStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
     }
 
-    internal func CreateFolder(directory string, name string) string {
+    internal func CreateFolder(directory string, name string) OperationResult {
         try {
             validateName(name)
             let parent = requireDirectory(directory)
@@ -38,30 +38,30 @@ unsafe class FileOperationService {
                 }
                 throw failure
             }
-            return ""
+            return OperationResult{Source: directory, FinalPath: destination, Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: directory, FinalPath: "", Error: failure.Message}
         }
     }
 
-    internal func Rename(source string, name string) string {
+    internal func Rename(source string, name string) OperationResult {
         try {
             validateName(name)
             let from = requireEntry(source)
             let parent = Path.GetDirectoryName(from) ?? ""
             let destination = Path.Combine(parent, name)
             if from == destination {
-                return ""
+                return OperationResult{Source: source, FinalPath: destination, Error: ""}
             }
             RequireAbsent(destination)
             MoveEntry(from, destination)
-            return ""
+            return OperationResult{Source: source, FinalPath: destination, Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
 
-    internal func Copy(source string, destinationDirectory string) string {
+    internal func Copy(source string, destinationDirectory string) OperationResult {
         try {
             let from = requireEntry(source)
             let parent = requireDirectory(destinationDirectory)
@@ -77,26 +77,26 @@ unsafe class FileOperationService {
                 }
                 throw failure
             }
-            return ""
+            return OperationResult{Source: source, FinalPath: destination, Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
 
-    internal func Move(source string, destinationDirectory string) string {
+    internal func Move(source string, destinationDirectory string) OperationResult {
         try {
             let from = requireEntry(source)
             let parent = requireDirectory(destinationDirectory)
             let destination = Path.Combine(parent, Path.GetFileName(from))
             validateDestination(from, parent, destination)
             MoveEntry(from, destination)
-            return ""
+            return OperationResult{Source: source, FinalPath: destination, Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
 
-    internal func Trash(source string) string {
+    internal func Trash(source string) OperationResult {
         try {
             let from = requireEntry(source)
             let root = TrashRoot()
@@ -133,9 +133,9 @@ unsafe class FileOperationService {
                 }
                 throw failure
             }
-            return ""
+            return OperationResult{Source: source, FinalPath: dataPath, Error: ""}
         } catch (failure Exception) {
-            return failure.Message
+            return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
 

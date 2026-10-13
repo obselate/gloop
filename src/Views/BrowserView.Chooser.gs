@@ -106,12 +106,12 @@ partial class BrowserView {
                 },
                 Summary: if picker.SavingMany {
                     picker.Request.Files.Count.ToString() + " files in " + FolderName(ChooserDestination())
-                } else if picker.Request.Directory && Model.SelectedCount() == 0 {
+                } else if picker.Request.Directory && Model.ActivePane().SelectedPaths.Count == 0 {
                     "Current folder"
-                } else if Model.SelectedCount() > 1 {
-                    Model.SelectedCount().ToString() + " selected"
+                } else if Model.ActivePane().SelectedPaths.Count > 1 {
+                    Model.ActivePane().SelectedPaths.Count.ToString() + " selected"
                 } else {
-                    Model.SelectionSummary()
+                    Model.ActivePane().SelectionSummary()
                 },
                 Error: chooserError,
                 OnAccept: () -> AcceptChooser(),
@@ -124,7 +124,7 @@ partial class BrowserView {
     }
 
     private func ChooserDestination() string {
-        if let entry = Model.SingleSelectedEntry() {
+        if let entry = Model.ActivePane().SingleSelectedEntry() {
             if entry.IsDirectory {
                 return entry.FullPath
             }
@@ -138,7 +138,7 @@ partial class BrowserView {
         }
         chooserError = ""
         if picker.Saving {
-            if let entry = Model.SingleSelectedEntry() {
+            if let entry = Model.ActivePane().SingleSelectedEntry() {
                 if !entry.IsDirectory {
                     chooserName = entry.Name
                 }
@@ -151,7 +151,7 @@ partial class BrowserView {
             Model.OpenSelected()
             return
         }
-        if let entry = Model.SelectedEntry() {
+        if let entry = Model.ActivePane().SelectedEntry() {
             if entry.IsDirectory && (doubleClick || !picker.Request.Directory || picker.SavingMany) {
                 Model.Navigate(entry.FullPath)
                 return
@@ -160,7 +160,7 @@ partial class BrowserView {
                 chooserName = entry.Name
             }
             if picker.Request.Method == "OpenFile" && !picker.Request.Directory
-            && !entry.IsDirectory && Model.SelectedCount() == 0 {
+            && !entry.IsDirectory && Model.ActivePane().SelectedPaths.Count == 0 {
                 Model.Select(Model.ActivePane().Selected)
             }
         }
@@ -177,8 +177,17 @@ partial class BrowserView {
             Rebuild()
             return
         }
-        if picker.Request.Method == "OpenFile" && !picker.Request.Directory && Model.SelectedCount() == 1 {
-            if let entry = Model.SingleSelectedEntry() {
+        if picker
+            .Request
+            .Method == "OpenFile" &&
+            !picker
+            .Request
+            .Directory &&
+            Model
+            .ActivePane()
+            .SelectedPaths
+            .Count == 1 {
+            if let entry = Model.ActivePane().SingleSelectedEntry() {
                 if entry.IsDirectory {
                     Model.Navigate(entry.FullPath)
                     return

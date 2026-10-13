@@ -11,17 +11,17 @@ partial class BrowserView {
     private var previewSource ImageSource?
 
     private func PreviewInput() PreviewSidebarInput {
-        let entry = Model.SelectedEntry()
+        let entry = Model.ActivePane().SelectedEntry()
         let sizeText = if let selected = entry {
             FileSystemService.FormatSize(selected.Size)
         } else {
             ""
         }
-        let preview = Model.Preview
+        let preview = Model.Previews.Preview
         return PreviewSidebarInput{
             Title: entry?.Name ?? "Preview",
             Preview: preview,
-            Image: Model.PreviewImage,
+            Image: Model.Previews.PreviewImage,
             Entry: entry,
             SizeText: entry?.IsDirectory == true ? "Folder": sizeText,
             Detail: if preview.Error != "" {
@@ -43,27 +43,27 @@ partial class BrowserView {
         }
         framebufferWidth = metrics.FramebufferWidth
         framebufferHeight = metrics.FramebufferHeight
-        Model.SetPreviewSize(framebufferWidth, framebufferHeight)
+        Model.Previews.SetPreviewSize(framebufferWidth, framebufferHeight)
         SchedulePreviewResize()
     }
 
     private func PreviewChanged() {
-        if Model.PreviewResizeFailed {
+        if Model.Previews.PreviewResizeFailed {
             previewResizeTimer?.Dispose()
             previewResizeTimer = nil
             return
         }
-        if previewVersion != Model.PreviewVersion || previewSource != Model.PreviewImage {
+        if previewVersion != Model.Previews.PreviewVersion || previewSource != Model.Previews.PreviewImage {
             previewResizeTimer?.Dispose()
             previewResizeTimer = nil
-            previewVersion = Model.PreviewVersion
-            previewSource = Model.PreviewImage
+            previewVersion = Model.Previews.PreviewVersion
+            previewSource = Model.Previews.PreviewImage
             SchedulePreviewResize()
         }
     }
 
     private func SchedulePreviewResize() {
-        if framebufferWidth > 0 && framebufferHeight > 0 && Model.NeedsPreviewResize(
+        if framebufferWidth > 0 && framebufferHeight > 0 && Model.Previews.NeedsPreviewResize(
             framebufferWidth,
             framebufferHeight
         ) {
@@ -71,7 +71,7 @@ partial class BrowserView {
             previewResizeTimer = Host.SetTimeout(
                 () -> {
                     previewResizeTimer = nil
-                    Model.RefreshPreviewBounds(framebufferWidth, framebufferHeight)
+                    Model.Previews.RefreshPreviewBounds(framebufferWidth, framebufferHeight)
                 },
                 180
             )

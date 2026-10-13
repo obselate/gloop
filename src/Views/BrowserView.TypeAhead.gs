@@ -46,10 +46,10 @@ partial class BrowserView {
             prefix = text
             start = pane.Selected + 1
         }
-        var index = Model.FindPrefix(pane, prefix, start)
+        var index = pane.FindPrefix(prefix, start)
         if index < 0 && !fresh && !repeated {
             prefix = text
-            index = Model.FindPrefix(pane, prefix, pane.Selected + 1)
+            index = pane.FindPrefix(prefix, pane.Selected + 1)
         }
         typedAt = now
         typedPrefix = if index >= 0 {

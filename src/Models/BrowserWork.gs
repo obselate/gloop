@@ -11,9 +11,11 @@ data struct PreviewRequest {
 }
 
 data struct DirectoryRequest {
-    internal var Index int32
+    internal var Pane BrowserPane
     internal var Generation int32
     internal var Path string
+    internal var Kind LocationKind
+    internal var AtTrashRoot bool
     internal var ShowHidden bool
     internal var Mode string
     internal var HistoryIndex int32
@@ -21,7 +23,7 @@ data struct DirectoryRequest {
 }
 
 data struct ViewRequest {
-    internal var Index int32
+    internal var Pane BrowserPane
     internal var Generation int32
     internal var Entries List[FileEntry]
     internal var Filter string
@@ -29,6 +31,13 @@ data struct ViewRequest {
     internal var Column string
     internal var Descending bool
     internal var SelectedPath string
+}
+
+enum OperationAdmission {
+    Closed;
+    Full;
+    Queued;
+    StartWorker
 }
 
 enum OperationKind {
@@ -48,4 +57,10 @@ data struct OperationRequest {
     internal var Destination string
     internal var Name string
     internal var ClipboardVersion int32
+}
+
+data struct OperationResult {
+    internal var Source string
+    internal var FinalPath string
+    internal var Error string
 }
