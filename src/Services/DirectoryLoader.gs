@@ -14,6 +14,7 @@ class DirectoryLoader {
     private let settings AppSettings
     private let loads Dictionary[BrowserPane, LatestWork] = Dictionary[BrowserPane, LatestWork]()
     private let views Dictionary[BrowserPane, LatestWork] = Dictionary[BrowserPane, LatestWork]()
+    private let watches Dictionary[BrowserPane, DirectoryWatch] = Dictionary[BrowserPane, DirectoryWatch]()
 
     internal init(window Window, controller BrowserController, settings AppSettings) {
         this.window = window
@@ -26,6 +27,12 @@ class DirectoryLoader {
     }
 
     internal func Close() {
+        for watch in watches.Values {
+            watch.Close()
+        }
+
+        watches.Clear()
+
         for queue in loads.Values {
             queue.Close()
         }
@@ -38,6 +45,40 @@ class DirectoryLoader {
     internal func AddPane(pane BrowserPane) {
         loads.Add(pane, LatestWork())
         views.Add(pane, LatestWork())
+    }
+
+    internal func StopWatch(pane BrowserPane) {
+        if watches.ContainsKey(pane) {
+            watches[pane].Close()
+            watches.Remove(pane)
+        }
+    }
+
+    internal func WatchPane(pane BrowserPane) {
+        if controller.Panes.IndexOf(pane) >= controller.VisiblePaneCount || pane.Kind != LocationKind.Folder {
+            StopWatch(pane)
+            return
+        }
+        if pane.DirectoryPath == "" || watches.ContainsKey(pane) {
+            return
+        }
+
+        watches.Add(
+            pane,
+            DirectoryWatch(
+                window,
+                pane.DirectoryPath,
+                error -> {
+                    if error != "" {
+                        controller.Status = error
+                        controller.Notify()
+                        return
+                    }
+
+                    NavigateTo(pane.DirectoryPath, pane, DirectoryMode.Refresh, pane.HistoryIndex, pane.FocusedPath())
+                }
+            )
+        )
     }
 
     internal func NavigateTo(
@@ -77,6 +118,12 @@ class DirectoryLoader {
         pane.DirectoryPath = fullPath
         pane.Kind = kind
         pane.AtTrashRoot = atTrashRoot
+
+        if mode != DirectoryMode.Refresh {
+            StopWatch(pane)
+        }
+
+        WatchPane(pane)
         pane.PendingFocusPath = selectedPath
         pane.Loading = true
         pane.Error = ""
