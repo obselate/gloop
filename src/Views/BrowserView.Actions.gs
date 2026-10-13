@@ -36,7 +36,7 @@ partial class BrowserView {
         }
 
         if dialog != DialogKind.None {
-            if action == "Dismiss" {
+            if action == "Dismiss" || (action == "ShowShortcuts" && dialog == DialogKind.Shortcuts) {
                 CloseDialog()
             } else if action == "Quit" {
                 Host.RequestClose()
@@ -46,6 +46,22 @@ partial class BrowserView {
                 Host.PlatformInput.MoveFocus(false)
             } else if action == "Open" && dialog == DialogKind.MoveToTrash {
                 SubmitDialog()
+            } else if dialog == DialogKind.Shortcuts &&
+                IsMovement(action) &&
+                action != "MoveLeft" &&
+                action != "MoveRight" {
+                let offset = shortcutsScroll.ScrollOffset.Y
+                let page = shortcutsScroll.ContentBox.Height
+                let target = switch action {
+                    case "MoveUp": offset - ShortcutScrollStep
+                    case "MoveDown": offset + ShortcutScrollStep
+                    case "PageUp": offset - page
+                    case "PageDown": offset + page
+                    case "MoveFirst": 0.0
+                    case "MoveLast": shortcutsScroll.ScrollRange.Y
+                    default: offset
+                }
+                shortcutsScroll.ScrollTo(0, Math.Max(0, target))
             } else {
                 return
             }
@@ -344,6 +360,10 @@ partial class BrowserView {
             }
             case "OpenSettings" {
                 OpenPreferences()
+                return true
+            }
+            case "ShowShortcuts" {
+                OpenDialog(DialogKind.Shortcuts, "")
                 return true
             }
         }

@@ -208,14 +208,17 @@ class Ui {
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
             Gap: 6,
-            Container{
-                Padding: Edges{Left: 5, Right: 5, Top: 2, Bottom: 2},
-                BorderWidth: 1,
-                BorderColor: p.Border,
-                BorderRadius: 4,
-                Label(key, p.Muted, 10),
-            },
+            KeyHint(key, p),
             Label(label, p.Muted, 11),
+        }
+
+        internal func KeyHint(key string, p Palette) Blob -> Container{
+            FlexShrink: 0,
+            Padding: Edges{Left: 5, Right: 5, Top: 2, Bottom: 2},
+            BorderWidth: 1,
+            BorderColor: p.Border,
+            BorderRadius: 4,
+            Text{Content: key, Color: p.Muted, FontSize: 10, TextWrap: TextWrap.NoWrap, FlexShrink: 0},
         }
 
         internal func ScrollbarStyle(p Palette, inset float64 = 2) Scrollbar -> Scrollbar{
