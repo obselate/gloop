@@ -70,7 +70,7 @@ partial class BrowserView {
         preferenceTab = "Appearance"
         themeColorRole = "Background"
         revealThemeEditor = false
-        OpenDialog("Preferences", "")
+        OpenDialog(DialogKind.Preferences, "")
     }
 
     private func ResetPreferencesTab() {
@@ -138,16 +138,7 @@ partial class BrowserView {
                 FontSize: 12,
                 TextWrap: TextWrap.Wrap,
             },
-            Container{
-                MinHeight: 0,
-                FlexShrink: 1,
-                OverflowY: Overflow.Scroll,
-                ScrollbarY: Ui.ScrollbarStyle(p),
-                ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                Gap: 8,
-                Padding: Edges{Right: 12},
-                Children: rows.ToArray()
-            },
+            DialogShell.ScrollColumn(rows.ToArray(), p),
         }
     }
 
@@ -157,7 +148,7 @@ partial class BrowserView {
             let input = preferenceInputs.TryGetValue(action, out var typed) ? typed: pair.Value
             rows.Add(
                 PreferenceRow(
-                    ActionLabel(action),
+                    AppSettings.ActionCatalog[action].Label,
                     input,
                     value -> SetPreferenceBinding(action, value),
                     () -> CommitPreferenceBinding(action),
@@ -171,7 +162,7 @@ partial class BrowserView {
     private func BehaviorRows(rows List[Blob], values AppSettings, p Palette) {
         rows.Add(DialogButton("Desktop setup", () -> OpenSetup(), p))
         rows.Add(
-            PreferenceToggle.Build(
+            PreferenceRow.Toggle(
                 "Smooth scrolling",
                 values.SmoothScrolling,
                 () -> {
@@ -183,7 +174,7 @@ partial class BrowserView {
             )
         )
         rows.Add(
-            PreferenceToggle.Build(
+            PreferenceRow.Toggle(
                 "Wrap text previews",
                 values.PreviewWordWrap,
                 () -> {
@@ -195,7 +186,7 @@ partial class BrowserView {
             )
         )
         rows.Add(
-            PreferenceToggle.Build(
+            PreferenceRow.Toggle(
                 "Show preview line numbers",
                 values.PreviewLineNumbers,
                 () -> {
@@ -207,17 +198,15 @@ partial class BrowserView {
             )
         )
         rows.Add(
-            Container{
-                Handle: scrollSpeedRow,
-                OnFocus: (_) -> scrollSpeedRow.ScrollIntoView(),
-                FlexShrink: 0,
-                Padding: Edges{Left: 10, Right: 10, Top: 10, Bottom: 6},
+            PreferenceRow
+                .Build(
+                "",
                 Cell.Mount[SliderInput, Slider](
                     "scroll-speed",
                     SliderInput{
                         Value: values.ScrollSpeed,
-                        Minimum: .25,
-                        Maximum: 4,
+                        Minimum: AppSettings.MinimumScrollSpeed,
+                        Maximum: AppSettings.MaximumScrollSpeed,
                         Step: .25,
                         Label: "Scroll speed",
                         ShowValue: true,
@@ -238,7 +227,10 @@ partial class BrowserView {
                         FocusOutlineColor: p.Accent,
                     }
                 ),
-            }
+                p,
+                scrollSpeedRow,
+                true
+            ){.Padding: Edges{Left: 10, Right: 10, Top: 10, Bottom: 6}}
         )
     }
 
@@ -246,12 +238,12 @@ partial class BrowserView {
         let choices = List[Blob]()
         choices.Add(
             ThemeChoice.Build(
-                "Custom",
+                AppSettings.CustomThemeName,
                 values.CustomTheme,
-                values.ThemeName == "Custom",
+                values.ThemeName == AppSettings.CustomThemeName,
                 p.Keyboard,
                 () -> {
-                    values.SelectTheme("Custom")
+                    values.SelectTheme(AppSettings.CustomThemeName)
                     revealThemeEditor = true
                     ApplyPreferences()
                 }
@@ -287,7 +279,7 @@ partial class BrowserView {
             }
             rows.Add(pair)
         }
-        if values.ThemeName == "Custom" {
+        if values.ThemeName == AppSettings.CustomThemeName {
             AppearanceColorRows(rows, values, p, compact)
         }
     }
@@ -370,55 +362,20 @@ partial class BrowserView {
             handle = ElementHandle()
             preferenceHandles[label] = handle
         }
-        return Container{
-            MinHeight: 38,
-            FlexShrink: 0,
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Gap: 18,
-            Container{
-                FlexGrow: 1,
-                FlexBasis: 0,
-                MinWidth: 0,
-                Text{Content: label, Color: p.Text, FontSize: 13, TextWrap: TextWrap.Wrap},
-            },
-            TextEntry{
-                Handle: handle,
-                Value: value,
-                Controlled: true,
-                Width: 160,
-                Height: 34,
-                Padding: Edges{Left: 10, Right: 10},
-                BackgroundColor: p.Background,
-                Color: p.Text,
-                FontSize: 12,
-                BorderWidth: 1,
-                BorderColor: invalid ? p.Error: p.Border,
-                BorderRadius: 5,
-                Focus: Style{BorderColor: invalid ? p.Error: p.Accent},
-                OnChange: change,
-                OnSubmit: (_) -> commit(),
-                OnFocus: (_) -> handle.ScrollIntoView(),
-                OnBlur: (_) -> commit(),
-                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: label, Invalid: invalid},
-            },
-        }
-    }
-
-    private func ActionLabel(action string) string {
-        if action == "ContextMenu" {
-            return "Open context menu"
-        }
-        if action == "ContextMenuAlternate" {
-            return "Open context menu (alternate)"
-        }
-        let result = System.Text.StringBuilder()
-        for index in 0 ... action.Length {
-            if index > 0 && Char.IsUpper(action[index]) {
-                result.Append(' ')
-            }
-            result.Append(action[index])
-        }
-        return result.ToString()
+        let field = TextField.Build(
+            value,
+            change,
+            (_) -> commit(),
+            label,
+            p,
+            invalid,
+            160,
+            handle,
+            fontSize: 12,
+            padding: 10
+        )
+        field.OnFocus = (_) -> handle.ScrollIntoView()
+        field.OnBlur = (_) -> commit()
+        return PreferenceRow.Build(label, field, p)
     }
 }

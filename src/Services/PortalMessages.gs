@@ -22,6 +22,10 @@ internal class PortalCall {
 }
 
 internal class PortalMessages {
+    private const FileLimit int32 = 4096
+    private const PathByteLimit int32 = 16384
+    private const OptionLimit int32 = 128
+
     shared {
         internal func Read(context MethodContext) PortalCall {
             let reader = context.Request.GetBodyReader()
@@ -55,19 +59,19 @@ internal class PortalMessages {
                 } else if key == "current_file" {
                     request.CurrentFile = PathBytes(value)
                 } else if key == "files" {
-                    Bound(value.Count, 4096)
+                    Bound(value.Count, FileLimit)
                     for i in 0 ... value.Count {
                         request.Files.Add(PathBytes(value.GetItem(i)))
                     }
                 } else if key == "filters" {
-                    Bound(value.Count)
+                    Bound(value.Count, OptionLimit)
                     for i in 0 ... value.Count {
                         request.Filters.Add(ReadFilter(value.GetItem(i)))
                     }
                 } else if key == "current_filter" {
                     request.CurrentFilter = ReadFilter(value)
                 } else if key == "choices" {
-                    Bound(value.Count)
+                    Bound(value.Count, OptionLimit)
                     for i in 0 ... value.Count {
                         let item = value.GetItem(i)
                         let choice = PortalChoice{
@@ -76,7 +80,7 @@ internal class PortalMessages {
                             Selected: item.GetItem(3).GetString(),
                         }
                         let choices = item.GetItem(2)
-                        Bound(choices.Count)
+                        Bound(choices.Count, OptionLimit)
                         for j in 0 ... choices.Count {
                             let option = choices.GetItem(j)
                             choice.Options.Add(
@@ -119,7 +123,7 @@ internal class PortalMessages {
         private func ReadFilter(value VariantValue) PortalFilter {
             let filter = PortalFilter{Name: value.GetItem(0).GetString()}
             let patterns = value.GetItem(1)
-            Bound(patterns.Count)
+            Bound(patterns.Count, OptionLimit)
             for i in 0 ... patterns.Count {
                 let item = patterns.GetItem(i)
                 let kind = item.GetItem(0).GetUInt32()
@@ -133,7 +137,7 @@ internal class PortalMessages {
 
         private func PathBytes(value VariantValue) string {
             let bytes = value.GetArray[byte]()
-            if bytes.Length > 16384 {
+            if bytes.Length > PathByteLimit {
                 throw InvalidDataException("File chooser path is too long")
             }
             var length = bytes.Length
@@ -151,7 +155,7 @@ internal class PortalMessages {
             return UTF8Encoding(false, true).GetString(bytes, 0, length)
         }
 
-        private func Bound(count int32, maximum int32 = 128) {
+        private func Bound(count int32, maximum int32) {
             if count > maximum {
                 throw InvalidDataException("Too many file chooser options")
             }

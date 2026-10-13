@@ -31,7 +31,7 @@ class PreviewLoader {
         previewHeight = height
         targetPreviewWidth = width
         targetPreviewHeight = height
-        Preview = PreviewData{Kind: "", Text: "", Path: "", Error: ""}
+        Preview = PreviewData{Kind: PreviewKind.None, Text: "", Path: "", Error: ""}
     }
 
     internal prop PreviewVersion int32 {
@@ -101,7 +101,7 @@ class PreviewLoader {
         loadedPreviewWidth = 0
         loadedPreviewHeight = 0
         previewAtOriginalSize = false
-        Preview = PreviewData{Kind: "", Text: "", Path: "", Error: ""}
+        Preview = PreviewData{Kind: PreviewKind.None, Text: "", Path: "", Error: ""}
         if let source = PreviewImage {
             source.Dispose()
         }
@@ -110,7 +110,7 @@ class PreviewLoader {
             Clear()
             return
         }
-        Preview = PreviewData{Kind: "loading", Path: entry.FullPath}
+        Preview = PreviewData{Kind: PreviewKind.Loading, Path: entry.FullPath}
         Submit(
             PreviewRequest{
                 Path: entry.FullPath,
@@ -125,7 +125,7 @@ class PreviewLoader {
         controller.PreviewVisible &&
         PreviewImage != nil &&
         !previewAtOriginalSize &&
-        Preview.Kind == "image" &&
+        Preview.Kind == PreviewKind.Image &&
         (width > previewWidth || height > previewHeight)
 
     internal func SetPreviewSize(width int32, height int32) {
@@ -163,7 +163,7 @@ class PreviewLoader {
             }
             return
         }
-        if data.Kind == "error" && PreviewImage != nil && Preview.Path == request.Path {
+        if data.Kind == PreviewKind.Error && PreviewImage != nil && Preview.Path == request.Path {
             previewWidth = loadedPreviewWidth
             previewHeight = loadedPreviewHeight
             previewResizeError = "Preview resize failed: " + data.Error
@@ -174,7 +174,7 @@ class PreviewLoader {
         if let old = PreviewImage {
             old.Dispose()
         }
-        if data.Kind != "error" {
+        if data.Kind != PreviewKind.Error {
             if controller.Status == previewResizeError && previewResizeError != "" {
                 controller.Status = ""
             }
@@ -201,7 +201,12 @@ class PreviewLoader {
             work.Submit(
                 generation -> Load(request, generation),
                 (_, failure) -> {
-                    let data = PreviewData{Kind: "error", Text: "", Path: request.Path, Error: failure.Message}
+                    let data = PreviewData{
+                        Kind: PreviewKind.Error,
+                        Text: "",
+                        Path: request.Path,
+                        Error: failure.Message
+                    }
                     try {
                         window.Post(() -> ApplyPreview(request, data, nil))
                     } catch (postFailure Exception) { }
@@ -237,7 +242,7 @@ class PreviewLoader {
         var source ImageSource?
         try {
             data = FileSystemService().ReadPreview(request.Path, () -> !work.IsCurrent(generation))
-            if data.Kind == "image" && work.IsCurrent(generation) {
+            if data.Kind == PreviewKind.Image && work.IsCurrent(generation) {
                 let cancellation = CancellationTokenSource()
                 if BeginImage(generation, cancellation) {
                     try {
@@ -256,14 +261,15 @@ class PreviewLoader {
                 }
             }
         } catch (failure Exception) {
-            let error = if data.Kind == "image" && failure is ImageLimitException {
+            let error = if data.Kind == PreviewKind.Image && failure is ImageLimitException {
                 "This image is too large to preview."
-            } else if data.Kind == "image" && (failure is InvalidDataException || failure is NotSupportedException) {
+            } else if data.Kind == PreviewKind.Image &&
+                (failure is InvalidDataException || failure is NotSupportedException) {
                 "This image could not be read. It may be damaged or use an unsupported format."
             } else {
                 failure.Message
             }
-            data = PreviewData{Kind: "error", Text: "", Path: request.Path, Error: error}
+            data = PreviewData{Kind: PreviewKind.Error, Text: "", Path: request.Path, Error: error}
         }
         if !work.IsCurrent(generation) {
             if let staleSource = source {

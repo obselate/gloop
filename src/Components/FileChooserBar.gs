@@ -34,27 +34,16 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
         if request.Method == "SaveFile" {
             fields.Children.Add(Ui.Label("File name", p.Muted, 12))
             fields.Children.Add(
-                TextEntry{
-                    Handle: value.NameHandle,
-                    Value: value.Name,
-                    Controlled: true,
-                    AutoFocus: true,
-                    FlexGrow: 1,
-                    FlexBasis: 0,
-                    MinWidth: 120,
-                    Height: 32,
-                    Padding: Edges{Left: 8, Right: 8},
-                    BackgroundColor: p.Surface,
-                    Color: p.Text,
-                    BorderWidth: 1,
-                    BorderColor: p.Border,
-                    BorderRadius: 4,
-                    Focus: Style{BorderColor: p.Accent},
-                    FontSize: 13,
-                    Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "File name"},
-                    OnChange: value.OnNameChange,
-                    OnSubmit: (_) -> value.OnAccept(),
-                }
+                TextField
+                    .Build(
+                    value.Name,
+                    value.OnNameChange,
+                    (_) -> value.OnAccept(),
+                    "File name",
+                    p,
+                    handle: value.NameHandle,
+                    autoFocus: true
+                ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 120}
             )
         }
         if request.Filters.Count > 0 {
@@ -188,7 +177,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
         let p = value.Palette
         let request = value.Request
         if value.Error != "" {
-            root.Children.Add(Text{Content: value.Error, Color: p.Error, FontSize: 12, TextWrap: TextWrap.Wrap})
+            root.Children.Add(Ui.ErrorText(value.Error, p))
         }
         root.Children.Add(
             Container{
@@ -236,9 +225,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     return row
                 },
                 CreatePopup: (_, panel) -> {
-                    panel.BackgroundColor = p.Overlay
-                    panel.BackdropBlur = p.Blur
-                    panel.BorderColor = p.Edge
+                    panel.BasedOn = p.PopupStyle()
                     return panel
                 },
                 CreateRow: (input, item, row) -> {
@@ -261,20 +248,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
 
     private func ActionButton(label string, action Action, value FileChooserBarInput, primary bool = false) Blob {
         let p = value.Palette
-        let button = Ui.ActionButton(label, action, p, primary, primary ? acceptHandle: cancelHandle)
-        button.MaxWidth = 200
-        button.MinWidth = 0
-        if button is Button {
-            for child in button.Children {
-                if child is Text {
-                    child.Width = Percent(100)
-                    child.MaxWidth = 172
-                    child.MinWidth = 0
-                    child.TextWrap = TextWrap.NoWrap
-                    child.TextTrimming = TextTrimming.Ellipsis
-                }
-            }
-        }
+        let button = Ui.ActionButton(label, action, p, primary, primary ? acceptHandle: cancelHandle, 200)
         return Tip("action-" + label, label, button, 200, value)
     }
 
@@ -284,21 +258,13 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
             MaxWidth: maxWidth,
             MinWidth: 0,
             FlexShrink: 0,
-            Cell.Mount[TooltipInput, Tooltip](
+            Ui.HoverLabel(
                 key,
-                TooltipInput{
-                    Window: value.Host,
-                    Content: Text{Content: label, Color: p.Text, FontSize: 12, MaxWidth: 320, TextWrap: TextWrap.Wrap},
-                    BubbleStyle: Style{
-                        BackgroundColor: p.Overlay,
-                        BackdropBlur: p.Blur,
-                        Padding: 8,
-                        BorderWidth: 1,
-                        BorderColor: p.Border,
-                        BorderRadius: 4
-                    },
-                    Target: Container{MinWidth: 0, MaxWidth: maxWidth, OverflowX: Overflow.Hidden, target},
-                }
+                label,
+                Container{MinWidth: 0, MaxWidth: maxWidth, OverflowX: Overflow.Hidden, target},
+                value.Host,
+                p,
+                wrap: true
             ),
         }
     }

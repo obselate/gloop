@@ -67,10 +67,21 @@ class ThumbnailItem {
 }
 
 class ThumbnailService : IDisposable {
+    private const MaximumEdgePixels int32 = 160
+    private const CacheItemLimit int32 = 128
+    private const QueueLimit int32 = 64
+    private const CacheByteLimit int64 = 16777216
+    private const EncodedImageByteLimit int32 = 268435456
+    private const ImageSidePixelLimit int32 = 16384
+    private const TextByteLimit int32 = 4096
+    private const TextLineLimit int32 = 6
+    private const TextCharacterLimit int32 = 600
+    private const TextColumnLimit int32 = 96
+
     shared {
         internal let ImageLimits ImageDecodeLimits = ImageDecodeLimits{
-            MaxEncodedBytes: 268435456,
-            MaxPixelsPerSide: 16384
+            MaxEncodedBytes: EncodedImageByteLimit,
+            MaxPixelsPerSide: ImageSidePixelLimit
         }
     }
 
@@ -90,12 +101,15 @@ class ThumbnailService : IDisposable {
 
     internal func Acquire(entry FileEntry, maxEdge int32, invalidate Action) ThumbnailLease {
         let extension = Path.GetExtension(entry.Name).ToLowerInvariant()
-        let image = imageExtension(extension)
-        let supported = !entry.IsDirectory && !entry.IsSymlink && entry.Size > 0 && (image || textExtension(extension))
+        let image = FileKinds.IsImage(extension)
+        let supported = !entry.IsDirectory &&
+            !entry.IsSymlink &&
+            entry.Size > 0 &&
+            (image || FileKinds.IsText(extension))
         if !supported || maxEdge <= 0 {
             return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
         }
-        let edge = Math.Min(maxEdge, 160)
+        let edge = Math.Min(maxEdge, MaximumEdgePixels)
         let key = entry.FullPath + "\0" + entry.Modified.Ticks.ToString() + "\0" + entry.Size.ToString() +
             "\0" +
             edge.ToString()
@@ -106,7 +120,7 @@ class ThumbnailService : IDisposable {
             if !closed {
                 if !items.TryGetValue(key, out item) {
                     makeRoom()
-                    if waiting.Count == 0 && items.Count < 128 && pending.Count < 64 {
+                    if waiting.Count == 0 && items.Count < CacheItemLimit && pending.Count < QueueLimit {
                         item = ThumbnailItem(key, entry, image, edge)
                         items.Add(key, item)
                         pending.Add(item)
@@ -277,7 +291,7 @@ class ThumbnailService : IDisposable {
                     continue
                 }
                 makeRoom()
-                if items.Count >= 128 || pending.Count >= 64 {
+                if items.Count >= CacheItemLimit || pending.Count >= QueueLimit {
                     capacityBlocked = true
                     index++
                     continue
@@ -311,7 +325,7 @@ class ThumbnailService : IDisposable {
     }
 
     private func makeRoom() {
-        while items.Count >= 128 || bytes > 16777216 {
+        while items.Count >= CacheItemLimit || bytes > CacheByteLimit {
             var oldest ThumbnailItem?
             for candidate in items.Values {
                 if candidate
@@ -348,7 +362,7 @@ class ThumbnailService : IDisposable {
     }
 
     private func loadText(item ThumbnailItem) ThumbnailData {
-        let limit = int32(Math.Min(item.Entry.Size, int64(4096)))
+        let limit = int32(Math.Min(item.Entry.Size, int64(TextByteLimit)))
         let buffer = [limit]uint8
         var count int32
         using let stream = FileStream(item.Entry.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
@@ -362,21 +376,12 @@ class ThumbnailService : IDisposable {
             }
             count += read
         }
-        for index in 0 ... count {
-            let value = buffer[index]
-            if value == 0 || (value < 32 && value != 9 && value != 10 && value != 13) {
-                return ThumbnailData{}
-            }
+        if TextContent.HasBinaryBytes(buffer, count, true) {
+            return ThumbnailData{}
         }
         while count > 0 {
             try {
-                let start = if count >= 3 && buffer[0] == 239 && buffer[1] == 187 && buffer[2] == 191 {
-                    3
-                } else {
-                    0
-                }
-                let text = UTF8Encoding(false, true).GetString(buffer, start, count - start)
-                return snippet(text)
+                return snippet(TextContent.Decode(buffer, count))
             } catch (failure DecoderFallbackException) {
                 if count < limit - 3 {
                     return ThumbnailData{}
@@ -392,7 +397,7 @@ class ThumbnailService : IDisposable {
         var lines int32 = 0
         var columns int32 = 0
         for character in text {
-            if lines >= 6 || output.Length >= 600 {
+            if lines >= TextLineLimit || output.Length >= TextCharacterLimit {
                 break
             }
             if Char.IsControl(character) && character != '\r' && character != '\n' && character != '\t' {
@@ -405,7 +410,7 @@ class ThumbnailService : IDisposable {
                 output.Append('\n')
                 lines++
                 columns = 0
-            } else if columns < 96 {
+            } else if columns < TextColumnLimit {
                 output.Append(
                     if character == '\t' {
                         ' '
@@ -422,30 +427,6 @@ class ThumbnailService : IDisposable {
         }
         return ThumbnailData{Kind: "text", Text: value}
     }
-
-    private func imageExtension(extension string) bool ->
-    extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".gif"
-
-    private func textExtension(extension string) bool ->
-    extension == "" ||
-        extension == ".txt" ||
-        extension == ".md" ||
-        extension == ".log" ||
-        extension == ".json" ||
-        extension == ".yaml" ||
-        extension == ".yml" ||
-        extension == ".toml" ||
-        extension == ".xml" ||
-        extension == ".html" ||
-        extension == ".css" ||
-        extension == ".js" ||
-        extension == ".ts" ||
-        extension == ".gs" ||
-        extension == ".cs" ||
-        extension == ".sh" ||
-        extension == ".py" ||
-        extension == ".rs" ||
-        extension == ".go"
 
     /// Cancels pending work and releases cached sources.
     public func Dispose() {

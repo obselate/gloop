@@ -8,6 +8,8 @@ import System.Collections.Generic
 import System.IO
 
 class PlacesSidebar {
+    internal const MinimumWidth float64 = 144
+
     shared {
         internal func Build(
             path string,
@@ -18,6 +20,7 @@ class PlacesSidebar {
             window Window,
             p Palette,
             standardPlaces IReadOnlyList[KeyValuePair[string, string]],
+            home string,
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
             showPreferences bool = true,
@@ -42,6 +45,7 @@ class PlacesSidebar {
                 bookmarkKey,
                 window,
                 p,
+                home,
                 drop,
                 dropPath,
                 bookmarkDrop,
@@ -134,6 +138,7 @@ class PlacesSidebar {
             bookmarkKey string,
             window Window,
             p Palette,
+            home string,
             drop Func[string, DropTarget]?,
             dropPath string,
             bookmarkDrop Func[int32, DropTarget]?,
@@ -164,11 +169,7 @@ class PlacesSidebar {
             }
             for index in 0 ... bookmarks.Count {
                 let bookmark = bookmarks[index]
-                let name = if bookmark == "/" {
-                    "File system"
-                } else {
-                    Path.GetFileName(bookmark)
-                }
+                let name = Locations.DisplayName(bookmark, home)
                 if let insert = bookmarkDrop {
                     saved.Children.Add(
                         DropInsertion.Build(
@@ -280,27 +281,14 @@ class PlacesSidebar {
             contextMenuKey Action[KeyEvent, Point]? = nil
         ) Blob -> Container{
             FlexShrink: 0,
-            Cell.Mount[TooltipInput, Tooltip](
+            Ui.HoverLabel(
                 path,
-                TooltipInput{
-                    Window: window,
-                    Text: path,
-                    Placement: placement,
-                    BubbleStyle: Ui.BubbleStyle(p),
-                    Content: Text{Content: path, Color: p.Text, FontSize: 11, MaxWidth: 320, TextWrap: TextWrap.Wrap,},
-                    Target: Place(
-                        "bookmark",
-                        label,
-                        path,
-                        current,
-                        navigate,
-                        p,
-                        drop,
-                        dropPath,
-                        contextMenu,
-                        contextMenuKey
-                    ),
-                }
+                path,
+                Place("bookmark", label, path, current, navigate, p, drop, dropPath, contextMenu, contextMenuKey),
+                window,
+                p,
+                placement,
+                true
             ),
         }
 

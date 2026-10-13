@@ -13,7 +13,7 @@ internal class AppSettings {
     internal var PreviewWordWrap bool
     internal var PreviewLineNumbers bool
     internal var SplitView bool
-    internal var ViewMode string
+    internal var ViewMode ViewMode
     internal var SmoothScrolling bool
     internal var ScrollSpeed float64
     internal let Keybindings Dictionary[string, string]
@@ -31,61 +31,19 @@ internal class AppSettings {
         PreviewWordWrap = true
         PreviewLineNumbers = true
         SplitView = false
-        ViewMode = "list"
+        ViewMode = ViewMode.List
         SmoothScrolling = true
         ScrollSpeed = 1.5
         Theme = ThemePalette()
         ThemeName = "Glass"
         CustomTheme = Theme.Clone()
-        Keybindings = Dictionary[string, string](StringComparer.Ordinal)
+        Keybindings = Dictionary[string, string](ActionCatalog.Count, StringComparer.Ordinal)
         UnknownKeybindings = Dictionary[string, string](StringComparer.Ordinal)
         UnknownSettings = Dictionary[string, JsonElement](StringComparer.Ordinal)
         Bookmarks = List[string]()
-        Keybindings["MoveUp"] = "Up"
-        Keybindings["MoveDown"] = "Down"
-        Keybindings["MoveLeft"] = "Left"
-        Keybindings["MoveRight"] = "Right"
-        Keybindings["MoveFirst"] = "Home"
-        Keybindings["MoveLast"] = "End"
-        Keybindings["PageUp"] = "PageUp"
-        Keybindings["PageDown"] = "PageDown"
-        Keybindings["Open"] = "Enter"
-        Keybindings["ContextMenu"] = "Shift+F10"
-        Keybindings["ContextMenuAlternate"] = "Menu"
-        Keybindings["SelectAll"] = "Ctrl+A"
-        Keybindings["ToggleSelection"] = "Ctrl+Space"
-        Keybindings["OpenTerminal"] = "F4"
-        Keybindings["ViewList"] = "Ctrl+Number1"
-        Keybindings["ViewTiles"] = "Ctrl+Number2"
-        Keybindings["Parent"] = "Alt+Up"
-        Keybindings["Back"] = "Alt+Left"
-        Keybindings["Forward"] = "Alt+Right"
-        Keybindings["FocusLocation"] = "Ctrl+L"
-        Keybindings["FocusFilter"] = "Ctrl+F"
-        Keybindings["TogglePreview"] = "Space"
-        Keybindings["ToggleSplit"] = "Ctrl+S"
-        Keybindings["NextPane"] = "Ctrl+Tab"
-        Keybindings["FocusNext"] = "Tab"
-        Keybindings["FocusPrevious"] = "Shift+Tab"
-        Keybindings["ToggleHidden"] = "Ctrl+H"
-        Keybindings["ToggleBookmark"] = "Ctrl+D"
-        Keybindings["OpenBookmarks"] = "Ctrl+B"
-        Keybindings["Refresh"] = "F5"
-        Keybindings["NewFolder"] = "Ctrl+Shift+N"
-        Keybindings["Rename"] = "F2"
-        Keybindings["Copy"] = "Ctrl+C"
-        Keybindings["Cut"] = "Ctrl+X"
-        Keybindings["Paste"] = "Ctrl+V"
-        Keybindings["CopyPath"] = "Ctrl+Shift+C"
-        Keybindings["Trash"] = "Delete"
-        Keybindings["Properties"] = "Alt+Enter"
-        Keybindings["Restore"] = "Ctrl+Shift+R"
-        Keybindings["DeletePermanently"] = "Shift+Delete"
-        Keybindings["EmptyTrash"] = "Ctrl+Shift+Delete"
-        Keybindings["ShowInFolder"] = "Ctrl+Shift+O"
-        Keybindings["Dismiss"] = "Escape"
-        Keybindings["Quit"] = "Ctrl+Q"
-        Keybindings["OpenSettings"] = "Ctrl+Comma"
+        for action in ActionCatalog {
+            Keybindings[action.Key] = action.Value.Default
+        }
     }
 
     internal func ActionFor(key string, ctrl bool, alt bool, shift bool, super bool) string {
@@ -199,7 +157,7 @@ internal class AppSettings {
 
     internal func SelectTheme(name string) {
         ThemeName = name
-        if name == "Custom" {
+        if name == CustomThemeName {
             Theme.ApplyFrom(CustomTheme)
         } else {
             Theme = ThemePresets.Create(name)
@@ -218,7 +176,7 @@ internal class AppSettings {
         if !hasThemeName {
             let preset = ThemePresets.Match(Theme)
             ThemeName = if preset == "" {
-                "Custom"
+                CustomThemeName
             } else {
                 preset
             }
@@ -226,7 +184,7 @@ internal class AppSettings {
         if ThemePresets.Contains(ThemeName) {
             Theme = ThemePresets.Create(ThemeName)
         }
-        if !hasCustomTheme && ThemeName == "Custom" {
+        if !hasCustomTheme && ThemeName == CustomThemeName {
             CustomTheme.ApplyFrom(Theme)
         }
     }
@@ -273,13 +231,85 @@ internal class AppSettings {
     }
 
     shared {
+        internal let ActionCatalog Dictionary[string, KeybindingAction] = map[string, KeybindingAction]{
+            "MoveUp": KeybindingAction{Label: "Move Up", Default: "Up"},
+            "MoveDown": KeybindingAction{Label: "Move Down", Default: "Down"},
+            "MoveLeft": KeybindingAction{Label: "Move Left", Default: "Left"},
+            "MoveRight": KeybindingAction{Label: "Move Right", Default: "Right"},
+            "MoveFirst": KeybindingAction{Label: "Move First", Default: "Home"},
+            "MoveLast": KeybindingAction{Label: "Move Last", Default: "End"},
+            "PageUp": KeybindingAction{Label: "Page Up", Default: "PageUp"},
+            "PageDown": KeybindingAction{Label: "Page Down", Default: "PageDown"},
+            "Open": KeybindingAction{Label: "Open", Default: "Enter"},
+            "ContextMenu": KeybindingAction{Label: "Open context menu", Default: "Shift+F10"},
+            "ContextMenuAlternate": KeybindingAction{Label: "Open context menu (alternate)", Default: "Menu"},
+            "SelectAll": KeybindingAction{Label: "Select All", Default: "Ctrl+A"},
+            "ToggleSelection": KeybindingAction{Label: "Toggle Selection", Default: "Ctrl+Space"},
+            "OpenTerminal": KeybindingAction{Label: "Open Terminal", Default: "F4"},
+            "OpenTerminalHere": KeybindingAction{Label: "Open Terminal Here", Default: "Ctrl+F4"},
+            "ViewList": KeybindingAction{Label: "View List", Default: "Ctrl+Number1"},
+            "ViewTiles": KeybindingAction{Label: "View Tiles", Default: "Ctrl+Number2"},
+            "Parent": KeybindingAction{Label: "Parent", Default: "Alt+Up"},
+            "Back": KeybindingAction{Label: "Back", Default: "Alt+Left"},
+            "Forward": KeybindingAction{Label: "Forward", Default: "Alt+Right"},
+            "FocusLocation": KeybindingAction{Label: "Focus Location", Default: "Ctrl+L"},
+            "FocusFilter": KeybindingAction{Label: "Focus Filter", Default: "Ctrl+F"},
+            "TogglePreview": KeybindingAction{Label: "Toggle Preview", Default: "Space"},
+            "ToggleSplit": KeybindingAction{Label: "Toggle Split", Default: "Ctrl+S"},
+            "NextPane": KeybindingAction{Label: "Next Pane", Default: "Ctrl+Tab"},
+            "FocusNext": KeybindingAction{Label: "Focus Next", Default: "Tab"},
+            "FocusPrevious": KeybindingAction{Label: "Focus Previous", Default: "Shift+Tab"},
+            "ToggleHidden": KeybindingAction{Label: "Toggle Hidden", Default: "Ctrl+H"},
+            "ToggleTypeColumn": KeybindingAction{Label: "Toggle Type Column", Default: "Ctrl+Shift+T"},
+            "ToggleBookmark": KeybindingAction{Label: "Toggle Bookmark", Default: "Ctrl+D"},
+            "OpenBookmarks": KeybindingAction{Label: "Open Bookmarks", Default: "Ctrl+B"},
+            "Refresh": KeybindingAction{Label: "Refresh", Default: "F5"},
+            "NewFolder": KeybindingAction{Label: "New Folder", Default: "Ctrl+Shift+N"},
+            "Rename": KeybindingAction{Label: "Rename", Default: "F2"},
+            "Copy": KeybindingAction{Label: "Copy", Default: "Ctrl+C"},
+            "Cut": KeybindingAction{Label: "Cut", Default: "Ctrl+X"},
+            "Paste": KeybindingAction{Label: "Paste", Default: "Ctrl+V"},
+            "CopyPath": KeybindingAction{Label: "Copy Path", Default: "Ctrl+Shift+C"},
+            "Trash": KeybindingAction{Label: "Trash", Default: "Delete"},
+            "Properties": KeybindingAction{Label: "Properties", Default: "Alt+Enter"},
+            "Restore": KeybindingAction{Label: "Restore", Default: "Ctrl+Shift+R"},
+            "DeletePermanently": KeybindingAction{Label: "Delete Permanently", Default: "Shift+Delete"},
+            "EmptyTrash": KeybindingAction{Label: "Empty Trash", Default: "Ctrl+Shift+Delete"},
+            "ShowInFolder": KeybindingAction{Label: "Show In Folder", Default: "Ctrl+Shift+O"},
+            "Dismiss": KeybindingAction{Label: "Dismiss", Default: "Escape"},
+            "Quit": KeybindingAction{Label: "Quit", Default: "Ctrl+Q"},
+            "OpenSettings": KeybindingAction{Label: "Open Settings", Default: "Ctrl+Comma"},
+        }
+
+        internal const CustomThemeName string = "Custom"
+        internal const MinimumScrollSpeed float64 = 0.25
+        internal const MaximumScrollSpeed float64 = 4.0
+
+        internal func ParseViewMode(value string) ViewMode {
+            switch value {
+                case "list" {
+                    return ViewMode.List
+                }
+                case "tiles" {
+                    return ViewMode.Tiles
+                }
+                default {
+                    throw FormatException("View mode must be list or tiles")
+                }
+            }
+        }
+
         internal func Validate(settings AppSettings) string {
-            if settings.ViewMode != "list" && settings.ViewMode != "tiles" {
+            if settings.ViewMode != ViewMode.List && settings.ViewMode != ViewMode.Tiles {
                 return "View mode must be list or tiles"
             }
-            if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < 0.25
-            || settings.ScrollSpeed > 4.0 {
-                return "Scroll speed must be between 0.25 and 4.0"
+            if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < MinimumScrollSpeed
+            || settings.ScrollSpeed > MaximumScrollSpeed {
+                return "Scroll speed must be between " + MinimumScrollSpeed.ToString(
+                    "0.00",
+                    System.Globalization.CultureInfo.InvariantCulture
+                )
+                + " and " + MaximumScrollSpeed.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
             }
             let seenBookmarks = HashSet[string](StringComparer.Ordinal)
             for bookmark in settings.Bookmarks {
@@ -320,7 +350,7 @@ internal class AppSettings {
                     return "Duplicate shortcut: " + binding.Value
                 }
             }
-            if settings.ThemeName != "Custom" && !ThemePresets.Contains(settings.ThemeName) {
+            if settings.ThemeName != CustomThemeName && !ThemePresets.Contains(settings.ThemeName) {
                 return "Unknown theme: " + settings.ThemeName
             }
             if !validTheme(settings.Theme) || !validTheme(settings.CustomTheme) {

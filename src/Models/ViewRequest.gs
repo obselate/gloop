@@ -9,7 +9,7 @@ data struct ViewRequest {
     internal var Entries List[FileEntry]
     internal var Filter string
     internal var EntryFilter Func[FileEntry, bool]?
-    internal var Column string
+    internal var Column SortColumn
     internal var Descending bool
     internal var SelectedPath string
 }

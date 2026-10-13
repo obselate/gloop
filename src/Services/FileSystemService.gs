@@ -6,14 +6,23 @@ import System.Diagnostics
 import System.Globalization
 import System.IO
 import System.IO.Enumeration
+import System.Runtime.InteropServices
 import System.Text
-import System.Text.Unicode
 
-class FileSystemService {
+unsafe class FileSystemService {
+    private const RecentEntryLimit int32 = 200
+    private const PreviewByteLimit int32 = 4194304
+    private const PreviewLineByteLimit int32 = 16384
+    private const CancellationCheckCharacters int32 = 65536
+    private const TextProbeBytes int32 = 8192
+    internal const BytesPerKiB int64 = 1024
+    internal const BytesPerMiB int64 = 1048576
+    private const BytesPerGiB int64 = 1073741824
+
     internal func List(path string, kind LocationKind, atTrashRoot bool, showHidden bool) DirectorySnapshot {
         let snapshot = DirectorySnapshot{DirectoryPath: path}
         if kind == LocationKind.Recent {
-            for entry in RecentService().List(200) {
+            for entry in RecentService().List(RecentEntryLimit) {
                 if showHidden || !entry.Name.StartsWith('.') {
                     snapshot.Entries.Add(entry)
                 }
@@ -46,13 +55,13 @@ class FileSystemService {
         return snapshot
     }
 
-    internal func Sort(entries List[FileEntry], column string, descending bool) List[FileEntry] {
+    internal func Sort(entries List[FileEntry], column SortColumn, descending bool) List[FileEntry] {
         let sorted = System.Collections.Generic.List[FileEntry](entries)
         SortInPlace(sorted, column, descending)
         return sorted
     }
 
-    internal func SortInPlace(entries List[FileEntry], column string, descending bool) {
+    internal func SortInPlace(entries List[FileEntry], column SortColumn, descending bool) {
         entries.Sort((left FileEntry, right FileEntry) -> compare(left, right, column, descending))
     }
 
@@ -61,24 +70,24 @@ class FileSystemService {
             let fullPath = Path.GetFullPath(path)
             let attributes = File.GetAttributes(fullPath)
             let name = Path.GetFileName(fullPath)
-            if hasAttribute(attributes, FileAttributes.ReparsePoint) {
-                return PreviewData{Kind: "metadata", Text: "Symbolic link", Path: fullPath}
+            if attributes.HasFlag(FileAttributes.ReparsePoint) {
+                return PreviewData{Kind: PreviewKind.Metadata, Text: "Symbolic link", Path: fullPath}
             }
-            if hasAttribute(attributes, FileAttributes.Directory) {
-                return PreviewData{Kind: "metadata", Text: "Folder", Path: fullPath}
+            if attributes.HasFlag(FileAttributes.Directory) {
+                return PreviewData{Kind: PreviewKind.Metadata, Text: "Folder", Path: fullPath}
             }
             let size = FileInfo(fullPath).Length
             let extension = Path.GetExtension(name).ToLowerInvariant()
-            if isImage(extension) {
-                return PreviewData{Kind: "image", Text: FormatSize(size), Path: fullPath}
+            if FileKinds.IsImage(extension) {
+                return PreviewData{Kind: PreviewKind.Image, Text: FormatSize(size), Path: fullPath}
             }
-            if !isText(extension) && !hasTextPrefix(fullPath, size) {
-                return PreviewData{Kind: "metadata", Text: FormatSize(size), Path: fullPath}
+            if !FileKinds.IsText(extension) && !hasTextPrefix(fullPath, size) {
+                return PreviewData{Kind: PreviewKind.Metadata, Text: FormatSize(size), Path: fullPath}
             }
             if size == 0 {
-                return PreviewData{Kind: "text", Text: "", Path: fullPath,}
+                return PreviewData{Kind: PreviewKind.Text, Text: "", Path: fullPath,}
             }
-            let limit = int32(Math.Min(size, int64(4194304)))
+            let limit = int32(Math.Min(size, int64(PreviewByteLimit)))
             let buffer = [limit]uint8
             var count int32 = 0
             using let stream = FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
@@ -93,49 +102,43 @@ class FileSystemService {
                 count += read
             }
             let sourceTruncated = size > int64(count)
-            for index in 0 ... count {
-                if (index & 65535) == 0 && cancelled() {
-                    throw OperationCanceledException()
-                }
-                if buffer[index] == 0 {
-                    return PreviewData{Kind: "metadata", Text: "Binary file · " + FormatSize(size), Path: fullPath}
+            if TextContent.HasBinaryBytes(buffer, count, cancelled: cancelled) {
+                return PreviewData{
+                    Kind: PreviewKind.Metadata,
+                    Text: "Binary file · " + FormatSize(size),
+                    Path: fullPath
                 }
             }
             if sourceTruncated {
-                count = completeUtf8Length(buffer, count)
+                count = TextContent.CompleteUtf8Length(buffer, count)
             }
-            let start = if count >= 3 && buffer[0] == 239 && buffer[1] == 187 && buffer[2] == 191 {
-                3
-            } else {
-                0
-            }
-            let decoded = UTF8Encoding(false, true).GetString(buffer, start, count - start)
+            let decoded = TextContent.Decode(buffer, count)
             let content = NormalizePreview(decoded, cancelled, out var shortened)
             let language = PreviewSyntaxService.DetectLanguage(extension, content)
             let highlighting = PreviewSyntaxService.Highlight(content, language, cancelled)
             var warning = ""
             if sourceTruncated {
-                warning = "Preview limited to the first 4 MiB."
+                warning = "Preview limited to the first " + (PreviewByteLimit / BytesPerMiB).ToString() + " MiB."
             }
             if shortened {
-                warning += " Lines over 16 KiB were shortened."
+                warning += " Lines over " + (PreviewLineByteLimit / BytesPerKiB).ToString() + " KiB were shortened."
             }
             if highlighting.Limited {
                 warning += " Syntax highlighting was limited."
             }
             return PreviewData{
-                Kind: "text",
+                Kind: PreviewKind.Text,
                 Text: content,
                 Path: fullPath,
                 Warning: warning.Trim(),
                 Styles: highlighting.Spans,
             }
         } catch (failure OperationCanceledException) {
-            return PreviewData{Kind: "cancelled", Path: path}
+            return PreviewData{Kind: PreviewKind.Cancelled, Path: path}
         } catch (failure DecoderFallbackException) {
-            return PreviewData{Kind: "metadata", Text: "Binary file", Path: path}
+            return PreviewData{Kind: PreviewKind.Metadata, Text: "Binary file", Path: path}
         } catch (failure Exception) {
-            return PreviewData{Kind: "error", Text: "", Path: path, Error: failure.Message}
+            return PreviewData{Kind: PreviewKind.Error, Text: "", Path: path, Error: failure.Message}
         }
     }
 
@@ -147,7 +150,7 @@ class FileSystemService {
         var index = 0
         var lastCheck = 0
         while index < decoded.Length {
-            if index - lastCheck >= 65536 {
+            if index - lastCheck >= CancellationCheckCharacters {
                 if cancelled() {
                     throw OperationCanceledException()
                 }
@@ -173,7 +176,7 @@ class FileSystemService {
                 } else {
                     3
                 }
-                if lineBytes + width <= 16384 {
+                if lineBytes + width <= PreviewLineByteLimit {
                     normalized.Append(character)
                     lineBytes += width
                 } else {
@@ -193,41 +196,14 @@ class FileSystemService {
         }
         try {
             using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-            let buffer = [8192]uint8
+            let buffer = [TextProbeBytes]uint8
             var count = stream.Read(buffer, 0, buffer.Length)
             if size > int64(count) {
-                count = completeUtf8Length(buffer, count)
+                count = TextContent.CompleteUtf8Length(buffer, count)
             }
-            return Array.IndexOf(buffer, uint8(0), 0, count) < 0 && Utf8.IsValid(ReadOnlySpan[uint8](buffer, 0, count))
+            return TextContent.IsText(buffer, count)
         } catch (failure Exception) {
             return false
-        }
-    }
-
-    private func completeUtf8Length(buffer[]uint8, count int32) int32 {
-        if count == 0 {
-            return count
-        }
-        var start = count - 1
-        while start > 0 && (int32(buffer[start]) & 192) == 128 {
-            start--
-        }
-        let lead = int32(buffer[start])
-        let width = if lead < 128 {
-            1
-        } else if (lead & 224) == 192 {
-            2
-        } else if (lead & 240) == 224 {
-            3
-        } else if (lead & 248) == 240 {
-            4
-        } else {
-            1
-        }
-        return if start + width > count {
-            start
-        } else {
-            count
         }
     }
 
@@ -250,17 +226,70 @@ class FileSystemService {
     }
 
     shared {
-        internal func FormatSize(size int64) string {
-            if size < 1024 {
+        internal const AtCurrentDirectory int32 = -100
+        internal const AtSymlinkNoFollow int32 = 256
+        internal const AtEffectiveAccess int32 = 512
+        internal const StatBufferSize int32 = 256
+        internal const StatType uint32 = 1u
+        internal const StatMode uint32 = 2u
+        internal const StatUid uint32 = 8u
+        internal const StatGid uint32 = 16u
+        internal const StatBirthTime uint32 = 2048u
+        internal const FileTypeMask int32 = 61440
+        internal const RegularFileType int32 = 32768
+        internal const DirectoryFileType int32 = 16384
+
+        @DllImport("libc", EntryPoint: "statx", CharSet: CharSet.Ansi, SetLastError: true)
+        internal func ReadStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
+
+        internal func Exists(path string) bool {
+            try {
+                File.GetAttributes(path)
+                return true
+            } catch (failure FileNotFoundException) {
+                return false
+            } catch (failure DirectoryNotFoundException) {
+                return false
+            }
+        }
+
+        internal func Remove(path string) {
+            let attributes = File.GetAttributes(path)
+            if attributes.HasFlag(FileAttributes.Directory) {
+                if !attributes.HasFlag(FileAttributes.ReparsePoint) {
+                    for child in Directory.EnumerateFileSystemEntries(path) {
+                        Remove(child)
+                    }
+                }
+                Directory.Delete(path, false)
+            } else {
+                File.Delete(path)
+            }
+        }
+
+        internal func FormatSize(size int64, rounded bool = false) string {
+            if size < BytesPerKiB {
                 return size.ToString() + " B"
             }
-            if size < 1048576 {
-                return (float64(size) / 1024).ToString("0.0", CultureInfo.InvariantCulture) + " KiB"
+            if size < BytesPerMiB {
+                let value = float64(size) / BytesPerKiB
+                return (rounded ? Math.Round(value): value).ToString(
+                    rounded ? "0": "0.0",
+                    CultureInfo.InvariantCulture
+                ) +
+                    " KiB"
             }
-            if size < 1073741824 {
-                return (float64(size) / 1048576).ToString("0.0", CultureInfo.InvariantCulture) + " MiB"
+            if size < BytesPerGiB {
+                let value = float64(size) / BytesPerMiB
+                return (rounded ? Math.Round(value): value).ToString(
+                    rounded ? "0": "0.0",
+                    CultureInfo.InvariantCulture
+                ) +
+                    " MiB"
             }
-            return (float64(size) / 1073741824).ToString("0.0", CultureInfo.InvariantCulture) + " GiB"
+            let value = float64(size) / BytesPerGiB
+            return (rounded ? Math.Round(value): value).ToString(rounded ? "0": "0.0", CultureInfo.InvariantCulture) +
+                " GiB"
         }
     }
 
@@ -269,19 +298,17 @@ class FileSystemService {
         var entry = FileEntry{Name: name, FullPath: raw.ToFullPath(), Kind: "File"}
         try {
             let attributes = raw.Attributes
-            entry.IsDirectory = hasAttribute(attributes, FileAttributes.Directory)
-            entry.IsSymlink = hasAttribute(attributes, FileAttributes.ReparsePoint)
+            entry.IsDirectory = attributes.HasFlag(FileAttributes.Directory)
+            entry.IsSymlink = attributes.HasFlag(FileAttributes.ReparsePoint)
             entry.Modified = raw.LastWriteTimeUtc.LocalDateTime
-            if entry.IsSymlink {
-                entry.Kind = "Link"
-            } else if entry.IsDirectory {
-                entry.Kind = "Folder"
+            if entry.IsSymlink || entry.IsDirectory {
+                entry.Kind = FileKinds.EntryKind("", entry.IsDirectory, entry.IsSymlink)
             } else {
                 entry.Size = raw.Length
                 let extension = Path.GetExtension(name)
                 if extension != "" {
                     if !kinds.TryGetValue(extension, out var kind) {
-                        kind = extension.Substring(1).ToUpperInvariant() + " file"
+                        kind = FileKinds.EntryKind(extension)
                         kinds.Add(extension, kind)
                     }
                     entry.Kind = kind
@@ -293,16 +320,16 @@ class FileSystemService {
         return entry
     }
 
-    private func compare(left FileEntry, right FileEntry, column string, descending bool) int32 {
+    private func compare(left FileEntry, right FileEntry, column SortColumn, descending bool) int32 {
         if left.IsDirectory != right.IsDirectory {
             return left.IsDirectory ? -1: 1
         }
         var result int32 = 0
-        if column == "size" {
+        if column == SortColumn.Size {
             result = left.Size.CompareTo(right.Size)
-        } else if column == "modified" {
+        } else if column == SortColumn.Modified {
             result = left.Modified.CompareTo(right.Modified)
-        } else if column == "kind" {
+        } else if column == SortColumn.Kind {
             result = String.Compare(left.Kind, right.Kind, StringComparison.OrdinalIgnoreCase)
         } else {
             result = String.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase)
@@ -315,19 +342,4 @@ class FileSystemService {
         }
         return descending ? -result: result
     }
-
-    private func hasAttribute(value FileAttributes, flag FileAttributes) bool -> (int32(value) & int32(flag)) != 0
-
-    private func isImage(extension string) bool -> extension == ".png" || extension == ".jpg"
-    || extension == ".jpeg" || extension == ".gif"
-
-    private func isText(extension string) bool -> extension == "" ||
-        extension == ".txt" ||
-        extension == ".md" ||
-        extension == ".log"
-    || extension == ".json" || extension == ".yaml" || extension == ".yml"
-    || extension == ".toml" || extension == ".xml" || extension == ".html"
-    || extension == ".css" || extension == ".js" || extension == ".ts"
-    || extension == ".gs" || extension == ".cs" || extension == ".sh"
-    || extension == ".py" || extension == ".rs" || extension == ".go"
 }

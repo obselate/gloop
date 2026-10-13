@@ -5,6 +5,8 @@ import System
 import System.Collections.Generic
 
 class FileOperationQueue {
+    private const QueueLimit int32 = 16
+
     private let window Window
     private let controller BrowserController
     private let gate object = Object()
@@ -48,7 +50,7 @@ class FileOperationQueue {
             if closed {
                 return OperationAdmission.Closed
             }
-            if pending.Count >= 16 {
+            if pending.Count >= QueueLimit {
                 return OperationAdmission.Full
             }
             pending.Add(request)
@@ -217,7 +219,7 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                     case OperationKind.Rename: operations.Rename(source, request.Name)
                     case OperationKind.Copy: operations.Copy(source, request.Destination)
                     case OperationKind.Move: operations.Move(source, request.Destination)
-                    case OperationKind.Trash: operations.Trash(source)
+                    case OperationKind.Trash: trash.Trash(source)
                     case OperationKind.Restore: trash.Restore(source)
                     case OperationKind.Delete: trash.Delete(source)
                     case OperationKind.Empty: trash.Empty()

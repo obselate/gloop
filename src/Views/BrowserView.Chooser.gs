@@ -105,7 +105,10 @@ partial class BrowserView {
                     Rebuild()
                 },
                 Summary: if picker.SavingMany {
-                    picker.Request.Files.Count.ToString() + " files in " + FolderName(ChooserDestination())
+                    picker.Request.Files.Count.ToString() + " files in " + Locations.DisplayName(
+                        ChooserDestination(),
+                        home
+                    )
                 } else if picker.Request.Directory && Model.ActivePane().SelectedPaths.Count == 0 {
                     "Current folder"
                 } else if Model.ActivePane().SelectedPaths.Count > 1 {
@@ -201,7 +204,7 @@ partial class BrowserView {
             return
         }
         if validation.ReplacePaths.Count > 0 {
-            OpenDialog("Replace file", String.Join("\n", validation.ReplacePaths))
+            OpenDialog(DialogKind.ReplaceFile, String.Join("\n", validation.ReplacePaths))
             return
         }
         if let result = validation.Result {

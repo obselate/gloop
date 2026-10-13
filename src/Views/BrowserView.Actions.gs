@@ -12,13 +12,7 @@ partial class BrowserView {
         if e.IsComposing && !e.Modifiers.Ctrl && !e.Modifiers.Alt && !e.Modifiers.Super {
             return
         }
-        let action = settings.ActionFor(
-            e.Key.ToString(),
-            e.Modifiers.Ctrl,
-            e.Modifiers.Alt,
-            e.Modifiers.Shift,
-            e.Modifiers.Super
-        )
+        let action = ActionFor(e)
         if contextMenuOpen {
             if action == "Dismiss" {
                 CloseContextMenu()
@@ -30,12 +24,12 @@ partial class BrowserView {
         if action == "" {
             return
         }
-        if dialog == "Preferences" && Host.PlatformInput.Editor?.IsReadOnly == false
+        if dialog == DialogKind.Preferences && Host.PlatformInput.Editor?.IsReadOnly == false
         && !e.Modifiers.Ctrl && !e.Modifiers.Alt && !e.Modifiers.Super
-        && e.Key.ToString() != "Tab" && e.Key.ToString() != "Escape" {
+        && action != "FocusNext" && action != "FocusPrevious" && action != "Dismiss" {
             return
         }
-        if dialog != "" {
+        if dialog != DialogKind.None {
             if action == "Dismiss" {
                 CloseDialog()
             } else if action == "Quit" {
@@ -44,7 +38,7 @@ partial class BrowserView {
                 Host.PlatformInput.MoveFocus(true)
             } else if action == "FocusPrevious" {
                 Host.PlatformInput.MoveFocus(false)
-            } else if action == "Open" && dialog == "Move to Trash" {
+            } else if action == "Open" && dialog == DialogKind.MoveToTrash {
                 SubmitDialog()
             } else {
                 return
@@ -54,7 +48,7 @@ partial class BrowserView {
             let previewFocused = editor?.IsReadOnly == true
             if editor != nil && !previewFocused && action != "Dismiss" && action != "Quit" && action != "FocusLocation"
             && action != "FocusFilter" && action != "FocusNext" && action != "FocusPrevious"
-            && action != "OpenTerminal" {
+            && action != "OpenTerminal" && action != "OpenTerminalHere" {
                 return
             }
             if previewFocused &&
@@ -76,6 +70,14 @@ partial class BrowserView {
         e.PreventDefault()
         e.StopPropagation()
     }
+
+    private func ActionFor(e KeyEvent) string -> settings.ActionFor(
+        e.Key.ToString(),
+        e.Modifiers.Ctrl,
+        e.Modifiers.Alt,
+        e.Modifiers.Shift,
+        e.Modifiers.Super
+    )
 
     private func Invoke(action string) {
         if !(chooser?.Allows(action) ?? true) || !Model.CanRun(action) {
@@ -146,7 +148,7 @@ partial class BrowserView {
             }
             case "FocusFilter" {
                 if Model.Split || BrowsingWidth() < 560 {
-                    OpenDialog("Filter files", Model.ActivePane().Filter)
+                    OpenDialog(DialogKind.FilterFiles, Model.ActivePane().Filter)
                 } else {
                     filterHandle.Focus()
                 }
@@ -198,9 +200,9 @@ partial class BrowserView {
             case "ViewList" or "ViewTiles" {
                 Model.SetViewMode(
                     if action == "ViewTiles" {
-                        "tiles"
+                        ViewMode.Tiles
                     } else {
-                        "list"
+                        ViewMode.List
                     }
                 )
                 SavePreferences()
@@ -212,6 +214,10 @@ partial class BrowserView {
             }
             case "OpenTerminal" {
                 Model.OpenTerminal()
+                return true
+            }
+            case "OpenTerminalHere" {
+                Model.OpenTerminal(false)
                 return true
             }
             case "CopyPath" {
@@ -237,7 +243,7 @@ partial class BrowserView {
                 return true
             }
             case "OpenBookmarks" {
-                OpenDialog("Bookmarks", "")
+                OpenDialog(DialogKind.Bookmarks, "")
                 return true
             }
         }
@@ -247,12 +253,12 @@ partial class BrowserView {
     private func InvokeFileAction(action string) bool {
         switch action {
             case "NewFolder" {
-                OpenDialog("New folder", "")
+                OpenDialog(DialogKind.NewFolder, "")
                 return true
             }
             case "Rename" {
                 if let entry = Model.ActivePane().SingleSelectedEntry() {
-                    OpenDialog("Rename", entry.Name)
+                    OpenDialog(DialogKind.Rename, entry.Name)
                 }
                 return true
             }
@@ -270,7 +276,7 @@ partial class BrowserView {
             }
             case "Trash" {
                 if Model.ActivePane().SelectedPaths.Count > 0 {
-                    OpenDialog("Move to Trash", Model.ActivePane().SelectionSummary())
+                    OpenDialog(DialogKind.MoveToTrash, Model.ActivePane().SelectionSummary())
                 }
                 return true
             }
@@ -280,14 +286,14 @@ partial class BrowserView {
             }
             case "DeletePermanently" {
                 if Model.AtTrashRoot && Model.ActivePane().SelectedPaths.Count > 0 {
-                    OpenDialog("Delete permanently", Model.ActivePane().SelectionSummary())
+                    OpenDialog(DialogKind.DeletePermanently, Model.ActivePane().SelectionSummary())
                 }
                 return true
             }
             case "EmptyTrash" {
                 if Model.AtTrashRoot && Model.Places.TrashCount > 0 {
                     OpenDialog(
-                        "Empty Trash",
+                        DialogKind.EmptyTrash,
                         Model.Places.TrashCount == 1 ? "1 item": "all " + Model.Places.TrashCount.ToString() + " items"
                     )
                 }
@@ -357,7 +363,7 @@ partial class BrowserView {
         let multiple = ChooserAllowsMultiple()
         let control = ctrl && multiple
         let extend = shift && multiple
-        let tiles = settings.ViewMode == "tiles"
+        let tiles = settings.ViewMode == ViewMode.Tiles
         let columns = if tiles {
             TileColumns(Model.ActiveIndex)
         } else {
@@ -406,13 +412,7 @@ partial class BrowserView {
         if e.IsComposing {
             return
         }
-        let action = settings.ActionFor(
-            e.Key.ToString(),
-            e.Modifiers.Ctrl,
-            e.Modifiers.Alt,
-            e.Modifiers.Shift,
-            e.Modifiers.Super
-        )
+        let action = ActionFor(e)
         if action == "Open" || action == "TogglePreview" {
             Invoke(action)
             e.PreventDefault()

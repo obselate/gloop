@@ -2,7 +2,6 @@ package gloop
 
 import System
 import System.Collections.Generic
-import System.Globalization
 import System.IO
 import System.Text
 import Tmds.DBus.Protocol
@@ -16,12 +15,15 @@ data struct MountEntry {
 }
 
 class VolumeService {
+    private const TimeoutSeconds int32 = 10
+    private const SectorBytes int64 = 512
+
     private const BusName string = "org.freedesktop.UDisks2"
     private const BlockInterface string = "org.freedesktop.UDisks2.Block"
     private const DriveInterface string = "org.freedesktop.UDisks2.Drive"
     private const FilesystemInterface string = "org.freedesktop.UDisks2.Filesystem"
     private const MaxVolumes int32 = 64
-    private let Timeout TimeSpan = TimeSpan.FromSeconds(10)
+    private let Timeout TimeSpan = TimeSpan.FromSeconds(TimeoutSeconds)
 
     internal func List() List[Volume] {
         let volumes = System.Collections.Generic.List[Volume]()
@@ -99,7 +101,7 @@ class VolumeService {
         try {
             let fullPath = Path.GetFullPath(path)
             for mount in readMounts() {
-                if holds(mount.MountPath, fullPath) && mount.MountPath.Length >= volume.MountPath.Length {
+                if Locations.Contains(mount.MountPath, fullPath) && mount.MountPath.Length >= volume.MountPath.Length {
                     volume.MountPath = mount.MountPath
                     volume.Device = mount.Source
                 }
@@ -230,7 +232,7 @@ class VolumeService {
 
     private func isSystemPath(path string) bool {
         for system in[]string{"/boot", "/efi"} {
-            if holds(system, path) {
+            if Locations.Contains(system, path) {
                 return true
             }
         }
@@ -243,11 +245,6 @@ class VolumeService {
         mount.Type != "fuse.portal" &&
         mount.Type != "fuse.gvfsd-fuse" &&
         !mount.ReadOnly
-
-    private func holds(mountPath string, path string) bool {
-        let prefix = mountPath.TrimEnd('/') + "/"
-        return path == mountPath || path.StartsWith(prefix, StringComparison.Ordinal)
-    }
 
     private func value(values Dictionary[string, string], key string) string -> values.GetValueOrDefault(key, "")
 
@@ -297,7 +294,7 @@ class VolumeService {
         var label = ""
         var bytes int64
         try {
-            bytes = Int64.Parse(File.ReadAllText("/sys/class/block/" + name + "/size").Trim()) * 512
+            bytes = Int64.Parse(File.ReadAllText("/sys/class/block/" + name + "/size").Trim()) * SectorBytes
             label = decode(value(properties, "ID_FS_LABEL_ENC"))
         } catch (failure Exception) { }
         let removable = value(properties, "ID_BUS") == "usb" || value(properties, "ID_INTEGRATION") == "external"
@@ -320,11 +317,8 @@ class VolumeService {
     }
 
     private func sizeName(bytes int64) string {
-        if bytes >= 1073741824 {
-            return Math.Round(float64(bytes) / 1073741824).ToString("0", CultureInfo.InvariantCulture) + " GiB volume"
-        }
-        if bytes >= 1048576 {
-            return Math.Round(float64(bytes) / 1048576).ToString("0", CultureInfo.InvariantCulture) + " MiB volume"
+        if bytes >= FileSystemService.BytesPerMiB {
+            return FileSystemService.FormatSize(bytes, true) + " volume"
         }
         return "Volume"
     }

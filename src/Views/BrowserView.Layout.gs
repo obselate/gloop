@@ -9,10 +9,10 @@ import System.IO
 
 partial class BrowserView {
     private func PaneWidth(index int32) float64 {
-        if !Model.Split || BrowsingWidth() < 660 {
+        if !Model.Split || BrowsingWidth() < SplitBreakpoint {
             return BrowsingWidth()
         }
-        let leadingWidth = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, 260, 260)
+        let leadingWidth = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, PaneMinimum, PaneMinimum)
         return index == Model.Panes.Count - 1 ? BrowsingWidth() - leadingWidth - 1: leadingWidth
     }
 
@@ -23,8 +23,8 @@ partial class BrowserView {
     }
 
     private func WorkspaceWidth() float64 -> width - (
-        if width >= 860 {
-            SplitSize(width, placesWidth, 144, 560) + 1
+        if width >= PlacesBreakpoint {
+            SplitSize(width, placesWidth, PlacesSidebar.MinimumWidth, WorkspaceMinimum) + 1
         } else {
             0
         }
@@ -40,8 +40,8 @@ partial class BrowserView {
                     previewRatio
                 }
             ),
-            260,
-            220
+            PaneMinimum,
+            PreviewSidebar.MinimumWidth
         )
     } else {
         WorkspaceWidth()
@@ -66,7 +66,7 @@ partial class BrowserView {
 
     private func PageSize() int32 {
         let list = PaneViewport(Model.ActiveIndex)
-        let tiles = settings.ViewMode == "tiles"
+        let tiles = settings.ViewMode == ViewMode.Tiles
         let rowHeight = if tiles {
             FileTiles.TileHeight + FileTiles.Gap
         } else {

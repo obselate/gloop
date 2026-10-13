@@ -5,6 +5,8 @@ import System.IO
 import System.Text.Json
 
 internal class PortalChooserCodec {
+    private const MessageByteLimit int64 = 1048576
+
     shared {
         internal func ReadRequest(path string) PortalChooserRequest {
             using let document = Read(path)
@@ -175,8 +177,11 @@ internal class PortalChooserCodec {
         }
 
         private func Read(path string) JsonDocument {
-            if FileInfo(path).Length > 1048576 {
-                throw InvalidDataException("File chooser message exceeds 1 MiB")
+            if FileInfo(path).Length > MessageByteLimit {
+                throw InvalidDataException(
+                    "File chooser message exceeds " + (MessageByteLimit / FileSystemService.BytesPerMiB).ToString() +
+                        " MiB"
+                )
             }
             return JsonDocument.Parse(File.ReadAllText(path))
         }

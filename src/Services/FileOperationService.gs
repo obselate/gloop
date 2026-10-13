@@ -2,13 +2,17 @@ package gloop
 
 import System
 import System.ComponentModel
-import System.Globalization
 import System.IO
 import System.Runtime.InteropServices
-import System.Text
 
 unsafe class FileOperationService {
+    private const SymlinkDepthLimit int32 = 32
+
     shared {
+        private const RenameNoReplace uint32 = 1u
+        private const CrossDeviceError int32 = 18
+        private const InvalidArgumentError int32 = 22
+
         @DllImport("libc", EntryPoint: "renameat2", CharSet: CharSet.Ansi, SetLastError: true)
         private func renameNoReplace(
             sourceDirectory int32,
@@ -17,14 +21,11 @@ unsafe class FileOperationService {
             destination string,
             flags uint32
         ) int32;
-
-        @DllImport("libc", EntryPoint: "statx", CharSet: CharSet.Ansi, SetLastError: true)
-        private func readStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
     }
 
     internal func CreateFolder(directory string, name string) OperationResult {
         try {
-            validateName(name)
+            FileNames.Validate(name)
             let parent = requireDirectory(directory)
             let destination = Path.Combine(parent, name)
             RequireAbsent(destination)
@@ -46,8 +47,8 @@ unsafe class FileOperationService {
 
     internal func Rename(source string, name string) OperationResult {
         try {
-            validateName(name)
-            let from = requireEntry(source)
+            FileNames.Validate(name)
+            let from = RequireEntry(source)
             let parent = Path.GetDirectoryName(from) ?? ""
             let destination = Path.Combine(parent, name)
             if from == destination {
@@ -63,7 +64,7 @@ unsafe class FileOperationService {
 
     internal func Copy(source string, destinationDirectory string) OperationResult {
         try {
-            let from = requireEntry(source)
+            let from = RequireEntry(source)
             let parent = requireDirectory(destinationDirectory)
             let destination = Path.Combine(parent, Path.GetFileName(from))
             validateDestination(from, parent, destination)
@@ -85,7 +86,7 @@ unsafe class FileOperationService {
 
     internal func Move(source string, destinationDirectory string) OperationResult {
         try {
-            let from = requireEntry(source)
+            let from = RequireEntry(source)
             let parent = requireDirectory(destinationDirectory)
             let destination = Path.Combine(parent, Path.GetFileName(from))
             validateDestination(from, parent, destination)
@@ -93,56 +94,6 @@ unsafe class FileOperationService {
             return OperationResult{Source: source, FinalPath: destination, Error: ""}
         } catch (failure Exception) {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
-        }
-    }
-
-    internal func Trash(source string) OperationResult {
-        try {
-            let from = requireEntry(source)
-            let root = TrashRoot()
-            let files = Path.Combine(root, "files")
-            let info = Path.Combine(root, "info")
-            Directory.CreateDirectory(root)
-            rejectLink(root)
-            Directory.CreateDirectory(files)
-            Directory.CreateDirectory(info)
-            rejectLink(files)
-            rejectLink(info)
-
-            let leaf = Path.GetFileName(from)
-            var index int32
-            var name = trashName(leaf, index)
-            while Exists(Path.Combine(files, name)) || Exists(Path.Combine(info, name + ".trashinfo")) {
-                index++
-                name = trashName(leaf, index)
-            }
-            let dataPath = Path.Combine(files, name)
-            let infoPath = Path.Combine(info, name + ".trashinfo")
-            var metadataCreated bool
-            try {
-                writeTrashInfo(infoPath, from)
-                metadataCreated = true
-                MoveEntry(from, dataPath)
-            } catch (failure Exception) {
-                if metadataCreated {
-                    try {
-                        File.Delete(infoPath)
-                    } catch (cleanupFailure Exception) {
-                        throw IOException(failure.Message + ". Trash metadata remains at " + infoPath)
-                    }
-                }
-                throw failure
-            }
-            return OperationResult{Source: source, FinalPath: dataPath, Error: ""}
-        } catch (failure Exception) {
-            return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
-        }
-    }
-
-    private func validateName(name string) {
-        if name == "" || name.Trim() == "" || name == "." || name == ".."
-        || name.Contains("/") || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 {
-            throw IOException("Enter a single valid name")
         }
     }
 
@@ -154,7 +105,7 @@ unsafe class FileOperationService {
         return fullPath
     }
 
-    private func requireEntry(path string) string {
+    internal func RequireEntry(path string) string {
         let fullPath = Path.GetFullPath(path)
         let root = Path.GetPathRoot(fullPath) ?? ""
         if fullPath == root {
@@ -165,7 +116,7 @@ unsafe class FileOperationService {
     }
 
     internal func RequireAbsent(path string) {
-        if Exists(path) {
+        if FileSystemService.Exists(path) {
             throw IOException("An item already exists: " + path)
         }
     }
@@ -176,19 +127,17 @@ unsafe class FileOperationService {
         }
         RequireAbsent(destination)
         let attributes = File.GetAttributes(source)
-        if hasAttribute(attributes, FileAttributes.Directory) &&
-            !hasAttribute(attributes, FileAttributes.ReparsePoint) {
+        if attributes.HasFlag(FileAttributes.Directory) && !attributes.HasFlag(FileAttributes.ReparsePoint) {
             let physicalSource = physicalPath(source, 0)
             let physicalDestination = Path.Combine(physicalPath(directory, 0), Path.GetFileName(source))
-            let relative = Path.GetRelativePath(physicalSource, physicalDestination)
-            if relative == "." || (relative != ".." && !relative.StartsWith("../") && !Path.IsPathRooted(relative)) {
+            if Locations.Contains(physicalSource, physicalDestination) {
                 throw IOException("Destination is inside the source folder")
             }
         }
     }
 
     private func physicalPath(path string, depth int32) string {
-        if depth > 32 {
+        if depth > SymlinkDepthLimit {
             throw IOException("Too many symbolic links in path")
         }
         let fullPath = Path.GetFullPath(path)
@@ -211,12 +160,18 @@ unsafe class FileOperationService {
     internal func MoveEntry(source string, destination string) {
         RequireAbsent(destination)
         if OperatingSystem.IsLinux() {
-            if renameNoReplace(-100, source, -100, destination, 1u) != 0 {
+            if renameNoReplace(
+                FileSystemService.AtCurrentDirectory,
+                source,
+                FileSystemService.AtCurrentDirectory,
+                destination,
+                RenameNoReplace
+            ) != 0 {
                 let error = Marshal.GetLastWin32Error()
-                if error == 18 {
+                if error == CrossDeviceError {
                     throw IOException("Move across filesystems is unavailable")
                 }
-                if error == 22 {
+                if error == InvalidArgumentError {
                     throw IOException(
                         "Cannot rename " + source + ": the filesystem does not support a safe no-replace rename"
                     )
@@ -226,7 +181,7 @@ unsafe class FileOperationService {
             return
         }
         let attributes = File.GetAttributes(source)
-        if hasAttribute(attributes, FileAttributes.Directory) {
+        if attributes.HasFlag(FileAttributes.Directory) {
             Directory.Move(source, destination)
         } else {
             File.Move(source, destination)
@@ -236,8 +191,8 @@ unsafe class FileOperationService {
     private func copyEntry(source string, destination string) {
         RequireAbsent(destination)
         let attributes = File.GetAttributes(source)
-        let isDirectory = hasAttribute(attributes, FileAttributes.Directory)
-        if hasAttribute(attributes, FileAttributes.ReparsePoint) {
+        let isDirectory = attributes.HasFlag(FileAttributes.Directory)
+        if attributes.HasFlag(FileAttributes.ReparsePoint) {
             let target = isDirectory ? DirectoryInfo(source).LinkTarget: FileInfo(source).LinkTarget
             guard let linkTarget = target else {
                 throw IOException("Symbolic link target is unavailable: " + source)
@@ -257,15 +212,23 @@ unsafe class FileOperationService {
             return
         }
         if OperatingSystem.IsLinux() {
-            let buffer *uint8 = stackalloc[256]uint8
+            let buffer *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
             let pointer = IntPtr(buffer)
-            if readStat(-100, source, 256, 1u, pointer) != 0 {
+            if FileSystemService.ReadStat(
+                FileSystemService.AtCurrentDirectory,
+                source,
+                FileSystemService.AtSymlinkNoFollow,
+                FileSystemService.StatType,
+                pointer
+            ) != 0 {
                 throw IOException("Cannot copy " + source + ": " + Win32Exception(Marshal.GetLastWin32Error()).Message)
             }
-            if (Marshal.ReadInt32(pointer, 0) & 1) == 0 {
+            if (uint32(Marshal.ReadInt32(pointer, 0)) & FileSystemService.StatType) == 0 {
                 throw IOException("Cannot copy " + source + ": the filesystem did not report the file type")
             }
-            if (int32(Marshal.ReadInt16(pointer, 28)) & 61440) != 32768 {
+            if (
+                int32(Marshal.ReadInt16(pointer, 28)) & FileSystemService.FileTypeMask
+            ) != FileSystemService.RegularFileType {
                 throw IOException("Cannot copy non-regular file: " + source)
             }
         }
@@ -274,48 +237,12 @@ unsafe class FileOperationService {
 
     private func cleanup(path string) bool {
         try {
-            if !Exists(path) {
-                return true
-            }
-            let attributes = File.GetAttributes(path)
-            if hasAttribute(attributes, FileAttributes.ReparsePoint) {
-                if hasAttribute(attributes, FileAttributes.Directory) {
-                    Directory.Delete(path, false)
-                } else {
-                    File.Delete(path)
-                }
-            } else if hasAttribute(attributes, FileAttributes.Directory) {
-                for child in Directory.EnumerateFileSystemEntries(path) {
-                    if !cleanup(child) {
-                        return false
-                    }
-                }
-                Directory.Delete(path, false)
-            } else {
-                File.Delete(path)
+            if FileSystemService.Exists(path) {
+                FileSystemService.Remove(path)
             }
             return true
         } catch (failure Exception) {
             return false
-        }
-    }
-
-    private func writeTrashInfo(path string, source string) {
-        using let stream = FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None)
-        try {
-            using let writer = StreamWriter(stream)
-            writer.Write(
-                "[Trash Info]\nPath=" + Uri.EscapeDataString(source).Replace("%2F", "/")
-                + "\nDeletionDate=" + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture) + "\n"
-            )
-        } catch (failure Exception) {
-            stream.Dispose()
-            try {
-                File.Delete(path)
-            } catch (cleanupFailure Exception) {
-                throw IOException(failure.Message + ". Trash metadata remains at " + path)
-            }
-            throw failure
         }
     }
 
@@ -323,52 +250,4 @@ unsafe class FileOperationService {
         let parent = Path.GetDirectoryName(destination) ?? ""
         return Path.Combine(parent, ".gloop-" + Guid.NewGuid().ToString("N"))
     }
-
-    private func trashName(leaf string, index int32) string {
-        let suffix = if index == 0 {
-            ""
-        } else {
-            "." + index.ToString()
-        }
-        let maxBytes = 255 - Encoding.UTF8.GetByteCount(suffix + ".trashinfo")
-        var length = leaf.Length
-        while Encoding.UTF8.GetByteCount(leaf.Substring(0, length)) > maxBytes {
-            length--
-            if length > 0 && Char.IsHighSurrogate(leaf[length - 1]) {
-                length--
-            }
-        }
-        return leaf.Substring(0, length) + suffix
-    }
-
-    internal func TrashRoot() string {
-        var dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME") ?? ""
-        if dataHome == "" || !Path.IsPathFullyQualified(dataHome) {
-            let home = Environment.GetEnvironmentVariable("HOME") ?? ""
-            if home == "" || !Path.IsPathFullyQualified(home) {
-                throw IOException("Home directory is unavailable")
-            }
-            dataHome = Path.Combine(home, ".local", "share")
-        }
-        return Path.Combine(dataHome, "Trash")
-    }
-
-    private func rejectLink(path string) {
-        if DirectoryInfo(path).LinkTarget != nil {
-            throw IOException("Trash directory is a symbolic link: " + path)
-        }
-    }
-
-    internal func Exists(path string) bool {
-        try {
-            File.GetAttributes(path)
-            return true
-        } catch (failure FileNotFoundException) {
-            return false
-        } catch (failure DirectoryNotFoundException) {
-            return false
-        }
-    }
-
-    private func hasAttribute(value FileAttributes, flag FileAttributes) bool -> (int32(value) & int32(flag)) != 0
 }

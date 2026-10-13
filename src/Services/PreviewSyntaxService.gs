@@ -9,6 +9,9 @@ data struct PreviewHighlight {
 }
 
 class PreviewSyntaxService {
+    private const CancellationCheckCharacters int32 = 16384
+    private const StyleSpanLimit int32 = 32768
+
     shared {
         internal func LanguageFor(extension string) string -> switch extension {
             case ".gs": "gsharp"
@@ -56,13 +59,13 @@ class PreviewSyntaxService {
             var lastCheck = 0
             var inMarkupTag = false
             while index < text.Length {
-                if index - lastCheck >= 16384 {
+                if index - lastCheck >= CancellationCheckCharacters {
                     if cancelled() {
                         throw OperationCanceledException()
                     }
                     lastCheck = index
                 }
-                if styles.Count >= 32768 {
+                if styles.Count >= StyleSpanLimit {
                     return PreviewHighlight{Spans: styles.ToArray(), Limited: true}
                 }
                 let start = index
@@ -193,13 +196,13 @@ class PreviewSyntaxService {
             var lineStart = 0
             var lastCheck = 0
             while lineStart < text.Length {
-                if lineStart - lastCheck >= 16384 {
+                if lineStart - lastCheck >= CancellationCheckCharacters {
                     if cancelled() {
                         throw OperationCanceledException()
                     }
                     lastCheck = lineStart
                 }
-                if styles.Count >= 32768 {
+                if styles.Count >= StyleSpanLimit {
                     return PreviewHighlight{Spans: styles.ToArray(), Limited: true}
                 }
                 let lineEnd = endOfLine(text, lineStart)
@@ -337,7 +340,7 @@ class PreviewSyntaxService {
             var index = start + (repeated ? 3: 1)
             var lastCheck = index
             while index < text.Length {
-                if index - lastCheck >= 16384 {
+                if index - lastCheck >= CancellationCheckCharacters {
                     if cancelled() {
                         throw OperationCanceledException()
                     }

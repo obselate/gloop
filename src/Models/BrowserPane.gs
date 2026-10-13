@@ -14,7 +14,7 @@ class BrowserPane {
     internal var SelectionAnchorPath string
     internal var PendingFocusPath string
     internal var Filter string
-    internal var SortColumn string
+    internal var SortColumn SortColumn
     internal var Descending bool
     internal var Loading bool
     internal var Refreshing bool
@@ -33,7 +33,7 @@ class BrowserPane {
         SelectionAnchorPath = ""
         PendingFocusPath = ""
         Filter = ""
-        SortColumn = "name"
+        SortColumn = SortColumn.Name
         Descending = false
         Loading = false
         Error = ""
@@ -107,8 +107,8 @@ class BrowserPane {
         return -1
     }
 
-    internal func UpdateHistory(path string, mode string, historyIndex int32) {
-        if mode == "push" {
+    internal func UpdateHistory(path string, mode DirectoryMode, historyIndex int32) {
+        if mode == DirectoryMode.Push {
             if HistoryIndex < History.Count - 1 {
                 History.RemoveRange(HistoryIndex + 1, History.Count - HistoryIndex - 1)
             }
@@ -116,7 +116,7 @@ class BrowserPane {
                 History.Add(path)
             }
             HistoryIndex = History.Count - 1
-        } else if mode == "history" {
+        } else if mode == DirectoryMode.History {
             HistoryIndex = historyIndex
         }
     }

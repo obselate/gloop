@@ -4,6 +4,8 @@ import Goo
 import System
 
 partial class BrowserView {
+    private const PreviewResizeDelayMilliseconds int32 = 180
+
     private var framebufferWidth int32
     private var framebufferHeight int32
     private var previewResizeTimer WindowTimer?
@@ -73,7 +75,7 @@ partial class BrowserView {
                     previewResizeTimer = nil
                     Model.Previews.RefreshPreviewBounds(framebufferWidth, framebufferHeight)
                 },
-                180
+                PreviewResizeDelayMilliseconds
             )
         }
     }

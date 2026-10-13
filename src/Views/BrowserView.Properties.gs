@@ -37,7 +37,7 @@ partial class BrowserView {
                 Rebuild()
             }
         )
-        OpenDialog("Properties", "")
+        OpenDialog(DialogKind.Properties, "")
     }
 
     private func PropertiesDialog() Blob {
@@ -70,28 +70,24 @@ partial class BrowserView {
         }
         rows.Add(PropertiesRow("Size", propertiesStage == 2 ? SizeText(info): "Calculating…"))
         if single {
-            rows.Add(PropertiesRow("Modified", propertiesStage >= 1 ? DateText(info.Modified): wait))
+            rows.Add(
+                PropertiesRow(
+                    "Modified",
+                    propertiesStage >= 1 ? FileEntry.FormatDate(info.Modified, CultureInfo.InvariantCulture): wait
+                )
+            )
             if propertiesStage >= 1 && info.Created != DateTime.MinValue {
-                rows.Add(PropertiesRow("Created", DateText(info.Created)))
+                rows.Add(PropertiesRow("Created", FileEntry.FormatDate(info.Created, CultureInfo.InvariantCulture)))
             }
             rows.Add(PropertiesRow("Permissions", propertiesStage >= 1 ? info.Permissions: wait))
             rows.Add(PropertiesRow("Owner / Group", propertiesStage >= 1 ? info.Owner + " / " + info.Group: wait))
         }
         if propertiesStage == 2 && info.Error != "" {
-            rows.Add(Text{Content: info.Error, Color: p.Error, FontSize: 12, TextWrap: TextWrap.Wrap})
+            rows.Add(Ui.ErrorText(info.Error, p))
         }
         return DialogShell.Build(
-            dialog,
-            Container{
-                MinHeight: 0,
-                FlexShrink: 1,
-                Gap: 6,
-                OverflowY: Overflow.Scroll,
-                ScrollbarY: Ui.ScrollbarStyle(p),
-                ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                Padding: Edges{Right: 12},
-                Children: rows.ToArray(),
-            },
+            DialogTitle(dialog),
+            DialogShell.ScrollColumn(rows.ToArray(), p, 6),
             Container{
                 FlexDirection: FlexDirection.Row,
                 JustifyContent: JustifyContent.FlexEnd,
@@ -129,6 +125,4 @@ partial class BrowserView {
         }
         return info.Complete ? text: text + " (incomplete)"
     }
-
-    private func DateText(value DateTime) string -> value.ToString("dd MMM yyyy, HH:mm", CultureInfo.InvariantCulture)
 }

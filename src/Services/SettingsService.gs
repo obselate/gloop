@@ -56,7 +56,7 @@ internal class SettingsService {
                     if property.Value.ValueKind != JsonValueKind.String {
                         throw FormatException("viewMode must be a string")
                     }
-                    settings.ViewMode = property.Value.GetString() ?? ""
+                    settings.ViewMode = AppSettings.ParseViewMode(property.Value.GetString() ?? "")
                 } else if property.Name == "smoothScrolling" {
                     settings.SmoothScrolling = readBool(property.Value, property.Name)
                 } else if property.Name == "scrollSpeed" {
@@ -121,7 +121,7 @@ internal class SettingsService {
                 writer.WriteBoolean("previewWordWrap", settings.PreviewWordWrap)
                 writer.WriteBoolean("previewLineNumbers", settings.PreviewLineNumbers)
                 writer.WriteBoolean("splitView", settings.SplitView)
-                writer.WriteString("viewMode", settings.ViewMode)
+                writer.WriteString("viewMode", settings.ViewMode == ViewMode.Tiles ? "tiles": "list")
                 writer.WriteBoolean("smoothScrolling", settings.SmoothScrolling)
                 writer.WriteNumber("scrollSpeed", settings.ScrollSpeed)
                 writer.WriteStartArray("bookmarks")
@@ -159,17 +159,9 @@ internal class SettingsService {
     }
 
     shared {
-        internal func Default() SettingsService {
-            var configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") ?? ""
-            if configHome == "" || !Path.IsPathFullyQualified(configHome) {
-                var home = Environment.GetEnvironmentVariable("HOME") ?? ""
-                if home == "" || !Path.IsPathFullyQualified(home) {
-                    home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-                }
-                configHome = Path.Combine(home, ".config")
-            }
-            return SettingsService(Path.Combine(configHome, "gloop", "settings.json"))
-        }
+        internal func Default() SettingsService -> SettingsService(
+            Path.Combine(Xdg.ConfigHome(), "gloop", "settings.json")
+        )
 
         private func writeTheme(writer Utf8JsonWriter, name string, theme ThemePalette) {
             writer.WriteStartObject(name)

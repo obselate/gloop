@@ -21,7 +21,7 @@ partial class BrowserView {
             }
             if room != metrics.ContentBox.Width {
                 room = metrics.ContentBox.Width
-                if settings.ViewMode == "tiles" {
+                if settings.ViewMode == ViewMode.Tiles {
                     Rebuild()
                 }
             }
@@ -39,32 +39,24 @@ partial class BrowserView {
         let pane = Model.Pane(index)
         let p = palette
         if locationEditing && Model.ActiveIndex == index {
-            return TextEntry{
-                Key: "location-edit",
-                Handle: locationHandle,
-                Value: locationText,
-                Controlled: true,
-                Width: crumbWidth,
-                MinWidth: 0,
-                Height: 30,
-                Padding: Edges{Left: 8, Right: 8},
-                BackgroundColor: p.Surface,
-                Color: p.Text,
-                BorderRadius: 6,
-                BorderWidth: 1,
-                BorderColor: p.Accent,
-                FontSize: 12,
-                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "Location"},
-                OnChange: value -> {
+            return TextField
+                .Build(
+                locationText,
+                value -> {
                     locationText = value
                     Rebuild()
                 },
-                OnSubmit: value -> {
+                value -> {
                     locationEditing = false
                     Model.Navigate(value)
                     FocusFiles()
                 },
-            }
+                "Location",
+                p,
+                width: crumbWidth,
+                handle: locationHandle,
+                fontSize: 12
+            ){.Key: "location-edit"}
         }
         return Cell.Mount[BreadcrumbInput, BreadcrumbBar](
             "location-" + index.ToString(),
@@ -72,7 +64,7 @@ partial class BrowserView {
                 Path: pane.DirectoryPath,
                 Kind: pane.Kind,
                 Trash: Model.TrashDirectory,
-                Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Home: home,
                 Width: crumbWidth,
                 Window: Host,
                 Palette: p,
@@ -115,7 +107,7 @@ partial class BrowserView {
             OnFocus: (_) -> Model.SetActive(index),
             Container{
                 Key: "pane-header",
-                Height: chooser != nil ? 36: 40,
+                Height: chooser != nil ? 36: Ui.BarHeight,
                 FlexShrink: 0,
                 Padding: Edges{Left: 7, Right: 8},
                 Gap: 8,
@@ -130,7 +122,7 @@ partial class BrowserView {
                     FlexDirection: FlexDirection.Row,
                     AlignItems: AlignItems.Center,
                     FlexShrink: 0,
-                    Gap: 4,
+                    Gap: Ui.ToolsGap,
                     Children: tools.ToArray(),
                 },
             },
@@ -207,7 +199,7 @@ partial class BrowserView {
                 },
                 Host,
                 p,
-                settings.ViewMode == "list"
+                settings.ViewMode == ViewMode.List
             )
         )
         tools.Add(
@@ -220,7 +212,7 @@ partial class BrowserView {
                 },
                 Host,
                 p,
-                settings.ViewMode == "tiles"
+                settings.ViewMode == ViewMode.Tiles
             )
         )
         if chooser == nil {
@@ -230,8 +222,7 @@ partial class BrowserView {
                     "Open terminal",
                     () -> {
                         Model.SetActive(index)
-                        notice = ""
-                        Model.OpenTerminal(false)
+                        Invoke("OpenTerminalHere")
                     },
                     Host,
                     p,
@@ -240,7 +231,7 @@ partial class BrowserView {
                 )
             )
         }
-        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * 30 + (tools.Count - 1) * 4
+        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * Ui.ToolSize + (tools.Count - 1) * Ui.ToolsGap
     }
 
     private func PaneTable(
@@ -264,7 +255,7 @@ partial class BrowserView {
                 ShowType: settings.ShowTypeColumn,
                 SizeText: FileSizeText,
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
-                Tiles: settings.ViewMode == "tiles",
+                Tiles: settings.ViewMode == ViewMode.Tiles,
                 TileWidth: TileWidth(index),
                 Active: active,
                 AutoFocus: active && !(chooser?.Saving ?? false),
@@ -350,7 +341,7 @@ partial class BrowserView {
         let pane = state.Pane
         if pane.Selected >= 0 {
             let list = PaneViewport(index)
-            let tiles = settings.ViewMode == "tiles"
+            let tiles = settings.ViewMode == ViewMode.Tiles
             let row = if tiles {
                 pane.Selected / TileColumns(index)
             } else {
@@ -386,7 +377,7 @@ partial class BrowserView {
 
     private func EditLocation() {
         if PaneWidth(Model.ActiveIndex) < 360 {
-            OpenDialog("Open location", Model.ActivePane().DirectoryPath)
+            OpenDialog(DialogKind.OpenLocation, Model.ActivePane().DirectoryPath)
             return
         }
         locationText = Model.ActivePane().DirectoryPath

@@ -7,6 +7,8 @@ import System.IO
 import System.IO.Enumeration
 
 class DirectoryLoader {
+    private const CancellationCheckMask int32 = 1023
+
     private let window Window
     private let controller BrowserController
     private let settings AppSettings
@@ -36,7 +38,13 @@ class DirectoryLoader {
         views.Add(pane, LatestWork())
     }
 
-    internal func NavigateTo(path string, pane BrowserPane, mode string, historyIndex int32, selectedPath string) {
+    internal func NavigateTo(
+        path string,
+        pane BrowserPane,
+        mode DirectoryMode,
+        historyIndex int32,
+        selectedPath string
+    ) {
         if controller.IsDisposed || !controller.Panes.Contains(pane) {
             return
         }
@@ -54,7 +62,7 @@ class DirectoryLoader {
         pane.LoadGeneration++
         pane.ViewGeneration++
         views[pane].Cancel()
-        if pane == controller.ActivePane() && mode != "refresh" {
+        if pane == controller.ActivePane() && mode != DirectoryMode.Refresh {
             controller.ResetTypeSelect()
         }
         pane.DirectoryPath = fullPath
@@ -63,7 +71,7 @@ class DirectoryLoader {
         pane.PendingFocusPath = selectedPath
         pane.Loading = true
         pane.Error = ""
-        pane.Refreshing = mode == "refresh"
+        pane.Refreshing = mode == DirectoryMode.Refresh
         if !pane.Refreshing {
             pane.Entries = List[FileEntry]()
             pane.VisibleEntries = List[FileEntry]()
@@ -111,7 +119,7 @@ class DirectoryLoader {
         pane BrowserPane,
         generation int32,
         snapshot DirectorySnapshot,
-        mode string,
+        mode DirectoryMode,
         historyIndex int32,
         selectedPath string
     ) {
@@ -140,7 +148,7 @@ class DirectoryLoader {
             return
         }
         pane.Entries = snapshot.Entries
-        if mode != "refresh" {
+        if mode != DirectoryMode.Refresh {
             controller.Status = ""
         }
         RequestView(pane, selectedPath)
@@ -233,7 +241,7 @@ class DirectoryLoader {
                 NavigateTo(
                     pane.DirectoryPath,
                     pane,
-                    "refresh",
+                    DirectoryMode.Refresh,
                     pane.HistoryIndex,
                     selected == source ? replacement: selected
                 )
@@ -273,7 +281,7 @@ class DirectoryLoader {
                 let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
                 var count = 0
                 for entry in request.Entries {
-                    if (count & 1023) == 0 && !queue.IsCurrent(generation) {
+                    if (count & CancellationCheckMask) == 0 && !queue.IsCurrent(generation) {
                         break
                     }
                     count++

@@ -5,6 +5,24 @@ import System
 
 class DialogShell {
     shared {
+        internal func ScrollColumn(
+            children[]Blob,
+            p Palette,
+            gap float64 = 8,
+            height Length = default(Length),
+            shrink float64 = 1
+        ) Container -> Container{
+            Height: height,
+            MinHeight: 0,
+            FlexShrink: shrink,
+            OverflowY: Overflow.Scroll,
+            ScrollbarY: Ui.ScrollbarStyle(p),
+            ScrollbarVisibilityY: ScrollbarVisibility.Always,
+            Padding: Edges{Right: 12},
+            Gap: gap,
+            Children: children,
+        }
+
         internal func Build(
             stringTitle string,
             content Blob,
@@ -26,7 +44,7 @@ class DialogShell {
             Right: 0,
             Top: 0,
             Bottom: 0,
-            BackgroundColor: Color.Rgba(0, 0, 0, 140),
+            BackgroundColor: p.Scrim,
             AlignItems: AlignItems.Center,
             JustifyContent: JustifyContent.Center,
             Container{
@@ -48,12 +66,7 @@ class DialogShell {
                 } else {
                     14
                 },
-                BackgroundColor: p.Overlay,
-                BackdropBlur: p.Blur,
-                BorderWidth: 1,
-                BorderColor: p.Edge,
-                BorderRadius: 10,
-                BoxShadow: Ui.Shadow(),
+                BasedOn: p.PopupStyle(),
                 Accessibility: Accessibility{Role: AccessibilityRole.Dialog, Name: stringTitle},
                 Container{
                     FlexDirection: FlexDirection.Row,

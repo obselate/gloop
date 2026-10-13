@@ -18,7 +18,9 @@ data struct ChooserPattern {
     internal var Flags int32
 }
 
-class FileChooserService {
+unsafe class FileChooserService {
+    private const MimeExpansionLimit int32 = 64
+
     internal let Request PortalChooserRequest
     internal let Saving bool
     internal let SavingMany bool
@@ -53,7 +55,8 @@ class FileChooserService {
 
     internal func Allows(action string) bool -> action != "Cut" && action != "Copy"
     && action != "Paste" && action != "Trash" && action != "Rename" && action != "ToggleSplit"
-    && action != "NextPane" && action != "OpenTerminal" && action != "ToggleBookmark" && action != "OpenSettings"
+    && action != "NextPane" && action != "OpenTerminal" && action != "OpenTerminalHere"
+    && action != "ToggleBookmark" && action != "OpenSettings"
     && action != "Restore" && action != "DeletePermanently" && action != "EmptyTrash"
 
     internal func CreateEntryFilter(filter PortalFilter?) Func[FileEntry, bool] {
@@ -109,10 +112,10 @@ class FileChooserService {
             let paths = List[string]()
             let replacements = List[string]()
             if Saving {
-                validateName(name)
+                FileNames.Validate(name)
                 let folder = requireDirectory(pane.DirectoryPath, 3)
                 let destination = Path.Combine(folder, name)
-                if exists(destination) {
+                if FileSystemService.Exists(destination) {
                     requireFile(destination, 2)
                     replacements.Add(destination)
                 }
@@ -124,10 +127,10 @@ class FileChooserService {
                 }
                 let used = HashSet[string](StringComparer.Ordinal)
                 for requested in Request.Files {
-                    validateName(requested)
+                    FileNames.Validate(requested)
                     var leaf = requested
                     var number = 0
-                    while used.Contains(leaf) || exists(Path.Combine(folder, leaf)) {
+                    while used.Contains(leaf) || FileSystemService.Exists(Path.Combine(folder, leaf)) {
                         number++
                         leaf = uniqueName(requested, number)
                     }
@@ -218,30 +221,16 @@ class FileChooserService {
         }
     }
 
-    private func validateName(name string) {
-        if name == "" || name.Trim() == "" || name == "." || name == ".." || name.Contains('/')
-        || name.Contains('\0') || UTF8Encoding(false, true).GetByteCount(name) > 255 {
-            throw IOException("Enter a single valid file name")
-        }
-    }
-
     private func uniqueName(name string, number int32) string {
         let extension = Path.GetExtension(name)
         var suffix = " (" + number.ToString() + ")" + extension
         var stem = name.Substring(0, name.Length - extension.Length)
-        if Encoding.UTF8.GetByteCount(suffix) > 255 {
+        if Encoding.UTF8.GetByteCount(suffix) > FileNames.MaxBytes {
             suffix = " (" + number.ToString() + ")"
             stem = name
         }
-        var length = stem.Length
-        while length > 0 && Encoding.UTF8.GetByteCount(stem.Substring(0, length) + suffix) > 255 {
-            length--
-            if length > 0 && Char.IsHighSurrogate(stem[length - 1]) {
-                length--
-            }
-        }
-        let candidate = stem.Substring(0, length) + suffix
-        validateName(candidate)
+        let candidate = FileNames.Truncate(stem, FileNames.MaxBytes - Encoding.UTF8.GetByteCount(suffix)) + suffix
+        FileNames.Validate(candidate)
         return candidate
     }
 
@@ -256,7 +245,7 @@ class FileChooserService {
 
     private func requireDirectory(path string, access int32) string {
         let fullPath = absolutePath(path)
-        if fileType(fullPath) != 16384 {
+        if fileType(fullPath) != FileSystemService.DirectoryFileType {
             throw IOException("Select an accessible folder: " + fullPath)
         }
         requireAccess(fullPath, access)
@@ -265,7 +254,7 @@ class FileChooserService {
 
     private func requireFile(path string, access int32) string {
         let fullPath = absolutePath(path)
-        if fileType(fullPath) != 32768 {
+        if fileType(fullPath) != FileSystemService.RegularFileType {
             throw IOException("Select a regular file: " + fullPath)
         }
         requireAccess(fullPath, access)
@@ -280,47 +269,28 @@ class FileChooserService {
     }
 
     private func fileType(path string) int32 {
-        let buffer = Marshal.AllocHGlobal(256)
-        try {
-            if readStat(-100, path, 0, 1u, buffer) != 0 {
-                throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path)
-            }
-            return int32(Marshal.ReadInt16(buffer, 28)) & 61440
-        } finally {
-            Marshal.FreeHGlobal(buffer)
+        let buffer *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
+        let pointer = IntPtr(buffer)
+        if FileSystemService.ReadStat(
+            FileSystemService.AtCurrentDirectory,
+            path,
+            0,
+            FileSystemService.StatType,
+            pointer
+        ) != 0 {
+            throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path)
         }
+        return int32(Marshal.ReadInt16(pointer, 28)) & FileSystemService.FileTypeMask
     }
 
     private func requireAccess(path string, mode int32) {
-        if checkAccess(-100, path, mode, 512) != 0 {
+        if checkAccess(FileSystemService.AtCurrentDirectory, path, mode, FileSystemService.AtEffectiveAccess) != 0 {
             throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path)
         }
     }
 
-    private func exists(path string) bool {
-        try {
-            File.GetAttributes(path)
-            return true
-        } catch (failure FileNotFoundException) {
-            return false
-        } catch (failure DirectoryNotFoundException) {
-            return false
-        }
-    }
-
     private func addMimePatterns(mimes List[string], patterns List[ChooserPattern], accepted HashSet[string]) {
-        let roots = List[string]()
-        let dataHome = Environment.GetEnvironmentVariable("XDG_DATA_HOME") ?? ""
-        if Path.IsPathFullyQualified(dataHome) {
-            roots.Add(dataHome)
-        } else {
-            roots.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "share"))
-        }
-        for root in(Environment.GetEnvironmentVariable("XDG_DATA_DIRS") ?? "/usr/local/share:/usr/share").Split(':') {
-            if Path.IsPathFullyQualified(root) {
-                roots.Add(root)
-            }
-        }
+        let roots = Xdg.DataDirs()
         let links = List[string]()
         for root in roots {
             for kind in[]string{"aliases", "subclasses"} {
@@ -338,7 +308,7 @@ class FileChooserService {
                 } catch (failure IOException) { } catch (failure UnauthorizedAccessException) { }
             }
         }
-        for iteration in 0 ... 64 {
+        for iteration in 0 ... MimeExpansionLimit {
             var changed = false
             for link in links {
                 let fields = link.Split(' ')
@@ -401,9 +371,6 @@ class FileChooserService {
     shared {
         @DllImport("libc", EntryPoint: "fnmatch", CharSet: CharSet.Ansi)
         private func matchName(pattern string, name string, flags int32) int32;
-
-        @DllImport("libc", EntryPoint: "statx", CharSet: CharSet.Ansi, SetLastError: true)
-        private func readStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
 
         @DllImport("libc", EntryPoint: "faccessat", CharSet: CharSet.Ansi, SetLastError: true)
         private func checkAccess(directory int32, path string, mode int32, flags int32) int32;

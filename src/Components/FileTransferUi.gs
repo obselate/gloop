@@ -5,6 +5,23 @@ import System
 
 class FileTransferUi {
     shared {
+        internal func Name(entry FileEntry) string -> entry.Name + (entry.IsSymlink ? " ↗": "")
+
+        internal func Root(root Container, value FileTableInput, clicks FileClickState) Container {
+            root.DropTarget = value.DropTarget(value.Pane.DirectoryPath)
+            root.OutlineWidth = value.DropPath == value.Pane.DirectoryPath ? 1: 0
+            root.OutlineColor = value.Palette.Accent
+            root.OutlineOffset = -1
+            root.OnPointerDown = e -> {
+                if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild
+                && !e.Modifiers.Ctrl && !e.Modifiers.Shift && !e.Modifiers.Super {
+                    value.OnClear()
+                }
+            }
+            root.OnPointerUp = e -> BackgroundContextMenu(e, value, clicks)
+            return root
+        }
+
         private func Create(entry FileEntry, value FileTableInput) DragData? {
             if !value.Pane.SelectedPaths.Contains(entry.FullPath) {
                 value.OnSelect(value.Pane.VisibleEntries.IndexOf(entry), false, false)

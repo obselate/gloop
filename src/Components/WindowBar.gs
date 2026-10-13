@@ -6,11 +6,13 @@ import System
 
 class WindowBar {
     shared {
+        internal const ControlWidth float64 = 36
+
         internal func Build(window Window, toolbar Blob, width float64, p Palette) Blob -> WindowChrome{
             Host: window,
-            LeadingContent: Container{Width: Math.Max(0, width - 108), toolbar},
-            Height: 40,
-            ControlWidth: 36,
+            LeadingContent: Container{Width: Math.Max(0, width - 3 * ControlWidth), toolbar},
+            Height: Ui.BarHeight,
+            ControlWidth: ControlWidth,
             BackgroundColor: p.Bar,
             BorderColor: p.Border,
             ControlColor: p.Muted,
@@ -24,32 +26,29 @@ class WindowBar {
                     case WindowChromeAction.Restore: "filter_none"
                     default: "close"
                 }
-                return Cell.Mount[TooltipInput, Tooltip](
+                return Ui.HoverLabel(
                     name,
-                    TooltipInput{
-                        Window: window,
-                        Content: Ui.Label(name, p.Text, 11),
-                        Placement: PortalPlacement.Bottom,
-                        BubbleStyle: Ui.BubbleStyle(p),
-                        Target: Container{
-                            Width: 36,
-                            Height: 40,
-                            HitTestSelf: true,
-                            AlignItems: AlignItems.Center,
-                            JustifyContent: JustifyContent.Center,
-                            Ui.Icon(icon, p.Muted, 18),
-                        },
-                    }
+                    name,
+                    Container{
+                        Width: ControlWidth,
+                        Height: Ui.BarHeight,
+                        HitTestSelf: true,
+                        AlignItems: AlignItems.Center,
+                        JustifyContent: JustifyContent.Center,
+                        Ui.Icon(icon, p.Muted, 18),
+                    },
+                    window,
+                    p
                 )
             },
             CreateControl: (_, command, _, _) -> Button{
-                Width: 36,
-                Height: 40,
+                Width: ControlWidth,
+                Height: Ui.BarHeight,
                 Padding: 0,
                 BackgroundColor: Color.Transparent,
                 Hover: Style{
                     BackgroundColor: if command == WindowChromeAction.Close {
-                        Color.Parse("#9F3545")
+                        p.Danger
                     } else {
                         p.Border
                     }

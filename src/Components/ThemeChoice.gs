@@ -7,13 +7,29 @@ import System
 open class ThemeChoice : Cell[ThemeChoiceInput] {
     private let handle ElementHandle = ElementHandle()
 
-    protected override func Build(value ThemeChoiceInput) Blob -> Choice(
-        value.Name,
-        value.Theme,
-        value.Selected,
-        value.Keyboard,
-        value.Choose
-    )
+    protected override func Build(value ThemeChoiceInput) Blob {
+        let p = Palette(value.Theme, value.Keyboard)
+        return ChoiceRow.Build(
+            value.Name,
+            Ui.Label(value.Name, p.Text, 13, 500),
+            Container{
+                Width: 20,
+                FlexShrink: 0,
+                if value.Selected {
+                    Ui.Icon("check", p.Accent, 18)
+                } else {
+                    Container{}
+                },
+            },
+            Preview(p),
+            value.Selected,
+            value.Choose,
+            handle,
+            p,
+            44,
+            6
+        )
+    }
 
     shared {
         internal func Build(name string, theme ThemePalette, selected bool, keyboard bool, choose Action) Blob -> Cell
@@ -21,46 +37,6 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
             nil,
             ThemeChoiceInput{Name: name, Theme: theme, Selected: selected, Keyboard: keyboard, Choose: choose,}
         )
-    }
-
-    private func Choice(name string, theme ThemePalette, selected bool, keyboard bool, choose Action) Blob {
-        let p = Palette(theme, keyboard)
-        let button = Button{
-            Handle: handle,
-            Height: 44,
-            FlexShrink: 0,
-            MinWidth: 0,
-            Padding: Edges{Left: 10, Right: 10},
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Gap: 6,
-            BorderWidth: 1,
-            BorderRadius: 4,
-            BorderColor: if selected {
-                p.Accent
-            } else {
-                p.Border
-            },
-            BackgroundColor: p.Background,
-            Hover: Style{BorderColor: p.Accent},
-            Focus: p.Ring(),
-            Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: name, Selected: selected},
-            OnClick: choose,
-            OnFocus: (_) -> handle.ScrollIntoView(),
-            Container{
-                Width: 20,
-                FlexShrink: 0,
-                if selected {
-                    Ui.Icon("check", p.Accent, 18)
-                } else {
-                    Container{}
-                },
-            },
-            Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(name, p.Text, 13, 500)},
-            Preview(p),
-        }
-        WidgetKeyBindings.BindActivation(button)
-        return button
     }
 
     private func Preview(p Palette) Blob {
@@ -97,7 +73,7 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
             },
         }
         if p.Glass {
-            frame.BackgroundGradient = LinearGradient(Color.Parse("#2B6FD6"), Color.Parse("#D43C8C"))
+            frame.BackgroundGradient = p.GlassGradient
         }
         return frame
     }

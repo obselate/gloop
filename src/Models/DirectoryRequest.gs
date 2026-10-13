@@ -10,7 +10,7 @@ data struct DirectoryRequest {
     internal var Kind LocationKind
     internal var AtTrashRoot bool
     internal var ShowHidden bool
-    internal var Mode string
+    internal var Mode DirectoryMode
     internal var HistoryIndex int32
     internal var SelectedPath string
 }

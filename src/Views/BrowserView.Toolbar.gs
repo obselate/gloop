@@ -13,7 +13,7 @@ partial class BrowserView {
         let p = palette
         return Container{
             Key: "toolbar",
-            Height: 40,
+            Height: Ui.BarHeight,
             FlexShrink: 0,
             Padding: Edges{Left: 8},
             FlexDirection: FlexDirection.Row,
@@ -23,12 +23,12 @@ partial class BrowserView {
                 AlignItems: AlignItems.Center,
                 FlexShrink: 0,
                 Gap: 3,
-                Ui.Tool("arrow_back", "Back", () -> Model.Back(), Host, p, false, !pane.CanBack()),
-                Ui.Tool("arrow_forward", "Forward", () -> Model.Forward(), Host, p, false, !pane.CanForward()),
+                Ui.Tool("arrow_back", "Back", () -> Invoke("Back"), Host, p, false, !pane.CanBack()),
+                Ui.Tool("arrow_forward", "Forward", () -> Invoke("Forward"), Host, p, false, !pane.CanForward()),
                 Ui.Tool(
                     "arrow_upward",
                     "Parent folder",
-                    () -> Model.Parent(),
+                    () -> Invoke("Parent"),
                     Host,
                     p,
                     false,
@@ -41,7 +41,7 @@ partial class BrowserView {
                 AlignItems: AlignItems.Center,
                 FlexShrink: 0,
                 Gap: 3,
-                if width < 860 {
+                if width < PlacesBreakpoint {
                     Ui.Tool("bookmarks", "Open bookmarks", () -> Invoke("OpenBookmarks"), Host, p)
                 } else {
                     Container{}
@@ -63,7 +63,7 @@ partial class BrowserView {
                 } else {
                     Container{}
                 },
-                Ui.Tool("refresh", "Refresh", () -> Model.Refresh(), Host, p),
+                Ui.Tool("refresh", "Refresh", () -> Invoke("Refresh"), Host, p),
                 Ui.Tool("visibility", "Toggle preview", () -> Invoke("TogglePreview"), Host, p, Model.PreviewVisible),
                 if chooser == nil {
                     Ui.Tool(

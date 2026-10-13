@@ -10,8 +10,11 @@ import System.Threading.Tasks
 import Tmds.DBus.Protocol
 
 internal class FileChooserPortal : IPathMethodHandler {
+    private const RequestLimit int32 = 16
+    private const ResultFileLimit int32 = 4096
+
     internal const BusName string = "org.freedesktop.impl.portal.desktop.gloop"
-    private const ChooserInterface string = "org.freedesktop.impl.portal.FileChooser"
+    internal const ChooserInterface string = "org.freedesktop.impl.portal.FileChooser"
     private const RequestInterface string = "org.freedesktop.impl.portal.Request"
     private let frontend NameOwnerWatcher
     private let gate object = Object()
@@ -80,7 +83,7 @@ internal class FileChooserPortal : IPathMethodHandler {
     private func Submit(call PortalCall) {
         var done chan[bool]?
         lock gate {
-            if stopped || requests.Count >= 16 || requests.ContainsKey(call.Handle) {
+            if stopped || requests.Count >= RequestLimit || requests.ContainsKey(call.Handle) {
                 PortalMessages.Reply(call.Context, PortalChooserResult{Response: 2})
                 return
             }
@@ -384,7 +387,7 @@ internal class FileChooserPortal : IPathMethodHandler {
             }
             let count = result.Uris.Count
             if count == 0 ||
-                count > 4096 ||
+                count > ResultFileLimit ||
                 (request.Method == "SaveFile" && count != 1) ||
                 (request.Method == "OpenFile" && !request.Multiple && count != 1) ||
                 (request.Method == "SaveFiles" && count != request.Files.Count) {

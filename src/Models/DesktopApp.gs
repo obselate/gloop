@@ -157,7 +157,7 @@ class DesktopApp {
     /// process. A %f or %u line needs one process per file. Throws when the line cannot open the files.
     internal func Commands(paths List[string]) List[List[string]] {
         if paths.Count > MaxFiles {
-            throw InvalidOperationException("Cannot open more than 128 files at once")
+            throw InvalidOperationException("Cannot open more than " + MaxFiles.ToString() + " files at once")
         }
         let multiple = uses("FU")
         if paths.Count > 0 && !multiple && !uses("fu") {

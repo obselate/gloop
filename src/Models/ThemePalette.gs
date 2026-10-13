@@ -13,6 +13,10 @@ internal class ThemePalette {
     internal var Accent string
     internal var Border string
     internal var Selection string
+    internal var Keyword string = ""
+    internal var String string = ""
+    internal var Number string = ""
+    internal var Type string = ""
 
     internal init() {
         Background = "#090B10"
@@ -38,6 +42,10 @@ internal class ThemePalette {
         Accent = source.Accent
         Border = source.Border
         Selection = source.Selection
+        Keyword = source.Keyword
+        String = source.String
+        Number = source.Number
+        Type = source.Type
     }
 
     internal func ColorFor(role string) string -> switch role {

@@ -24,6 +24,7 @@ partial class BrowserView : Cell {
     private let filterHandle ElementHandle = ElementHandle()
     private let dialogHandle ElementHandle = ElementHandle()
     private let dialogInput ElementHandle = ElementHandle()
+    private let home string = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
     private let smoothScrollingRow ElementHandle = ElementHandle()
     private let previewWordWrapRow ElementHandle = ElementHandle()
     private let previewLineNumbersRow ElementHandle = ElementHandle()
@@ -31,8 +32,15 @@ partial class BrowserView : Cell {
     private let themeEditorHandle ElementHandle = ElementHandle()
     private var focusScope FocusScope?
     private const WindowRadius float64 = 12
-    private var width float64 = 1180
-    private var height float64 = 760
+    internal const DefaultWidth int32 = 1180
+    internal const DefaultHeight int32 = 760
+    private const SplitBreakpoint float64 = 660
+    private const PlacesBreakpoint float64 = 860
+    private const PaneMinimum float64 = 260
+    private const VerticalPaneMinimum float64 = 120
+    private const WorkspaceMinimum float64 = 560
+    private var width float64 = DefaultWidth
+    private var height float64 = DefaultHeight
     private var placesWidth float64 = 180
     private var paneRatio float64 = .5
     private var previewRatio float64 = .5
@@ -41,7 +49,7 @@ partial class BrowserView : Cell {
     private var locationEditing bool
     private var locationFocusPending bool
     private var locationText string = ""
-    private var dialog string = ""
+    private var dialog DialogKind = DialogKind.None
     private var dialogValue string = ""
     private var dialogError string = ""
     private var notice string
@@ -62,8 +70,8 @@ partial class BrowserView : Cell {
                 (Math.Abs(width - metrics.ContentBox.Width) > 1 || Math.Abs(height - metrics.ContentBox.Height) > 1) {
                 width = metrics.ContentBox.Width
                 height = metrics.ContentBox.Height
-                if locationEditing && dialog == "" && PaneWidth(Model.ActiveIndex) < 360 {
-                    OpenDialog("Open location", locationText)
+                if locationEditing && dialog == DialogKind.None && PaneWidth(Model.ActiveIndex) < 360 {
+                    OpenDialog(DialogKind.OpenLocation, locationText)
                 } else {
                     Rebuild()
                 }
@@ -71,20 +79,20 @@ partial class BrowserView : Cell {
         }
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
-                let textEntry = dialog != "Preferences" &&
-                    dialog != "Desktop setup" &&
-                    dialog != "Move to Trash" &&
-                    dialog != "Delete permanently" &&
-                    dialog != "Empty Trash" &&
-                    dialog != "Bookmarks" &&
-                    dialog != "Properties" &&
-                    dialog != "Replace file"
+                let textEntry = dialog != DialogKind.Preferences &&
+                    dialog != DialogKind.DesktopSetup &&
+                    dialog != DialogKind.MoveToTrash &&
+                    dialog != DialogKind.DeletePermanently &&
+                    dialog != DialogKind.EmptyTrash &&
+                    dialog != DialogKind.Bookmarks &&
+                    dialog != DialogKind.Properties &&
+                    dialog != DialogKind.ReplaceFile
                 focusScope = dialogHandle.BeginFocusScope(
                     FocusScopeOptions{
                         Modal: true,
                         InitialFocus: if textEntry {
                             dialogInput
-                        } else if dialog == "Desktop setup" {
+                        } else if dialog == DialogKind.DesktopSetup {
                             setupChoiceHandle
                         } else {
                             dialogHandle
@@ -93,7 +101,9 @@ partial class BrowserView : Cell {
                 )
                 if textEntry {
                     dialogInput.Focus()
-                    if dialog == "Rename" || dialog == "Filter files" || dialog == "Open location" {
+                    if dialog == DialogKind.Rename ||
+                        dialog == DialogKind.FilterFiles ||
+                        dialog == DialogKind.OpenLocation {
                         Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
                     }
                 }
@@ -144,7 +154,7 @@ partial class BrowserView : Cell {
                 settingsService,
                 error -> {
                     notice = error
-                    if dialog == "Preferences" {
+                    if dialog == DialogKind.Preferences {
                         dialogError = error
                     }
                     Rebuild()
@@ -186,10 +196,10 @@ partial class BrowserView : Cell {
 
     internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
 
-    private func PaneFocus(index int32) ElementHandle -> settings.ViewMode == "tiles" ?
+    private func PaneFocus(index int32) ElementHandle -> settings.ViewMode == ViewMode.Tiles ?
     paneViews[index].TileFocus: paneViews[index].ListFocus
 
-    private func PaneViewport(index int32) ElementHandle -> settings.ViewMode == "tiles" ?
+    private func PaneViewport(index int32) ElementHandle -> settings.ViewMode == ViewMode.Tiles ?
     paneViews[index].TileViewport: paneViews[index].ListViewport
 
     private func SyncPaneViews() {
@@ -291,7 +301,7 @@ partial class BrowserView : Cell {
         children.Add(chrome)
         children.Add(main)
         children.Add(chooser != nil ? ChooserBar(): StatusBar())
-        if dialog != "" {
+        if dialog != DialogKind.None {
             children.Add(Dialog())
         }
         children.Add(ContextMenu())
@@ -304,7 +314,7 @@ partial class BrowserView : Cell {
             BackgroundColor: p.Window,
             BorderRadius: rounded ? WindowRadius: 0,
             BorderWidth: rounded ? 1: 0,
-            BorderColor: Color.Rgba(184, 191, 201, 46),
+            BorderColor: p.Edge,
             Overflow: rounded ? Overflow.Hidden: Overflow.Visible,
             Color: p.Text,
             FontFamily: "sans-serif, Noto Sans CJK",
@@ -336,20 +346,20 @@ partial class BrowserView : Cell {
                 Rebuild()
             },
             SplitUnit.Ratio,
-            if BrowsingWidth() < 660 {
+            if BrowsingWidth() < SplitBreakpoint {
                 SplitOrientation.Vertical
             } else {
                 SplitOrientation.Horizontal
             },
-            if BrowsingWidth() < 660 {
-                120
+            if BrowsingWidth() < SplitBreakpoint {
+                VerticalPaneMinimum
             } else {
-                260
+                PaneMinimum
             },
-            if BrowsingWidth() < 660 {
-                120
+            if BrowsingWidth() < SplitBreakpoint {
+                VerticalPaneMinimum
             } else {
-                260
+                PaneMinimum
             },
             "Resize browsing panes",
             Model.Split,
@@ -385,8 +395,8 @@ partial class BrowserView : Cell {
             },
             SplitUnit.Ratio,
             SplitOrientation.Horizontal,
-            260,
-            220,
+            PaneMinimum,
+            PreviewSidebar.MinimumWidth,
             "Resize preview",
             Model.PreviewVisible,
             p
@@ -413,7 +423,7 @@ partial class BrowserView : Cell {
             bookmarkMenuKey = OpenBookmarkKeyboardContextMenu
         }
         var places Blob? = nil
-        if width >= 860 {
+        if width >= PlacesBreakpoint {
             places = PlacesSidebar.Build(
                 Model.ActivePane().DirectoryPath,
                 path -> {
@@ -426,6 +436,7 @@ partial class BrowserView : Cell {
                 Host,
                 p,
                 Model.Places.StandardPlaces,
+                home,
                 destination -> FileDropTarget(destination),
                 dropPath,
                 chooser == nil,
@@ -445,7 +456,7 @@ partial class BrowserView : Cell {
             "places-split",
             places,
             browserArea,
-            if width >= 860 {
+            if width >= PlacesBreakpoint {
                 placesWidth
             } else {
                 0
@@ -456,27 +467,13 @@ partial class BrowserView : Cell {
             },
             SplitUnit.Pixels,
             SplitOrientation.Horizontal,
-            144,
-            560,
+            PlacesSidebar.MinimumWidth,
+            WorkspaceMinimum,
             "Resize places sidebar",
-            width >= 860,
+            width >= PlacesBreakpoint,
             p
         )
         main.Key = "main"
         return main
-    }
-
-    private func FolderName(path string) string {
-        var directory = path
-        while directory.Length > 1 && Path.EndsInDirectorySeparator(directory) {
-            directory = Path.TrimEndingDirectorySeparator(directory)
-        }
-        if directory == "/" {
-            return "File system"
-        }
-        if directory == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) {
-            return "Home"
-        }
-        return Path.GetFileName(directory)
     }
 }

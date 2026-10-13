@@ -10,15 +10,12 @@ open class FilterField : Cell[FilterFieldInput] {
         let p = value.Palette
         return Container{
             Width: value.Width,
-            Height: 32,
+            BasedOn: TextField.FieldStyle(p),
             HitTestSelf: true,
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
             Gap: 7,
             Padding: Edges{Left: 10, Right: 8},
-            BackgroundColor: p.Surface,
-            BorderRadius: 6,
-            BorderWidth: 1,
             BorderColor: focused ? p.Accent: p.Border,
             OnFocus: (_) -> {
                 focused = true
@@ -35,24 +32,25 @@ open class FilterField : Cell[FilterFieldInput] {
                 }
             },
             Ui.Icon("search", p.Muted, 16),
-            TextEntry{
-                Handle: value.Handle,
-                Value: value.Value,
-                Controlled: true,
-                Placeholder: "Filter files",
-                FlexGrow: 1,
-                FlexBasis: 0,
-                MinWidth: 0,
-                Height: 28,
-                Color: p.Text,
-                BackgroundColor: Color.Transparent,
-                BorderWidth: 0,
-                OutlineWidth: 0,
-                FontSize: 12,
-                Focus: Style{BorderWidth: 0, OutlineWidth: 0},
-                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "Filter files"},
-                OnChange: value.OnChange,
-                OnSubmit: (_) -> value.OnSubmit(),
+            TextField
+                .Build(
+                value.Value,
+                value.OnChange,
+                (_) -> value.OnSubmit(),
+                "Filter files",
+                p,
+                handle: value.Handle,
+                fontSize: 12
+            ){
+                .Placeholder: "Filter files",
+                .FlexGrow: 1,
+                .FlexBasis: 0,
+                .Height: TextField.Height - 4,
+                .Padding: 0,
+                .BackgroundColor: Color.Transparent,
+                .BorderWidth: 0,
+                .OutlineWidth: 0,
+                .Focus: Style{BorderWidth: 0, OutlineWidth: 0},
             },
         }
     }

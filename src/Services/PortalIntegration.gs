@@ -6,8 +6,6 @@ import System.IO
 
 internal class PortalIntegration {
     shared {
-        private const Interface string = "org.freedesktop.impl.portal.FileChooser"
-        private const BusName string = "org.freedesktop.impl.portal.desktop.gloop"
         private const BackupSuffix string = ".gloop-chooser-backup"
         private const CreatedSuffix string = ".gloop-chooser-created"
         private const ChooserEnvironment string = "PLASMA_INTEGRATION_USE_PORTAL=1\nGTK_USE_PORTAL=1\n"
@@ -19,21 +17,31 @@ internal class PortalIntegration {
                 return "Using the system-installed Gloop file chooser portal"
             }
             RequireUserBackendSupport()
-            let dataHome = DesktopIntegration.UserDirectory("XDG_DATA_HOME", ".local/share")
+            let dataHome = Xdg.UserDirectory("XDG_DATA_HOME", ".local/share")
             let binary = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 ".local/bin/gloop"
             )
-            let service = Path.Combine(dataHome, "dbus-1/services", BusName + ".service")
+            let service = Path.Combine(dataHome, "dbus-1/services", FileChooserPortal.BusName + ".service")
             let portal = Path.Combine(dataHome, "xdg-desktop-portal/portals/gloop.portal")
             Directory.CreateDirectory(Path.GetDirectoryName(service) ?? "")
             Directory.CreateDirectory(Path.GetDirectoryName(portal) ?? "")
-            File.WriteAllText(
+            Xdg.WriteText(
                 service,
-                "[D-BUS Service]\nName=" + BusName + "\nExec=" + DesktopIntegration.QuotedExec(binary, false) +
+                "[D-BUS Service]\nName=" + FileChooserPortal.BusName + "\nExec=" + DesktopIntegration.QuotedExec(
+                    binary,
+                    false
+                ) +
                     " --portal\n"
             )
-            File.WriteAllText(portal, "[portal]\nDBusName=" + BusName + "\nInterfaces=" + Interface + ";\nUseIn=\n")
+            Xdg.WriteText(
+                portal,
+                "[portal]\nDBusName=" +
+                    FileChooserPortal.BusName +
+                    "\nInterfaces=" +
+                    FileChooserPortal.ChooserInterface +
+                    ";\nUseIn=\n"
+            )
             return "Installed the Gloop file chooser portal. Select it with gloop --set-default-chooser."
         }
 
@@ -44,7 +52,7 @@ internal class PortalIntegration {
             } else {
                 RequireUserBackendSupport()
             }
-            let configHome = DesktopIntegration.UserDirectory("XDG_CONFIG_HOME", ".config")
+            let configHome = Xdg.ConfigHome()
             let environment = EnvironmentPath(configHome)
             if File.Exists(environment) && File.ReadAllText(environment) != ChooserEnvironment {
                 throw InvalidOperationException(
@@ -64,23 +72,23 @@ internal class PortalIntegration {
                 source == "" ? "[preferred]\ndefault=*\n": File.ReadAllText(source)
             }
             if !File.Exists(destination + BackupSuffix) {
-                File.WriteAllText(destination + BackupSuffix, original)
+                Xdg.WriteText(destination + BackupSuffix, original)
                 if target == "" {
-                    File.WriteAllText(destination + CreatedSuffix, "")
+                    Xdg.WriteText(destination + CreatedSuffix, "")
                 }
             }
-            File.WriteAllText(destination, Preference(original, "gloop"))
+            Xdg.WriteText(destination, Preference(original, "gloop"))
             if !File.Exists(environment) {
                 Directory.CreateDirectory(Path.GetDirectoryName(environment) ?? "")
-                File.WriteAllText(environment, ChooserEnvironment)
-                File.WriteAllText(environment + CreatedSuffix, "")
+                Xdg.WriteText(environment, ChooserEnvironment)
+                Xdg.WriteText(environment + CreatedSuffix, "")
             }
             DesktopIntegration.RunTool("systemctl", []string{"--user", "daemon-reload"}, false)
             return "Gloop is selected for portal file choosers. Log out and log in, then restart applications to enable standard KDE and GTK choosers. Custom application dialogs keep their own browser."
         }
 
         internal func RestoreDefault() string {
-            let configHome = DesktopIntegration.UserDirectory("XDG_CONFIG_HOME", ".config")
+            let configHome = Xdg.ConfigHome()
             for name in ConfigNames() {
                 let destination = Path.Combine(configHome, "xdg-desktop-portal", name)
                 let backup = destination + BackupSuffix
@@ -93,7 +101,7 @@ internal class PortalIntegration {
                 if File.Exists(destination + CreatedSuffix) && Preference(current, "") == Preference(original, "") {
                     File.Delete(destination)
                 } else {
-                    File.WriteAllText(destination, restored)
+                    Xdg.WriteText(destination, restored)
                 }
                 File.Delete(backup)
                 File.Delete(destination + CreatedSuffix)
@@ -128,7 +136,7 @@ internal class PortalIntegration {
                             lines.Add(line)
                         }
                     }
-                    File.WriteAllText(path, String.Join("\n", lines))
+                    Xdg.WriteText(path, String.Join("\n", lines))
                     notice = " Other edits in " + path + " were kept."
                 }
             }
@@ -168,11 +176,11 @@ internal class PortalIntegration {
         }
 
         private func RequireSystemBackend(binary string) {
-            if binary == "/usr/local/bin/gloop" {
+            if binary == DesktopIntegration.LocalSystemBinaryPath {
                 RequireUserBackendSupport()
             }
             let dataRoot = DesktopIntegration.SystemData(binary)
-            let service = Path.Combine(dataRoot, "dbus-1/services", BusName + ".service")
+            let service = Path.Combine(dataRoot, "dbus-1/services", FileChooserPortal.BusName + ".service")
             let portal = Path.Combine(dataRoot, "xdg-desktop-portal/portals/gloop.portal")
             if !MatchesService(service, binary) || !MatchesPortal(portal) {
                 throw InvalidOperationException(
@@ -184,8 +192,8 @@ internal class PortalIntegration {
                         portal
                 )
             }
-            let dataHome = DesktopIntegration.UserDirectory("XDG_DATA_HOME", ".local/share")
-            let userService = Path.Combine(dataHome, "dbus-1/services", BusName + ".service")
+            let dataHome = Xdg.UserDirectory("XDG_DATA_HOME", ".local/share")
+            let userService = Path.Combine(dataHome, "dbus-1/services", FileChooserPortal.BusName + ".service")
             let userPortal = Path.Combine(dataHome, "xdg-desktop-portal/portals/gloop.portal")
             for path in[]string{userService, userPortal} {
                 if File.Exists(path) && (path == userService ? !MatchesService(path, binary): !MatchesPortal(path)) {
@@ -201,7 +209,7 @@ internal class PortalIntegration {
         }
 
         private func MatchesService(path string, binary string) bool ->
-        DesktopIntegration.EntryValue(path, "D-BUS Service", "Name") == BusName && DesktopIntegration.EntryValue(
+        Xdg.EntryValue(path, "D-BUS Service", "Name") == FileChooserPortal.BusName && Xdg.EntryValue(
             path,
             "D-BUS Service",
             "Exec"
@@ -209,9 +217,9 @@ internal class PortalIntegration {
             " --portal"
 
         private func MatchesPortal(path string) bool ->
-        DesktopIntegration.EntryValue(path, "portal", "DBusName") == BusName && Array.Exists(
-            DesktopIntegration.EntryValue(path, "portal", "Interfaces").Split(';'),
-            value -> value == Interface
+        Xdg.EntryValue(path, "portal", "DBusName") == FileChooserPortal.BusName && Array.Exists(
+            Xdg.EntryValue(path, "portal", "Interfaces").Split(';'),
+            value -> value == FileChooserPortal.ChooserInterface
         )
 
         private func ExistingConfig(root string, names List[string]) string {
@@ -225,18 +233,10 @@ internal class PortalIntegration {
         }
 
         private func InheritedConfig(names List[string]) string {
-            let roots = List[string]()
-            for root in(Environment.GetEnvironmentVariable("XDG_CONFIG_DIRS") ?? "/etc/xdg").Split(':') {
-                roots.Add(root)
-            }
+            let roots = Xdg.ConfigDirs()
+            roots.RemoveAt(0)
             roots.Add("/etc")
-            roots.Add(DesktopIntegration.UserDirectory("XDG_DATA_HOME", ".local/share"))
-            for root in(Environment.GetEnvironmentVariable("XDG_DATA_DIRS") ?? "/usr/local/share:/usr/share").Split(
-                ':'
-            ) {
-                roots.Add(root)
-            }
-            roots.Add("/usr/share")
+            roots.AddRange(Xdg.DataDirs())
             for root in roots {
                 if Path.IsPathFullyQualified(root) {
                     let config = ExistingConfig(root, names)
@@ -249,22 +249,14 @@ internal class PortalIntegration {
         }
 
         private func ReadPreference(text string) string {
-            var preferred = false
-            var value = ""
-            for line in text.Split('\n') {
-                let trimmed = line.Trim()
-                if trimmed.StartsWith("[") {
-                    preferred = trimmed == "[preferred]"
-                } else if preferred && IsPreference(trimmed) {
-                    value = trimmed.Substring(trimmed.IndexOf('=') + 1).Trim()
-                }
-            }
-            return value
+            let groups = Xdg.ParseGroups(text.Split('\n'))
+            return groups.TryGetValue("preferred", out var values) ?
+            values.GetValueOrDefault(FileChooserPortal.ChooserInterface, ""): ""
         }
 
         private func IsPreference(line string) bool {
             let separator = line.IndexOf('=')
-            return separator >= 0 && line.Substring(0, separator).Trim() == Interface
+            return separator >= 0 && line.Substring(0, separator).Trim() == FileChooserPortal.ChooserInterface
         }
 
         private func Preference(text string, value string) string {
@@ -277,7 +269,7 @@ internal class PortalIntegration {
                     preferred = trimmed == "[preferred]"
                     lines.Add(line)
                     if preferred && value != "" && !found {
-                        lines.Add(Interface + "=" + value)
+                        lines.Add(FileChooserPortal.ChooserInterface + "=" + value)
                         found = true
                     }
                 } else if !preferred || !IsPreference(trimmed) {
@@ -286,7 +278,7 @@ internal class PortalIntegration {
             }
             if value != "" && !found {
                 lines.Add("[preferred]")
-                lines.Add(Interface + "=" + value)
+                lines.Add(FileChooserPortal.ChooserInterface + "=" + value)
             }
             return String.Join("\n", lines) + "\n"
         }

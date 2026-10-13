@@ -1,7 +1,7 @@
 package gloop
 
 data struct PreviewData {
-    internal var Kind string = ""
+    internal var Kind PreviewKind = PreviewKind.None
     internal var Text string = ""
     internal var Path string = ""
     internal var Error string = ""
