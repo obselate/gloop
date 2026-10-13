@@ -142,7 +142,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ========================================================================
-Goo.Widgets 0.2.15 and Goo.Animations 0.2.6 | MIT
+Goo.Widgets 0.2.16 and Goo.Animations 0.2.6 | MIT
 ========================================================================
 
 MIT License
