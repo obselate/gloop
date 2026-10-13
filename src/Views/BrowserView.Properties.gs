@@ -154,6 +154,7 @@ partial class BrowserView {
     private func PermissionRow(label string, shift int32, canEdit bool) Blob {
         let controls = List[Blob](3)
         let names = []string{"Read", "Write", "Execute"}
+        let disabled = !canEdit || Model.Operations.IsOperating || !Model.Operations.AcceptingOperations
 
         for index in 0 ... 3 {
             let bit = UnixFileMode((4 >> index) << shift)
@@ -162,16 +163,16 @@ partial class BrowserView {
                 AccessibilityName: label + " " + names[index].ToLowerInvariant(),
                 State: (propertiesInfo.Mode & bit) != UnixFileMode.None ?
                 AccessibilityChecked.True: AccessibilityChecked.False,
-                Disabled: !canEdit || Model.Operations.IsOperating || !Model.Operations.AcceptingOperations,
+                Disabled: disabled,
                 OnChange: state -> ChangePermission(bit, state == AccessibilityChecked.True),
-                LabelColor: palette.Text,
+                LabelColor: disabled ? palette.Muted: palette.Text,
                 LabelFontSize: 13,
                 Size: 16,
                 BackgroundColor: palette.Surface,
                 BorderColor: palette.Border,
-                CheckedBackgroundColor: palette.Accent,
-                CheckedBorderColor: palette.Accent,
-                MarkColor: palette.Background,
+                CheckedBackgroundColor: disabled ? palette.Border: palette.Accent,
+                CheckedBorderColor: disabled ? palette.Border: palette.Accent,
+                MarkColor: disabled ? palette.Muted: palette.Background,
             }.Build()
             checkbox.Focus = palette.Ring(2, 2)
             controls.Add(checkbox)
