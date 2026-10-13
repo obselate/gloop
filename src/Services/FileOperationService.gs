@@ -1,6 +1,7 @@
 package gloop
 
 import System
+import System.Collections.Generic
 import System.ComponentModel
 import System.IO
 import System.Runtime.InteropServices
@@ -74,6 +75,32 @@ unsafe class FileOperationService {
             failure is UnauthorizedAccessException ||
             failure is ArgumentException {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
+        }
+    }
+
+    internal func ValidateRenames(sources List[string], names List[string]) {
+        let destinations = HashSet[string](StringComparer.Ordinal)
+
+        for index in 0 ... sources.Count {
+            let source = sources[index]
+            let name = names[index]
+
+            try {
+                FileNames.Validate(name)
+
+                let destination = Path.Combine(Path.GetDirectoryName(source) ?? "", name)
+
+                if !destinations.Add(destination) {
+                    throw IOException("More than one item would be named " + name)
+                }
+                if source != destination && FileSystemService.Exists(destination) {
+                    throw IOException(
+                        "An item already exists at " + destination + ". Swaps and rename chains are not supported"
+                    )
+                }
+            } catch (failure Exception) when failure is IOException || failure is ArgumentException {
+                throw IOException("Rename failed for " + source + ": " + failure.Message)
+            }
         }
     }
 

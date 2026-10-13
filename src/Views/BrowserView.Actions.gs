@@ -307,8 +307,10 @@ partial class BrowserView {
                 OpenDialog(DialogKind.NewFolder, "")
                 return true
             }
-            case "Rename" {
-                if let entry = Model.ActivePane().SingleSelectedEntry() {
+            case "Rename" or "BulkRename" {
+                if action == "BulkRename" || Model.ActivePane().SelectedPaths.Count > 1 {
+                    OpenBulkRename()
+                } else if let entry = Model.ActivePane().SingleSelectedEntry() {
                     OpenDialog(DialogKind.Rename, entry.Name)
                 }
 

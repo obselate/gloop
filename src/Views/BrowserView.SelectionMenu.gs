@@ -39,6 +39,8 @@ partial class BrowserView {
 
         if count == 1 {
             items.Add(ContextMenuItem("Rename", "Rename", "edit"))
+        } else {
+            items.Add(ContextMenuItem("BulkRename", "Bulk rename", "edit"))
         }
 
         items.Add(ContextMenuItem("Trash", "Move to Trash", "delete"))

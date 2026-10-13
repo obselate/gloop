@@ -90,6 +90,10 @@ class BrowserController {
     }
 
     internal func CanRun(action string) bool {
+        if action == "Rename" || action == "BulkRename" {
+            return !InTrashView && ActivePane().SelectedPaths.Count > 0 && Operations.AcceptingOperations
+        }
+
         if InTrashView {
             if action == "NewFolder" || action == "Rename" || action == "Copy"
             || action == "Cut" || action == "Paste" || action == "Trash" {

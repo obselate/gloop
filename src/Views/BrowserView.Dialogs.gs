@@ -49,6 +49,10 @@ partial class BrowserView {
             return PropertiesDialog()
         }
 
+        if dialog == DialogKind.BulkRename {
+            return BulkRenameDialog()
+        }
+
         if dialog == DialogKind.Bookmarks {
             return DialogShell.Build(
                 DialogTitle(dialog),
@@ -259,7 +263,7 @@ partial class BrowserView {
     }
 
     private func CloseDialog() {
-        if setupBusy {
+        if setupBusy || bulkBusy {
             return
         }
 

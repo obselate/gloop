@@ -117,7 +117,8 @@ class FileOperationQueue {
         clipboardVersion int32 = -1,
         completed Action[List[OperationResult]]? = nil,
         permission UnixFileMode = UnixFileMode.None,
-        enabled bool = false
+        enabled bool = false,
+        names List[string]? = nil
     ) {
         if controller.IsDisposed || closeRequested {
             return
@@ -150,6 +151,7 @@ class FileOperationQueue {
                 Completed: completed,
                 Permission: permission,
                 Enabled: enabled,
+                Names: names ?? sources,
             }
         )
 
@@ -222,17 +224,19 @@ class FileOperationQueue {
 
             succeeded++
 
-            if succeeded == 1 && request.Kind == OperationKind.Rename {
+            if request.Kind == OperationKind.Rename || request.Kind == OperationKind.BulkRename {
                 for pane in controller.Panes {
                     pane.RetargetSelection(result.Source, result.FinalPath)
                 }
-
-                controller.Directories.RefreshLoadedPanes(result.Source, result.FinalPath)
             }
         }
 
-        if succeeded > 0 && request.Kind != OperationKind.Rename {
-            controller.Directories.RefreshLoadedPanes()
+        if succeeded > 0 {
+            if request.Kind == OperationKind.Rename {
+                controller.Directories.RefreshLoadedPanes(results[0].Source, results[0].FinalPath)
+            } else {
+                controller.Directories.RefreshLoadedPanes()
+            }
         }
 
         if failed > 0 && request.Kind != OperationKind.Permissions {
@@ -266,6 +270,7 @@ class FileOperationQueue {
     private func TracksSources(kind OperationKind) bool -> kind == OperationKind.Move ||
         kind == OperationKind.Trash ||
         kind == OperationKind.Rename ||
+        kind == OperationKind.BulkRename ||
         kind == OperationKind.Restore ||
         kind == OperationKind.Delete
 }
@@ -276,13 +281,29 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
         let operations = FileOperationService()
         let trash = TrashService()
 
-        for source in request.Sources {
+        var validationError = ""
+
+        if request.Kind == OperationKind.BulkRename {
+            try {
+                operations.ValidateRenames(request.Sources, request.Names)
+            } catch (failure Exception) {
+                validationError = failure.Message
+            }
+        }
+
+        for index in 0 ... request.Sources.Count {
+            let source = request.Sources[index]
             var result OperationResult
 
             try {
+                if validationError != "" {
+                    throw System.IO.IOException(validationError)
+                }
+
                 result = switch request.Kind {
                     case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
                     case OperationKind.Rename: operations.Rename(source, request.Name)
+                    case OperationKind.BulkRename: operations.Rename(source, request.Names[index])
                     case OperationKind.Copy: operations.Copy(source, request.Destination)
                     case OperationKind.Move: operations.Move(source, request.Destination)
                     case OperationKind.Trash: trash.Trash(source)
