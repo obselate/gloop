@@ -194,6 +194,8 @@ partial class BrowserView {
                         "Create folder"
                     } else if dialog == DialogKind.OpenLocation {
                         "Open"
+                    } else if dialog == DialogKind.Compress {
+                        "Compress"
                     } else {
                         "Apply"
                     },

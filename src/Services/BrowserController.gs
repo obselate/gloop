@@ -5,7 +5,7 @@ import System
 import System.Collections.Generic
 import System.IO
 
-partial class BrowserController {
+class BrowserController {
     internal let Panes List[BrowserPane] = List[BrowserPane]()
     internal var ActiveIndex int32
     internal var Split bool
@@ -90,6 +90,84 @@ partial class BrowserController {
         get -> ActivePane().AtTrashRoot
     }
 
+    internal func CanRun(action string) bool {
+        if ActivePane().Kind == LocationKind.Archive &&
+            (
+            action == "Rename" ||
+                action == "Trash" ||
+                action == "Cut" ||
+                action == "Copy" ||
+                action == "Paste" ||
+                action == "NewFolder" ||
+                action == "Compress" ||
+                action == "Properties" ||
+                action == "OpenTerminal" ||
+                action == "OpenTerminalHere" ||
+                action == "ToggleBookmark"
+        ) {
+            return false
+        }
+
+        if action == "Extract" || action == "Compress" {
+            if InTrashView || InRecent || ActivePane().SelectedPaths.Count == 0 {
+                return false
+            }
+
+            if action == "Extract" && ActivePane().Kind != LocationKind.Archive {
+                for source in ActivePane().SelectionPaths() {
+                    if !ArchiveService.Supported(source) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        if InTrashView {
+            if action == "NewFolder" || action == "Rename" || action == "Copy"
+            || action == "Cut" || action == "Paste" || action == "Trash" {
+                return false
+            }
+
+            if action == "Open" {
+                return ActivePane().SingleSelectedEntry()?.IsDirectory ?? false
+            }
+
+            if action == "Restore" || action == "DeletePermanently" {
+                return AtTrashRoot
+            }
+
+            if action == "EmptyTrash" {
+                return AtTrashRoot && Places.TrashCount > 0
+            }
+
+            return true
+        }
+
+        if InRecent &&
+            (
+            action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
+            || action == "OpenTerminalHere"
+            || (action == "OpenTerminal" && !(ActivePane().SingleSelectedEntry()?.IsDirectory ?? false))
+        ) {
+            return false
+        }
+
+        let empty = ActivePane().SelectedPaths.Count == 0
+
+        if InRecent {
+            return !empty || (action != "CopyPath" && action != "Properties")
+        }
+
+        if ActivePane().DirectoryPath == "" || ActivePane().Error != "" {
+            return action != "OpenTerminal" &&
+                action != "OpenTerminalHere" &&
+                (
+                !empty || (action != "NewFolder" && action != "Paste" && action != "CopyPath" && action != "Properties")
+            )
+        }
+
+        return true
+    }
 
     internal func Pane(index int32) BrowserPane -> Panes[index]
 
@@ -503,7 +581,27 @@ partial class BrowserController {
     }
 
     internal func Extract(destination string) {
-        Operations.StartOperation(OperationKind.Extract, ActivePane().SelectionPaths(), destination, "")
+        var folder = ActivePane().DirectoryPath
+
+        if ActivePane().Kind == LocationKind.Archive {
+            folder = Path.GetDirectoryName(Archives.Source(folder)) ?? folder
+        }
+
+        try {
+            if destination.StartsWith('~') {
+                throw ArgumentException("Use a folder path without '~'")
+            }
+
+            Operations.StartOperation(
+                OperationKind.Extract,
+                ActivePane().SelectionPaths(),
+                Path.GetFullPath(destination, folder),
+                ""
+            )
+        } catch (failure ArgumentException) {
+            Status = "Extract failed for " + destination + ": " + failure.Message
+            Notify()
+        }
     }
 
     internal func Compress(name string) {

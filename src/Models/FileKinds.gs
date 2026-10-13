@@ -35,7 +35,7 @@ class FileKinds {
             }
 
             return switch extension {
-                case ".zip" or ".gz" or ".tar" or ".7z" or ".xz": "folder_zip"
+                case ".zip" or ".gz" or ".tgz" or ".tar" or ".7z" or ".xz": "folder_zip"
                 case ".mp3" or ".flac" or ".wav" or ".ogg": "audio_file"
                 case ".mp4" or ".mkv" or ".webm": "video_file"
                 case ".gs" or ".cs" or ".rs" or ".go" or ".js" or ".ts" or ".py" or ".sh" or ".json": "code"
