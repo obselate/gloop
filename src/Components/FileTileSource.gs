@@ -26,6 +26,7 @@ class FileTileSource : IReadOnlyList[FileTileItem] {
         get {
             let pane = value.Pane
             let entry = entries[index]
+
             return FileTileItem{
                 Entry: entry,
                 Index: index,

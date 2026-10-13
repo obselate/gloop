@@ -39,9 +39,12 @@ class FileOperationQueue {
         if !IsOperating {
             return true
         }
+
         closeRequested = true
         controller.Status = "Finishing file operations before exit"
+
         controller.Notify()
+
         return false
     }
 
@@ -53,11 +56,15 @@ class FileOperationQueue {
             if pending.Count >= QueueLimit {
                 return OperationAdmission.Full
             }
+
             pending.Add(request)
+
             if running {
                 return OperationAdmission.Queued
             }
+
             running = true
+
             return OperationAdmission.StartWorker
         }
     }
@@ -68,14 +75,17 @@ class FileOperationQueue {
                 running = false
                 return nil
             }
+
             let request = pending[0]
             pending.RemoveAt(0)
+
             return request
         }
     }
 
     internal func Close() {
         closeRequested = false
+
         lock gate {
             closed = true
             pending.Clear()
@@ -91,6 +101,7 @@ class FileOperationQueue {
     ) {
         let sources = List[string]()
         sources.Add(source)
+
         StartOperation(kind, sources, destination, name, clipboardVersion)
     }
 
@@ -107,16 +118,21 @@ class FileOperationQueue {
         if sources.Count == 0 {
             return
         }
+
         if TracksSources(kind) {
             for source in sources {
                 if !movingSources.Contains(source) {
                     continue
                 }
+
                 controller.Status = kind.ToString() + " failed for " + source + ": File operation already in progress"
+
                 controller.Notify()
+
                 return
             }
         }
+
         let admission = Submit(
             OperationRequest{
                 Kind: kind,
@@ -126,21 +142,28 @@ class FileOperationQueue {
                 ClipboardVersion: clipboardVersion,
             }
         )
+
         if admission == OperationAdmission.Full || admission == OperationAdmission.Closed {
             controller.Status = kind.ToString() +
                 ": File operation queue is " +
                 (admission == OperationAdmission.Full ? "full": "closed")
+
             controller.Notify()
+
             return
         }
+
         if TracksSources(kind) {
             for source in sources {
                 movingSources.Add(source)
             }
         }
+
         operationCount++
         controller.Status = "Working…"
+
         controller.Notify()
+
         if admission == OperationAdmission.StartWorker {
             let queue = this
             let owner = window
@@ -152,49 +175,63 @@ class FileOperationQueue {
         if controller.IsDisposed {
             return
         }
+
         if TracksSources(request.Kind) {
             for source in request.Sources {
                 movingSources.Remove(source)
             }
         }
+
         operationCount--
         controller.CompleteClipboardMove(request, results)
+
         var succeeded int32
         var failed int32
         var firstError = ""
+
         for result in results {
             if result.Error != "" {
                 failed++
+
                 if firstError == "" {
                     firstError = (request.Kind == OperationKind.CreateFolder ? request.Name: result.Source) +
                         ": " +
                         result.Error
                 }
+
                 continue
             }
+
             succeeded++
+
             if succeeded == 1 && request.Kind == OperationKind.Rename {
                 for pane in controller.Panes {
                     pane.RetargetSelection(result.Source, result.FinalPath)
                 }
+
                 controller.Directories.RefreshLoadedPanes(result.Source, result.FinalPath)
             }
         }
+
         if succeeded > 0 && request.Kind != OperationKind.Rename {
             controller.Directories.RefreshLoadedPanes()
         }
+
         if failed > 0 {
             let operation = request.Kind == OperationKind.CreateFolder ? "Create folder": request.Kind.ToString()
             controller.Status = results.Count == 1
             ? operation + " failed for " + firstError
             : operation + ": " + succeeded.ToString() + " done, " + failed.ToString() + " failed. " + firstError
+
             if closeRequested && closeFailure == "" {
                 closeFailure = controller.Status
             }
         } else if closeFailure == "" {
             controller.Status = "Done"
         }
+
         controller.Places.Refresh()
+
         if closeRequested && operationCount == 0 {
             if closeFailure != "" {
                 closeRequested = false
@@ -202,6 +239,7 @@ class FileOperationQueue {
                 closeFailure = ""
             }
         }
+
         controller.Notify()
     }
 
@@ -217,8 +255,10 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
         let results = List[OperationResult](request.Sources.Count)
         let operations = FileOperationService()
         let trash = TrashService()
+
         for source in request.Sources {
             var result OperationResult
+
             try {
                 result = switch request.Kind {
                     case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
@@ -234,8 +274,10 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
             } catch (failure Exception) {
                 result = OperationResult{Source: source, FinalPath: "", Error: failure.Message}
             }
+
             results.Add(result)
         }
+
         try {
             window.Post(() -> queue.CompleteOperation(request, results))
         } catch (failure InvalidOperationException) { }

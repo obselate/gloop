@@ -11,9 +11,11 @@ partial class BrowserView {
 
     private func SpaceStatus() Blob? {
         let space = Model.Places.Space
+
         if width < 760 || space.TotalBytes <= 0 || Model.InRecent {
             return nil
         }
+
         return Container{
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
@@ -36,7 +38,9 @@ partial class BrowserView {
             FocusFiles()
             return
         }
+
         notice = ""
+
         Model.Places.Mount(
             volume,
             (path, error) -> {

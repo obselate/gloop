@@ -10,16 +10,21 @@ class Xdg {
 
         internal func UserDirectory(variable string, fallback string, requireHome bool = false) string {
             let configured = Environment.GetEnvironmentVariable(variable) ?? ""
+
             if Path.IsPathFullyQualified(configured) {
                 return configured
             }
+
             var home = Environment.GetEnvironmentVariable("HOME") ?? ""
+
             if !Path.IsPathFullyQualified(home) {
                 if requireHome {
                     throw IOException("Home directory is unavailable")
                 }
+
                 home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             }
+
             return Path.Combine(home, fallback)
         }
 
@@ -27,6 +32,7 @@ class Xdg {
 
         internal func WriteText(path string, text string) {
             let temporary = path + "." + Guid.NewGuid().ToString("N") + ".new"
+
             try {
                 File.WriteAllText(temporary, text)
                 File.Move(temporary, path, true)
@@ -39,6 +45,7 @@ class Xdg {
         internal func DataDirs() List[string] {
             let roots = directories("XDG_DATA_DIRS", "/usr/local/share:/usr/share")
             roots.Insert(0, UserDirectory("XDG_DATA_HOME", ".local/share"))
+
             return roots
         }
 
@@ -46,17 +53,20 @@ class Xdg {
         internal func ConfigDirs() List[string] {
             let roots = directories("XDG_CONFIG_DIRS", "/etc/xdg")
             roots.Insert(0, ConfigHome())
+
             return roots
         }
 
         /// Reads the lines of a text file. A missing, unreadable or oversized file yields no lines.
         internal func ReadLines(path string) List[string] {
             let lines = List[string]()
+
             try {
                 if File.Exists(path) && FileInfo(path).Length <= MaxFileSize {
                     lines.AddRange(File.ReadLines(path))
                 }
             } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
+
             return lines
         }
 
@@ -66,9 +76,11 @@ class Xdg {
         internal func ParseGroups(lines IEnumerable[string]) Dictionary[string, Dictionary[string, string]] {
             let groups = Dictionary[string, Dictionary[string, string]]()
             var current = Dictionary[string, string]()
+
             for line in lines {
                 let text = line.Trim()
                 let separator = text.IndexOf('=')
+
                 if text.StartsWith('[') && text.EndsWith(']') {
                     current = Dictionary[string, string]()
                     groups[text.Substring(1, text.Length - 2)] = current
@@ -76,11 +88,13 @@ class Xdg {
                     current[text.Substring(0, separator).Trim()] = text.Substring(separator + 1).Trim()
                 }
             }
+
             return groups
         }
 
         internal func EntryValue(path string, section string, key string) string {
             let groups = Groups(path)
+
             return groups.TryGetValue(section, out var values) ? values.GetValueOrDefault(key, ""): ""
         }
 
@@ -89,6 +103,7 @@ class Xdg {
             if name.Contains('/') {
                 return isExecutable(name) ? name: ""
             }
+
             for directory in(Environment.GetEnvironmentVariable("PATH") ?? "").Split(
                 ':',
                 StringSplitOptions.RemoveEmptyEntries
@@ -97,6 +112,7 @@ class Xdg {
                     return Path.Combine(directory, name)
                 }
             }
+
             return ""
         }
 
@@ -111,14 +127,17 @@ class Xdg {
         private func directories(variable string, fallback string) List[string] {
             let roots = List[string]()
             var value = Environment.GetEnvironmentVariable(variable) ?? ""
+
             if value == "" {
                 value = fallback
             }
+
             for root in value.Split(':') {
                 if Path.IsPathFullyQualified(root) && !roots.Contains(root) {
                     roots.Add(root)
                 }
             }
+
             return roots
         }
     }

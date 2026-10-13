@@ -30,7 +30,9 @@ internal class ThemePalette {
 
     internal func Clone() ThemePalette {
         let copy = ThemePalette()
+
         copy.ApplyFrom(this)
+
         return copy
     }
 

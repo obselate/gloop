@@ -37,11 +37,15 @@ open class FileTiles : Cell[FileTableInput] {
                 MultiSelectable: true
             },
         }
+
         FileTransferUi.Root(root, value, clicks)
+
         if pane.VisibleEntries.Count == 0 {
             root.Children.Add(FileTable.Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly))
+
             return root
         }
+
         let grid = VirtualItems(
             FileTileSource(value),
             value.TileWidth,
@@ -62,7 +66,9 @@ open class FileTiles : Cell[FileTableInput] {
         grid.OverflowY = Overflow.Scroll
         grid.ScrollbarY = Ui.ScrollbarStyle(p)
         grid.ScrollbarVisibilityY = ScrollbarVisibility.Always
+
         root.Children.Add(grid)
+
         return root
     }
 
@@ -132,6 +138,7 @@ open class FileTiles : Cell[FileTableInput] {
                 MinWidth: 0,
             },
         }
+
         return FileTransferUi.Bind(tile, entry, value, clicks)
     }
 }

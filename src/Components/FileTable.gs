@@ -20,23 +20,29 @@ open class FileTable : Cell[FileTableInput] {
                 rows = []DataGridRow{}
                 indices = Dictionary[string, int32](StringComparer.Ordinal)
             }
+
             return Cell.Mount[FileTableInput, FileTiles]("tiles", value)
         }
+
         let pane = value.Pane
         let p = value.Palette
+
         if !Object.ReferenceEquals(entries, pane.VisibleEntries) {
             entries = pane.VisibleEntries
             rows = [pane.VisibleEntries.Count]DataGridRow
             indices = Dictionary[string, int32](pane.VisibleEntries.Count, StringComparer.Ordinal)
+
             for index in 0 ... pane.VisibleEntries.Count {
                 let entry = pane.VisibleEntries[index]
                 rows[index] = DataGridRow{Id: entry.FullPath, Label: entry.Name}
                 indices[entry.FullPath] = index
             }
         }
+
         let columns = BuildColumns(value)
         let selected = [pane.SelectedPaths.Count]string
         pane.SelectedPaths.CopyTo(selected)
+
         let grid = Cell.Mount[DataGridInput, DataGrid](
             "grid",
             DataGridInput{
@@ -127,19 +133,24 @@ open class FileTable : Cell[FileTableInput] {
                 },
             }
         )
+
         return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6}, grid,}
     }
 
     private func BuildColumns(value FileTableInput)[]DataGridColumn {
         let columns = List[DataGridColumn]()
         columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: 150, Sortable: true})
+
         if !value.Compact {
             columns.Add(DataGridColumn{Id: "modified", Label: "Modified", Width: 136, Minimum: 90, Sortable: true})
         }
+
         if !value.Compact && value.ShowType {
             columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: 104, Minimum: 70, Sortable: true})
         }
+
         columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: 88, Minimum: 60, Sortable: true})
+
         return columns.ToArray()
     }
 
@@ -149,6 +160,7 @@ open class FileTable : Cell[FileTableInput] {
         root.BorderRadius = 0
         root.AutoFocus = value.AutoFocus
         root.KeyBindings = value.Keys
+
         return FileTransferUi.Root(root, value, clicks)
     }
 
@@ -156,6 +168,7 @@ open class FileTable : Cell[FileTableInput] {
         let pane = value.Pane
         let p = value.Palette
         let sorted = pane.SortColumn == ColumnKind(column.Id ?? "")
+
         return Container{
             Width: Percent(100),
             MinWidth: 0,
@@ -192,6 +205,7 @@ open class FileTable : Cell[FileTableInput] {
         if column == "name" {
             let label = Ui.Label(FileTransferUi.Name(entry), p.Text)
             label.Key = "name"
+
             return Container{
                 MinWidth: 0,
                 FlexDirection: FlexDirection.Row,
@@ -204,12 +218,14 @@ open class FileTable : Cell[FileTableInput] {
                 label,
             }
         }
+
         let today = column == "modified" && entry.Modified.Date == DateTime.Today
         let text = switch column {
             case "modified": FileEntry.FormatDate(entry.Modified, compact: true)
             case "kind": entry.Kind
             default: value.SizeText(entry)
         }
+
         return Container{
             MinWidth: 0,
             AlignItems: if column == "size" {
@@ -246,10 +262,13 @@ open class FileTable : Cell[FileTableInput] {
             if pane.Loading {
                 return Ui.Empty("hourglass_empty", "Opening folder", "Reading the directory…", p)
             }
+
             if pane.Error != "" {
                 return Ui.Empty("folder_off", "Unable to open folder", pane.Error, p)
             }
+
             let empty = pane.Filter == "" && (!choosing || pane.Entries.Count == 0)
+
             return Ui.Empty(
                 "folder_open",
                 if empty && location == LocationKind.Recent {

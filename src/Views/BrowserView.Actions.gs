@@ -12,23 +12,29 @@ partial class BrowserView {
         if e.IsComposing && !e.Modifiers.Ctrl && !e.Modifiers.Alt && !e.Modifiers.Super {
             return
         }
+
         let action = ActionFor(e)
+
         if contextMenuOpen {
             if action == "Dismiss" {
                 CloseContextMenu()
                 e.PreventDefault()
                 e.StopPropagation()
             }
+
             return
         }
+
         if action == "" {
             return
         }
+
         if dialog == DialogKind.Preferences && Host.PlatformInput.Editor?.IsReadOnly == false
         && !e.Modifiers.Ctrl && !e.Modifiers.Alt && !e.Modifiers.Super
         && action != "FocusNext" && action != "FocusPrevious" && action != "Dismiss" {
             return
         }
+
         if dialog != DialogKind.None {
             if action == "Dismiss" {
                 CloseDialog()
@@ -46,11 +52,13 @@ partial class BrowserView {
         } else {
             let editor = Host.PlatformInput.Editor
             let previewFocused = editor?.IsReadOnly == true
+
             if editor != nil && !previewFocused && action != "Dismiss" && action != "Quit" && action != "FocusLocation"
             && action != "FocusFilter" && action != "FocusNext" && action != "FocusPrevious"
             && action != "OpenTerminal" && action != "OpenTerminalHere" {
                 return
             }
+
             if previewFocused &&
                 (
                 action == "Copy" || action == "Cut" || action == "Paste" || action == "Trash"
@@ -58,15 +66,20 @@ partial class BrowserView {
             ) {
                 return
             }
+
             if IsMovement(action) || action == "Open" {
                 return
             }
+
             let plain = !e.Modifiers.Ctrl && !e.Modifiers.Alt && !e.Modifiers.Super
+
             if !previewFocused && action == "TogglePreview" && plain {
                 return
             }
+
             Invoke(action)
         }
+
         e.PreventDefault()
         e.StopPropagation()
     }
@@ -83,11 +96,14 @@ partial class BrowserView {
         if !(chooser?.Allows(action) ?? true) || !Model.CanRun(action) {
             return
         }
+
         notice = ""
+
         if InvokeNavigation(action) || InvokeView(action) || InvokeFileAction(action) {
             Rebuild()
             return
         }
+
         switch action {
             case "Quit" {
                 Host.RequestClose()
@@ -96,10 +112,12 @@ partial class BrowserView {
                 if Host.PlatformInput.CancelDrag() {
                     return
                 }
+
                 if chooser != nil {
                     CancelChooser()
                     return
                 }
+
                 if locationEditing {
                     locationEditing = false
                 } else if Model.ActivePane().Filter != "" {
@@ -110,9 +128,11 @@ partial class BrowserView {
                 } else {
                     Model.ClearSelection()
                 }
+
                 FocusFiles()
             }
         }
+
         Rebuild()
     }
 
@@ -152,6 +172,7 @@ partial class BrowserView {
                 } else {
                     filterHandle.Focus()
                 }
+
                 return true
             }
             case "FocusNext" {
@@ -168,6 +189,7 @@ partial class BrowserView {
                 return true
             }
         }
+
         return false
     }
 
@@ -176,9 +198,11 @@ partial class BrowserView {
             case "TogglePreview" {
                 Model.TogglePreview()
                 SavePreferences()
+
                 if !Model.PreviewVisible {
                     FocusFiles()
                 }
+
                 return true
             }
             case "ToggleSplit" {
@@ -207,9 +231,11 @@ partial class BrowserView {
                 )
                 SavePreferences()
                 FocusFiles()
+
                 let state = paneViews[Model.ActiveIndex]
                 state.RevealPending = true
                 Host.Post(() -> RevealSelection(state))
+
                 return true
             }
             case "OpenTerminal" {
@@ -232,6 +258,7 @@ partial class BrowserView {
                 if ChooserAllowsMultiple() {
                     Model.SelectAll()
                 }
+
                 return true
             }
             case "ToggleSelection" {
@@ -247,6 +274,7 @@ partial class BrowserView {
                 return true
             }
         }
+
         return false
     }
 
@@ -260,6 +288,7 @@ partial class BrowserView {
                 if let entry = Model.ActivePane().SingleSelectedEntry() {
                     OpenDialog(DialogKind.Rename, entry.Name)
                 }
+
                 return true
             }
             case "Copy" {
@@ -278,6 +307,7 @@ partial class BrowserView {
                 if Model.ActivePane().SelectedPaths.Count > 0 {
                     OpenDialog(DialogKind.MoveToTrash, Model.ActivePane().SelectionSummary())
                 }
+
                 return true
             }
             case "Restore" {
@@ -288,6 +318,7 @@ partial class BrowserView {
                 if Model.AtTrashRoot && Model.ActivePane().SelectedPaths.Count > 0 {
                     OpenDialog(DialogKind.DeletePermanently, Model.ActivePane().SelectionSummary())
                 }
+
                 return true
             }
             case "EmptyTrash" {
@@ -297,6 +328,7 @@ partial class BrowserView {
                         Model.Places.TrashCount == 1 ? "1 item": "all " + Model.Places.TrashCount.ToString() + " items"
                     )
                 }
+
                 return true
             }
             case "ShowInFolder" {
@@ -308,6 +340,7 @@ partial class BrowserView {
                 return true
             }
         }
+
         return false
     }
 
@@ -317,30 +350,39 @@ partial class BrowserView {
 
     private func ListKeys()[]KeyBinding {
         let bindings = List[KeyBinding]()
+
         for pair in settings.Keybindings {
             if !IsMovement(pair.Key) {
                 continue
             }
+
             let action = pair.Key
             let shortcut = Shortcut.Parse(pair.Value)
             var key Key
+
             if !Enum.TryParse[Key](shortcut.Key, out key) {
                 continue
             }
+
             let baseCtrl = shortcut.Ctrl
             let baseShift = shortcut.Shift
             let alt = shortcut.Alt
             let super = shortcut.Super
+
             for variant in 0 ... 4 {
                 let ctrl = variant == 1 || variant == 3
                 let shift = variant >= 2
+
                 if (ctrl && baseCtrl) || (shift && baseShift) {
                     continue
                 }
+
                 let assigned = settings.ActionFor(key.ToString(), baseCtrl || ctrl, alt, baseShift || shift, super)
+
                 if variant > 0 && assigned != "" {
                     continue
                 }
+
                 bindings.Add(
                     KeyBinding{
                         Key: key,
@@ -356,6 +398,7 @@ partial class BrowserView {
                 )
             }
         }
+
         return bindings.ToArray()
     }
 
@@ -369,6 +412,7 @@ partial class BrowserView {
         } else {
             1
         }
+
         switch action {
             case "MoveUp" {
                 if !tiles || Model.ActivePane().Selected >= columns {
@@ -377,6 +421,7 @@ partial class BrowserView {
             }
             case "MoveDown" {
                 let pane = Model.ActivePane()
+
                 if !tiles || pane.Selected / columns < (pane.VisibleEntries.Count - 1) / columns {
                     Model.MoveSelection(columns, control, extend)
                 }
@@ -404,6 +449,7 @@ partial class BrowserView {
                 Model.MoveSelection(PageSize(), control, extend)
             }
         }
+
         ChooserSelectionChanged()
         Rebuild()
     }
@@ -412,7 +458,9 @@ partial class BrowserView {
         if e.IsComposing {
             return
         }
+
         let action = ActionFor(e)
+
         if action == "Open" || action == "TogglePreview" {
             Invoke(action)
             e.PreventDefault()

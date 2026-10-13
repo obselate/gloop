@@ -15,26 +15,32 @@ partial class BrowserView {
             guard let value = selectionInfo else {
                 throw InvalidOperationException("Selection info is not attached")
             }
+
             return value
         }
     }
 
     private func SelectionMenuItems(items List[MenuItem], count int32) {
         let recent = Model.InRecent
+
         items.Add(ContextMenuItem("Open", "Open", "open_in_new", count != 1))
         items.Add(OpenWithItem(count))
+
         if recent {
             items.Add(ContextMenuItem("ShowInFolder", "Show in folder", "folder_open", count != 1))
         }
+
         items.Add(MenuItem{Id: "open-separator", Separator: true})
         items.Add(ContextMenuItem("Cut", "Cut", "content_cut"))
         items.Add(ContextMenuItem("Copy", "Copy", "content_copy"))
         items.Add(ContextMenuItem("Paste", "Paste", "content_paste", !Model.HasClipboard))
         items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
         items.Add(MenuItem{Id: "copy-separator", Separator: true})
+
         if count == 1 {
             items.Add(ContextMenuItem("Rename", "Rename", "edit"))
         }
+
         items.Add(ContextMenuItem("Trash", "Move to Trash", "delete"))
         items.Add(MenuItem{Id: "trash-separator", Separator: true})
         items.Add(ContextMenuItem("OpenTerminal", "Open terminal here", "terminal"))
@@ -44,8 +50,10 @@ partial class BrowserView {
     private func OpenWithItem(count int32) MenuItem {
         let ready = count == 1 && contextApplicationsReady && contextApplications.Count > 0
         var item = FileContextMenu.Item("OpenWith", "Open with", "apps", "", palette, !ready)
+
         if ready {
             let children = List[MenuItem]()
+
             for choice in contextApplications {
                 children.Add(
                     FileContextMenu.Item(
@@ -57,8 +65,10 @@ partial class BrowserView {
                     )
                 )
             }
+
             item.Children = children.ToArray()
         }
+
         return item
     }
 
@@ -66,12 +76,15 @@ partial class BrowserView {
         Selection.CancelApplications()
         contextApplications = List[AppChoice]()
         contextApplicationsReady = false
+
         if chooser != nil || Model.InTrashView {
             return
         }
+
         guard let entry = Model.ActivePane().SingleSelectedEntry() else {
             return
         }
+
         Selection.LoadApplications(
             entry.FullPath,
             (choices, error) -> {
@@ -87,9 +100,11 @@ partial class BrowserView {
 
     private func LaunchApplication(id string) {
         let paths = Model.ActivePane().SelectionPaths()
+
         if paths.Count == 0 {
             return
         }
+
         Selection.Launch(
             id,
             paths,
@@ -104,12 +119,15 @@ partial class BrowserView {
 
     private func CopyPaths() {
         let paths = Model.ActivePane().SelectionPaths()
+
         if paths.Count == 0 && !Model.InRecent && Model.ActivePane().DirectoryPath != "" {
             paths.Add(Model.ActivePane().DirectoryPath)
         }
+
         if paths.Count == 0 {
             return
         }
+
         Host.SetClipboardText(String.Join("\n", paths))
         notice = paths.Count == 1 ? "Copied 1 path": "Copied " + paths.Count.ToString() + " paths"
     }

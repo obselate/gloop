@@ -24,17 +24,20 @@ partial class BrowserView {
         chooser = picker
         Model.SelectFirstEntry = !request.Directory && !picker.SavingMany
         chooserName = picker.InitialName
+
         if let current = request.CurrentFilter {
             if request.Filters.Count == 0 {
                 request.Filters.Add(current)
             }
         }
+
         for index in 0 ... request.Filters.Count {
             if SameChooserFilter(request.Filters[index], request.CurrentFilter) {
                 chooserFilterIndex = index
                 break
             }
         }
+
         for choice in request.Choices {
             chooserChoices[choice.Id] = choice.Selected != "" ? choice.Selected: choice
                 .Options
@@ -42,7 +45,9 @@ partial class BrowserView {
                 .Options[0]
                 .Id: "false"
         }
+
         Model.SetEntryFilter(picker.CreateEntryFilter(ChooserFilter()))
+
         return picker
     }
 
@@ -50,9 +55,11 @@ partial class BrowserView {
         guard let other = second else {
             return false
         }
+
         if first.Name != other.Name || first.Patterns.Count != other.Patterns.Count {
             return false
         }
+
         for index in 0 ... first.Patterns.Count {
             if first
                 .Patterns[index]
@@ -67,6 +74,7 @@ partial class BrowserView {
                 return false
             }
         }
+
         return true
     }
 
@@ -74,7 +82,9 @@ partial class BrowserView {
         guard let picker = chooser else {
             return nil
         }
+
         let filters = picker.Request.Filters
+
         return chooserFilterIndex >= 0 && chooserFilterIndex < filters.Count ? filters[chooserFilterIndex]: nil
     }
 
@@ -82,6 +92,7 @@ partial class BrowserView {
         guard let picker = chooser else {
             return Container{}
         }
+
         return Cell.Mount[FileChooserBarInput, FileChooserBar](
             "chooser-bar",
             FileChooserBarInput{
@@ -132,6 +143,7 @@ partial class BrowserView {
                 return entry.FullPath
             }
         }
+
         return Model.ActivePane().DirectoryPath
     }
 
@@ -139,7 +151,9 @@ partial class BrowserView {
         guard let picker = chooser else {
             return
         }
+
         chooserError = ""
+
         if picker.Saving {
             if let entry = Model.ActivePane().SingleSelectedEntry() {
                 if !entry.IsDirectory {
@@ -154,19 +168,23 @@ partial class BrowserView {
             Model.OpenSelected()
             return
         }
+
         if let entry = Model.ActivePane().SelectedEntry() {
             if entry.IsDirectory && (doubleClick || !picker.Request.Directory || picker.SavingMany) {
                 Model.Navigate(entry.FullPath)
                 return
             }
+
             if picker.Saving && !entry.IsDirectory {
                 chooserName = entry.Name
             }
+
             if picker.Request.Method == "OpenFile" && !picker.Request.Directory
             && !entry.IsDirectory && Model.ActivePane().SelectedPaths.Count == 0 {
                 Model.Select(Model.ActivePane().Selected)
             }
         }
+
         AcceptChooser()
     }
 
@@ -174,12 +192,15 @@ partial class BrowserView {
         guard let picker = chooser else {
             return
         }
+
         let pane = Model.ActivePane()
+
         if pane.Loading || pane.Error != "" {
             chooserError = pane.Loading ? "Wait for the folder to finish loading.": pane.Error
             Rebuild()
             return
         }
+
         if picker
             .Request
             .Method == "OpenFile" &&
@@ -197,16 +218,20 @@ partial class BrowserView {
                 }
             }
         }
+
         let validation = picker.Validate(pane, chooserName, ChooserFilter(), chooserChoices, replace)
+
         if validation.Error != "" {
             chooserError = validation.Error
             Rebuild()
             return
         }
+
         if validation.ReplacePaths.Count > 0 {
             OpenDialog(DialogKind.ReplaceFile, String.Join("\n", validation.ReplacePaths))
             return
         }
+
         if let result = validation.Result {
             chooserResult = result
             Host.RequestClose()
@@ -225,6 +250,7 @@ partial class BrowserView {
         guard let request = launch.ChooserRequest else {
             return Model.ActivePane().DirectoryPath
         }
+
         return request.Title != "" ? request.Title: request.Method != "OpenFile" ? "Save files": request.Directory ? "Select folder": "Open files"
     }
 }

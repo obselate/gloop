@@ -106,9 +106,11 @@ class ThumbnailService : IDisposable {
             !entry.IsSymlink &&
             entry.Size > 0 &&
             (image || FileKinds.IsText(extension))
+
         if !supported || maxEdge <= 0 {
             return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
         }
+
         let edge = Math.Min(maxEdge, MaximumEdgePixels)
         let key = entry.FullPath + "\0" + entry.Modified.Ticks.ToString() + "\0" + entry.Size.ToString() +
             "\0" +
@@ -116,22 +118,26 @@ class ThumbnailService : IDisposable {
         var started bool
         var item ThumbnailItem?
         var lease ThumbnailLease?
+
         lock gate {
             if !closed {
                 if !items.TryGetValue(key, out item) {
                     makeRoom()
+
                     if waiting.Count == 0 && items.Count < CacheItemLimit && pending.Count < QueueLimit {
                         item = ThumbnailItem(key, entry, image, edge)
                         items.Add(key, item)
                         pending.Add(item)
                     }
                 }
+
                 if let current = item {
                     stamp++
                     current.Stamp = stamp
                     let created = ThumbnailLease(this, current, invalidate, key, entry, image, edge)
                     current.Leases.Add(created)
                     lease = created
+
                     if workers == 0 && pending.Count > 0 {
                         workers++
                         started = true
@@ -144,12 +150,15 @@ class ThumbnailService : IDisposable {
                 }
             }
         }
+
         if started {
             go thumbnailWorker(this)
         }
+
         if let current = lease {
             return current
         }
+
         return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
     }
 
@@ -164,38 +173,47 @@ class ThumbnailService : IDisposable {
                 }
             }
         }
+
         return ThumbnailData{}
     }
 
     internal func Release(lease ThumbnailLease) {
         var admitted[]ThumbnailLease = []ThumbnailLease{}
         var started bool
+
         lock gate {
             if !lease.Active {
                 return
             }
+
             lease.Active = false
+
             if lease.Waiting {
                 lease.Waiting = false
                 waiting.Remove(lease)
             } else if let item = lease.Item {
                 item.Leases.Remove(lease)
+
                 if item.Leases.Count == 0 && item.Data.Kind == "loading" {
                     pending.Remove(item)
                     item.Cancellation?.Cancel()
                     items.Remove(item.Key)
                 }
+
                 makeRoom()
                 admitted = admitWaiting()
+
                 if workers == 0 && pending.Count > 0 {
                     workers++
                     started = true
                 }
             }
         }
+
         if started {
             go thumbnailWorker(this)
         }
+
         post(admitted)
     }
 
@@ -204,15 +222,20 @@ class ThumbnailService : IDisposable {
             while pending.Count > 0 && !closed {
                 let item = pending[0]
                 pending.RemoveAt(0)
+
                 if item.Leases.Count == 0 {
                     continue
                 }
+
                 item.Running = true
                 item.Cancellation = CancellationTokenSource()
+
                 return item
             }
+
             workers--
         }
+
         return nil
     }
 
@@ -220,23 +243,29 @@ class ThumbnailService : IDisposable {
         var result = ThumbnailData{}
         var loadedSource ImageSource?
         var completed bool
+
         try {
             let info = FileInfo(item.Entry.FullPath)
+
             if info.Length == item.Entry.Size && info.LastWriteTime == item.Entry.Modified {
                 if item.Image {
                     result = loadImage(item)
                 } else {
                     result = loadText(item)
                 }
+
                 loadedSource = result.Source
                 info.Refresh()
+
                 if info.Length != item.Entry.Size || info.LastWriteTime != item.Entry.Modified {
                     if let source = result.Source {
                         source.Dispose()
                     }
+
                     result = ThumbnailData{}
                 }
             }
+
             completed = true
         } catch (failure Exception) when failure is OperationCanceledException ||
             failure is ImageLimitException ||
@@ -249,17 +278,21 @@ class ThumbnailService : IDisposable {
                 loadedSource?.Dispose()
             }
         }
+
         Complete(item, result)
     }
 
     internal func Complete(item ThumbnailItem, result ThumbnailData) {
         let notify = List[ThumbnailLease]()
         var keep bool
+
         lock gate {
             item.Cancellation?.Dispose()
             item.Cancellation = nil
             item.Running = false
+
             var current ThumbnailItem?
+
             if !closed && item.Leases.Count > 0 && items.TryGetValue(item.Key, out current) && current == item {
                 item.Data = result
                 item.Bytes = if let source = result.Source {
@@ -270,16 +303,20 @@ class ThumbnailService : IDisposable {
                 bytes += item.Bytes
                 notify.AddRange(item.Leases)
                 keep = true
+
                 makeRoom()
                 notify.AddRange(admitWaiting())
             }
         }
+
         if !keep {
             if let source = result.Source {
                 source.Dispose()
             }
+
             return
         }
+
         post(notify)
     }
 
@@ -295,36 +332,45 @@ class ThumbnailService : IDisposable {
         let admitted = List[ThumbnailLease]()
         var index int32
         var capacityBlocked bool
+
         while index < waiting.Count {
             let lease = waiting[index]
             var item ThumbnailItem?
+
             if !items.TryGetValue(lease.Key, out item) {
                 if capacityBlocked {
                     index++
                     continue
                 }
+
                 makeRoom()
+
                 if items.Count >= CacheItemLimit || pending.Count >= QueueLimit {
                     capacityBlocked = true
                     index++
                     continue
                 }
+
                 item = ThumbnailItem(lease.Key, lease.Entry, lease.Image, lease.Edge)
                 items.Add(lease.Key, item)
                 pending.Add(item)
             }
+
             waiting.RemoveAt(index)
             lease.Waiting = false
             lease.Item = item
+
             if let current = item {
                 stamp++
                 current.Stamp = stamp
                 current.Leases.Add(lease)
+
                 if current.Data.Kind != "loading" {
                     admitted.Add(lease)
                 }
             }
         }
+
         return admitted.ToArray()
     }
 
@@ -334,12 +380,14 @@ class ThumbnailService : IDisposable {
                 return
             }
         }
+
         lease.Invalidate()
     }
 
     private func makeRoom() {
         while items.Count >= CacheItemLimit || bytes > CacheByteLimit {
             var oldest ThumbnailItem?
+
             for candidate in items.Values {
                 if candidate
                     .Leases
@@ -349,11 +397,14 @@ class ThumbnailService : IDisposable {
                     oldest = candidate
                 }
             }
+
             guard let victim = oldest else {
                 return
             }
+
             items.Remove(victim.Key)
             bytes -= victim.Bytes
+
             if let source = victim.Data.Source {
                 source.Dispose()
             }
@@ -364,6 +415,7 @@ class ThumbnailService : IDisposable {
         guard let cancellation = item.Cancellation else {
             return ThumbnailData{}
         }
+
         let source = ImageSource.LoadThumbnail(
             item.Entry.FullPath,
             item.Edge,
@@ -371,6 +423,7 @@ class ThumbnailService : IDisposable {
             ImageLimits,
             cancellation.Token
         )
+
         return ThumbnailData{Kind: "image", Source: source}
     }
 
@@ -379,19 +432,25 @@ class ThumbnailService : IDisposable {
         let buffer = [limit]uint8
         var count int32
         using let stream = FileStream(item.Entry.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+
         while count < limit {
             if item.Cancellation?.IsCancellationRequested == true {
                 return ThumbnailData{}
             }
+
             let read = stream.Read(buffer, count, limit - count)
+
             if read == 0 {
                 break
             }
+
             count += read
         }
+
         if TextContent.HasBinaryBytes(buffer, count, true) {
             return ThumbnailData{}
         }
+
         while count > 0 {
             try {
                 return snippet(TextContent.Decode(buffer, count))
@@ -399,9 +458,11 @@ class ThumbnailService : IDisposable {
                 if count < limit - 3 {
                     return ThumbnailData{}
                 }
+
                 count--
             }
         }
+
         return ThumbnailData{}
     }
 
@@ -409,6 +470,7 @@ class ThumbnailService : IDisposable {
         let output = StringBuilder()
         var lines int32 = 0
         var columns int32 = 0
+
         for character in text {
             if lines >= TextLineLimit || output.Length >= TextCharacterLimit {
                 break
@@ -419,6 +481,7 @@ class ThumbnailService : IDisposable {
             if character == '\r' {
                 continue
             }
+
             if character == '\n' {
                 output.Append('\n')
                 lines++
@@ -434,10 +497,13 @@ class ThumbnailService : IDisposable {
                 columns++
             }
         }
+
         let value = output.ToString().Trim()
+
         if value == "" {
             return ThumbnailData{}
         }
+
         return ThumbnailData{Kind: "text", Text: value}
     }
 
@@ -447,15 +513,19 @@ class ThumbnailService : IDisposable {
             if closed {
                 return
             }
+
             closed = true
             pending.Clear()
             waiting.Clear()
+
             for item in items.Values {
                 item.Cancellation?.Cancel()
+
                 if let source = item.Data.Source {
                     source.Dispose()
                 }
             }
+
             items.Clear()
             bytes = 0
         }

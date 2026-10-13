@@ -41,6 +41,7 @@ internal class AppSettings {
         UnknownKeybindings = Dictionary[string, string](StringComparer.Ordinal)
         UnknownSettings = Dictionary[string, JsonElement](StringComparer.Ordinal)
         Bookmarks = List[string]()
+
         for action in ActionCatalog {
             Keybindings[action.Key] = action.Value.Default
         }
@@ -48,25 +49,32 @@ internal class AppSettings {
 
     internal func ActionFor(key string, ctrl bool, alt bool, shift bool, super bool) string {
         let name = Shortcut.KeyName(key)
+
         if name == "" {
             return ""
         }
+
         let shortcut = (ctrl ? "Ctrl+": "") + (alt ? "Alt+": "")
         + (shift ? "Shift+": "") + (super ? "Super+": "") + name
+
         for binding in Keybindings {
             if binding.Value == shortcut {
                 return binding.Key
             }
         }
+
         return ""
     }
 
     internal func SetBinding(action string, shortcut string) string {
         let error = ValidateBinding(action, shortcut)
+
         if error != "" {
             return error
         }
+
         Keybindings[action] = Shortcut.Normalize(shortcut)
+
         return ""
     }
 
@@ -74,26 +82,33 @@ internal class AppSettings {
         if !Keybindings.ContainsKey(action) {
             return "Unknown action: " + action
         }
+
         let normalized = Shortcut.Normalize(shortcut)
+
         if normalized == "" {
             return "Invalid shortcut: " + shortcut
         }
+
         for binding in Keybindings {
             if binding.Key != action && binding.Value == normalized {
                 return "Shortcut already assigned to " + binding.Key
             }
         }
+
         return ""
     }
 
     internal func IsBookmarked(path string) bool {
         let normalized = BookmarkPath.Normalize(path)
+
         return normalized != "" && Bookmarks.Contains(normalized)
     }
 
     internal func Clone() AppSettings {
         let copy = AppSettings()
+
         copy.ApplyFrom(this)
+
         return copy
     }
 
@@ -101,6 +116,7 @@ internal class AppSettings {
         if Object.ReferenceEquals(this, source) {
             return
         }
+
         ShowHidden = source.ShowHidden
         LaunchShowHiddenOriginal = source.LaunchShowHiddenOriginal
         ShowTypeColumn = source.ShowTypeColumn
@@ -114,19 +130,27 @@ internal class AppSettings {
         Theme.ApplyFrom(source.Theme)
         ThemeName = source.ThemeName
         CustomTheme.ApplyFrom(source.CustomTheme)
+
         Keybindings.Clear()
+
         for binding in source.Keybindings {
             Keybindings[binding.Key] = binding.Value
         }
+
         UnknownKeybindings.Clear()
+
         for binding in source.UnknownKeybindings {
             UnknownKeybindings[binding.Key] = binding.Value
         }
+
         UnknownSettings.Clear()
+
         for setting in source.UnknownSettings {
             UnknownSettings[setting.Key] = setting.Value
         }
+
         Bookmarks.Clear()
+
         for bookmark in source.Bookmarks {
             Bookmarks.Add(bookmark)
         }
@@ -134,7 +158,9 @@ internal class AppSettings {
 
     internal func ResetShortcuts() {
         let defaults = AppSettings()
+
         Keybindings.Clear()
+
         for binding in defaults.Keybindings {
             Keybindings[binding.Key] = binding.Value
         }
@@ -142,6 +168,7 @@ internal class AppSettings {
 
     internal func ResetBehavior() {
         let defaults = AppSettings()
+
         SmoothScrolling = defaults.SmoothScrolling
         ScrollSpeed = defaults.ScrollSpeed
         PreviewWordWrap = defaults.PreviewWordWrap
@@ -150,6 +177,7 @@ internal class AppSettings {
 
     internal func ResetAppearance() {
         let defaults = AppSettings()
+
         Theme = defaults.Theme
         ThemeName = defaults.ThemeName
         CustomTheme = defaults.CustomTheme
@@ -157,6 +185,7 @@ internal class AppSettings {
 
     internal func SelectTheme(name string) {
         ThemeName = name
+
         if name == CustomThemeName {
             Theme.ApplyFrom(CustomTheme)
         } else {
@@ -173,6 +202,7 @@ internal class AppSettings {
         if isLegacyDefaultTheme(Theme) {
             Theme = ThemePalette()
         }
+
         if !hasThemeName {
             let preset = ThemePresets.Match(Theme)
             ThemeName = if preset == "" {
@@ -181,9 +211,11 @@ internal class AppSettings {
                 preset
             }
         }
+
         if ThemePresets.Contains(ThemeName) {
             Theme = ThemePresets.Create(ThemeName)
         }
+
         if !hasCustomTheme && ThemeName == CustomThemeName {
             CustomTheme.ApplyFrom(Theme)
         }
@@ -191,39 +223,52 @@ internal class AppSettings {
 
     internal func ReadBindings(bindings Dictionary[string, string]) {
         let reserved = HashSet[string](Keybindings.Values, StringComparer.Ordinal)
+
         for binding in bindings {
             let shortcut = Shortcut.Normalize(binding.Value)
+
             if shortcut == "" {
                 throw FormatException("Invalid shortcut for " + binding.Key)
             }
+
             if Keybindings.ContainsKey(binding.Key) {
                 Keybindings[binding.Key] = shortcut
             } else {
                 UnknownKeybindings[binding.Key] = shortcut
             }
         }
+
         let assigned = HashSet[string](StringComparer.Ordinal)
+
         for binding in bindings {
             if !Keybindings.ContainsKey(binding.Key) {
                 continue
             }
+
             let shortcut = Keybindings[binding.Key]
+
             if !assigned.Add(shortcut) {
                 throw FormatException("Duplicate shortcut: " + shortcut)
             }
         }
+
         let inherited = List[string]()
+
         for binding in Keybindings {
             if !bindings.ContainsKey(binding.Key) {
                 inherited.Add(binding.Key)
             }
         }
+
         inherited.Sort(StringComparer.Ordinal)
+
         for action in inherited {
             let shortcut = Keybindings[action]
+
             if assigned.Add(shortcut) {
                 continue
             }
+
             let fallback = availableShortcut(shortcut, assigned, reserved)
             Keybindings[action] = fallback
             assigned.Add(fallback)
@@ -303,6 +348,7 @@ internal class AppSettings {
             if settings.ViewMode != ViewMode.List && settings.ViewMode != ViewMode.Tiles {
                 return "View mode must be list or tiles"
             }
+
             if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < MinimumScrollSpeed
             || settings.ScrollSpeed > MaximumScrollSpeed {
                 return "Scroll speed must be between " + MinimumScrollSpeed.ToString(
@@ -311,54 +357,73 @@ internal class AppSettings {
                 )
                 + " and " + MaximumScrollSpeed.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)
             }
+
             let seenBookmarks = HashSet[string](StringComparer.Ordinal)
+
             for bookmark in settings.Bookmarks {
                 if bookmark == "" || BookmarkPath.Normalize(bookmark) != bookmark {
                     return "Bookmark paths must be normalized absolute paths"
                 }
+
                 if !seenBookmarks.Add(bookmark) {
                     return "Duplicate bookmark: " + bookmark
                 }
             }
+
             let defaults = AppSettings()
+
             if settings.Keybindings.Count != defaults.Keybindings.Count {
                 return "Every action needs a binding"
             }
+
             let used = HashSet[string](StringComparer.Ordinal)
+
             for binding in settings.Keybindings {
                 if !defaults.Keybindings.ContainsKey(binding.Key) {
                     return "Unknown action: " + binding.Key
                 }
+
                 let normalized = Shortcut.Normalize(binding.Value)
+
                 if normalized == "" || normalized != binding.Value {
                     return "Invalid shortcut for " + binding.Key
                 }
+
                 if !used.Add(binding.Value) {
                     return "Duplicate shortcut: " + binding.Value
                 }
             }
+
             used.Clear()
+
             for binding in settings.UnknownKeybindings {
                 if defaults.Keybindings.ContainsKey(binding.Key) {
                     return "Known action in unknown bindings: " + binding.Key
                 }
+
                 let normalized = Shortcut.Normalize(binding.Value)
+
                 if normalized == "" || normalized != binding.Value {
                     return "Invalid shortcut for " + binding.Key
                 }
+
                 if !used.Add(binding.Value) {
                     return "Duplicate shortcut: " + binding.Value
                 }
             }
+
             if settings.ThemeName != CustomThemeName && !ThemePresets.Contains(settings.ThemeName) {
                 return "Unknown theme: " + settings.ThemeName
             }
+
             if !validTheme(settings.Theme) {
                 return "Settings: field theme colors must be #RRGGBB"
             }
+
             if !validTheme(settings.CustomTheme) {
                 return "Settings: field customTheme colors must be #RRGGBB"
             }
+
             return ""
         }
 
@@ -371,36 +436,45 @@ internal class AppSettings {
             if value.Length != 7 || value[0] != char(35) {
                 return false
             }
+
             for i in 1 ... value.Length {
                 let c = value[i]
+
                 if !(c >= char(48) && c <= char(57))
                 && !(c >= char(65) && c <= char(70))
                 && !(c >= char(97) && c <= char(102)) {
                     return false
                 }
             }
+
             return true
         }
 
         private func availableShortcut(preferred string, assigned HashSet[string], reserved HashSet[string]) string {
             let key = preferred.Substring(preferred.LastIndexOf(char(43)) + 1)
             let first = "Ctrl+Shift+" + key
+
             if Shortcut.Normalize(first) == first && !assigned.Contains(first)
             && !reserved.Contains(first) {
                 return first
             }
+
             for code in 65 ... 91 {
                 let candidate = "Ctrl+Shift+" + char(code).ToString()
+
                 if !assigned.Contains(candidate) && !reserved.Contains(candidate) {
                     return candidate
                 }
             }
+
             for number in 1 ... 26 {
                 let candidate = "Ctrl+Shift+F" + number.ToString()
+
                 if !assigned.Contains(candidate) && !reserved.Contains(candidate) {
                     return candidate
                 }
             }
+
             throw FormatException("No shortcut available for " + preferred)
         }
 

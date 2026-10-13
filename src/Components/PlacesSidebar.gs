@@ -36,7 +36,9 @@ class PlacesSidebar {
             showVirtual bool = true
         ) Blob {
             let places = List[Blob]()
+
             BuildPlaces(places, path, navigate, p, standardPlaces, drop, dropPath, showVirtual, trashPath, trashCount)
+
             BuildBookmarks(
                 places,
                 path,
@@ -53,7 +55,9 @@ class PlacesSidebar {
                 bookmarkMenu,
                 bookmarkMenuKey
             )
+
             BuildDevices(places, path, navigate, window, p, drop, dropPath, volumes, openVolume, ejectVolume)
+
             return Container{
                 Width: Percent(100),
                 Height: Percent(100),
@@ -96,6 +100,7 @@ class PlacesSidebar {
             trashCount int32
         ) {
             places.Add(Ui.Section("PLACES", p))
+
             for place in standardPlaces {
                 let icon = switch place.Key {
                     case "Home": "home"
@@ -106,12 +111,16 @@ class PlacesSidebar {
                     case "Music": "music_note"
                     default: "movie"
                 }
+
                 places.Add(Place(icon, place.Key, place.Value, path, navigate, p, drop, dropPath))
             }
+
             if showVirtual {
                 places.Add(Place("history", "Recent", Locations.Recent, path, navigate, p))
+
                 if trashPath != "" {
                     var count Blob? = nil
+
                     if trashCount > 0 {
                         count = Container{
                             Height: 18,
@@ -125,6 +134,7 @@ class PlacesSidebar {
                             Ui.Label(trashCount.ToString(), p.Text, 11),
                         }
                     }
+
                     places.Add(Place("delete", "Trash", trashPath, path, navigate, p, trailing: count))
                 }
             }
@@ -151,6 +161,7 @@ class PlacesSidebar {
                 DropTarget: bookmarkDrop?.Invoke(bookmarks.Count),
                 Ui.Section("BOOKMARKS", p),
             }
+
             if bookmarks.Count == 0 {
                 saved.Children.Add(
                     Container{
@@ -167,9 +178,11 @@ class PlacesSidebar {
                     }
                 )
             }
+
             for index in 0 ... bookmarks.Count {
                 let bookmark = bookmarks[index]
                 let name = Locations.DisplayName(bookmark, home)
+
                 if let insert = bookmarkDrop {
                     saved.Children.Add(
                         DropInsertion.Build(
@@ -180,14 +193,18 @@ class PlacesSidebar {
                         )
                     )
                 }
+
                 var openMenu Action[Point]? = nil
                 var openMenuKey Action[KeyEvent, Point]? = nil
+
                 if let menu = bookmarkMenu {
                     openMenu = point -> menu(bookmark, point)
                 }
+
                 if let menuKey = bookmarkMenuKey {
                     openMenuKey = (e, point) -> menuKey(bookmark, e, point)
                 }
+
                 saved.Children.Add(
                     Bookmark(
                         bookmark,
@@ -203,6 +220,7 @@ class PlacesSidebar {
                     )
                 )
             }
+
             if bookmarks.Count > 0 {
                 if let insert = bookmarkDrop {
                     saved.Children.Add(
@@ -215,6 +233,7 @@ class PlacesSidebar {
                     )
                 }
             }
+
             places.Add(saved)
         }
 
@@ -232,12 +251,15 @@ class PlacesSidebar {
         ) {
             places.Add(Ui.Section("DEVICES", p))
             places.Add(Place("hard_drive", "File system", "/", path, navigate, p, drop, dropPath))
+
             for volume in volumes ?? List[Volume]() {
                 if volume.MountPath == "/" {
                     continue
                 }
+
                 let mounted = volume.MountPath != ""
                 var eject Blob? = nil
+
                 if mounted && volume.Ejectable {
                     eject = Ui.Tool(
                         "eject",
@@ -250,6 +272,7 @@ class PlacesSidebar {
                         hoverColor: p.Selection
                     )
                 }
+
                 places.Add(
                     Place(
                         volume.Removable ? "usb": "hard_drive",

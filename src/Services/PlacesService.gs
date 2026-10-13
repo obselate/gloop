@@ -56,8 +56,10 @@ class PlacesService {
         lock gate {
             if closed || (!volumesPending && spacePending == "") {
                 running = false
+
                 return nil
             }
+
             let request = PlacesRequest{
                 Volumes: volumesPending,
                 SpacePath: spacePending,
@@ -66,6 +68,7 @@ class PlacesService {
             }
             volumesPending = false
             spacePending = ""
+
             return request
         }
     }
@@ -75,21 +78,27 @@ class PlacesService {
         let places = List[KeyValuePair[string, string]]()
         var trashCount int32
         var space = Volume{}
+
         if request.Volumes {
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             places.Add(KeyValuePair[string, string]("Home", home))
+
             for name in[]string{"Desktop", "Documents", "Downloads", "Pictures", "Music", "Videos"} {
                 let location = Path.Combine(home, name)
+
                 if Directory.Exists(location) {
                     places.Add(KeyValuePair[string, string](name, location))
                 }
             }
+
             volumes = VolumeService().List()
             trashCount = TrashService().Count()
         }
+
         if request.SpacePath != "" {
             space = VolumeService().Space(request.SpacePath)
         }
+
         try {
             window.Post(() -> Apply(request, places, volumes, trashCount, space))
         } catch (failure InvalidOperationException) { }
@@ -99,7 +108,9 @@ class PlacesService {
         if closed {
             return
         }
+
         deviceBusy = false
+
         Refresh()
         done(path, error)
     }
@@ -112,27 +123,33 @@ class PlacesService {
 
     private func Submit(volumes bool, path string) {
         var started bool
+
         lock gate {
             if closed {
                 return
             }
+
             if volumes {
                 volumesPending = true
                 volumesGeneration++
             }
+
             if path != "" {
                 spacePath = path
                 spacePending = path
                 spaceGeneration++
             }
+
             if !running {
                 running = true
                 started = true
             }
         }
+
         if started {
             let owner = window
             let service = this
+
             go placesWorker(owner, service)
         }
     }
@@ -147,14 +164,17 @@ class PlacesService {
         if closed {
             return
         }
+
         if request.Volumes && request.VolumesGeneration == volumesGeneration {
             StandardPlaces = places
             Volumes = volumes
             TrashCount = trashCount
         }
+
         if request.SpacePath != "" && request.SpaceGeneration == spaceGeneration {
             Space = space
         }
+
         changed("")
     }
 
@@ -162,6 +182,7 @@ class PlacesService {
         if closed {
             return
         }
+
         if deviceBusy {
             done(
                 "",
@@ -170,11 +191,14 @@ class PlacesService {
                     volume.Device +
                     ": Another disk operation is still running"
             )
+
             return
         }
+
         deviceBusy = true
         let owner = window
         let service = this
+
         go placesDevice(owner, service, volume, mount, done)
     }
 
@@ -205,6 +229,7 @@ func placesWorker(window Window, service PlacesService) {
 func placesDevice(window Window, service PlacesService, volume Volume, mount bool, done Action[string, string]) {
     var path = ""
     var error string
+
     try {
         if mount {
             error = VolumeService().Mount(volume.Device, out path)
@@ -214,9 +239,11 @@ func placesDevice(window Window, service PlacesService, volume Volume, mount boo
     } catch (failure Exception) {
         error = failure.Message
     }
+
     if error != "" {
         error = (mount ? "Mount": "Eject") + " failed for " + volume.Device + ": " + error
     }
+
     try {
         window.Post(() -> service.CompleteDevice(done, path, error))
     } catch (failure InvalidOperationException) { }

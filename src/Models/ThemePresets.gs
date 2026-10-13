@@ -43,6 +43,7 @@ internal class ThemePresets {
                     "#E8CF8A"
                 )
             }
+
             if name == "Catppuccin Mocha" {
                 return Make(
                     "#1E1E2E",
@@ -58,6 +59,7 @@ internal class ThemePresets {
                     "#F9E2AF"
                 )
             }
+
             if name == "Tokyo Night" {
                 return Make(
                     "#1A1B26",
@@ -73,6 +75,7 @@ internal class ThemePresets {
                     "#E0AF68"
                 )
             }
+
             if name == "Nord" {
                 return Make(
                     "#2E3440",
@@ -88,6 +91,7 @@ internal class ThemePresets {
                     "#EBCB8B"
                 )
             }
+
             if name == "Gruvbox Dark" {
                 return Make(
                     "#282828",
@@ -103,6 +107,7 @@ internal class ThemePresets {
                     "#FABD2F"
                 )
             }
+
             if name == "Catppuccin Latte" {
                 return Make(
                     "#EFF1F5",
@@ -118,6 +123,7 @@ internal class ThemePresets {
                     "#7C4B00"
                 )
             }
+
             if name == "Rose Pine" {
                 return Make(
                     "#191724",
@@ -133,6 +139,7 @@ internal class ThemePresets {
                     "#F6C177"
                 )
             }
+
             if name == "Rose Pine Dawn" {
                 return Make(
                     "#FAF4ED",
@@ -148,6 +155,7 @@ internal class ThemePresets {
                     "#8A5B14"
                 )
             }
+
             if name == "Dracula" {
                 return Make(
                     "#282A36",
@@ -163,6 +171,7 @@ internal class ThemePresets {
                     "#8BE9FD"
                 )
             }
+
             if name == "Kanagawa Wave" {
                 return Make(
                     "#1F1F28",
@@ -178,6 +187,7 @@ internal class ThemePresets {
                     "#7FB4CA"
                 )
             }
+
             if name == "Everforest Dark Hard" {
                 return Make(
                     "#1E2326",
@@ -193,6 +203,7 @@ internal class ThemePresets {
                     "#7FBBB3"
                 )
             }
+
             if name == "Ayu Mirage" {
                 return Make(
                     "#1F2430",
@@ -208,6 +219,7 @@ internal class ThemePresets {
                     "#6DCBFA"
                 )
             }
+
             return ThemePalette()
         }
 
@@ -217,12 +229,14 @@ internal class ThemePresets {
                     return true
                 }
             }
+
             return false
         }
 
         internal func Match(theme ThemePalette) string {
             for name in Names() {
                 let preset = Create(name)
+
                 if theme.Background == preset.Background && theme.Surface == preset.Surface
                 && theme.Text == preset.Text && theme.MutedText == preset.MutedText
                 && theme.Accent == preset.Accent && theme.Border == preset.Border
@@ -230,6 +244,7 @@ internal class ThemePresets {
                     return name
                 }
             }
+
             return ""
         }
 
@@ -247,6 +262,7 @@ internal class ThemePresets {
             syntaxType string
         ) ThemePalette {
             let theme = ThemePalette()
+
             theme.Background = background
             theme.Surface = surface
             theme.Text = text
@@ -258,6 +274,7 @@ internal class ThemePresets {
             theme.String = syntaxString
             theme.Number = number
             theme.Type = syntaxType
+
             return theme
         }
     }

@@ -40,7 +40,9 @@ class ChoiceRow {
                 Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, label},
                 trailing,
             }
+
             WidgetKeyBindings.BindActivation(button)
+
             return button
         }
     }

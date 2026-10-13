@@ -45,21 +45,26 @@ class PreviewLoader {
     internal func Close() {
         lock gate {
             work.Close()
+
             if let active = imageCancellation {
                 active.Cancel()
                 imageCancellation = nil
             }
         }
+
         previewGeneration++
+
         if let source = PreviewImage {
             source.Dispose()
         }
+
         PreviewImage = nil
     }
 
     private func Clear() {
         lock gate {
             work.Cancel()
+
             if let active = imageCancellation {
                 active.Cancel()
                 imageCancellation = nil
@@ -77,6 +82,7 @@ class PreviewLoader {
         } else {
             nil
         }
+
         if let entry = selected {
             if let previous = previewEntry {
                 if entry.FullPath == previous.FullPath &&
@@ -89,11 +95,13 @@ class PreviewLoader {
                 }
             }
         }
+
         previewEntry = selected
 
         if controller.Status == previewResizeError && previewResizeError != "" {
             controller.Status = ""
         }
+
         previewResizeError = ""
         previewGeneration++
         previewWidth = targetPreviewWidth
@@ -102,15 +110,20 @@ class PreviewLoader {
         loadedPreviewHeight = 0
         previewAtOriginalSize = false
         Preview = PreviewData{Kind: PreviewKind.None, Text: "", Path: "", Error: ""}
+
         if let source = PreviewImage {
             source.Dispose()
         }
+
         PreviewImage = nil
+
         guard let entry = selected else {
             Clear()
             return
         }
+
         Preview = PreviewData{Kind: PreviewKind.Loading, Path: entry.FullPath}
+
         Submit(
             PreviewRequest{
                 Path: entry.FullPath,
@@ -143,9 +156,11 @@ class PreviewLoader {
         if entry.FullPath != Preview.Path {
             return
         }
+
         previewGeneration++
         previewWidth = Math.Max(previewWidth, width)
         previewHeight = Math.Max(previewHeight, height)
+
         Submit(
             PreviewRequest{
                 Path: entry.FullPath,
@@ -161,25 +176,33 @@ class PreviewLoader {
             if let stale = source {
                 stale.Dispose()
             }
+
             return
         }
+
         if data.Kind == PreviewKind.Error && PreviewImage != nil && Preview.Path == request.Path {
             previewWidth = loadedPreviewWidth
             previewHeight = loadedPreviewHeight
             previewResizeError = "Preview resize failed: " + data.Error
             controller.Status = previewResizeError
+
             controller.Notify()
+
             return
         }
+
         if let old = PreviewImage {
             old.Dispose()
         }
+
         if data.Kind != PreviewKind.Error {
             if controller.Status == previewResizeError && previewResizeError != "" {
                 controller.Status = ""
             }
+
             previewResizeError = ""
         }
+
         if let image = source {
             loadedPreviewWidth = request.Width
             loadedPreviewHeight = request.Height
@@ -187,8 +210,10 @@ class PreviewLoader {
         } else {
             previewAtOriginalSize = false
         }
+
         Preview = data
         PreviewImage = source
+
         controller.Notify()
     }
 
@@ -198,6 +223,7 @@ class PreviewLoader {
                 active.Cancel()
                 imageCancellation = nil
             }
+
             work.Submit(
                 generation -> Load(request, generation),
                 (_, failure) -> {
@@ -220,7 +246,9 @@ class PreviewLoader {
             if !work.IsCurrent(generation) {
                 return false
             }
+
             imageCancellation = cancellation
+
             return true
         }
     }
@@ -230,6 +258,7 @@ class PreviewLoader {
             if Object.ReferenceEquals(imageCancellation, cancellation) {
                 imageCancellation = nil
             }
+
             cancellation.Dispose()
         }
     }
@@ -238,12 +267,16 @@ class PreviewLoader {
         if !work.IsCurrent(generation) {
             return
         }
+
         var data PreviewData
         var source ImageSource?
+
         try {
             data = FileSystemService().ReadPreview(request.Path, () -> !work.IsCurrent(generation))
+
             if data.Kind == PreviewKind.Image && work.IsCurrent(generation) {
                 let cancellation = CancellationTokenSource()
+
                 if BeginImage(generation, cancellation) {
                     try {
                         source = ImageSource.LoadThumbnail(
@@ -272,12 +305,15 @@ class PreviewLoader {
                 Error: "Preview failed for " + request.Path + ": " + failure.Message
             }
         }
+
         if !work.IsCurrent(generation) {
             if let staleSource = source {
                 staleSource.Dispose()
             }
+
             return
         }
+
         try {
             window.Post(() -> ApplyPreview(request, data, source))
         } catch (failure InvalidOperationException) {

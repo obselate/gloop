@@ -23,10 +23,12 @@ class SelectionInfoService {
         let work = applicationWork
         let service = applications
         let owner = window
+
         work.Submit(
             generation -> {
                 let choices = service.Applications(path)
                 choices.RemoveAll(choice -> choice.Id == DesktopIntegration.AppId + ".desktop")
+
                 deliver(
                     owner,
                     work,
@@ -54,6 +56,7 @@ class SelectionInfoService {
         let work = propertiesWork
         let service = properties
         let owner = window
+
         work.Submit(
             generation -> {
                 let result = service.Describe(
@@ -61,6 +64,7 @@ class SelectionInfoService {
                     () -> !work.IsCurrent(generation),
                     partial -> deliver(owner, work, generation, () -> early(partial))
                 )
+
                 deliver(owner, work, generation, () -> done(result))
             },
             (generation, failure) -> deliver(
@@ -86,11 +90,14 @@ class SelectionInfoService {
             if launching {
                 return
             }
+
             launching = true
         }
+
         let owner = window
         let service = applications
         let session = this
+
         go launchWorker(owner, session, service, id, paths, done)
     }
 
@@ -129,12 +136,15 @@ func launchWorker(
     done Action[string]
 ) {
     var error string
+
     try {
         error = service.Launch(id, paths)
     } catch (failure Exception) {
         error = "Open With failed for " + String.Join(", ", paths) + ": " + failure.Message
     }
+
     session.FinishLaunch()
+
     try {
         window.Post(() -> done(error))
     } catch (failure InvalidOperationException) { }

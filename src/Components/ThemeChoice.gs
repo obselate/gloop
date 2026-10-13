@@ -9,6 +9,7 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
 
     protected override func Build(value ThemeChoiceInput) Blob {
         let p = Palette(value.Theme, value.Keyboard)
+
         return ChoiceRow.Build(
             value.Name,
             Ui.Label(value.Name, p.Text, 13, 500),
@@ -72,9 +73,11 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
                 },
             },
         }
+
         if p.Glass {
             frame.BackgroundGradient = p.GlassGradient
         }
+
         return frame
     }
 

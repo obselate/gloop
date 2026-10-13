@@ -15,9 +15,11 @@ partial class BrowserView {
         guard let host = window else {
             return
         }
+
         host.Background = palette.Glass ? Color.Transparent: palette.Background
         host.BackdropFallbackColor = palette.Background
         host.Backdrop = palette.Glass ? WindowBackdrop.Blur: WindowBackdrop.None
+
         UpdateBackdropRegion()
     }
 
@@ -25,6 +27,7 @@ partial class BrowserView {
         guard let host = window else {
             return
         }
+
         host.WaylandBackdrop = Rounded() ? WaylandBackdropOptions{
             Region: ElementRect{X: 1, Y: 1, Width: Math.Max(0, host.Width - 2), Height: Math.Max(0, host.Height - 2)},
             CornerRadius: WindowRadius - 1,
@@ -34,6 +37,7 @@ partial class BrowserView {
     private func KeyPressed(key Key, modifiers KeyModifiers) {
         let modifier = key is Key.ShiftLeft or Key.ShiftRight or Key.ControlLeft or Key.ControlRight or Key.AltLeft
         or Key.AltRight or Key.SuperLeft or Key.SuperRight
+
         if !modifier && !modifiers.Ctrl && !modifiers.Alt && !modifiers.Super {
             SetKeyboardFocus(true)
         }
@@ -43,6 +47,7 @@ partial class BrowserView {
         if keyboardFocus != value {
             keyboardFocus = value
             palette = Palette(settings.Theme, value)
+
             Rebuild()
         }
     }

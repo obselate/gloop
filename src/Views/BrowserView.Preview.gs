@@ -20,6 +20,7 @@ partial class BrowserView {
             ""
         }
         let preview = Model.Previews.Preview
+
         return PreviewSidebarInput{
             Title: entry?.Name ?? "Preview",
             Preview: preview,
@@ -43,8 +44,10 @@ partial class BrowserView {
         if metrics.FramebufferWidth <= 0 || metrics.FramebufferHeight <= 0 {
             return
         }
+
         framebufferWidth = metrics.FramebufferWidth
         framebufferHeight = metrics.FramebufferHeight
+
         Model.Previews.SetPreviewSize(framebufferWidth, framebufferHeight)
         SchedulePreviewResize()
     }
@@ -55,11 +58,13 @@ partial class BrowserView {
             previewResizeTimer = nil
             return
         }
+
         if previewVersion != Model.Previews.PreviewVersion || previewSource != Model.Previews.PreviewImage {
             previewResizeTimer?.Dispose()
             previewResizeTimer = nil
             previewVersion = Model.Previews.PreviewVersion
             previewSource = Model.Previews.PreviewImage
+
             SchedulePreviewResize()
         }
     }

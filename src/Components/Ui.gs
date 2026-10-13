@@ -29,7 +29,9 @@ class Ui {
             if icon != "folder" {
                 return Icon(icon, p.IconColor(icon), size)
             }
+
             let scale = size / float64(folder.ViewBoxWidth)
+
             return Shape{
                 Path: folder.PathForNode(1),
                 Width: size,
@@ -107,6 +109,7 @@ class Ui {
         internal func Icon(name string, color Color, size float64 = 20) Blob {
             let icon = MaterialIcons.Create(name, size, color)
             icon.FlexShrink = 0
+
             return icon
         }
 
@@ -195,7 +198,9 @@ class Ui {
                     TextTrimming: TextTrimming.Ellipsis,
                 },
             }
+
             WidgetKeyBindings.BindActivation(button)
+
             return button
         }
 

@@ -18,15 +18,18 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
     protected override func Build(value FilePreviewInput) Blob {
         let entry = value.Entry
         let p = value.Palette
+
         if path != entry.FullPath || size != entry.Size || modified != entry.Modified.Ticks {
             Dispose()
             path = entry.FullPath
             size = entry.Size
             modified = entry.Modified.Ticks
         }
+
         if !entry.IsDirectory && lease == nil {
             lease = value.Acquire(entry, 160, () -> Rebuild())
         }
+
         let data = lease?.Data
         let canvas = Container{
             Width: 22,
@@ -52,9 +55,11 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
             },
             Accessibility: Accessibility{Hidden: true},
         }
+
         if value.Tile {
             canvas.Width = Percent(100)
         }
+
         if let source = data?.Source {
             canvas.Children.Add(
                 Image{Source: source, Fit: ImageFit.Contain, Width: Percent(100), Height: Percent(100),}
@@ -78,6 +83,7 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
         } else {
             canvas.Children.Add(Ui.FileIcon(FileKinds.IconName(entry), p, value.Tile ? 48: 18))
         }
+
         return canvas
     }
 }
