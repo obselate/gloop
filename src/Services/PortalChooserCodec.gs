@@ -77,66 +77,64 @@ internal class PortalChooserCodec {
                         request.CurrentFilter = ReadFilter(value, "Portal request", property.Name)
                     }
                 } else if property.Name == "choices" {
-                    var index = 0
-
-                    for item in value.EnumerateArray() {
-                        let field = "choices[" + index.ToString() + "]"
-
-                        RequireKind(item, JsonValueKind.Object, "Portal request", field)
-
-                        let choice = PortalChoice{
-                            Id: ReadField(item, "id", JsonValueKind.String, "Portal request", field).GetString() ?? "",
-                            Label: ReadField(
-                                item,
-                                "label",
-                                JsonValueKind.String,
-                                "Portal request",
-                                field
-                            ).GetString() ?? "",
-                            Selected: ReadField(
-                                item,
-                                "selected",
-                                JsonValueKind.String,
-                                "Portal request",
-                                field
-                            ).GetString() ?? "",
-                        }
-                        var optionIndex = 0
-
-                        for option in ReadField(item, "options", JsonValueKind.Array, "Portal request", field)
-                            .EnumerateArray() {
-                            let optionField = field + ".options[" + optionIndex.ToString() + "]"
-
-                            RequireKind(option, JsonValueKind.Object, "Portal request", optionField)
-
-                            choice.Options.Add(
-                                PortalChoiceOption{
-                                    Id: ReadField(
-                                        option,
-                                        "id",
-                                        JsonValueKind.String,
-                                        "Portal request",
-                                        optionField
-                                    ).GetString() ?? "",
-                                    Label: ReadField(
-                                        option,
-                                        "label",
-                                        JsonValueKind.String,
-                                        "Portal request",
-                                        optionField
-                                    ).GetString() ?? "",
-                                }
-                            )
-                            optionIndex++
-                        }
-
-                        request.Choices.Add(choice)
-                        index++
-                    }
+                    ReadChoices(value, request)
                 }
             }
 
             return request
+        }
+
+        private func ReadChoices(value JsonElement, request PortalChooserRequest) {
+            var index = 0
+
+            for item in value.EnumerateArray() {
+                let field = "choices[" + index.ToString() + "]"
+
+                RequireKind(item, JsonValueKind.Object, "Portal request", field)
+
+                let choice = PortalChoice{
+                    Id: ReadField(item, "id", JsonValueKind.String, "Portal request", field).GetString() ?? "",
+                    Label: ReadField(item, "label", JsonValueKind.String, "Portal request", field).GetString() ?? "",
+                    Selected: ReadField(
+                        item,
+                        "selected",
+                        JsonValueKind.String,
+                        "Portal request",
+                        field
+                    ).GetString() ?? "",
+                }
+                var optionIndex = 0
+
+                for option in ReadField(item, "options", JsonValueKind.Array, "Portal request", field)
+                    .EnumerateArray() {
+                    let optionField = field + ".options[" + optionIndex.ToString() + "]"
+
+                    RequireKind(option, JsonValueKind.Object, "Portal request", optionField)
+
+                    choice.Options.Add(
+                        PortalChoiceOption{
+                            Id: ReadField(
+                                option,
+                                "id",
+                                JsonValueKind.String,
+                                "Portal request",
+                                optionField
+                            ).GetString() ?? "",
+                            Label: ReadField(
+                                option,
+                                "label",
+                                JsonValueKind.String,
+                                "Portal request",
+                                optionField
+                            ).GetString() ?? "",
+                        }
+                    )
+                    optionIndex++
+                }
+
+                request.Choices.Add(choice)
+                index++
+            }
         }
 
         internal func WriteRequest(path string, request PortalChooserRequest) {

@@ -165,7 +165,7 @@ partial class BrowserView {
 
     private func OpenBrowserSelection(doubleClick bool = false) {
         guard let picker = chooser else {
-            Model.OpenSelected()
+            Model.Launches.OpenSelected()
             return
         }
 

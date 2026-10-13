@@ -47,43 +47,50 @@ func Main(args[]string) int32 {
         launch.SetDefault ||
         launch.InstallPortal ||
         launch.SetDefaultChooser ||
-        launch
-        .RestoreDefaultChooser {
-        var operation = "Install desktop entry"
-
-        try {
-            if !launch.RestoreDefaultChooser {
-                Console.WriteLine(DesktopIntegration.Install())
-            }
-
-            if launch.SetDefault {
-                operation = "Set default file manager"
-                Console.WriteLine(DesktopIntegration.SetDefault())
-            }
-
-            if launch.InstallPortal || launch.SetDefaultChooser {
-                operation = "Register portal"
-                Console.WriteLine(PortalIntegration.Install())
-            }
-
-            if launch.SetDefaultChooser {
-                operation = "Set default file chooser"
-                Console.WriteLine(PortalIntegration.SetDefault())
-            }
-
-            if launch.RestoreDefaultChooser {
-                operation = "Restore default file chooser"
-                Console.WriteLine(PortalIntegration.RestoreDefault())
-            }
-
-            return 0
-        } catch (e Exception) {
-            Console.Error.WriteLine(operation + " failed: " + e.Message)
-
-            return 1
-        }
+        launch.RestoreDefaultChooser {
+        return RunDesktopIntegration(launch)
     }
 
+    return RunBrowser(launch)
+}
+
+private func RunDesktopIntegration(launch LaunchOptions) int32 {
+    var operation = "Install desktop entry"
+
+    try {
+        if !launch.RestoreDefaultChooser {
+            Console.WriteLine(DesktopIntegration.Install())
+        }
+
+        if launch.SetDefault {
+            operation = "Set default file manager"
+            Console.WriteLine(DesktopIntegration.SetDefault())
+        }
+
+        if launch.InstallPortal || launch.SetDefaultChooser {
+            operation = "Register portal"
+            Console.WriteLine(PortalIntegration.Install())
+        }
+
+        if launch.SetDefaultChooser {
+            operation = "Set default file chooser"
+            Console.WriteLine(PortalIntegration.SetDefault())
+        }
+
+        if launch.RestoreDefaultChooser {
+            operation = "Restore default file chooser"
+            Console.WriteLine(PortalIntegration.RestoreDefault())
+        }
+
+        return 0
+    } catch (e Exception) {
+        Console.Error.WriteLine(operation + " failed: " + e.Message)
+
+        return 1
+    }
+}
+
+private func RunBrowser(launch LaunchOptions) int32 {
     if launch.ChooserRequestPath != "" {
         try {
             launch.ChooserRequest = PortalChooserCodec.ReadRequest(launch.ChooserRequestPath)
