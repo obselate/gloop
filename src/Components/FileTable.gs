@@ -6,42 +6,6 @@ import Goo.Widgets.Data
 import System
 import System.Collections.Generic
 
-internal data struct FileTableInput {
-    var Host Window
-    var Pane BrowserPane
-    var Location LocationKind
-    var Compact bool
-    var ShowType bool
-    var SizeText Func[FileEntry, string]
-    var OnHeaderMenu Action[Point]
-    var Tiles bool
-    var TileWidth float64
-    var WordWrap bool
-    var Active bool
-    var AutoFocus bool
-    var Choosing bool
-    var DirectoriesOnly bool
-    var FocusHandle ElementHandle
-    var ViewportHandle ElementHandle
-    var OnKey Action[KeyEvent]
-    var Keys[]KeyBinding
-    var ColumnWidths IReadOnlyDictionary[string, float64]
-    var OnFittedColumnWidthsChange Action[IReadOnlyDictionary[string, float64]]
-    var OnFocusRow Action[int32]
-    var OnSelect Action[int32, bool, bool]
-    var OnDrag((string) -> DragData?)
-    var OnDragEnd Action
-    var DropTarget Func[string, DropTarget]
-    var DropPath string
-    var OnClear Action
-    var OnContextMenu Action[int32, Point]
-    var AcquireThumbnail Func[FileEntry, int32, Action, ThumbnailLease]
-    var OnOpen Action
-    var OnSort Action[string]
-    var OnText Action[string]
-    var Palette Palette
-}
-
 open class FileTable : Cell[FileTableInput] {
     private let clicks FileClickState = FileClickState()
     internal const RowHeight float64 = 30
@@ -70,21 +34,13 @@ open class FileTable : Cell[FileTableInput] {
                 indices[entry.FullPath] = index
             }
         }
-        let columns = List[DataGridColumn]()
-        columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: 150, Sortable: true})
-        if !value.Compact {
-            columns.Add(DataGridColumn{Id: "modified", Label: "Modified", Width: 136, Minimum: 90, Sortable: true})
-        }
-        if !value.Compact && value.ShowType {
-            columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: 104, Minimum: 70, Sortable: true})
-        }
-        columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: 88, Minimum: 60, Sortable: true})
+        let columns = BuildColumns(value)
         let selected = [pane.SelectedPaths.Count]string
         pane.SelectedPaths.CopyTo(selected)
         let grid = Cell.Mount[DataGridInput, DataGrid](
             "grid",
             DataGridInput{
-                Columns: columns.ToArray(),
+                Columns: columns,
                 Rows: rows,
                 ColumnWidths: value.ColumnWidths,
                 FitColumnsToViewport: true,
@@ -141,55 +97,8 @@ open class FileTable : Cell[FileTableInput] {
                     handle.Focus = p.FocusBorder()
                     return handle
                 },
-                CreateRoot: (_, root) -> {
-                    root.FlexGrow = 1
-                    root.FlexBasis = 0
-                    root.BorderRadius = 0
-                    root.DropTarget = value.DropTarget(pane.DirectoryPath)
-                    root.OutlineWidth = value.DropPath == pane.DirectoryPath ? 1: 0
-                    root.OutlineColor = p.Accent
-                    root.OutlineOffset = -1
-                    root.AutoFocus = value.AutoFocus
-                    root.KeyBindings = value.Keys
-                    root.OnPointerDown = e -> {
-                        if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild
-                        && !e.Modifiers.Ctrl && !e.Modifiers.Shift && !e.Modifiers.Super {
-                            value.OnClear()
-                        }
-                    }
-                    root.OnPointerUp = e -> FileTransferUi.BackgroundContextMenu(e, value, clicks)
-                    return root
-                },
-                CreateHeader: (_, column, _) -> Container{
-                    Width: Percent(100),
-                    MinWidth: 0,
-                    Opacity: value.Active ? 1: .6,
-                    OnPointerUp: e -> {
-                        if e.Button == PointerButton.Secondary {
-                            e.PreventDefault()
-                            e.StopPropagation()
-                            value.OnHeaderMenu(e.WindowPosition)
-                        }
-                    },
-                    AlignItems: if column.Id == "size" {
-                        AlignItems.FlexEnd
-                    } else {
-                        AlignItems.FlexStart
-                    },
-                    Padding: Edges{
-                        Left: if column.Id == "name" {
-                            30
-                        } else {
-                            0
-                        }
-                    },
-                    Container{
-                        FlexDirection: FlexDirection.Row,
-                        Gap: pane.SortColumn == column.Id ? 6: 0,
-                        Ui.Label(column.Label ?? "", pane.SortColumn == column.Id ? p.Text: p.Muted, 11, 500),
-                        Ui.Label(pane.SortColumn != column.Id ? "": pane.Descending ? "↓": "↑", p.Accent, 11, 700),
-                    },
-                },
+                CreateRoot: (_, root) -> BuildRoot(root, value),
+                CreateHeader: (_, column, _) -> BuildHeader(column, value),
                 CreateCell: (_, row, column, _) -> CellContent(
                     pane.VisibleEntries[indices[(row.Id ?? "")]],
                     (column.Id ?? ""),
@@ -219,6 +128,76 @@ open class FileTable : Cell[FileTableInput] {
             }
         )
         return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6}, grid,}
+    }
+
+    private func BuildColumns(value FileTableInput)[]DataGridColumn {
+        let columns = List[DataGridColumn]()
+        columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: 150, Sortable: true})
+        if !value.Compact {
+            columns.Add(DataGridColumn{Id: "modified", Label: "Modified", Width: 136, Minimum: 90, Sortable: true})
+        }
+        if !value.Compact && value.ShowType {
+            columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: 104, Minimum: 70, Sortable: true})
+        }
+        columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: 88, Minimum: 60, Sortable: true})
+        return columns.ToArray()
+    }
+
+    private func BuildRoot(root Container, value FileTableInput) Container {
+        let pane = value.Pane
+        let p = value.Palette
+        root.FlexGrow = 1
+        root.FlexBasis = 0
+        root.BorderRadius = 0
+        root.DropTarget = value.DropTarget(pane.DirectoryPath)
+        root.OutlineWidth = value.DropPath == pane.DirectoryPath ? 1: 0
+        root.OutlineColor = p.Accent
+        root.OutlineOffset = -1
+        root.AutoFocus = value.AutoFocus
+        root.KeyBindings = value.Keys
+        root.OnPointerDown = e -> {
+            if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild
+            && !e.Modifiers.Ctrl && !e.Modifiers.Shift && !e.Modifiers.Super {
+                value.OnClear()
+            }
+        }
+        root.OnPointerUp = e -> FileTransferUi.BackgroundContextMenu(e, value, clicks)
+        return root
+    }
+
+    private func BuildHeader(column DataGridColumn, value FileTableInput) Blob {
+        let pane = value.Pane
+        let p = value.Palette
+        return Container{
+            Width: Percent(100),
+            MinWidth: 0,
+            Opacity: value.Active ? 1: .6,
+            OnPointerUp: e -> {
+                if e.Button == PointerButton.Secondary {
+                    e.PreventDefault()
+                    e.StopPropagation()
+                    value.OnHeaderMenu(e.WindowPosition)
+                }
+            },
+            AlignItems: if column.Id == "size" {
+                AlignItems.FlexEnd
+            } else {
+                AlignItems.FlexStart
+            },
+            Padding: Edges{
+                Left: if column.Id == "name" {
+                    30
+                } else {
+                    0
+                }
+            },
+            Container{
+                FlexDirection: FlexDirection.Row,
+                Gap: pane.SortColumn == column.Id ? 6: 0,
+                Ui.Label(column.Label ?? "", pane.SortColumn == column.Id ? p.Text: p.Muted, 11, 500),
+                Ui.Label(pane.SortColumn != column.Id ? "": pane.Descending ? "↓": "↑", p.Accent, 11, 700),
+            },
+        }
     }
 
     private func CellContent(entry FileEntry, column string, selected bool, value FileTableInput, p Palette) Blob {

@@ -162,54 +162,6 @@ partial class BrowserView : Cell {
         }
     }
 
-    private func Rounded() bool -> palette.Glass && window?.State != WindowState.Maximized
-    && window?.State != WindowState.Fullscreen
-
-    private func ApplyBackdrop() {
-        guard let host = window else {
-            return
-        }
-        host.Background = palette.Glass ? Color.Transparent: palette.Background
-        host.BackdropFallbackColor = palette.Background
-        host.Backdrop = palette.Glass ? WindowBackdrop.Blur: WindowBackdrop.None
-        UpdateBackdropRegion()
-    }
-
-    private func UpdateBackdropRegion() {
-        guard let host = window else {
-            return
-        }
-        host.WaylandBackdrop = Rounded() ? WaylandBackdropOptions{
-            Region: ElementRect{X: 1, Y: 1, Width: Math.Max(0, host.Width - 2), Height: Math.Max(0, host.Height - 2)},
-            CornerRadius: WindowRadius - 1,
-        }: WaylandBackdropOptions{}
-    }
-
-    private func KeyPressed(key Key, modifiers KeyModifiers) {
-        let modifier = key is Key.ShiftLeft or Key.ShiftRight or Key.ControlLeft or Key.ControlRight or Key.AltLeft
-        or Key.AltRight or Key.SuperLeft or Key.SuperRight
-        if !modifier && !modifiers.Ctrl && !modifiers.Alt && !modifiers.Super {
-            SetKeyboardFocus(true)
-        }
-    }
-
-    private func SetKeyboardFocus(value bool) {
-        if keyboardFocus != value {
-            keyboardFocus = value
-            palette = Palette(settings.Theme, value)
-            Rebuild()
-        }
-    }
-
-    private func WindowResized(metrics WindowMetrics) {
-        UpdateBackdropRegion()
-    }
-
-    private func WindowStateChanged(state WindowState) {
-        UpdateBackdropRegion()
-        Rebuild()
-    }
-
     internal func Shutdown() {
         if let attached = window {
             attached.FocusChanged -= DismissContextMenuOnBlur
@@ -325,173 +277,14 @@ partial class BrowserView : Cell {
         }
     }
 
-    private func WatchList(handle ElementHandle, state BrowserPaneViewState) {
-        var viewport float64 = -1
-        var scrollRange float64 = -1
-        var room float64 = -1
-        handle.MetricsChanged += (metrics) -> {
-            if !metrics.IsMounted {
-                viewport = -1
-                scrollRange = -1
-                room = -1
-                return
-            }
-            if room != metrics.ContentBox.Width {
-                room = metrics.ContentBox.Width
-                if settings.ViewMode == "tiles" {
-                    Rebuild()
-                }
-            }
-            if viewport != metrics.ContentBox.Height || scrollRange != metrics.ScrollRange.Y {
-                viewport = metrics.ContentBox.Height
-                scrollRange = metrics.ScrollRange.Y
-                if state.RevealPending {
-                    RevealSelection(state)
-                }
-            }
-        }
-    }
-
     override func Build() Blob {
         if browser == nil {
             return Container{BackgroundColor: palette.Window}
         }
         let p = palette
-        let browsing = Splitter(
-            "browser-split",
-            Pane(0),
-            if Model.Split {
-                Pane(1)
-            } else {
-                nil
-            },
-            if Model.Split {
-                paneRatio
-            } else {
-                1
-            },
-            value -> {
-                paneRatio = value
-                Rebuild()
-            },
-            SplitUnit.Ratio,
-            if BrowsingWidth() < 660 {
-                SplitOrientation.Vertical
-            } else {
-                SplitOrientation.Horizontal
-            },
-            if BrowsingWidth() < 660 {
-                120
-            } else {
-                260
-            },
-            if BrowsingWidth() < 660 {
-                120
-            } else {
-                260
-            },
-            "Resize browsing panes",
-            Model.Split
-        )
-        let workspace = Splitter(
-            "preview-split",
-            browsing,
-            if Model.PreviewVisible {
-                PreviewSidebar.Build(PreviewInput(), Host, p)
-            } else {
-                nil
-            },
-            if Model.PreviewVisible {
-                if Model.Split {
-                    splitPreviewRatio
-                } else {
-                    previewRatio
-                }
-            } else {
-                1
-            },
-            value -> {
-                if Model.Split {
-                    splitPreviewRatio = value
-                } else {
-                    previewRatio = value
-                }
-                Rebuild()
-            },
-            SplitUnit.Ratio,
-            SplitOrientation.Horizontal,
-            260,
-            220,
-            "Resize preview",
-            Model.PreviewVisible
-        )
-        workspace.Key = "workspace"
-        let browserArea = Container{
-            Key: "browser-area",
-            FlexGrow: 1,
-            FlexBasis: 0,
-            MinWidth: 0,
-            MinHeight: 0,
-            workspace,
-        }
-        var bookmarkDrop Func[int32, DropTarget]? = nil
-        var bookmarkMenu Action[string, Point]? = nil
-        var bookmarkMenuKey Action[string, KeyEvent, Point]? = nil
-        if chooser == nil {
-            bookmarkDrop = index -> BookmarkDropTarget(index)
-            bookmarkMenu = OpenBookmarkContextMenu
-            bookmarkMenuKey = OpenBookmarkKeyboardContextMenu
-        }
-        let main = Splitter(
-            "places-split",
-            if width >= 860 {
-                PlacesSidebar.Build(
-                    Model.ActivePane().DirectoryPath,
-                    path -> {
-                        Model.Navigate(path)
-                        FocusFiles()
-                    },
-                    () -> OpenPreferences(),
-                    settings.Bookmarks,
-                    chooser == nil ? settings.Keybindings["ToggleBookmark"]: "",
-                    Host,
-                    p,
-                    Model.Places.StandardPlaces,
-                    destination -> FileDropTarget(destination),
-                    dropPath,
-                    chooser == nil,
-                    bookmarkDrop,
-                    bookmarkDropIndex,
-                    bookmarkMenu,
-                    bookmarkMenuKey,
-                    Model.Places.Volumes,
-                    OpenVolume,
-                    EjectVolume,
-                    Model.TrashDirectory,
-                    Model.Places.TrashCount,
-                    chooser == nil
-                )
-            } else {
-                nil
-            },
-            browserArea,
-            if width >= 860 {
-                placesWidth
-            } else {
-                0
-            },
-            value -> {
-                placesWidth = value
-                Rebuild()
-            },
-            SplitUnit.Pixels,
-            SplitOrientation.Horizontal,
-            144,
-            560,
-            "Resize places sidebar",
-            width >= 860
-        )
-        main.Key = "main"
+        let browsing = BrowsingSplit(p)
+        let browserArea = PreviewSplit(browsing, p)
+        let main = PlacesSplit(browserArea, p)
         let children = List[Blob]()
         let chrome = WindowBar.Build(Host, Toolbar(), width, p)
         chrome.Key = "window-bar"
@@ -523,554 +316,155 @@ partial class BrowserView : Cell {
         }
     }
 
-    private func Toolbar() Blob {
-        let pane = Model.ActivePane()
-        let p = palette
-        return Container{
-            Key: "toolbar",
-            Height: 40,
-            FlexShrink: 0,
-            Padding: Edges{Left: 8},
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Container{
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                FlexShrink: 0,
-                Gap: 3,
-                Ui.Tool("arrow_back", "Back", () -> Model.Back(), Host, p, false, !pane.CanBack()),
-                Ui.Tool("arrow_forward", "Forward", () -> Model.Forward(), Host, p, false, !pane.CanForward()),
-                Ui.Tool(
-                    "arrow_upward",
-                    "Parent folder",
-                    () -> Model.Parent(),
-                    Host,
-                    p,
-                    false,
-                    pane.DirectoryPath == "/"
-                ),
-            },
-            Container{FlexGrow: 1, MinWidth: 0},
-            Container{
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                FlexShrink: 0,
-                Gap: 3,
-                if width < 860 {
-                    Ui.Tool("bookmarks", "Open bookmarks", () -> Invoke("OpenBookmarks"), Host, p)
-                } else {
-                    Container{}
-                },
-                if chooser == nil {
-                    Ui.Tool(
-                        "bookmark",
-                        if settings.IsBookmarked(pane.DirectoryPath) {
-                            "Remove bookmark"
-                        } else {
-                            "Bookmark this folder"
-                        },
-                        () -> Invoke("ToggleBookmark"),
-                        Host,
-                        p,
-                        settings.IsBookmarked(pane.DirectoryPath),
-                        Model.InRecent
-                    )
-                } else {
-                    Container{}
-                },
-                Ui.Tool("refresh", "Refresh", () -> Model.Refresh(), Host, p),
-                Ui.Tool("visibility", "Toggle preview", () -> Invoke("TogglePreview"), Host, p, Model.PreviewVisible),
-                if chooser == nil {
-                    Ui.Tool(
-                        "splitscreen_vertical_add",
-                        "Toggle split view",
-                        () -> Invoke("ToggleSplit"),
-                        Host,
-                        p,
-                        Model.Split
-                    )
-                } else {
-                    Container{}
-                },
-                Ui.Tool(
-                    "visibility_off",
-                    "Toggle hidden files",
-                    () -> Invoke("ToggleHidden"),
-                    Host,
-                    p,
-                    settings.ShowHidden
-                ),
-            },
-            Container{Width: 1, Height: 20, Margin: Edges{Left: 8}, FlexShrink: 0, BackgroundColor: p.Border},
+    private func BrowsingSplit(p Palette) Blob {
+        let first = Pane(0)
+        var second Blob? = nil
+        if Model.Split {
+            second = Pane(1)
         }
-    }
-
-    private func PaneWidth(index int32) float64 {
-        if !Model.Split || BrowsingWidth() < 660 {
-            return BrowsingWidth()
-        }
-        let leadingWidth = SplitSize(BrowsingWidth(), (BrowsingWidth() - 1) * paneRatio, 260, 260)
-        return index == Model.Panes.Count - 1 ? BrowsingWidth() - leadingWidth - 1: leadingWidth
-    }
-
-    private func Location(index int32, crumbWidth float64) Blob {
-        let pane = Model.Pane(index)
-        let p = palette
-        if locationEditing && Model.ActiveIndex == index {
-            return TextEntry{
-                Key: "location-edit",
-                Handle: locationHandle,
-                Value: locationText,
-                Controlled: true,
-                Width: crumbWidth,
-                MinWidth: 0,
-                Height: 30,
-                Padding: Edges{Left: 8, Right: 8},
-                BackgroundColor: p.Surface,
-                Color: p.Text,
-                BorderRadius: 6,
-                BorderWidth: 1,
-                BorderColor: p.Accent,
-                FontSize: 12,
-                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "Location"},
-                OnChange: value -> {
-                    locationText = value
-                    Rebuild()
-                },
-                OnSubmit: value -> {
-                    locationEditing = false
-                    Model.Navigate(value)
-                    FocusFiles()
-                },
-            }
-        }
-        return Cell.Mount[BreadcrumbInput, BreadcrumbBar](
-            "location-" + index.ToString(),
-            BreadcrumbInput{
-                Path: pane.DirectoryPath,
-                Kind: pane.Kind,
-                Trash: Model.TrashDirectory,
-                Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                Width: crumbWidth,
-                Window: Host,
-                Palette: p,
-                Navigate: destination -> {
-                    Model.SetActive(index)
-                    Model.Navigate(destination)
-                    FocusFiles()
-                },
-                Edit: () -> {
-                    Model.SetActive(index)
-                    EditLocation()
-                },
-                More: (paths, point) -> OpenPathMenu(index, paths, point),
-            }
-        )
-    }
-
-    private func Pane(index int32) Blob {
-        let pane = Model.Pane(index)
-        let active = Model.ActiveIndex == index
-        let p = palette
-        let availableWidth = PaneWidth(index)
-        let compact = availableWidth < 600
-        let state = paneViews[index]
-        let handle = PaneViewport(index)
-        let location = pane.Kind
-        let tools = List[Blob]()
-        var toolsWidth = 0.0
-        if !Model.Split && availableWidth >= 560 {
-            toolsWidth = if width < 950 {
-                142
+        return SplitDivider.Build(
+            "browser-split",
+            first,
+            second,
+            if Model.Split {
+                paneRatio
             } else {
-                188
-            }
-            tools.Add(
-                Cell.Mount[FilterFieldInput, FilterField](
-                    nil,
-                    FilterFieldInput{
-                        Value: pane.Filter,
-                        Handle: filterHandle,
-                        Palette: p,
-                        Width: toolsWidth,
-                        OnChange: value -> Model.SetFilter(value),
-                        OnSubmit: () -> FocusFiles(),
-                    }
-                )
-            )
-        } else if availableWidth >= 400 {
-            tools.Add(
-                Ui.Tool(
-                    "search",
-                    "Filter files",
-                    () -> {
-                        Model.SetActive(index)
-                        Invoke("FocusFilter")
-                    },
-                    Host,
-                    p,
-                    pane.Filter != ""
-                )
-            )
-        }
-        if availableWidth >= 400 {
-            tools.Add(
-                Ui.Tool(
-                    "create_new_folder",
-                    "New folder",
-                    () -> {
-                        Model.SetActive(index)
-                        Invoke("NewFolder")
-                    },
-                    Host,
-                    p,
-                    false,
-                    location != LocationKind.Folder
-                )
-            )
-        }
-        tools.Add(
-            Ui.Tool(
-                "view_list",
-                "List view",
-                () -> {
-                    Model.SetActive(index)
-                    Invoke("ViewList")
-                },
-                Host,
-                p,
-                settings.ViewMode == "list"
-            )
-        )
-        tools.Add(
-            Ui.Tool(
-                "grid_view",
-                "Tile view",
-                () -> {
-                    Model.SetActive(index)
-                    Invoke("ViewTiles")
-                },
-                Host,
-                p,
-                settings.ViewMode == "tiles"
-            )
-        )
-        if chooser == nil {
-            tools.Add(
-                Ui.Tool(
-                    "terminal",
-                    "Open terminal",
-                    () -> {
-                        Model.SetActive(index)
-                        notice = ""
-                        Model.OpenTerminal(false)
-                    },
-                    Host,
-                    p,
-                    false,
-                    location == LocationKind.Recent
-                )
-            )
-        }
-        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * 30 + (tools.Count - 1) * 4
-        return Container{
-            Key: "pane-" + index.ToString(),
-            FlexGrow: 1,
-            FlexBasis: 0,
-            MinWidth: 0,
-            MinHeight: 0,
-            BorderWidth: Edges{Top: 2},
-            BorderColor: if active && Model.Split {
-                p.Accent
+                1
+            },
+            value -> {
+                paneRatio = value
+                Rebuild()
+            },
+            SplitUnit.Ratio,
+            if BrowsingWidth() < 660 {
+                SplitOrientation.Vertical
             } else {
-                Color.Transparent
+                SplitOrientation.Horizontal
             },
-            OnPointerDown: (_) -> Model.SetActive(index),
-            OnFocus: (_) -> Model.SetActive(index),
-            Container{
-                Key: "pane-header",
-                Height: chooser != nil ? 36: 40,
-                FlexShrink: 0,
-                Padding: Edges{Left: 7, Right: 8},
-                Gap: 8,
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                BorderWidth: Edges{Bottom: 1},
-                BorderColor: p.Border,
-                Opacity: Model.Split && !active ? .6: 1,
-                Location(index, Math.Max(0, availableWidth - 23 - toolsWidth)),
-                Container{
-                    Key: "tools",
-                    FlexDirection: FlexDirection.Row,
-                    AlignItems: AlignItems.Center,
-                    FlexShrink: 0,
-                    Gap: 4,
-                    Children: tools.ToArray(),
-                },
+            if BrowsingWidth() < 660 {
+                120
+            } else {
+                260
             },
-            Cell.Mount[FileTableInput, FileTable](
-                "table-" + index.ToString(),
-                FileTableInput{
-                    Host: Host,
-                    WordWrap: settings.PreviewWordWrap,
-                    Pane: pane,
-                    Location: location,
-                    Compact: compact,
-                    ShowType: settings.ShowTypeColumn,
-                    SizeText: FileSizeText,
-                    OnHeaderMenu: point -> OpenColumnMenu(index, point),
-                    Tiles: settings.ViewMode == "tiles",
-                    TileWidth: TileWidth(index),
-                    Active: active,
-                    AutoFocus: active && !(chooser?.Saving ?? false),
-                    Choosing: chooser != nil,
-                    DirectoriesOnly: (chooser?.Request.Directory ?? false) || (chooser?.SavingMany ?? false),
-                    ViewportHandle: handle,
-                    FocusHandle: PaneFocus(index),
-                    OnKey: ListKey,
-                    Keys: ListKeys(),
-                    ColumnWidths: state.ColumnWidths,
-                    OnFittedColumnWidthsChange: widths -> {
-                        let merged = Dictionary[string, float64](state.ColumnWidths)
-                        for pair in widths {
-                            merged[pair.Key] = pair.Value
-                        }
-                        state.ColumnWidths = merged
-                        Rebuild()
-                    },
-                    OnFocusRow: row -> {
-                        Model.SetActive(index)
-                        Model.MoveTo(row, true)
-                    },
-                    OnSelect: (row, ctrl, shift) -> {
-                        Model.SetActive(index)
-                        let multiple = ChooserAllowsMultiple()
-                        Model.Select(row, ctrl && multiple, shift && multiple)
-                        ChooserSelectionChanged()
-                        FocusFiles()
-                    },
-                    OnDrag: path -> {
-                        if chooser != nil {
-                            return nil
-                        }
-                        Model.SetActive(index)
-                        return CreateFileDrag(index, path)
-                    },
-                    OnDragEnd: () -> {
-                        transfers.Clear()
-                        ClearDropTarget()
-                    },
-                    DropTarget: destination -> FileDropTarget(destination),
-                    DropPath: dropPath,
-                    AcquireThumbnail: Thumbnails.Acquire,
-                    OnClear: () -> {
-                        Model.SetActive(index)
-                        Model.ClearSelection()
-                        FocusFiles()
-                    },
-                    OnContextMenu: (row, point) -> OpenContextMenu(index, row, point),
-                    OnOpen: () -> {
-                        Model.SetActive(index)
-                        OpenBrowserSelection(true)
-                    },
-                    OnSort: column -> {
-                        Model.SetActive(index)
-                        Model.Sort(column)
-                    },
-                    OnText: text -> {
-                        Model.SetActive(index)
-                        TypeSelect(text)
-                    },
-                    Palette: p,
-                }
-            ),
-        }
+            if BrowsingWidth() < 660 {
+                120
+            } else {
+                260
+            },
+            "Resize browsing panes",
+            Model.Split,
+            p
+        )
     }
 
-    private func FileSizeText(entry FileEntry) string {
-        if !entry.IsDirectory {
-            return FileSystemService.FormatSize(entry.Size)
+    private func PreviewSplit(browsing Blob, p Palette) Blob {
+        var preview Blob? = nil
+        if Model.PreviewVisible {
+            preview = PreviewSidebar.Build(PreviewInput(), Host, p)
         }
-        let count = FolderCounts.Count(entry, settings.ShowHidden)
-        if count < 0 {
-            return count == -1 ? "": "—"
-        }
-        return count == 1 ? "1 item": count.ToString() + " items"
-    }
-
-    private func StatusBar() Blob {
-        let p = palette
-        let pane = Model.ActivePane()
-        let total = pane.VisibleEntries.Count
-        let selected = Model.ActivePane().SelectedPaths.Count
-        let info = if notice != "" {
-            notice
-        } else if Model.Status != "" {
-            Model.Status
-        } else if pane.Loading && total == 0 {
-            "Reading folder…"
-        } else if selected > 0 {
-            let size = Model.ActivePane().SelectedSize()
-            selected.ToString() + " of " + total.ToString() +
-                " selected" +
-                (
-                if size < 0 {
-                    ""
-                } else {
-                    " · " + FileSystemService.FormatSize(size)
-                }
-            )
-        } else if total == 1 {
-            "1 item"
-        } else {
-            total.ToString() + " items"
-        }
-        let bar = Container{
-            Height: 26,
-            Key: "status",
-            FlexShrink: 0,
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Padding: Edges{Left: 12, Right: 10},
-            Gap: 14,
-            BorderWidth: Edges{Top: 1},
-            BorderColor: p.Border,
-            BackgroundColor: p.Bar,
-            Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(info, p.Muted, 11)},
-            Ui.Shortcut(settings.Keybindings["TogglePreview"], "Preview", p),
-            Ui.Shortcut(settings.Keybindings["ToggleSplit"], "Split", p),
-        }
-        if let space = SpaceStatus() {
-            bar.Children.Insert(1, space)
-        }
-        return bar
-    }
-
-    private func SplitSize(extent float64, requested float64, minimumFirst float64, minimumSecond float64) float64 {
-        let available = Math.Max(0, extent - 1)
-        let factor = Math.Min(1, available / (minimumFirst + minimumSecond))
-        return Math.Clamp(requested, minimumFirst * factor, available - minimumSecond * factor)
-    }
-
-    private func WorkspaceWidth() float64 -> width - (
-        if width >= 860 {
-            SplitSize(width, placesWidth, 144, 560) + 1
-        } else {
-            0
-        }
-    )
-
-    private func BrowsingWidth() float64 -> if Model.PreviewVisible {
-        SplitSize(
-            WorkspaceWidth(),
-            (WorkspaceWidth() - 1) * (
+        let workspace = SplitDivider.Build(
+            "preview-split",
+            browsing,
+            preview,
+            if Model.PreviewVisible {
                 if Model.Split {
                     splitPreviewRatio
                 } else {
                     previewRatio
                 }
-            ),
+            } else {
+                1
+            },
+            value -> {
+                if Model.Split {
+                    splitPreviewRatio = value
+                } else {
+                    previewRatio = value
+                }
+                Rebuild()
+            },
+            SplitUnit.Ratio,
+            SplitOrientation.Horizontal,
             260,
-            220
+            220,
+            "Resize preview",
+            Model.PreviewVisible,
+            p
         )
-    } else {
-        WorkspaceWidth()
+        workspace.Key = "workspace"
+        let browserArea = Container{
+            Key: "browser-area",
+            FlexGrow: 1,
+            FlexBasis: 0,
+            MinWidth: 0,
+            MinHeight: 0,
+            workspace,
+        }
+        return browserArea
     }
 
-    private func Splitter(
-        key string,
-        first Blob?,
-        second Blob?,
-        value float64,
-        change Action[float64],
-        unit SplitUnit,
-        orientation SplitOrientation,
-        minimumFirst float64,
-        minimumSecond float64,
-        name string,
-        enabled bool
-    ) Blob -> Cell
-        .Mount[SplitPaneInput, SplitPane](
-        key,
-        SplitPaneInput{
-            First: first,
-            Second: second,
-            Value: value,
-            Unit: unit,
-            Orientation: orientation,
-            MinimumFirst: if enabled {
-                minimumFirst
-            } else {
-                0
-            },
-            MinimumSecond: if enabled {
-                minimumSecond
-            } else {
-                0
-            },
-            HandleSize: if enabled {
-                1
-            } else {
-                0
-            },
-            Disabled: !enabled,
-            AccessibilityName: name,
-            OnChange: change,
-            CreateRoot: (_, root) -> {
-                root.FlexGrow = 1
-                root.FlexBasis = 0
-                return root
-            },
-            CreateHandle: (_, divider) -> {
-                divider.ZIndex = 2
-                divider.BackgroundColor = Color.Transparent
-                divider.BorderWidth = if !enabled {
-                    Edges{}
-                } else if orientation == SplitOrientation.Horizontal {
-                    Edges{Left: 1}
-                } else {
-                    Edges{Top: 1}
-                }
-                divider.BorderColor = palette.Border
-                divider.Hover = Style{BorderColor: palette.Accent}
-                divider.Focus = palette.FocusBorder()
-                if enabled {
-                    divider.Children.Add(
-                        Container{
-                            Position: PositionType.Absolute,
-                            Left: if orientation == SplitOrientation.Horizontal {
-                                -3
-                            } else {
-                                0
-                            },
-                            Right: if orientation == SplitOrientation.Horizontal {
-                                -3
-                            } else {
-                                0
-                            },
-                            Top: if orientation == SplitOrientation.Horizontal {
-                                0
-                            } else {
-                                -3
-                            },
-                            Bottom: if orientation == SplitOrientation.Horizontal {
-                                0
-                            } else {
-                                -3
-                            },
-                            HitTestSelf: true,
-                            Cursor: if orientation == SplitOrientation.Horizontal {
-                                Cursor.ResizeHorizontal
-                            } else {
-                                Cursor.ResizeVertical
-                            },
-                        }
-                    )
-                }
-                return divider
-            },
+    private func PlacesSplit(browserArea Blob, p Palette) Blob {
+        var bookmarkDrop Func[int32, DropTarget]? = nil
+        var bookmarkMenu Action[string, Point]? = nil
+        var bookmarkMenuKey Action[string, KeyEvent, Point]? = nil
+        if chooser == nil {
+            bookmarkDrop = index -> BookmarkDropTarget(index)
+            bookmarkMenu = OpenBookmarkContextMenu
+            bookmarkMenuKey = OpenBookmarkKeyboardContextMenu
         }
-    )
+        var places Blob? = nil
+        if width >= 860 {
+            places = PlacesSidebar.Build(
+                Model.ActivePane().DirectoryPath,
+                path -> {
+                    Model.Navigate(path)
+                    FocusFiles()
+                },
+                () -> OpenPreferences(),
+                settings.Bookmarks,
+                chooser == nil ? settings.Keybindings["ToggleBookmark"]: "",
+                Host,
+                p,
+                Model.Places.StandardPlaces,
+                destination -> FileDropTarget(destination),
+                dropPath,
+                chooser == nil,
+                bookmarkDrop,
+                bookmarkDropIndex,
+                bookmarkMenu,
+                bookmarkMenuKey,
+                Model.Places.Volumes,
+                OpenVolume,
+                EjectVolume,
+                Model.TrashDirectory,
+                Model.Places.TrashCount,
+                chooser == nil
+            )
+        }
+        let main = SplitDivider.Build(
+            "places-split",
+            places,
+            browserArea,
+            if width >= 860 {
+                placesWidth
+            } else {
+                0
+            },
+            value -> {
+                placesWidth = value
+                Rebuild()
+            },
+            SplitUnit.Pixels,
+            SplitOrientation.Horizontal,
+            144,
+            560,
+            "Resize places sidebar",
+            width >= 860,
+            p
+        )
+        main.Key = "main"
+        return main
+    }
 
     private func FolderName(path string) string {
         var directory = path
@@ -1084,20 +478,5 @@ partial class BrowserView : Cell {
             return "Home"
         }
         return Path.GetFileName(directory)
-    }
-}
-
-class BrowserPaneViewState {
-    internal let Pane BrowserPane
-    internal let ListFocus ElementHandle = ElementHandle()
-    internal let TileFocus ElementHandle = ElementHandle()
-    internal let ListViewport ElementHandle = ElementHandle()
-    internal let TileViewport ElementHandle = ElementHandle()
-    internal var ColumnWidths Dictionary[string, float64] = Dictionary[string, float64]()
-    internal var Selection string = ""
-    internal var RevealPending bool
-
-    internal init(pane BrowserPane) {
-        Pane = pane
     }
 }

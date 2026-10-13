@@ -33,6 +33,64 @@ class PlacesSidebar {
             showVirtual bool = true
         ) Blob {
             let places = List[Blob]()
+            BuildPlaces(places, path, navigate, p, standardPlaces, drop, dropPath, showVirtual, trashPath, trashCount)
+            BuildBookmarks(
+                places,
+                path,
+                navigate,
+                bookmarks,
+                bookmarkKey,
+                window,
+                p,
+                drop,
+                dropPath,
+                bookmarkDrop,
+                bookmarkDropIndex,
+                bookmarkMenu,
+                bookmarkMenuKey
+            )
+            BuildDevices(places, path, navigate, window, p, drop, dropPath, volumes, openVolume, ejectVolume)
+            return Container{
+                Width: Percent(100),
+                Height: Percent(100),
+                MinWidth: 0,
+                MinHeight: 0,
+                BackgroundColor: p.Sidebar,
+                Padding: Edges{Left: 6, Right: 6},
+                Container{
+                    FlexGrow: 1,
+                    FlexBasis: 0,
+                    MinHeight: 0,
+                    OverflowY: Overflow.Scroll,
+                    ScrollbarY: Ui.ScrollbarStyle(p),
+                    ScrollbarVisibilityY: ScrollbarVisibility.Always,
+                    Children: places.ToArray()
+                },
+                if showPreferences {
+                    Container{
+                        Height: 44,
+                        FlexShrink: 0,
+                        JustifyContent: JustifyContent.Center,
+                        Place("settings", "Preferences", "", "not-selected", (_) -> settings(), p),
+                    }
+                } else {
+                    Container{}
+                },
+            }
+        }
+
+        private func BuildPlaces(
+            places List[Blob],
+            path string,
+            navigate Action[string],
+            p Palette,
+            standardPlaces IReadOnlyList[KeyValuePair[string, string]],
+            drop Func[string, DropTarget]?,
+            dropPath string,
+            showVirtual bool,
+            trashPath string,
+            trashCount int32
+        ) {
             places.Add(Ui.Section("PLACES", p))
             for place in standardPlaces {
                 let icon = switch place.Key {
@@ -66,6 +124,23 @@ class PlacesSidebar {
                     places.Add(Place("delete", "Trash", trashPath, path, navigate, p, trailing: count))
                 }
             }
+        }
+
+        private func BuildBookmarks(
+            places List[Blob],
+            path string,
+            navigate Action[string],
+            bookmarks IReadOnlyList[string],
+            bookmarkKey string,
+            window Window,
+            p Palette,
+            drop Func[string, DropTarget]?,
+            dropPath string,
+            bookmarkDrop Func[int32, DropTarget]?,
+            bookmarkDropIndex int32,
+            bookmarkMenu Action[string, Point]?,
+            bookmarkMenuKey Action[string, KeyEvent, Point]?
+        ) {
             let saved = Container{
                 FlexShrink: 0,
                 DropTarget: bookmarkDrop?.Invoke(bookmarks.Count),
@@ -140,6 +215,20 @@ class PlacesSidebar {
                 }
             }
             places.Add(saved)
+        }
+
+        private func BuildDevices(
+            places List[Blob],
+            path string,
+            navigate Action[string],
+            window Window,
+            p Palette,
+            drop Func[string, DropTarget]?,
+            dropPath string,
+            volumes IReadOnlyList[Volume]?,
+            openVolume Action[Volume]?,
+            ejectVolume Action[Volume]?
+        ) {
             places.Add(Ui.Section("DEVICES", p))
             places.Add(Place("hard_drive", "File system", "/", path, navigate, p, drop, dropPath))
             for volume in volumes ?? List[Volume]() {
@@ -174,33 +263,6 @@ class PlacesSidebar {
                         trailing: eject
                     )
                 )
-            }
-            return Container{
-                Width: Percent(100),
-                Height: Percent(100),
-                MinWidth: 0,
-                MinHeight: 0,
-                BackgroundColor: p.Sidebar,
-                Padding: Edges{Left: 6, Right: 6},
-                Container{
-                    FlexGrow: 1,
-                    FlexBasis: 0,
-                    MinHeight: 0,
-                    OverflowY: Overflow.Scroll,
-                    ScrollbarY: Ui.ScrollbarStyle(p),
-                    ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                    Children: places.ToArray()
-                },
-                if showPreferences {
-                    Container{
-                        Height: 44,
-                        FlexShrink: 0,
-                        JustifyContent: JustifyContent.Center,
-                        Place("settings", "Preferences", "", "not-selected", (_) -> settings(), p),
-                    }
-                } else {
-                    Container{}
-                },
             }
         }
 

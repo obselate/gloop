@@ -3,19 +3,6 @@ package gloop
 import System
 import System.Collections.Generic
 
-data struct MimeGlob {
-    internal var Pattern string
-    internal var Folded string
-    internal var Type string
-    internal var Weight int32
-}
-
-data struct MimeDataFile {
-    internal var Globs List[string]
-    internal var Aliases List[string]
-    internal var Subclasses List[string]
-}
-
 class MimeDatabase {
     private let globs List[MimeGlob] = List[MimeGlob]()
     private let canonical Dictionary[string, string] = Dictionary[string, string]()

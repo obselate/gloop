@@ -7,19 +7,6 @@ import System
 import System.Collections.Generic
 import System.IO
 
-internal data struct BreadcrumbInput {
-    var Path string
-    var Kind LocationKind
-    var Trash string
-    var Home string
-    var Width float64
-    var Window Window
-    var Palette Palette
-    var Navigate Action[string]
-    var Edit Action
-    var More Action[[]string, Point]
-}
-
 open class BreadcrumbBar : Cell[BreadcrumbInput] {
     private const SeparatorWidth float64 = 12
     private const MoreWidth float64 = 28
