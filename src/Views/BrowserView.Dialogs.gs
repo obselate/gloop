@@ -141,7 +141,20 @@ partial class BrowserView {
         let rows = List[Blob](settings.Keybindings.Count)
 
         for binding in settings.Keybindings {
-            rows.Add(PropertyRow.Build(binding.Value, AppSettings.ActionCatalog[binding.Key].Label, p, 130, 13, true))
+            let row = PreferenceRow.Build(
+                AppSettings.ActionCatalog[binding.Key].Label,
+                Text{
+                    Content: binding.Value,
+                    Color: p.Muted,
+                    FontSize: 13,
+                    Width: 160,
+                    FlexShrink: 0,
+                    TextWrap: TextWrap.Wrap,
+                },
+                p
+            )
+            row.MinHeight = 0
+            rows.Add(row)
         }
 
         return DialogShell.ScrollColumn(rows.ToArray(), p)
@@ -256,6 +269,8 @@ partial class BrowserView {
             return
         }
 
+        let shortcuts = dialog == DialogKind.Shortcuts
+
         CommitPreferenceBindings()
         Selection.CancelDescribe()
 
@@ -266,6 +281,10 @@ partial class BrowserView {
         preferenceInputs.Clear()
 
         Rebuild()
+
+        if shortcuts {
+            FocusFiles()
+        }
     }
 
     private func SubmitDialog() {
