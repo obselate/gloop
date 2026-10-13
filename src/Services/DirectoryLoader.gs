@@ -98,6 +98,9 @@ class DirectoryLoader {
 
         try {
             kind = Locations.Resolve(path, controller.TrashDirectory, out fullPath, out atTrashRoot)
+            if controller.Archives.Source(fullPath) != "" {
+                kind = LocationKind.Archive
+            }
         } catch (failure ArgumentException) {
             pane.Error = "Open folder failed for " + path + ": " + failure.Message
             controller.Status = pane.Error
@@ -117,6 +120,7 @@ class DirectoryLoader {
 
         pane.DirectoryPath = fullPath
         pane.Kind = kind
+        controller.Archives.ReleaseUnused(controller.Panes)
         pane.AtTrashRoot = atTrashRoot
 
         if mode != DirectoryMode.Refresh {
@@ -339,7 +343,9 @@ class DirectoryLoader {
     }
 
     private func Load(queue LatestWork, generation int32, request DirectoryRequest) {
-        let snapshot = FileSystemService().List(request.Path, request.Kind, request.AtTrashRoot, request.ShowHidden)
+        let snapshot = request.Kind == LocationKind.Archive
+        ? controller.Archives.ListArchive(request.Path, request.ShowHidden)
+        : FileSystemService().List(request.Path, request.Kind, request.AtTrashRoot, request.ShowHidden)
 
         if !queue.IsCurrent(generation) {
             return

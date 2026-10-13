@@ -122,6 +122,11 @@ class PreviewLoader {
             return
         }
 
+        if entry.IsDirectory && controller.ActivePane().Kind == LocationKind.Archive {
+            Clear()
+            return
+        }
+
         Preview = PreviewData{Kind: PreviewKind.Loading, Path: entry.FullPath}
 
         Submit(
@@ -272,7 +277,8 @@ class PreviewLoader {
         var source ImageSource?
 
         try {
-            data = FileSystemService().ReadPreview(request.Path, () -> !work.IsCurrent(generation))
+            let path = controller.Archives.Preview(request.Path)
+            data = FileSystemService().ReadPreview(path, () -> !work.IsCurrent(generation))
 
             if data.Kind == PreviewKind.Image && work.IsCurrent(generation) {
                 let cancellation = CancellationTokenSource()
@@ -293,6 +299,7 @@ class PreviewLoader {
                     cancellation.Dispose()
                 }
             }
+            data.Path = request.Path
         } catch (failure OperationCanceledException) {
             data = PreviewData{Kind: PreviewKind.Cancelled, Path: request.Path}
         } catch (failure Exception) when failure is ImageLimitException ||

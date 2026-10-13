@@ -35,6 +35,8 @@ partial class BrowserView {
         items.Add(ContextMenuItem("Copy", "Copy", "content_copy"))
         items.Add(ContextMenuItem("Paste", "Paste", "content_paste", !Model.HasClipboard))
         items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
+        items.Add(ContextMenuItem("Extract", "Extract", "folder_zip"))
+        items.Add(ContextMenuItem("Compress", "Compress", "folder_zip"))
         items.Add(MenuItem{Id: "copy-separator", Separator: true})
 
         if count == 1 {
@@ -50,7 +52,11 @@ partial class BrowserView {
     }
 
     private func OpenWithItem(count int32) MenuItem {
-        let ready = count == 1 && contextApplicationsReady && contextApplications.Count > 0
+        let ready = Model.ActivePane()
+            .Kind != LocationKind.Archive &&
+            count == 1 &&
+            contextApplicationsReady &&
+            contextApplications.Count > 0
         var item = FileContextMenu.Item("OpenWith", "Open with", "apps", "", palette, !ready)
 
         if ready {
@@ -79,7 +85,7 @@ partial class BrowserView {
         contextApplications = List[AppChoice]()
         contextApplicationsReady = false
 
-        if chooser != nil || Model.InTrashView {
+        if chooser != nil || Model.InTrashView || Model.ActivePane().Kind == LocationKind.Archive {
             return
         }
 

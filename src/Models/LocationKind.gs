@@ -7,4 +7,5 @@ enum LocationKind {
     Folder;
     Recent;
     Trash;
+    Archive;
 }

@@ -5,7 +5,7 @@ import System
 import System.Collections.Generic
 import System.IO
 
-class BrowserController {
+partial class BrowserController {
     internal let Panes List[BrowserPane] = List[BrowserPane]()
     internal var ActiveIndex int32
     internal var Split bool
@@ -21,6 +21,7 @@ class BrowserController {
     internal let Directories DirectoryLoader
     internal let Operations FileOperationQueue
     internal let Previews PreviewLoader
+    internal let Archives ArchiveService = ArchiveService()
     private let resetTypeSelect Action
     private let clipboardPaths List[string]
     private var clipboardCut bool
@@ -89,57 +90,6 @@ class BrowserController {
         get -> ActivePane().AtTrashRoot
     }
 
-    internal func CanRun(action string) bool {
-        if action == "Rename" || action == "BulkRename" {
-            return !InTrashView && ActivePane().SelectedPaths.Count > 0 && Operations.AcceptingOperations
-        }
-
-        if InTrashView {
-            if action == "NewFolder" || action == "Copy"
-            || action == "Cut" || action == "Paste" || action == "Trash" {
-                return false
-            }
-
-            if action == "Open" {
-                return ActivePane().SingleSelectedEntry()?.IsDirectory ?? false
-            }
-
-            if action == "Restore" || action == "DeletePermanently" {
-                return AtTrashRoot
-            }
-
-            if action == "EmptyTrash" {
-                return AtTrashRoot && Places.TrashCount > 0
-            }
-
-            return true
-        }
-
-        if InRecent &&
-            (
-            action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
-            || action == "OpenTerminalHere"
-            || (action == "OpenTerminal" && !(ActivePane().SingleSelectedEntry()?.IsDirectory ?? false))
-        ) {
-            return false
-        }
-
-        let empty = ActivePane().SelectedPaths.Count == 0
-
-        if InRecent {
-            return !empty || (action != "CopyPath" && action != "Properties")
-        }
-
-        if ActivePane().DirectoryPath == "" || ActivePane().Error != "" {
-            return action != "OpenTerminal" &&
-                action != "OpenTerminalHere" &&
-                (
-                !empty || (action != "NewFolder" && action != "Paste" && action != "CopyPath" && action != "Properties")
-            )
-        }
-
-        return true
-    }
 
     internal func Pane(index int32) BrowserPane -> Panes[index]
 
@@ -497,7 +447,7 @@ class BrowserController {
     internal func CanDrag(paneIndex int32) bool -> Operations.AcceptingOperations &&
         paneIndex >= 0 &&
         paneIndex < VisiblePaneCount &&
-        Pane(paneIndex).Kind != LocationKind.Trash
+        Pane(paneIndex).Kind != LocationKind.Trash && Pane(paneIndex).Kind != LocationKind.Archive
 
     internal func CanDrop(destination string) bool -> Operations.AcceptingOperations && !DropBlocked(destination)
 
@@ -552,6 +502,19 @@ class BrowserController {
         }
     }
 
+    internal func Extract(destination string) {
+        Operations.StartOperation(OperationKind.Extract, ActivePane().SelectionPaths(), destination, "")
+    }
+
+    internal func Compress(name string) {
+        Operations.StartOperation(
+            OperationKind.Compress,
+            ActivePane().SelectionPaths(),
+            ActivePane().DirectoryPath,
+            name
+        )
+    }
+
     internal func Dispose() {
         if disposed {
             return
@@ -563,6 +526,7 @@ class BrowserController {
         Directories.Close()
         Operations.Close()
         Previews.Close()
+        Archives.Close()
     }
 
     internal func CompleteClipboardMove(request OperationRequest, results List[OperationResult]) {
@@ -588,7 +552,12 @@ class BrowserController {
     }
 
     private func DropBlocked(destination string) bool ->
-    Locations.Resolve(destination, TrashDirectory, out var fullPath, out var atTrashRoot) != LocationKind.Folder
+    Archives.Source(destination) != "" || Locations.Resolve(
+        destination,
+        TrashDirectory,
+        out var fullPath,
+        out var atTrashRoot
+    ) != LocationKind.Folder
 
     internal func ResetTypeSelect() {
         resetTypeSelect()

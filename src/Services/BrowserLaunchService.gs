@@ -20,8 +20,15 @@ internal class BrowserLaunchService {
             return
         }
 
-        if entry.IsDirectory {
+        if entry.IsDirectory || ArchiveService.Supported(entry.FullPath) {
             controller.Navigate(entry.FullPath)
+        } else if controller.ActivePane().Kind == LocationKind.Archive {
+            if !controller.PreviewVisible {
+                controller.TogglePreview()
+            } else {
+                controller.Previews.RequestReload()
+                controller.Previews.QueuePreview()
+            }
         } else if !controller.InTrashView {
             let owner = window
             let launches = this

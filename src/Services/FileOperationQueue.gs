@@ -304,13 +304,27 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                         request.Permission,
                         request.Enabled
                     )
+                    case OperationKind.Extract: ArchiveService().Extract(source, request.Destination)
+                    case OperationKind.Compress: ArchiveService().Compress(
+                        request.Sources,
+                        request.Destination,
+                        request.Name
+                    )
                     default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
                 }
             } catch (failure Exception) {
                 result = OperationResult{Source: source, FinalPath: "", Error: failure.Message}
             }
 
+            if request.Kind == OperationKind.Extract || request.Kind == OperationKind.Compress {
+                result.Source = source
+            }
+
             results.Add(result)
+
+            if request.Kind == OperationKind.Compress {
+                break
+            }
         }
 
         try {

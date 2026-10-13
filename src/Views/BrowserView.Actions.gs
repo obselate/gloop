@@ -303,6 +303,19 @@ partial class BrowserView {
 
     private func InvokeFileAction(action string) bool {
         switch action {
+            case "Extract" {
+                let destination = Model.Split && Model.Pane((Model.ActiveIndex + 1) % Model.VisiblePaneCount)
+                    .Kind == LocationKind.Folder
+                ? Model.Pane((Model.ActiveIndex + 1) % Model.VisiblePaneCount).DirectoryPath
+                : Path.GetDirectoryName(Model.Archives.Source(Model.ActivePane().DirectoryPath)) ?? Model.ActivePane()
+                    .DirectoryPath
+                OpenDialog(DialogKind.Extract, destination)
+                return true
+            }
+            case "Compress" {
+                OpenDialog(DialogKind.Compress, "Archive.zip")
+                return true
+            }
             case "NewFolder" {
                 OpenDialog(DialogKind.NewFolder, "")
                 return true

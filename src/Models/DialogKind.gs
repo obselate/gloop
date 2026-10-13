@@ -16,4 +16,6 @@ enum DialogKind {
     DeletePermanently;
     EmptyTrash;
     ReplaceFile;
+    Extract;
+    Compress;
 }
