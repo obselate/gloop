@@ -114,7 +114,7 @@ partial class BrowserView {
             },
             Container{
                 Gap: 4,
-                Ui.Label("Case", p.Muted, 12),
+                Container{Key: "bulk-case-label", Ui.Label("Case", p.Muted, 12)},
                 Cell.Mount[ComboBoxInput, ComboBox](
                     "bulk-case",
                     ComboBoxInput{
