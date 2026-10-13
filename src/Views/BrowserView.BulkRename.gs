@@ -199,7 +199,30 @@ partial class BrowserView {
             rows.Add(Ui.Label(bulkSummary, p.Muted, 12))
         }
 
-        rows.Add(Ui.Label("Old name → New name", p.Text, 13, 600))
+        rows.Add(
+            Container{
+                FlexDirection: FlexDirection.Row,
+                Gap: 6,
+                Text{
+                    Content: "Old name",
+                    Color: p.Text,
+                    FontSize: 13,
+                    FontWeight: 600,
+                    FlexGrow: 1,
+                    FlexBasis: 0,
+                    MinWidth: 0
+                },
+                Text{
+                    Content: "New name",
+                    Color: p.Text,
+                    FontSize: 13,
+                    FontWeight: 600,
+                    FlexGrow: 1,
+                    FlexBasis: 0,
+                    MinWidth: 0
+                },
+            }
+        )
         BulkPreviewRows(rows, p)
 
         let actions = Container{FlexDirection: FlexDirection.Row, JustifyContent: JustifyContent.FlexEnd, Gap: 8}
@@ -272,7 +295,7 @@ partial class BrowserView {
                     AlignItems: AlignItems.Center,
                     Gap: 6,
                     Text{
-                        Content: oldName + " →",
+                        Content: oldName,
                         Color: invalid ? p.Error: p.Muted,
                         FontSize: 13,
                         FlexGrow: 1,
