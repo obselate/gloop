@@ -222,13 +222,11 @@ unsafe class FileOperationService {
                         copyEntry(source, staging)
                         MoveEntry(staging, destination, false)
                     } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
-                        let message = "Cannot move " + source + ": " + failure.Message
-
                         if !cleanup(staging) {
-                            throw IOException(message + ". Partial copy remains at " + staging)
+                            throw IOException(failure.Message + ". Partial copy remains at " + staging)
                         }
 
-                        throw IOException(message)
+                        rethrow
                     }
 
                     FileSystemService.Remove(source)
