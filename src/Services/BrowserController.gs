@@ -89,25 +89,23 @@ class BrowserController {
         get -> ActivePane().AtTrashRoot
     }
 
-    internal func CanRun(action string, menu bool = false) bool {
+    internal func CanRun(action string) bool {
         if InTrashView {
             if action == "NewFolder" || action == "Rename" || action == "Copy"
             || action == "Cut" || action == "Paste" || action == "Trash" {
                 return false
             }
 
-            if menu {
-                if action == "Open" {
-                    return ActivePane().SingleSelectedEntry()?.IsDirectory ?? false
-                }
+            if action == "Open" {
+                return ActivePane().SingleSelectedEntry()?.IsDirectory ?? false
+            }
 
-                if action == "Restore" || action == "DeletePermanently" {
-                    return AtTrashRoot
-                }
+            if action == "Restore" || action == "DeletePermanently" {
+                return AtTrashRoot
+            }
 
-                if action == "EmptyTrash" {
-                    return AtTrashRoot && Places.TrashCount > 0
-                }
+            if action == "EmptyTrash" {
+                return AtTrashRoot && Places.TrashCount > 0
             }
 
             return true
@@ -120,10 +118,6 @@ class BrowserController {
             || (action == "OpenTerminal" && !(ActivePane().SingleSelectedEntry()?.IsDirectory ?? false))
         ) {
             return false
-        }
-
-        if !menu {
-            return true
         }
 
         let empty = ActivePane().SelectedPaths.Count == 0
