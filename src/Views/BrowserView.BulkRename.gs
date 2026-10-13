@@ -7,7 +7,6 @@ import Goo.Widgets.Layout
 import System
 import System.Collections.Generic
 import System.IO
-import System.Text.RegularExpressions
 
 partial class BrowserView {
     private var bulkOptions BulkRenameOptions = BulkRenameOptions()
@@ -45,14 +44,8 @@ partial class BrowserView {
                     break
                 }
             }
-        } catch (failure Exception) when failure is IOException ||
-            failure is ArgumentException ||
-            failure is RegexMatchTimeoutException {
-            dialogError = if failure is RegexMatchTimeoutException {
-                "Rename preview failed: the regular expression took too long"
-            } else {
-                failure.Message
-            }
+        } catch (failure Exception) when failure is IOException || failure is ArgumentException {
+            dialogError = failure.Message
         }
 
         Rebuild()
@@ -92,26 +85,6 @@ partial class BrowserView {
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
             Gap: 12,
-            Container{
-                FlexGrow: 1,
-                MinWidth: 0,
-                Checkbox{
-                    Label: "Regular expression",
-                    State: bulkOptions.UseRegex ? AccessibilityChecked.True: AccessibilityChecked.False,
-                    OnChange: state -> {
-                        bulkOptions.UseRegex = state == AccessibilityChecked.True
-                        UpdateBulkPreview()
-                    },
-                    LabelColor: p.Text,
-                    LabelFontSize: 12,
-                    Size: 16,
-                    BackgroundColor: p.Surface,
-                    BorderColor: p.Border,
-                    CheckedBackgroundColor: p.Accent,
-                    CheckedBorderColor: p.Accent,
-                    MarkColor: p.Background,
-                }.Build(),
-            },
             Container{
                 Gap: 4,
                 Container{Key: "bulk-case-label", Ui.Label("Case", p.Muted, 12)},

@@ -4,12 +4,10 @@ import System
 import System.Collections.Generic
 import System.Globalization
 import System.IO
-import System.Text.RegularExpressions
 
 class BulkRenameOptions {
     internal var Find string = ""
     internal var Replace string = ""
-    internal var UseRegex bool
     internal var Pattern string = ""
     internal var Start string = "1"
     internal var Padding string = "1"
@@ -27,11 +25,6 @@ class BulkRenameOptions {
             throw ArgumentException("Number padding must be between 1 and 20")
         }
 
-        let regex Regex? = if UseRegex && Find != "" {
-            Regex(Find, RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(50))
-        } else {
-            nil
-        }
         let names = List[string](sources.Count)
 
         for index in 0 ... sources.Count {
@@ -44,7 +37,7 @@ class BulkRenameOptions {
                     .Replace("{name}", Path.GetFileNameWithoutExtension(name))
             }
             if Find != "" {
-                name = regex?.Replace(name, Replace) ?? name.Replace(Find, Replace, StringComparison.Ordinal)
+                name = name.Replace(Find, Replace, StringComparison.Ordinal)
             }
 
             names.Add(
