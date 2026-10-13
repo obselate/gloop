@@ -29,13 +29,19 @@ partial class BrowserView {
         default: ""
     }
 
-    private func DialogButton(label string, action Action, p Palette, primary bool = false) Blob {
+    private func DialogButton(
+        label string,
+        action Action,
+        p Palette,
+        primary bool = false,
+        disabled bool = false
+    ) Blob {
         if !dialogButtons.TryGetValue(label, out var handle) {
             handle = ElementHandle()
             dialogButtons[label] = handle
         }
 
-        return Ui.ActionButton(label, action, p, primary, handle)
+        return Ui.ActionButton(label, action, p, primary, handle, disabled: disabled)
     }
 
     private func Dialog() Blob {

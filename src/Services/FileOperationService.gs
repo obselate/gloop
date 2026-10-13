@@ -79,29 +79,46 @@ unsafe class FileOperationService {
     }
 
     internal func ValidateRenames(sources List[string], names List[string]) {
-        let destinations = HashSet[string](StringComparer.Ordinal)
-
-        for index in 0 ... sources.Count {
-            let source = sources[index]
-            let name = names[index]
-
-            try {
-                FileNames.Validate(name)
-
-                let destination = Path.Combine(Path.GetDirectoryName(source) ?? "", name)
-
-                if !destinations.Add(destination) {
-                    throw IOException("More than one item would be named " + name)
-                }
-                if source != destination && FileSystemService.Exists(destination) {
-                    throw IOException(
-                        "An item already exists at " + destination + ". Swaps and rename chains are not supported"
-                    )
-                }
-            } catch (failure Exception) when failure is IOException || failure is ArgumentException {
-                throw IOException("Rename failed for " + source + ": " + failure.Message)
+        for error in RenameErrors(sources, names) {
+            if error != "" {
+                throw IOException(error)
             }
         }
+    }
+
+    internal func RenameErrors(sources List[string], names List[string]) List[string] {
+        let destinations = List[string](sources.Count)
+        let counts = Dictionary[string, int32](StringComparer.Ordinal)
+        let errors = List[string](sources.Count)
+
+        for index in 0 ... sources.Count {
+            try {
+                FileNames.Validate(names[index])
+
+                let destination = Path.Combine(Path.GetDirectoryName(sources[index]) ?? "", names[index])
+                destinations.Add(destination)
+                counts[destination] = counts.TryGetValue(destination, out var count) ? count + 1: 1
+                errors.Add("")
+            } catch (failure Exception) when failure is IOException || failure is ArgumentException {
+                destinations.Add("")
+                errors.Add("Invalid name " + names[index] + ": " + failure.Message)
+            }
+        }
+
+        for index in 0 ... sources.Count {
+            let destination = destinations[index]
+
+            if destination == "" {
+                continue
+            }
+            if counts[destination] > 1 {
+                errors[index] = counts[destination].ToString() + " items would be named " + names[index]
+            } else if sources[index] != destination && FileSystemService.Exists(destination) {
+                errors[index] = names[index] + " already exists. Swaps and rename chains are not supported."
+            }
+        }
+
+        return errors
     }
 
     internal func Copy(source string, destinationDirectory string) OperationResult {

@@ -240,7 +240,11 @@ class FileOperationQueue {
         }
 
         if failed > 0 && request.Kind != OperationKind.Permissions {
-            let operation = request.Kind == OperationKind.CreateFolder ? "Create folder": request.Kind.ToString()
+            let operation = switch request.Kind {
+                case OperationKind.CreateFolder: "Create folder"
+                case OperationKind.BulkRename: "Bulk rename"
+                default: request.Kind.ToString()
+            }
             controller.Status = results.Count == 1
             ? operation + " failed for " + firstError
             : operation + ": " + succeeded.ToString() + " done, " + failed.ToString() + " failed. " + firstError

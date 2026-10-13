@@ -13,7 +13,7 @@ class BulkRenameOptions {
     internal var Pattern string = ""
     internal var Start string = "1"
     internal var Padding string = "1"
-    internal var Case string = "Keep case"
+    internal var Case string = "Keep"
 
     internal func Names(sources List[string]) List[string] {
         var start int64
@@ -38,10 +38,10 @@ class BulkRenameOptions {
             var name = Path.GetFileName(sources[index])
 
             if Pattern != "" {
-                name = Pattern.Replace(
-                    "{n}",
-                    (start + int64(index)).ToString(CultureInfo.InvariantCulture).PadLeft(padding, '0')
-                )
+                name = Pattern
+                    .Replace("{n}", (start + int64(index)).ToString(CultureInfo.InvariantCulture).PadLeft(padding, '0'))
+                    .Replace("{ext}", Path.GetExtension(name))
+                    .Replace("{name}", Path.GetFileNameWithoutExtension(name))
             }
             if Find != "" {
                 name = regex?.Replace(name, Replace) ?? name.Replace(Find, Replace, StringComparison.Ordinal)
