@@ -63,6 +63,52 @@ internal data struct Shortcut {
                     return key
                 }
             }
+            let alias = KeyAlias(key)
+            if alias != "" {
+                return alias
+            }
+            if key.Length >= 2 && key[0] == char(70) {
+                var number int32
+                if Int32.TryParse(key.Substring(1), out number) && number >= 1 && number <= 25 {
+                    return "F" + number.ToString()
+                }
+            }
+            if key.Length == 1 && key[0] >= char(48) && key[0] <= char(57) {
+                return "Number" + key
+            }
+            if key.Length == 7 && key.StartsWith("NUMBER")
+            && key[6] >= char(48) && key[6] <= char(57) {
+                return "Number" + key.Substring(6, 1)
+            }
+            if key.Length == 7 && key.StartsWith("KEYPAD")
+            && key[6] >= char(48) && key[6] <= char(57) {
+                return "Keypad" + key.Substring(6, 1)
+            }
+            if key == "KEYPADENTER" {
+                return "KeypadEnter"
+            }
+            if key == "KEYPADDECIMAL" {
+                return "KeypadDecimal"
+            }
+            if key == "KEYPADDIVIDE" {
+                return "KeypadDivide"
+            }
+            if key == "KEYPADMULTIPLY" {
+                return "KeypadMultiply"
+            }
+            if key == "KEYPADSUBTRACT" {
+                return "KeypadSubtract"
+            }
+            if key == "KEYPADADD" {
+                return "KeypadAdd"
+            }
+            if key == "KEYPADEQUAL" {
+                return "KeypadEqual"
+            }
+            return ""
+        }
+
+        private func KeyAlias(key string) string {
             if key == "," || key == "COMMA" {
                 return "Comma"
             }
@@ -158,44 +204,6 @@ internal data struct Shortcut {
             }
             if key == "MENU" {
                 return "Menu"
-            }
-            if key.Length >= 2 && key[0] == char(70) {
-                var number int32
-                if Int32.TryParse(key.Substring(1), out number) && number >= 1 && number <= 25 {
-                    return "F" + number.ToString()
-                }
-            }
-            if key.Length == 1 && key[0] >= char(48) && key[0] <= char(57) {
-                return "Number" + key
-            }
-            if key.Length == 7 && key.StartsWith("NUMBER")
-            && key[6] >= char(48) && key[6] <= char(57) {
-                return "Number" + key.Substring(6, 1)
-            }
-            if key.Length == 7 && key.StartsWith("KEYPAD")
-            && key[6] >= char(48) && key[6] <= char(57) {
-                return "Keypad" + key.Substring(6, 1)
-            }
-            if key == "KEYPADENTER" {
-                return "KeypadEnter"
-            }
-            if key == "KEYPADDECIMAL" {
-                return "KeypadDecimal"
-            }
-            if key == "KEYPADDIVIDE" {
-                return "KeypadDivide"
-            }
-            if key == "KEYPADMULTIPLY" {
-                return "KeypadMultiply"
-            }
-            if key == "KEYPADSUBTRACT" {
-                return "KeypadSubtract"
-            }
-            if key == "KEYPADADD" {
-                return "KeypadAdd"
-            }
-            if key == "KEYPADEQUAL" {
-                return "KeypadEqual"
             }
             return ""
         }

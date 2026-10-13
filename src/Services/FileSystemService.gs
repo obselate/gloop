@@ -110,51 +110,7 @@ class FileSystemService {
                 0
             }
             let decoded = UTF8Encoding(false, true).GetString(buffer, start, count - start)
-            let normalized = StringBuilder(decoded.Length)
-            var lineBytes = 0
-            var shortened = false
-            var lineShortened = false
-            var index = 0
-            var lastCheck = 0
-            while index < decoded.Length {
-                if index - lastCheck >= 65536 {
-                    if cancelled() {
-                        throw OperationCanceledException()
-                    }
-                    lastCheck = index
-                }
-                let character = decoded[index]
-                if character == '\r' || character == '\n' {
-                    normalized.Append('\n')
-                    if character == '\r' && index + 1 < decoded.Length && decoded[index + 1] == '\n' {
-                        index++
-                    }
-                    lineBytes = 0
-                    lineShortened = false
-                } else if !lineShortened {
-                    let width = if character <= 127 {
-                        1
-                    } else if character <= 2047 {
-                        2
-                    } else if Char.IsHighSurrogate(character) {
-                        4
-                    } else if Char.IsLowSurrogate(character) {
-                        0
-                    } else {
-                        3
-                    }
-                    if lineBytes + width <= 16384 {
-                        normalized.Append(character)
-                        lineBytes += width
-                    } else {
-                        normalized.Append('…')
-                        shortened = true
-                        lineShortened = true
-                    }
-                }
-                index++
-            }
-            let content = normalized.ToString()
+            let content = NormalizePreview(decoded, cancelled, out var shortened)
             let language = PreviewSyntaxService.DetectLanguage(extension, content)
             let highlighting = PreviewSyntaxService.Highlight(content, language, cancelled)
             var warning = ""
@@ -181,6 +137,54 @@ class FileSystemService {
         } catch (failure Exception) {
             return PreviewData{Kind: "error", Text: "", Path: path, Error: failure.Message}
         }
+    }
+
+    private func NormalizePreview(decoded string, cancelled Func[bool], out shortened bool) string {
+        let normalized = StringBuilder(decoded.Length)
+        var lineBytes = 0
+        shortened = false
+        var lineShortened = false
+        var index = 0
+        var lastCheck = 0
+        while index < decoded.Length {
+            if index - lastCheck >= 65536 {
+                if cancelled() {
+                    throw OperationCanceledException()
+                }
+                lastCheck = index
+            }
+            let character = decoded[index]
+            if character == '\r' || character == '\n' {
+                normalized.Append('\n')
+                if character == '\r' && index + 1 < decoded.Length && decoded[index + 1] == '\n' {
+                    index++
+                }
+                lineBytes = 0
+                lineShortened = false
+            } else if !lineShortened {
+                let width = if character <= 127 {
+                    1
+                } else if character <= 2047 {
+                    2
+                } else if Char.IsHighSurrogate(character) {
+                    4
+                } else if Char.IsLowSurrogate(character) {
+                    0
+                } else {
+                    3
+                }
+                if lineBytes + width <= 16384 {
+                    normalized.Append(character)
+                    lineBytes += width
+                } else {
+                    normalized.Append('…')
+                    shortened = true
+                    lineShortened = true
+                }
+            }
+            index++
+        }
+        return normalized.ToString()
     }
 
     private func hasTextPrefix(path string, size int64) bool {

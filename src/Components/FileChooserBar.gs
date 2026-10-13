@@ -6,24 +6,6 @@ import Goo.Widgets.Layout
 import System
 import System.Collections.Generic
 
-internal data struct FileChooserBarInput {
-    var Request PortalChooserRequest
-    var Name string
-    var OnNameChange Action[string]
-    var NameHandle ElementHandle
-    var FilterIndex int32
-    var OnFilterChange Action[int32]
-    var Choices IReadOnlyDictionary[string, string]
-    var OnChoiceChange Action[string, string]
-    var Summary string
-    var Error string
-    var OnAccept Action
-    var OnCancel Action
-    var OverlayHost ElementHandle
-    var Host Window
-    var Palette Palette
-}
-
 open class FileChooserBar : Cell[FileChooserBarInput] {
     private let acceptHandle ElementHandle = ElementHandle()
     private let cancelHandle ElementHandle = ElementHandle()
@@ -39,6 +21,15 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
             BorderColor: p.Border,
             BackgroundColor: p.Bar,
         }
+        BuildFields(root, value)
+        BuildChoices(root, value)
+        BuildActions(root, value)
+        return root
+    }
+
+    private func BuildFields(root Container, value FileChooserBarInput) {
+        let p = value.Palette
+        let request = value.Request
         let fields = Container{FlexDirection: FlexDirection.Row, AlignItems: AlignItems.Center, Gap: 8, MinWidth: 0}
         if request.Method == "SaveFile" {
             fields.Children.Add(Ui.Label("File name", p.Muted, 12))
@@ -90,6 +81,11 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
         if fields.Children.Count > 0 {
             root.Children.Add(fields)
         }
+    }
+
+    private func BuildChoices(root Container, value FileChooserBarInput) {
+        let p = value.Palette
+        let request = value.Request
         if request.Choices.Count > 0 {
             let choices = Container{
                 FlexDirection: FlexDirection.Row,
@@ -186,6 +182,11 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
             }
             root.Children.Add(choices)
         }
+    }
+
+    private func BuildActions(root Container, value FileChooserBarInput) {
+        let p = value.Palette
+        let request = value.Request
         if value.Error != "" {
             root.Children.Add(Text{Content: value.Error, Color: p.Error, FontSize: 12, TextWrap: TextWrap.Wrap})
         }
@@ -204,7 +205,6 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 ),
             }
         )
-        return root
     }
 
     private func Select(
