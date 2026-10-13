@@ -8,6 +8,8 @@ import System.Collections.Generic
 import System.IO
 
 class PlacesSidebar {
+    internal const MinimumWidth float64 = 144
+
     shared {
         internal func Build(
             path string,
@@ -280,27 +282,14 @@ class PlacesSidebar {
             contextMenuKey Action[KeyEvent, Point]? = nil
         ) Blob -> Container{
             FlexShrink: 0,
-            Cell.Mount[TooltipInput, Tooltip](
+            Ui.HoverLabel(
                 path,
-                TooltipInput{
-                    Window: window,
-                    Text: path,
-                    Placement: placement,
-                    BubbleStyle: Ui.BubbleStyle(p),
-                    Content: Text{Content: path, Color: p.Text, FontSize: 11, MaxWidth: 320, TextWrap: TextWrap.Wrap,},
-                    Target: Place(
-                        "bookmark",
-                        label,
-                        path,
-                        current,
-                        navigate,
-                        p,
-                        drop,
-                        dropPath,
-                        contextMenu,
-                        contextMenuKey
-                    ),
-                }
+                path,
+                Place("bookmark", label, path, current, navigate, p, drop, dropPath, contextMenu, contextMenuKey),
+                window,
+                p,
+                placement,
+                true
             ),
         }
 

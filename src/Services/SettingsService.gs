@@ -159,17 +159,9 @@ internal class SettingsService {
     }
 
     shared {
-        internal func Default() SettingsService {
-            var configHome = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME") ?? ""
-            if configHome == "" || !Path.IsPathFullyQualified(configHome) {
-                var home = Environment.GetEnvironmentVariable("HOME") ?? ""
-                if home == "" || !Path.IsPathFullyQualified(home) {
-                    home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
-                }
-                configHome = Path.Combine(home, ".config")
-            }
-            return SettingsService(Path.Combine(configHome, "gloop", "settings.json"))
-        }
+        internal func Default() SettingsService -> SettingsService(
+            Path.Combine(Xdg.ConfigHome(), "gloop", "settings.json")
+        )
 
         private func writeTheme(writer Utf8JsonWriter, name string, theme ThemePalette) {
             writer.WriteStartObject(name)

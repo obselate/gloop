@@ -57,6 +57,14 @@ class TerminalService {
     }
 
     shared {
+        internal func CommandFlags(name string)[]string -> switch name {
+            case "gnome-terminal": []string{"--"}
+            case "wezterm": []string{"start", "--"}
+            case "xfce4-terminal": []string{"-x"}
+            case "xdg-terminal-exec" or "foot" or "kitty": []string{}
+            default: []string{"-e"}
+        }
+
         internal func Candidates() List[string] {
             let candidates = List[string]()
             let preferred = Environment.GetEnvironmentVariable("TERMINAL") ?? ""

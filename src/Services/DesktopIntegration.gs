@@ -9,6 +9,8 @@ import System.Text
 internal class DesktopIntegration {
     shared {
         internal const AppId string = "io.github.obselate.gloop"
+        internal const SystemBinaryPath string = "/usr/bin/gloop"
+        internal const LocalSystemBinaryPath string = "/usr/local/bin/gloop"
 
         internal func Install() string {
             if !OperatingSystem.IsLinux() || RuntimeFeature.IsDynamicCodeSupported {
@@ -21,7 +23,7 @@ internal class DesktopIntegration {
             }
             let home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
             let binary = Path.Combine(home, ".local", "bin", "gloop")
-            let dataHome = UserDirectory("XDG_DATA_HOME", ".local/share")
+            let dataHome = Xdg.UserDirectory("XDG_DATA_HOME", ".local/share")
             let icon = Path.Combine(dataHome, "icons", "hicolor", "512x512", "apps", AppId + ".png")
             let desktop = Path.Combine(dataHome, "applications", AppId + ".desktop")
             let metainfo = Path.Combine(dataHome, "metainfo", AppId + ".metainfo.xml")
@@ -43,17 +45,17 @@ internal class DesktopIntegration {
             }
             File.WriteAllBytes(icon, AppIcon.Bytes())
             let entry = DesktopEntry(binary)
-            File.WriteAllText(desktop, entry)
+            Xdg.WriteText(desktop, entry)
             using let metadata = typeof(DesktopIntegration).Assembly.GetManifestResourceStream("gloop.Metainfo.xml")
             ?? throw InvalidOperationException("Embedded Gloop metadata is missing")
             using let reader = StreamReader(metadata)
-            File.WriteAllText(metainfo, reader.ReadToEnd())
+            Xdg.WriteText(metainfo, reader.ReadToEnd())
             let legacy = Path.Combine(dataHome, "applications", "gloop.desktop")
             if File.Exists(legacy) {
                 let lines = File.ReadAllLines(legacy)
                 let executable = "Exec=" + QuotedExec(binary)
                 if Array.Exists(lines, line -> line == executable || line == executable + " %f") {
-                    File.WriteAllText(legacy, entry + "NoDisplay=true\n")
+                    Xdg.WriteText(legacy, entry + "NoDisplay=true\n")
                 }
             }
             RefreshDesktop(dataHome)
@@ -61,30 +63,27 @@ internal class DesktopIntegration {
         }
 
         internal func SetDefault() string {
-            Directory.CreateDirectory(UserDirectory("XDG_CONFIG_HOME", ".config"))
-            RunTool("xdg-mime", []string{"default", AppId + ".desktop", "inode/directory"}, true)
-            let result = RunTool("xdg-mime", []string{"query", "default", "inode/directory"}, true)
+            Directory.CreateDirectory(Xdg.ConfigHome())
+            RunTool("xdg-mime", []string{"default", AppId + ".desktop", FileKinds.DirectoryMime}, true)
+            let result = RunTool("xdg-mime", []string{"query", "default", FileKinds.DirectoryMime}, true)
             if result.Trim() != AppId + ".desktop" {
                 throw InvalidOperationException("The desktop did not select Gloop as the default folder handler")
             }
             return "Gloop is the default application for opening folders. Save and extraction destination dialogs use the application's file chooser."
         }
 
-        internal func UserDirectory(variable string, fallback string) string {
-            let configured = Environment.GetEnvironmentVariable(variable) ?? ""
-            return Path.IsPathFullyQualified(configured) ? configured:
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), fallback)
-        }
-
         internal func SystemBinary() string {
             let binary = Environment.ProcessPath ?? ""
-            if binary != "/usr/bin/gloop" && binary != "/usr/local/bin/gloop" {
+            if binary != SystemBinaryPath && binary != LocalSystemBinaryPath {
                 return ""
             }
             let desktop = Path.Combine(SystemData(binary), "applications", AppId + ".desktop")
             let expected = binary + " %f"
-            if EntryValue(desktop, "Desktop Entry", "Type") != "Application" ||
-                EntryValue(desktop, "Desktop Entry", "Exec") != expected {
+            if Xdg.EntryValue(desktop, "Desktop Entry", "Type") != "Application" || Xdg.EntryValue(
+                desktop,
+                "Desktop Entry",
+                "Exec"
+            ) != expected {
                 throw InvalidOperationException(
                     "The system launcher does not match " +
                         binary +
@@ -93,11 +92,11 @@ internal class DesktopIntegration {
                 )
             }
             let userDesktop = Path.Combine(
-                UserDirectory("XDG_DATA_HOME", ".local/share"),
+                Xdg.UserDirectory("XDG_DATA_HOME", ".local/share"),
                 "applications",
                 AppId + ".desktop"
             )
-            if File.Exists(userDesktop) && EntryValue(userDesktop, "Desktop Entry", "Exec") != expected {
+            if File.Exists(userDesktop) && Xdg.EntryValue(userDesktop, "Desktop Entry", "Exec") != expected {
                 throw InvalidOperationException(
                     "A user launcher overrides the system package. Back up and remove " +
                         userDesktop +
@@ -109,27 +108,7 @@ internal class DesktopIntegration {
             return binary
         }
 
-        internal func SystemData(binary string) string -> binary == "/usr/bin/gloop" ? "/usr/share": "/usr/local/share"
-
-        internal func EntryValue(path string, section string, key string) string {
-            if !File.Exists(path) {
-                return ""
-            }
-            var active = false
-            var value = ""
-            for line in File.ReadLines(path) {
-                let trimmed = line.Trim()
-                if trimmed.StartsWith('[') {
-                    active = trimmed == "[" + section + "]"
-                } else if active {
-                    let separator = trimmed.IndexOf('=')
-                    if separator >= 0 && trimmed.Substring(0, separator).Trim() == key {
-                        value = trimmed.Substring(separator + 1).Trim()
-                    }
-                }
-            }
-            return value
-        }
+        internal func SystemData(binary string) string -> binary == SystemBinaryPath ? "/usr/share": "/usr/local/share"
 
         private func DesktopEntry(binary string) string ->
         "[Desktop Entry]\n" +
@@ -152,7 +131,9 @@ internal class DesktopIntegration {
             "\n" +
             "Terminal=false\n" +
             "Categories=System;FileTools;FileManager;\n" +
-            "MimeType=inode/directory;\n"
+            "MimeType=" +
+            FileKinds.DirectoryMime +
+            ";\n"
 
         private func DesktopValue(value string) string -> value
             .Replace("\\", "\\\\")

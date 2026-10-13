@@ -4,6 +4,8 @@ import Goo
 import System
 
 class PreviewSidebar {
+    internal const MinimumWidth float64 = 220
+
     shared {
         internal func Build(value PreviewSidebarInput, window Window, p Palette) Blob -> Container{
             Width: Percent(100),
@@ -12,7 +14,7 @@ class PreviewSidebar {
             MinHeight: 0,
             BackgroundColor: p.Preview,
             Container{
-                Height: 40,
+                Height: Ui.BarHeight,
                 FlexShrink: 0,
                 Padding: Edges{Left: 12, Right: 8},
                 Gap: 8,

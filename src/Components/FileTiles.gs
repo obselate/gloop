@@ -12,6 +12,8 @@ open class FileTiles : Cell[FileTableInput] {
     internal const TileWidth float64 = 144
     internal const TileHeight float64 = 156
     internal const Gap float64 = 8
+    internal const Padding float64 = 12
+
     private var clickModifiers KeyModifiers
 
     protected override func Build(value FileTableInput) Blob {
@@ -29,23 +31,13 @@ open class FileTiles : Cell[FileTableInput] {
             OnKeyDown: value.OnKey,
             OnTextInput: value.OnText,
             KeyBindings: value.Keys,
-            DropTarget: value.DropTarget(pane.DirectoryPath),
-            OutlineWidth: value.DropPath == pane.DirectoryPath ? 1: 0,
-            OutlineColor: p.Accent,
-            OutlineOffset: -1,
-            OnPointerDown: e -> {
-                if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild
-                && !e.Modifiers.Ctrl && !e.Modifiers.Shift && !e.Modifiers.Super {
-                    value.OnClear()
-                }
-            },
-            OnPointerUp: e -> FileTransferUi.BackgroundContextMenu(e, value, clicks),
             Accessibility: Accessibility{
                 Role: AccessibilityRole.List,
                 Name: "Files in " + pane.DirectoryPath,
                 MultiSelectable: true
             },
         }
+        FileTransferUi.Root(root, value, clicks)
         if pane.VisibleEntries.Count == 0 {
             root.Children.Add(FileTable.Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly))
             return root
@@ -65,7 +57,7 @@ open class FileTiles : Cell[FileTableInput] {
         grid.FlexDirection = FlexDirection.Row
         grid.FlexWrap = FlexWrap.Wrap
         grid.Gap = Gap
-        grid.Padding = 12
+        grid.Padding = Padding
         grid.OverflowX = Overflow.Hidden
         grid.OverflowY = Overflow.Scroll
         grid.ScrollbarY = Ui.ScrollbarStyle(p)
@@ -129,11 +121,7 @@ open class FileTiles : Cell[FileTableInput] {
             ),
             Text{
                 Key: "name",
-                Content: entry.Name + if entry.IsSymlink {
-                    " ↗"
-                } else {
-                    ""
-                },
+                Content: FileTransferUi.Name(entry),
                 Height: 34,
                 FontSize: 13,
                 Color: p.Text,

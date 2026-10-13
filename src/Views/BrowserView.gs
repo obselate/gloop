@@ -31,8 +31,15 @@ partial class BrowserView : Cell {
     private let themeEditorHandle ElementHandle = ElementHandle()
     private var focusScope FocusScope?
     private const WindowRadius float64 = 12
-    private var width float64 = 1180
-    private var height float64 = 760
+    internal const DefaultWidth int32 = 1180
+    internal const DefaultHeight int32 = 760
+    private const SplitBreakpoint float64 = 660
+    private const PlacesBreakpoint float64 = 860
+    private const PaneMinimum float64 = 260
+    private const VerticalPaneMinimum float64 = 120
+    private const WorkspaceMinimum float64 = 560
+    private var width float64 = DefaultWidth
+    private var height float64 = DefaultHeight
     private var placesWidth float64 = 180
     private var paneRatio float64 = .5
     private var previewRatio float64 = .5
@@ -304,7 +311,7 @@ partial class BrowserView : Cell {
             BackgroundColor: p.Window,
             BorderRadius: rounded ? WindowRadius: 0,
             BorderWidth: rounded ? 1: 0,
-            BorderColor: Color.Rgba(184, 191, 201, 46),
+            BorderColor: p.Edge,
             Overflow: rounded ? Overflow.Hidden: Overflow.Visible,
             Color: p.Text,
             FontFamily: "sans-serif, Noto Sans CJK",
@@ -336,20 +343,20 @@ partial class BrowserView : Cell {
                 Rebuild()
             },
             SplitUnit.Ratio,
-            if BrowsingWidth() < 660 {
+            if BrowsingWidth() < SplitBreakpoint {
                 SplitOrientation.Vertical
             } else {
                 SplitOrientation.Horizontal
             },
-            if BrowsingWidth() < 660 {
-                120
+            if BrowsingWidth() < SplitBreakpoint {
+                VerticalPaneMinimum
             } else {
-                260
+                PaneMinimum
             },
-            if BrowsingWidth() < 660 {
-                120
+            if BrowsingWidth() < SplitBreakpoint {
+                VerticalPaneMinimum
             } else {
-                260
+                PaneMinimum
             },
             "Resize browsing panes",
             Model.Split,
@@ -385,8 +392,8 @@ partial class BrowserView : Cell {
             },
             SplitUnit.Ratio,
             SplitOrientation.Horizontal,
-            260,
-            220,
+            PaneMinimum,
+            PreviewSidebar.MinimumWidth,
             "Resize preview",
             Model.PreviewVisible,
             p
@@ -413,7 +420,7 @@ partial class BrowserView : Cell {
             bookmarkMenuKey = OpenBookmarkKeyboardContextMenu
         }
         var places Blob? = nil
-        if width >= 860 {
+        if width >= PlacesBreakpoint {
             places = PlacesSidebar.Build(
                 Model.ActivePane().DirectoryPath,
                 path -> {
@@ -445,7 +452,7 @@ partial class BrowserView : Cell {
             "places-split",
             places,
             browserArea,
-            if width >= 860 {
+            if width >= PlacesBreakpoint {
                 placesWidth
             } else {
                 0
@@ -456,10 +463,10 @@ partial class BrowserView : Cell {
             },
             SplitUnit.Pixels,
             SplitOrientation.Horizontal,
-            144,
-            560,
+            PlacesSidebar.MinimumWidth,
+            WorkspaceMinimum,
             "Resize places sidebar",
-            width >= 860,
+            width >= PlacesBreakpoint,
             p
         )
         main.Key = "main"

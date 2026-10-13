@@ -35,18 +35,11 @@ internal class FirstRunSetup {
         internal func Complete() {
             RequireNative()
             using let stateLock = AcquireLock()
-            let path = CompletionPath()
-            let temporary = path + ".new"
-            try {
-                File.WriteAllText(temporary, "1\n")
-                File.Move(temporary, path, true)
-            } finally {
-                File.Delete(temporary)
-            }
+            Xdg.WriteText(CompletionPath(), "1\n")
         }
 
         private func DirectoryPath() string ->
-        Path.Combine(DesktopIntegration.UserDirectory("XDG_CONFIG_HOME", ".config"), "gloop")
+        Path.Combine(Xdg.ConfigHome(), "gloop")
 
         private func CompletionPath() string -> Path.Combine(DirectoryPath(), "setup-complete")
 

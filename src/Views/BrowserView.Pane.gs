@@ -39,32 +39,24 @@ partial class BrowserView {
         let pane = Model.Pane(index)
         let p = palette
         if locationEditing && Model.ActiveIndex == index {
-            return TextEntry{
-                Key: "location-edit",
-                Handle: locationHandle,
-                Value: locationText,
-                Controlled: true,
-                Width: crumbWidth,
-                MinWidth: 0,
-                Height: 30,
-                Padding: Edges{Left: 8, Right: 8},
-                BackgroundColor: p.Surface,
-                Color: p.Text,
-                BorderRadius: 6,
-                BorderWidth: 1,
-                BorderColor: p.Accent,
-                FontSize: 12,
-                Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: "Location"},
-                OnChange: value -> {
+            return TextField
+                .Build(
+                locationText,
+                value -> {
                     locationText = value
                     Rebuild()
                 },
-                OnSubmit: value -> {
+                value -> {
                     locationEditing = false
                     Model.Navigate(value)
                     FocusFiles()
                 },
-            }
+                "Location",
+                p,
+                width: crumbWidth,
+                handle: locationHandle,
+                fontSize: 12
+            ){.Key: "location-edit"}
         }
         return Cell.Mount[BreadcrumbInput, BreadcrumbBar](
             "location-" + index.ToString(),
@@ -115,7 +107,7 @@ partial class BrowserView {
             OnFocus: (_) -> Model.SetActive(index),
             Container{
                 Key: "pane-header",
-                Height: chooser != nil ? 36: 40,
+                Height: chooser != nil ? 36: Ui.BarHeight,
                 FlexShrink: 0,
                 Padding: Edges{Left: 7, Right: 8},
                 Gap: 8,
@@ -130,7 +122,7 @@ partial class BrowserView {
                     FlexDirection: FlexDirection.Row,
                     AlignItems: AlignItems.Center,
                     FlexShrink: 0,
-                    Gap: 4,
+                    Gap: Ui.ToolsGap,
                     Children: tools.ToArray(),
                 },
             },
@@ -240,7 +232,7 @@ partial class BrowserView {
                 )
             )
         }
-        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * 30 + (tools.Count - 1) * 4
+        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * Ui.ToolSize + (tools.Count - 1) * Ui.ToolsGap
     }
 
     private func PaneTable(

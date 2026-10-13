@@ -17,7 +17,7 @@ class QuestionPrompt {
                         MinHeight: 0,
                         OverflowY: Overflow.Scroll,
                         ScrollbarY: Ui.ScrollbarStyle(p),
-                        Text{Content: error, Color: p.Error, FontSize: 12, TextWrap: TextWrap.Wrap},
+                        Ui.ErrorText(error, p),
                     }
                 )
             }

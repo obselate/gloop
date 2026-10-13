@@ -78,20 +78,11 @@ partial class BrowserView {
             rows.Add(PropertiesRow("Owner / Group", propertiesStage >= 1 ? info.Owner + " / " + info.Group: wait))
         }
         if propertiesStage == 2 && info.Error != "" {
-            rows.Add(Text{Content: info.Error, Color: p.Error, FontSize: 12, TextWrap: TextWrap.Wrap})
+            rows.Add(Ui.ErrorText(info.Error, p))
         }
         return DialogShell.Build(
             dialog,
-            Container{
-                MinHeight: 0,
-                FlexShrink: 1,
-                Gap: 6,
-                OverflowY: Overflow.Scroll,
-                ScrollbarY: Ui.ScrollbarStyle(p),
-                ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                Padding: Edges{Right: 12},
-                Children: rows.ToArray(),
-            },
+            DialogShell.ScrollColumn(rows.ToArray(), p, 6),
             Container{
                 FlexDirection: FlexDirection.Row,
                 JustifyContent: JustifyContent.FlexEnd,

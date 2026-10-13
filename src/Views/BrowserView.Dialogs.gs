@@ -83,30 +83,21 @@ partial class BrowserView {
             contents.Add(Text{Content: dialogValue, FontSize: 12, Color: p.Muted, TextWrap: TextWrap.Wrap})
         } else {
             contents.Add(
-                TextEntry{
-                    Handle: dialogInput,
-                    Value: dialogValue,
-                    Controlled: true,
-                    AutoFocus: true,
-                    Height: 38,
-                    Padding: Edges{Left: 10, Right: 10},
-                    FontSize: 14,
-                    BackgroundColor: p.Background,
-                    Color: p.Text,
-                    BorderWidth: 1,
-                    BorderColor: p.Border,
-                    BorderRadius: 6,
-                    Focus: Style{BorderColor: p.Accent},
-                    Accessibility: Accessibility{Role: AccessibilityRole.TextInput, Name: dialog},
-                    OnChange: value -> {
-                        dialogValue = value
-                    },
-                    OnSubmit: (_) -> SubmitDialog(),
-                }
+                TextField.Build(
+                    dialogValue,
+                    value -> dialogValue = value,
+                    (_) -> SubmitDialog(),
+                    dialog,
+                    p,
+                    handle: dialogInput,
+                    autoFocus: true,
+                    fontSize: 14,
+                    padding: 10
+                )
             )
         }
         if dialogError != "" {
-            contents.Add(Text{Content: dialogError, Color: p.Error, FontSize: 12})
+            contents.Add(Ui.ErrorText(dialogError, p))
         }
         let content = Container{
             MinHeight: 0,
@@ -187,16 +178,16 @@ partial class BrowserView {
                 )
             )
         }
-        return Container{
-            Height: Math.Min(settings.Bookmarks.Count * 34, Math.Clamp(height * .88 - 150, 80, 360)),
-            MinHeight: 0,
-            OverflowY: Overflow.Scroll,
-            ScrollbarY: Ui.ScrollbarStyle(p),
-            ScrollbarVisibilityY: ScrollbarVisibility.Always,
-            Padding: Edges{Right: 12},
-            Gap: 4,
-            Children: rows.ToArray(),
-        }
+        return DialogShell.ScrollColumn(
+            rows.ToArray(),
+            p,
+            Ui.ToolsGap,
+            Math.Min(
+                settings.Bookmarks.Count * (SidebarLink.RowHeight + Ui.ToolsGap),
+                Math.Clamp(height * .88 - 150, 80, 360)
+            ),
+            0
+        )
     }
 
     private func OpenDialog(kind string, value string) {

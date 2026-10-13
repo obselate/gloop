@@ -9,10 +9,7 @@ class RecentService {
     internal func List(limit int32) List[FileEntry] {
         let entries = System.Collections.Generic.List[FileEntry]()
         try {
-            let source = Path.Combine(
-                DesktopIntegration.UserDirectory("XDG_DATA_HOME", ".local/share"),
-                "recently-used.xbel"
-            )
+            let source = Path.Combine(Xdg.UserDirectory("XDG_DATA_HOME", ".local/share"), "recently-used.xbel")
             if limit <= 0 || FileInfo(source).Length > 16777216 {
                 return entries
             }
@@ -109,16 +106,9 @@ class RecentService {
             Modified: File.GetLastWriteTimeUtc(path).ToLocalTime(),
             Kind: "File",
         }
-        if entry.IsSymlink {
-            entry.Kind = "Link"
-        } else if entry.IsDirectory {
-            entry.Kind = "Folder"
-        } else {
+        entry.Kind = FileKinds.EntryKind(Path.GetExtension(entry.Name), entry.IsDirectory, entry.IsSymlink)
+        if !entry.IsSymlink && !entry.IsDirectory {
             entry.Size = FileInfo(path).Length
-            let extension = Path.GetExtension(entry.Name)
-            if extension != "" {
-                entry.Kind = extension.Substring(1).ToUpperInvariant() + " file"
-            }
         }
         return entry
     }

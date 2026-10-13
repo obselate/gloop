@@ -66,8 +66,7 @@ class FileTransferService {
             if Path.GetDirectoryName(source) == target {
                 return false
             }
-            let relative = Path.GetRelativePath(source, target)
-            if relative == "." || (relative != ".." && !relative.StartsWith("../") && !Path.IsPathRooted(relative)) {
+            if Locations.Contains(source, target) {
                 return false
             }
         }

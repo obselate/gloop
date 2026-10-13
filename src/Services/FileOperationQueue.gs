@@ -217,7 +217,7 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                     case OperationKind.Rename: operations.Rename(source, request.Name)
                     case OperationKind.Copy: operations.Copy(source, request.Destination)
                     case OperationKind.Move: operations.Move(source, request.Destination)
-                    case OperationKind.Trash: operations.Trash(source)
+                    case OperationKind.Trash: trash.Trash(source)
                     case OperationKind.Restore: trash.Restore(source)
                     case OperationKind.Delete: trash.Delete(source)
                     case OperationKind.Empty: trash.Empty()

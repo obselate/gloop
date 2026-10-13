@@ -12,6 +12,10 @@ import System.IO
 import System.Text
 
 class Ui {
+    internal const ToolSize float64 = 30
+    internal const ToolsGap float64 = 4
+    internal const BarHeight float64 = 40
+
     shared {
         private let folder VectorAsset = Svg.Load(
             MemoryStream(
@@ -41,7 +45,7 @@ class Ui {
             }
         }
 
-        internal func Shadow() BoxShadow -> BoxShadow{OffsetY: 12, Blur: 32, Color: Color.Black.WithAlpha(.6)}
+        internal func Shadow(p Palette) BoxShadow -> BoxShadow{OffsetY: 12, Blur: 32, Color: p.Shadow.WithAlpha(.6)}
 
         internal func BubbleStyle(p Palette) Style -> Style{
             BackgroundColor: p.Overlay,
@@ -52,7 +56,41 @@ class Ui {
             FontSize: 11,
             Padding: Edges{Left: 9, Right: 9, Top: 6, Bottom: 6},
             BorderRadius: 6,
-            BoxShadow: BoxShadow{OffsetY: 4, Blur: 12, Color: Color.Black.WithAlpha(.5)},
+            BoxShadow: BoxShadow{OffsetY: 4, Blur: 12, Color: p.Shadow.WithAlpha(.5)},
+        }
+
+        internal func HoverLabel(
+            key string,
+            label string,
+            target Blob,
+            window Window,
+            p Palette,
+            placement PortalPlacement = PortalPlacement.Bottom,
+            wrap bool = false
+        ) Blob -> Cell
+            .Mount[TooltipInput, Tooltip](
+            key,
+            TooltipInput{
+                Window: window,
+                Text: label,
+                Content: Text{
+                    Content: label,
+                    Color: p.Text,
+                    FontSize: 11,
+                    MaxWidth: wrap ? 320: default(Length),
+                    TextWrap: wrap ? TextWrap.Wrap: TextWrap.NoWrap,
+                },
+                Placement: placement,
+                BubbleStyle: BubbleStyle(p),
+                Target: target,
+            }
+        )
+
+        internal func ErrorText(value string, p Palette) Text -> Text{
+            Content: value,
+            Color: p.Error,
+            FontSize: 12,
+            TextWrap: TextWrap.Wrap,
         }
 
         internal func Label(value string, color Color, size float64 = 13, weight float64 = 400) Text -> Text{
@@ -80,44 +118,41 @@ class Ui {
             p Palette,
             active bool = false,
             disabled bool = false,
-            size float64 = 30,
+            size float64? = nil,
             iconSize float64 = 20,
             hoverColor Color? = nil
         ) Container -> Container{
-            Width: size,
-            Height: size,
+            Width: size ?? ToolSize,
+            Height: size ?? ToolSize,
             FlexShrink: 0,
-            Cell.Mount[TooltipInput, Tooltip](
+            HoverLabel(
                 label,
-                TooltipInput{
-                    Window: window,
-                    Content: Label(label, p.Text, 11),
-                    Placement: PortalPlacement.Bottom,
-                    BubbleStyle: BubbleStyle(p),
-                    Target: IconButton{
-                        Icon: Icon(
-                            name,
-                            if active {
-                                p.Accent
-                            } else {
-                                p.Muted
-                            },
-                            iconSize
-                        ),
-                        AccessibilityName: label,
-                        OnClick: action,
-                        Active: active,
-                        Disabled: disabled,
-                        Width: size,
-                        Height: size,
-                        BorderRadius: 6,
-                        BackgroundColor: Color.Transparent,
-                        ActiveBackgroundColor: p.Selection,
-                        HoverBackgroundColor: hoverColor ?? p.Border,
-                        ShowFocusHighlight: p.Keyboard,
-                        FocusOutlineColor: p.Accent,
-                    }.Build(),
-                }
+                label,
+                IconButton{
+                    Icon: Icon(
+                        name,
+                        if active {
+                            p.Accent
+                        } else {
+                            p.Muted
+                        },
+                        iconSize
+                    ),
+                    AccessibilityName: label,
+                    OnClick: action,
+                    Active: active,
+                    Disabled: disabled,
+                    Width: size ?? ToolSize,
+                    Height: size ?? ToolSize,
+                    BorderRadius: 6,
+                    BackgroundColor: Color.Transparent,
+                    ActiveBackgroundColor: p.Selection,
+                    HoverBackgroundColor: hoverColor ?? p.Border,
+                    ShowFocusHighlight: p.Keyboard,
+                    FocusOutlineColor: p.Accent,
+                }.Build(),
+                window,
+                p
             ),
         }
 
@@ -126,10 +161,13 @@ class Ui {
             action Action,
             p Palette,
             primary bool = false,
-            handle ElementHandle? = nil
+            handle ElementHandle? = nil,
+            maxWidth Length = default(Length)
         ) Blob {
             let button = Button{
                 Handle: handle,
+                MaxWidth: maxWidth,
+                MinWidth: 0,
                 Height: 34,
                 Padding: Edges{Left: 14, Right: 14},
                 BorderRadius: 6,
@@ -144,16 +182,18 @@ class Ui {
                 Focus: p.Ring(2, 2),
                 OnClick: action,
                 Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: label},
-                Label(
-                    label,
-                    if primary {
-                        p.Background
-                    } else {
-                        p.Text
-                    },
-                    13,
-                    600
-                ),
+                Text{
+                    Content: label,
+                    Color: primary ? p.Background: p.Text,
+                    FontSize: 13,
+                    FontWeight: 600,
+                    Width: maxWidth.HasMagnitude ? Percent(100): default(Length),
+                    MaxWidth: maxWidth.HasMagnitude ? maxWidth.Magnitude - 28: default(Length),
+                    MinWidth: 0,
+                    FlexShrink: 1,
+                    TextWrap: TextWrap.NoWrap,
+                    TextTrimming: TextTrimming.Ellipsis,
+                },
             }
             WidgetKeyBindings.BindActivation(button)
             return button

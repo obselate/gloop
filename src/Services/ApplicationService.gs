@@ -4,7 +4,6 @@ import System
 import System.Collections.Generic
 import System.Diagnostics
 import System.IO
-import System.Text
 
 class ApplicationService {
     private let gate object = Object()
@@ -19,7 +18,7 @@ class ApplicationService {
         try {
             let fullPath = Path.GetFullPath(path)
             if Directory.Exists(fullPath) {
-                return "inode/directory"
+                return FileKinds.DirectoryMime
             }
             let known = database().Lookup(Path.GetFileName(fullPath))
             if known != "" {
@@ -150,17 +149,7 @@ class ApplicationService {
         let buffer = [8192]uint8
         using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
         let count = stream.Read(buffer, 0, buffer.Length)
-        for index in 0 ... count {
-            if buffer[index] == 0 {
-                return false
-            }
-        }
-        try {
-            UTF8Encoding(false, true).GetDecoder().GetCharCount(buffer, 0, count, count < buffer.Length)
-            return true
-        } catch (failure DecoderFallbackException) {
-            return false
-        }
+        return TextContent.IsText(buffer, count, count < buffer.Length)
     }
 
     private func find(id string) DesktopApp? {
@@ -240,27 +229,11 @@ class ApplicationService {
             let program = Xdg.FindExecutable(candidate)
             if program != "" {
                 let wrapped = List[string]{program}
-                wrapped.AddRange(terminalFlags(Path.GetFileName(candidate)))
+                wrapped.AddRange(TerminalService.CommandFlags(Path.GetFileName(candidate)))
                 wrapped.AddRange(command)
                 return wrapped
             }
         }
         throw InvalidOperationException("Could not find a desktop terminal")
-    }
-
-    private func terminalFlags(name string)[]string {
-        if name == "gnome-terminal" {
-            return []string{"--"}
-        }
-        if name == "wezterm" {
-            return []string{"start", "--"}
-        }
-        if name == "xfce4-terminal" {
-            return []string{"-x"}
-        }
-        if name == "xdg-terminal-exec" || name == "foot" || name == "kitty" {
-            return []string{}
-        }
-        return []string{"-e"}
     }
 }

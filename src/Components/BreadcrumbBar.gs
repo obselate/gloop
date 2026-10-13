@@ -66,7 +66,6 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         if first > 0 {
             let hidden = paths.GetRange(0, first).ToArray()
             let button = Button{
-                Key: "more",
                 Handle: more,
                 Width: MoreWidth,
                 Height: 26,
@@ -86,7 +85,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 Ui.Label("…", p.Muted, 12),
             }
             WidgetKeyBindings.BindActivation(button)
-            children.Add(button)
+            children.Add(Ui.HoverLabel("more", "Show parent folders", button, value.Window, p))
         }
         for index in first ... names.Count {
             if index > 0 {
@@ -186,22 +185,6 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             },
         }
         WidgetKeyBindings.BindActivation(button)
-        return Cell.Mount[TooltipInput, Tooltip](
-            destination,
-            TooltipInput{
-                Window: value.Window,
-                Text: destination,
-                Placement: PortalPlacement.Bottom,
-                Content: Text{
-                    Content: destination,
-                    Color: p.Text,
-                    FontSize: 11,
-                    MaxWidth: 320,
-                    TextWrap: TextWrap.Wrap
-                },
-                BubbleStyle: Ui.BubbleStyle(p),
-                Target: button,
-            }
-        )
+        return Ui.HoverLabel(destination, destination, button, value.Window, p, wrap: true)
     }
 }

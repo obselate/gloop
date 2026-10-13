@@ -11,7 +11,7 @@ import Tmds.DBus.Protocol
 
 internal class FileChooserPortal : IPathMethodHandler {
     internal const BusName string = "org.freedesktop.impl.portal.desktop.gloop"
-    private const ChooserInterface string = "org.freedesktop.impl.portal.FileChooser"
+    internal const ChooserInterface string = "org.freedesktop.impl.portal.FileChooser"
     private const RequestInterface string = "org.freedesktop.impl.portal.Request"
     private let frontend NameOwnerWatcher
     private let gate object = Object()

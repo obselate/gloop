@@ -13,7 +13,7 @@ partial class BrowserView {
         let p = palette
         return Container{
             Key: "toolbar",
-            Height: 40,
+            Height: Ui.BarHeight,
             FlexShrink: 0,
             Padding: Edges{Left: 8},
             FlexDirection: FlexDirection.Row,
@@ -41,7 +41,7 @@ partial class BrowserView {
                 AlignItems: AlignItems.Center,
                 FlexShrink: 0,
                 Gap: 3,
-                if width < 860 {
+                if width < PlacesBreakpoint {
                     Ui.Tool("bookmarks", "Open bookmarks", () -> Invoke("OpenBookmarks"), Host, p)
                 } else {
                     Container{}

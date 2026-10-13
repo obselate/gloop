@@ -9,32 +9,9 @@ open class ThemeColorRole : Cell[ThemeColorRoleInput] {
 
     protected override func Build(value ThemeColorRoleInput) Blob {
         let p = value.Palette
-        let button = Button{
-            Handle: handle,
-            Height: 38,
-            FlexShrink: 0,
-            MinWidth: 0,
-            Padding: Edges{Left: 10, Right: 10},
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Gap: 10,
-            BorderWidth: 1,
-            BorderRadius: 4,
-            BorderColor: if value.Selected {
-                p.Accent
-            } else {
-                p.Border
-            },
-            BackgroundColor: p.Background,
-            Hover: Style{BorderColor: p.Accent},
-            Focus: p.Ring(),
-            Accessibility: Accessibility{
-                Role: AccessibilityRole.Button,
-                Name: value.Role + " color " + value.Value,
-                Selected: value.Selected,
-            },
-            OnClick: value.Choose,
-            OnFocus: (_) -> handle.ScrollIntoView(),
+        return ChoiceRow.Build(
+            value.Role + " color " + value.Value,
+            Ui.Label(value.Role, p.Text, 12, 500),
             Container{
                 Width: 18,
                 Height: 18,
@@ -44,11 +21,14 @@ open class ThemeColorRole : Cell[ThemeColorRoleInput] {
                 BorderColor: p.Border,
                 BorderRadius: 3,
             },
-            Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(value.Role, p.Text, 12, 500)},
             Ui.Label(value.Value, p.Muted, 11),
-        }
-        WidgetKeyBindings.BindActivation(button)
-        return button
+            value.Selected,
+            value.Choose,
+            handle,
+            p,
+            38,
+            10
+        )
     }
 
     shared {

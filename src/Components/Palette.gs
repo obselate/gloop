@@ -35,6 +35,19 @@ class Palette {
     internal let Edge Color
     internal let Blur float64
     internal let Keyboard bool
+    internal let Danger Color = Color.Parse("#9F3545")
+    internal let Scrim Color = Color.Rgba(0, 0, 0, 140)
+    internal let Shadow Color = Color.Black
+    internal let GlassGradient LinearGradient = LinearGradient(Color.Parse("#2B6FD6"), Color.Parse("#D43C8C"))
+
+    internal func PopupStyle() Style -> Style{
+        BackgroundColor: Overlay,
+        BackdropBlur: Blur,
+        BorderWidth: 1,
+        BorderColor: Edge,
+        BorderRadius: 10,
+        BoxShadow: Ui.Shadow(this),
+    }
 
     internal init(theme ThemePalette, keyboard bool = false) {
         Keyboard = keyboard
@@ -57,25 +70,11 @@ class Palette {
         Edge = Glass ? Color.Rgba(184, 191, 201, 56): Border
         Blur = Glass ? 24: 0
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
-        let syntax = switch preset {
-            case "": []string{theme.Accent, theme.Text, theme.MutedText, theme.Accent}
-            case "Glass": []string{"#C3A6FF", "#8FD694", "#F0A56B", "#E8CF8A"}
-            case "Tokyo Night": []string{"#BB9AF7", "#9ECE6A", "#FF9E64", "#E0AF68"}
-            case "Nord": []string{"#81A1C1", "#A3BE8C", "#B48EAD", "#EBCB8B"}
-            case "Gruvbox Dark": []string{"#FB4934", "#B8BB26", "#D3869B", "#FABD2F"}
-            case "Catppuccin Latte": []string{"#8839EF", "#276A22", "#9C4221", "#7C4B00"}
-            case "Rose Pine": []string{"#C4A7E7", "#9CCFD8", "#EB6F92", "#F6C177"}
-            case "Rose Pine Dawn": []string{"#765D8C", "#286983", "#9B4059", "#8A5B14"}
-            case "Dracula": []string{"#FF79C6", "#50FA7B", "#BD93F9", "#8BE9FD"}
-            case "Kanagawa Wave": []string{"#957FB8", "#98BB6C", "#E6C384", "#7FB4CA"}
-            case "Everforest Dark Hard": []string{"#D699B6", "#A7C080", "#E69875", "#7FBBB3"}
-            case "Ayu Mirage": []string{"#DABAFA", "#87D96C", "#FACC6E", "#6DCBFA"}
-            default: []string{"#CBA6F7", "#A6E3A1", "#FAB387", "#F9E2AF"}
-        }
-        Keyword = Color.Parse(syntax[0])
-        String = Color.Parse(syntax[1])
-        Number = Color.Parse(syntax[2])
-        Type = Color.Parse(syntax[3])
+        let syntax = preset == "" ? nil: ThemePresets.Create(preset)
+        Keyword = Color.Parse(syntax?.Keyword ?? theme.Accent)
+        String = Color.Parse(syntax?.String ?? theme.Text)
+        Number = Color.Parse(syntax?.Number ?? theme.MutedText)
+        Type = Color.Parse(syntax?.Type ?? theme.Accent)
     }
 
     internal func Ring(offset float64 = 0, width float64 = 1) Style -> if Keyboard {

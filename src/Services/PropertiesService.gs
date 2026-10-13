@@ -8,7 +8,7 @@ import System.IO.Enumeration
 import System.Runtime.InteropServices
 import System.Text
 
-class PropertiesService {
+unsafe class PropertiesService {
     private let applications ApplicationService
 
     internal init(applications ApplicationService) {
@@ -17,9 +17,6 @@ class PropertiesService {
 
     shared {
         private const MaxItems int32 = 2000000
-
-        @DllImport("libc", EntryPoint: "statx", CharSet: CharSet.Ansi, SetLastError: true)
-        private func readStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
     }
 
     /// Describes one path in full or several paths by count, common location, total size and contained items.
@@ -65,26 +62,28 @@ class PropertiesService {
     private func normalize(path string) string -> Path.TrimEndingDirectorySeparator(Path.GetFullPath(path))
 
     private func describe(path string, ref result FileProperties) {
-        let buffer = Marshal.AllocHGlobal(256)
-        try {
-            if readStat(-100, path, 256, 2075u, buffer) != 0 {
-                result.Error = Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path
-                return
-            }
-            if (Marshal.ReadInt32(buffer, 0) & 27) != 27 {
-                result.Error = "Cannot read properties for " +
-                    path +
-                    ": the filesystem did not report required metadata"
-                return
-            }
-            result.Permissions = permissions(int32(Marshal.ReadInt16(buffer, 28)))
-            result.Owner = identity("/etc/passwd", uint32(Marshal.ReadInt32(buffer, 20)))
-            result.Group = identity("/etc/group", uint32(Marshal.ReadInt32(buffer, 24)))
-            if (Marshal.ReadInt32(buffer, 0) & 2048) != 0 {
-                result.Created = DateTimeOffset.FromUnixTimeSeconds(Marshal.ReadInt64(buffer, 80)).LocalDateTime
-            }
-        } finally {
-            Marshal.FreeHGlobal(buffer)
+        let raw *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
+        let buffer = IntPtr(raw)
+        let required = FileSystemService.StatType | FileSystemService.StatMode | FileSystemService.StatUid | FileSystemService.StatGid
+        if FileSystemService.ReadStat(
+            FileSystemService.AtCurrentDirectory,
+            path,
+            FileSystemService.AtSymlinkNoFollow,
+            required | FileSystemService.StatBirthTime,
+            buffer
+        ) != 0 {
+            result.Error = Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path
+            return
+        }
+        if (uint32(Marshal.ReadInt32(buffer, 0)) & required) != required {
+            result.Error = "Cannot read properties for " + path + ": the filesystem did not report required metadata"
+            return
+        }
+        result.Permissions = permissions(int32(Marshal.ReadInt16(buffer, 28)))
+        result.Owner = identity("/etc/passwd", uint32(Marshal.ReadInt32(buffer, 20)))
+        result.Group = identity("/etc/group", uint32(Marshal.ReadInt32(buffer, 24)))
+        if (uint32(Marshal.ReadInt32(buffer, 0)) & FileSystemService.StatBirthTime) != 0 {
+            result.Created = DateTimeOffset.FromUnixTimeSeconds(Marshal.ReadInt64(buffer, 80)).LocalDateTime
         }
         let info FileSystemInfo = Directory.Exists(path) ? DirectoryInfo(path): FileInfo(path)
         result.Name = info.Name
@@ -92,14 +91,7 @@ class PropertiesService {
         result.MimeType = applications.MimeType(path)
         result.Modified = info.LastWriteTime
         result.Accessed = info.LastAccessTime
-        if result.LinkTarget != "" {
-            result.Kind = "Link"
-        } else if Directory.Exists(path) {
-            result.Kind = "Folder"
-        } else {
-            let extension = Path.GetExtension(path)
-            result.Kind = extension.Length > 1 ? extension.Substring(1).ToUpperInvariant() + " file": "File"
-        }
+        result.Kind = FileKinds.EntryKind(Path.GetExtension(path), Directory.Exists(path), result.LinkTarget != "")
     }
 
     private func measure(path string, tally PropertiesTally, cancelled Func[bool]) {
@@ -155,7 +147,7 @@ class PropertiesService {
     }
 
     private func readEntry(ref raw FileSystemEntry) PropertiesEntry {
-        let link = (int32(raw.Attributes) & int32(FileAttributes.ReparsePoint)) != 0
+        let link = raw.Attributes.HasFlag(FileAttributes.ReparsePoint)
         if link {
             return PropertiesEntry{}
         }

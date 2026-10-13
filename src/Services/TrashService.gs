@@ -2,13 +2,59 @@ package gloop
 
 import System
 import System.IO
+import System.Text
 
 class TrashService {
     private let operations FileOperationService = FileOperationService()
 
+    internal func Trash(source string) OperationResult {
+        try {
+            let from = operations.RequireEntry(source)
+            let root = TrashRoot()
+            let files = Path.Combine(root, "files")
+            let info = Path.Combine(root, "info")
+            Directory.CreateDirectory(root)
+            rejectLink(root)
+            Directory.CreateDirectory(files)
+            Directory.CreateDirectory(info)
+            rejectLink(files)
+            rejectLink(info)
+
+            let leaf = Path.GetFileName(from)
+            var index int32
+            var name = trashName(leaf, index)
+            while FileSystemService.Exists(Path.Combine(files, name)) || FileSystemService.Exists(
+                Path.Combine(info, name + TrashInfo.Extension)
+            ) {
+                index++
+                name = trashName(leaf, index)
+            }
+            let dataPath = Path.Combine(files, name)
+            let infoPath = Path.Combine(info, name + TrashInfo.Extension)
+            var metadataCreated bool
+            try {
+                writeTrashInfo(infoPath, from)
+                metadataCreated = true
+                operations.MoveEntry(from, dataPath)
+            } catch (failure Exception) {
+                if metadataCreated {
+                    try {
+                        File.Delete(infoPath)
+                    } catch (cleanupFailure Exception) {
+                        throw IOException(failure.Message + ". Trash metadata remains at " + infoPath)
+                    }
+                }
+                throw failure
+            }
+            return OperationResult{Source: source, FinalPath: dataPath, Error: ""}
+        } catch (failure Exception) {
+            return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
+        }
+    }
+
     internal func FilesDirectory() string {
         try {
-            return Path.GetFullPath(Path.Combine(operations.TrashRoot(), "files"))
+            return Path.GetFullPath(Path.Combine(TrashRoot(), "files"))
         } catch (failure Exception) {
             return ""
         }
@@ -52,7 +98,7 @@ class TrashService {
     internal func Delete(trashPath string) OperationResult {
         try {
             let source = locate(trashPath)
-            remove(source)
+            FileSystemService.Remove(source)
             File.Delete(infoFile(source))
             return OperationResult{Source: trashPath, FinalPath: "", Error: ""}
         } catch (failure Exception) {
@@ -66,7 +112,7 @@ class TrashService {
             let files = requireStore()
             for entry in entries(files) {
                 try {
-                    remove(entry)
+                    FileSystemService.Remove(entry)
                     File.Delete(infoFile(entry))
                 } catch (failure Exception) {
                     result = result == "" ? failure.Message: result
@@ -74,7 +120,7 @@ class TrashService {
             }
             for orphan in entries(infoDirectory()) {
                 try {
-                    if Path.GetExtension(orphan) == ".trashinfo" && !operations.Exists(
+                    if Path.GetExtension(orphan) == TrashInfo.Extension && !FileSystemService.Exists(
                         Path.Combine(files, Path.GetFileNameWithoutExtension(orphan))
                     ) {
                         File.Delete(orphan)
@@ -95,9 +141,7 @@ class TrashService {
             throw IOException("Home directory is unavailable")
         }
         for path in[]string{Path.GetDirectoryName(files) ?? "", files, infoDirectory()} {
-            if DirectoryInfo(path).LinkTarget != nil {
-                throw IOException("Trash directory is a symbolic link: " + path)
-            }
+            rejectLink(path)
         }
         return files
     }
@@ -115,7 +159,7 @@ class TrashService {
 
     private func infoFile(source string) string -> Path.Combine(
         infoDirectory(),
-        Path.GetFileName(source) + ".trashinfo"
+        Path.GetFileName(source) + TrashInfo.Extension
     )
 
     private func entries(directory string)[]string -> Directory.Exists(directory)
@@ -128,30 +172,42 @@ class TrashService {
             if FileInfo(infoPath).Length > 65536 {
                 return item
             }
-            var section = false
-            for line in File.ReadLines(infoPath) {
-                if line.StartsWith("[", StringComparison.Ordinal) {
-                    section = line == "[Trash Info]"
-                } else if section && line.StartsWith("Path=", StringComparison.Ordinal) {
-                    let path = Uri.UnescapeDataString(line.Substring(5))
-                    if Path.IsPathRooted(path) {
-                        item.OriginalPath = Path.GetFullPath(path)
-                    }
-                }
-            }
+            item = TrashInfo.Parse(source, File.ReadLines(infoPath))
         } catch (failure Exception) { }
         return item
     }
 
-    private func remove(path string) {
-        let attributes = File.GetAttributes(path)
-        if attributes.HasFlag(FileAttributes.Directory) && !attributes.HasFlag(FileAttributes.ReparsePoint) {
-            for child in Directory.GetFileSystemEntries(path) {
-                remove(child)
+    private func writeTrashInfo(path string, source string) {
+        using let stream = FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None)
+        try {
+            using let writer = StreamWriter(stream)
+            writer.Write(TrashInfo.Format(source, DateTime.Now))
+        } catch (failure Exception) {
+            stream.Dispose()
+            try {
+                File.Delete(path)
+            } catch (cleanupFailure Exception) {
+                throw IOException(failure.Message + ". Trash metadata remains at " + path)
             }
-            Directory.Delete(path, false)
-        } else {
-            File.Delete(path)
+            throw failure
         }
     }
+
+    private func trashName(leaf string, index int32) string {
+        let suffix = if index == 0 {
+            ""
+        } else {
+            "." + index.ToString()
+        }
+        let maxBytes = FileNames.MaxBytes - Encoding.UTF8.GetByteCount(suffix + TrashInfo.Extension)
+        return FileNames.Truncate(leaf, maxBytes) + suffix
+    }
+
+    private func rejectLink(path string) {
+        if DirectoryInfo(path).LinkTarget != nil {
+            throw IOException("Trash directory is a symbolic link: " + path)
+        }
+    }
+
+    internal func TrashRoot() string -> Path.Combine(Xdg.UserDirectory("XDG_DATA_HOME", ".local/share", true), "Trash")
 }

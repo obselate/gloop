@@ -5,13 +5,15 @@ import Goo.Widgets
 import System
 
 open class SidebarLink : Cell[SidebarLinkInput] {
+    internal const RowHeight float64 = 30
+
     private let handle ElementHandle = ElementHandle()
 
     protected override func Build(value SidebarLinkInput) Blob {
         let p = value.Palette
         let button = Button{
             Handle: handle,
-            Height: 30,
+            Height: RowHeight,
             FlexShrink: 0,
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,

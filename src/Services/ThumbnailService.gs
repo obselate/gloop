@@ -90,8 +90,11 @@ class ThumbnailService : IDisposable {
 
     internal func Acquire(entry FileEntry, maxEdge int32, invalidate Action) ThumbnailLease {
         let extension = Path.GetExtension(entry.Name).ToLowerInvariant()
-        let image = imageExtension(extension)
-        let supported = !entry.IsDirectory && !entry.IsSymlink && entry.Size > 0 && (image || textExtension(extension))
+        let image = FileKinds.IsImage(extension)
+        let supported = !entry.IsDirectory &&
+            !entry.IsSymlink &&
+            entry.Size > 0 &&
+            (image || FileKinds.IsText(extension))
         if !supported || maxEdge <= 0 {
             return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
         }
@@ -362,21 +365,12 @@ class ThumbnailService : IDisposable {
             }
             count += read
         }
-        for index in 0 ... count {
-            let value = buffer[index]
-            if value == 0 || (value < 32 && value != 9 && value != 10 && value != 13) {
-                return ThumbnailData{}
-            }
+        if TextContent.HasBinaryBytes(buffer, count, true) {
+            return ThumbnailData{}
         }
         while count > 0 {
             try {
-                let start = if count >= 3 && buffer[0] == 239 && buffer[1] == 187 && buffer[2] == 191 {
-                    3
-                } else {
-                    0
-                }
-                let text = UTF8Encoding(false, true).GetString(buffer, start, count - start)
-                return snippet(text)
+                return snippet(TextContent.Decode(buffer, count))
             } catch (failure DecoderFallbackException) {
                 if count < limit - 3 {
                     return ThumbnailData{}
@@ -422,30 +416,6 @@ class ThumbnailService : IDisposable {
         }
         return ThumbnailData{Kind: "text", Text: value}
     }
-
-    private func imageExtension(extension string) bool ->
-    extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".gif"
-
-    private func textExtension(extension string) bool ->
-    extension == "" ||
-        extension == ".txt" ||
-        extension == ".md" ||
-        extension == ".log" ||
-        extension == ".json" ||
-        extension == ".yaml" ||
-        extension == ".yml" ||
-        extension == ".toml" ||
-        extension == ".xml" ||
-        extension == ".html" ||
-        extension == ".css" ||
-        extension == ".js" ||
-        extension == ".ts" ||
-        extension == ".gs" ||
-        extension == ".cs" ||
-        extension == ".sh" ||
-        extension == ".py" ||
-        extension == ".rs" ||
-        extension == ".go"
 
     /// Cancels pending work and releases cached sources.
     public func Dispose() {

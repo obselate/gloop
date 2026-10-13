@@ -144,25 +144,12 @@ open class FileTable : Cell[FileTableInput] {
     }
 
     private func BuildRoot(root Container, value FileTableInput) Container {
-        let pane = value.Pane
-        let p = value.Palette
         root.FlexGrow = 1
         root.FlexBasis = 0
         root.BorderRadius = 0
-        root.DropTarget = value.DropTarget(pane.DirectoryPath)
-        root.OutlineWidth = value.DropPath == pane.DirectoryPath ? 1: 0
-        root.OutlineColor = p.Accent
-        root.OutlineOffset = -1
         root.AutoFocus = value.AutoFocus
         root.KeyBindings = value.Keys
-        root.OnPointerDown = e -> {
-            if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild
-            && !e.Modifiers.Ctrl && !e.Modifiers.Shift && !e.Modifiers.Super {
-                value.OnClear()
-            }
-        }
-        root.OnPointerUp = e -> FileTransferUi.BackgroundContextMenu(e, value, clicks)
-        return root
+        return FileTransferUi.Root(root, value, clicks)
     }
 
     private func BuildHeader(column DataGridColumn, value FileTableInput) Blob {
@@ -202,14 +189,7 @@ open class FileTable : Cell[FileTableInput] {
 
     private func CellContent(entry FileEntry, column string, selected bool, value FileTableInput, p Palette) Blob {
         if column == "name" {
-            let label = Ui.Label(
-                entry.Name + if entry.IsSymlink {
-                    " ↗"
-                } else {
-                    ""
-                },
-                p.Text
-            )
+            let label = Ui.Label(FileTransferUi.Name(entry), p.Text)
             label.Key = "name"
             return Container{
                 MinWidth: 0,
