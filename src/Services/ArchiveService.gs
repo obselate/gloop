@@ -1,12 +1,16 @@
 package gloop
 
 import System
+import System.Buffers
 import System.Collections.Generic
 import System.Formats.Tar
 import System.IO
 import System.IO.Compression
 
 class ArchiveService {
+    private const PreviewByteLimit int64 = 16777216
+    private const PreviewBufferSize int32 = 65536
+
     private let gate object = Object()
     private let previews Dictionary[string, string] = Dictionary[string, string](StringComparer.Ordinal)
     private let active HashSet[string] = HashSet[string](StringComparer.Ordinal)
@@ -285,13 +289,13 @@ class ArchiveService {
                     using let archive = ZipFile.OpenRead(source)
                     let entry = archive.GetEntry(name) ?? throw IOException("Archive entry is unavailable: " + name)
 
-                    if entry.Length > 16777216 {
+                    if entry.Length > PreviewByteLimit {
                         throw IOException("Archive preview exceeds 16 MiB: " + name)
                     }
 
                     using let input = entry.Open()
                     using let output = FileStream(target, FileMode.CreateNew, FileAccess.Write)
-                    input.CopyTo(output)
+                    CopyPreview(input, output)
                 } else {
                     using let input = File.OpenRead(source)
                     using let stream Stream = source.EndsWith(".tar", StringComparison.OrdinalIgnoreCase)
@@ -303,12 +307,16 @@ class ArchiveService {
                             continue
                         }
 
-                        if entry.Length > 16777216 || entry.DataStream == nil {
+                        if entry.Length > PreviewByteLimit {
+                            throw IOException("Archive entry cannot be previewed: " + name)
+                        }
+
+                        guard let content = entry.DataStream else {
                             throw IOException("Archive entry cannot be previewed: " + name)
                         }
 
                         using let output = FileStream(target, FileMode.CreateNew, FileAccess.Write)
-                        entry.DataStream?.CopyTo(output)
+                        CopyPreview(content, output)
                         break
                     }
                 }
@@ -338,6 +346,28 @@ class ArchiveService {
                 }
                 rethrow
             }
+        }
+    }
+
+    private func CopyPreview(input Stream, output Stream) {
+        let buffer = ArrayPool[uint8].Shared.Rent(PreviewBufferSize)
+        var total int64
+
+        try {
+            var count = input.Read(buffer, 0, buffer.Length)
+
+            while count > 0 {
+                total += count
+
+                if total > PreviewByteLimit {
+                    throw IOException("Archive preview exceeds 16 MiB")
+                }
+
+                output.Write(buffer, 0, count)
+                count = input.Read(buffer, 0, buffer.Length)
+            }
+        } finally {
+            ArrayPool[uint8].Shared.Return(buffer)
         }
     }
 

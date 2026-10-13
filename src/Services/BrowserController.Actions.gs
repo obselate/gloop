@@ -11,6 +11,7 @@ partial class BrowserController {
                 action == "Paste" ||
                 action == "NewFolder" ||
                 action == "Compress" ||
+                action == "Properties" ||
                 action == "OpenTerminal" ||
                 action == "OpenTerminalHere" ||
                 action == "ToggleBookmark"
