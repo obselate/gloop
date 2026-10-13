@@ -254,9 +254,30 @@ class ArchiveService {
 
         {
             let root = Path.Combine(Path.GetTempPath(), "gloop-preview-" + Guid.NewGuid().ToString("N"))
-            Directory.CreateDirectory(root)
-            File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute)
             let target = Path.Combine(root, Path.GetFileName(path))
+
+            lock gate {
+                if !active.Contains(source) {
+                    throw OperationCanceledException()
+                }
+
+                let expired = List[string]()
+
+                for preview in previews {
+                    if Source(preview.Key) == source {
+                        Directory.Delete(Path.GetDirectoryName(preview.Value) ?? "", true)
+                        expired.Add(preview.Key)
+                    }
+                }
+
+                for previous in expired {
+                    previews.Remove(previous)
+                }
+
+                Directory.CreateDirectory(root)
+                File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute)
+                previews[path] = target
+            }
             let name = Path.GetRelativePath(source, path)
 
             try {
@@ -300,28 +321,21 @@ class ArchiveService {
                     if !active.Contains(source) {
                         throw OperationCanceledException()
                     }
-
-                    let expired = List[string]()
-
-                    for preview in previews {
-                        if Source(preview.Key) == source {
-                            Directory.Delete(Path.GetDirectoryName(preview.Value) ?? "", true)
-                            expired.Add(preview.Key)
-                        }
-                    }
-
-                    for previous in expired {
-                        previews.Remove(previous)
-                    }
-
-                    previews[path] = target
                 }
 
                 return target
             } catch (failure Exception) when failure is IOException ||
                 failure is UnauthorizedAccessException ||
                 failure is OperationCanceledException {
-                Directory.Delete(root, true)
+                lock gate {
+                    if previews.TryGetValue(path, out var current) && current == target {
+                        previews.Remove(path)
+                    }
+
+                    if Directory.Exists(root) {
+                        Directory.Delete(root, true)
+                    }
+                }
                 rethrow
             }
         }
@@ -469,6 +483,8 @@ class ArchiveService {
 
     internal func Close() {
         lock gate {
+            active.Clear()
+
             for preview in previews.Values {
                 Directory.Delete(Path.GetDirectoryName(preview) ?? "", true)
             }
