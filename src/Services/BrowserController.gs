@@ -21,6 +21,7 @@ class BrowserController {
     internal let Directories DirectoryLoader
     internal let Operations FileOperationQueue
     internal let Previews PreviewLoader
+    internal let Archives ArchiveService = ArchiveService()
     private let resetTypeSelect Action
     private let clipboardPaths List[string]
     private var clipboardCut bool
@@ -90,8 +91,8 @@ class BrowserController {
     }
 
     internal func CanRun(action string) bool {
-        if action == "Rename" || action == "BulkRename" {
-            return !InTrashView && ActivePane().SelectedPaths.Count > 0 && Operations.AcceptingOperations
+        if !Operations.AllowsAction(action) {
+            return false
         }
 
         if InTrashView {
@@ -494,18 +495,12 @@ class BrowserController {
         )
     }
 
-    internal func CanDrag(paneIndex int32) bool -> Operations.AcceptingOperations &&
-        paneIndex >= 0 &&
-        paneIndex < VisiblePaneCount &&
-        Pane(paneIndex).Kind != LocationKind.Trash
+    internal func CanDrag(paneIndex int32) bool -> Operations.CanDrag(paneIndex)
 
-    internal func CanDrop(destination string) bool -> Operations.AcceptingOperations && !DropBlocked(destination)
+    internal func CanDrop(destination string) bool -> Operations.CanDrop(destination)
 
-    internal func QueueFileDrop(sources List[string], destination string, copy bool) {
-        if CanDrop(destination) && sources.Count > 0 {
-            Operations.StartOperation(copy ? OperationKind.Copy: OperationKind.Move, sources, destination, "")
-        }
-    }
+    internal func QueueFileDrop(sources List[string], destination string, copy bool) ->
+    Operations.Drop(sources, destination, copy)
 
     internal func DragTooLarge() {
         Status = "Selection is too large to drag into another app"
@@ -552,6 +547,10 @@ class BrowserController {
         }
     }
 
+    internal func Extract(destination string) -> Operations.Extract(destination)
+
+    internal func Compress(name string) -> Operations.Compress(name)
+
     internal func Dispose() {
         if disposed {
             return
@@ -586,9 +585,6 @@ class BrowserController {
             Operations.StartOperation(kind, sources, "", "")
         }
     }
-
-    private func DropBlocked(destination string) bool ->
-    Locations.Resolve(destination, TrashDirectory, out var fullPath, out var atTrashRoot) != LocationKind.Folder
 
     internal func ResetTypeSelect() {
         resetTypeSelect()

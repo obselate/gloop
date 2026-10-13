@@ -14,4 +14,6 @@ enum OperationKind {
     Delete;
     Empty;
     Permissions;
+    Extract;
+    Compress;
 }

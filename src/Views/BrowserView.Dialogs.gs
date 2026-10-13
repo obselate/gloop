@@ -22,6 +22,8 @@ partial class BrowserView {
         case DialogKind.FilterFiles: "Filter files"
         case DialogKind.NewFolder: "New folder"
         case DialogKind.Rename: "Rename"
+        case DialogKind.Extract: "Extract to folder"
+        case DialogKind.Compress: "Compress (.zip, .tar, .tar.gz)"
         case DialogKind.MoveToTrash: "Move to Trash"
         case DialogKind.DeletePermanently: "Delete permanently"
         case DialogKind.EmptyTrash: "Empty Trash"
@@ -192,6 +194,8 @@ partial class BrowserView {
                         "Create folder"
                     } else if dialog == DialogKind.OpenLocation {
                         "Open"
+                    } else if dialog == DialogKind.Compress {
+                        "Compress"
                     } else {
                         "Apply"
                     },
@@ -302,6 +306,10 @@ partial class BrowserView {
             Model.CreateFolder(dialogValue)
         } else if dialog == DialogKind.Rename {
             Model.Rename(dialogValue)
+        } else if dialog == DialogKind.Extract {
+            Model.Extract(dialogValue)
+        } else if dialog == DialogKind.Compress {
+            Model.Compress(dialogValue)
         } else if dialog == DialogKind.MoveToTrash {
             Model.Trash()
         } else if dialog == DialogKind.DeletePermanently {
