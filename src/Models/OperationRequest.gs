@@ -2,6 +2,7 @@ package gloop
 
 import System
 import System.Collections.Generic
+import System.IO
 
 data struct OperationRequest {
     internal var Kind OperationKind
@@ -9,4 +10,7 @@ data struct OperationRequest {
     internal var Destination string
     internal var Name string
     internal var ClipboardVersion int32
+    internal var Permission UnixFileMode
+    internal var Enabled bool
+    internal var Completed Action[List[OperationResult]]?
 }

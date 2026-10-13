@@ -17,6 +17,83 @@ unsafe class PropertiesService {
 
     shared {
         private const MaxItems int32 = 2000000
+
+        @DllImport("libc", EntryPoint: "geteuid")
+        internal func EffectiveUserId() uint32;
+
+        internal func SetPermission(path string, permission UnixFileMode, enabled bool) OperationResult {
+            var result = OperationResult{Source: path, FinalPath: path, Error: ""}
+
+            try {
+                let bits = readMode(path)
+                result.Mode = UnixFileMode(bits & 4095)
+
+                if (bits & FileSystemService.FileTypeMask) == 40960 {
+                    result.Error = "Symbolic link permissions cannot be edited"
+                    return result
+                }
+
+                let mode = UnixFileMode(bits & 4095)
+                let requested = enabled ? mode | permission: mode & UnixFileMode(4095 ^ int32(permission))
+
+                if requested != mode {
+                    File.SetUnixFileMode(path, requested)
+                }
+
+                result.Mode = UnixFileMode(readMode(path) & 4095)
+
+                if result.Mode != requested {
+                    result.Error = "The filesystem did not retain the requested permission bits"
+                }
+            } catch (failure Exception) when failure is IOException ||
+                failure is UnauthorizedAccessException ||
+                failure is ArgumentException ||
+                failure is NotSupportedException {
+                result.Error = failure.Message
+            }
+
+            return result
+        }
+
+        private func readMode(path string) int32 {
+            let raw *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
+            let buffer = IntPtr(raw)
+            let required = FileSystemService.StatType | FileSystemService.StatMode
+
+            if FileSystemService.ReadStat(
+                FileSystemService.AtCurrentDirectory,
+                path,
+                FileSystemService.AtSymlinkNoFollow,
+                required,
+                buffer
+            ) != 0 {
+                throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message)
+            }
+            if (uint32(Marshal.ReadInt32(buffer, 0)) & required) != required {
+                throw IOException("The filesystem did not report permission bits")
+            }
+
+            return int32(Marshal.ReadInt16(buffer, 28))
+        }
+
+        internal func Permissions(mode UnixFileMode) string {
+            let bits = int32(mode)
+            let letters = "rwx"
+            let text = StringBuilder()
+
+            for index in 0 ... 9 {
+                let granted = (bits & (256 >> index)) != 0
+                var letter = granted ? letters[index % 3]: '-'
+
+                if index % 3 == 2 && (bits & (2048 >> (index / 3))) != 0 {
+                    letter = index == 8 ? (granted ? 't': 'T'): (granted ? 's': 'S')
+                }
+
+                text.Append(letter)
+            }
+
+            return text.ToString() + " (" + Convert.ToString(bits & 4095, 8).PadLeft(3, '0') + ")"
+        }
     }
 
     /// Describes one path in full or several paths by count, common location, total size and contained items.
@@ -95,8 +172,12 @@ unsafe class PropertiesService {
             return
         }
 
-        result.Permissions = permissions(int32(Marshal.ReadInt16(buffer, 28)))
-        result.Owner = identity("/etc/passwd", uint32(Marshal.ReadInt32(buffer, 20)))
+        let bits = int32(Marshal.ReadInt16(buffer, 28))
+        result.Mode = UnixFileMode(bits & 4095)
+        result.IsLink = (bits & FileSystemService.FileTypeMask) == 40960
+        result.Permissions = Permissions(result.Mode)
+        result.OwnerId = uint32(Marshal.ReadInt32(buffer, 20))
+        result.Owner = identity("/etc/passwd", result.OwnerId)
         result.Group = identity("/etc/group", uint32(Marshal.ReadInt32(buffer, 24)))
 
         if (uint32(Marshal.ReadInt32(buffer, 0)) & FileSystemService.StatBirthTime) != 0 {
@@ -184,24 +265,6 @@ unsafe class PropertiesService {
         }
 
         return PropertiesEntry{Size: raw.Length}
-    }
-
-    private func permissions(bits int32) string {
-        let letters = "rwx"
-        let text = StringBuilder()
-
-        for index in 0 ... 9 {
-            let granted = (bits & (256 >> index)) != 0
-            var letter = granted ? letters[index % 3]: '-'
-
-            if index % 3 == 2 && (bits & (2048 >> (index / 3))) != 0 {
-                letter = index == 8 ? (granted ? 't': 'T'): (granted ? 's': 'S')
-            }
-
-            text.Append(letter)
-        }
-
-        return text.ToString() + " (" + Convert.ToString(bits & 4095, 8).PadLeft(3, '0') + ")"
     }
 
     private func identity(file string, id uint32) string {

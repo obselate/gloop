@@ -3,6 +3,7 @@ package gloop
 import Goo
 import System
 import System.Collections.Generic
+import System.IO
 
 class FileOperationQueue {
     private const QueueLimit int32 = 16
@@ -97,12 +98,15 @@ class FileOperationQueue {
         source string,
         destination string,
         name string,
-        clipboardVersion int32 = -1
+        clipboardVersion int32 = -1,
+        completed Action[List[OperationResult]]? = nil,
+        permission UnixFileMode = UnixFileMode.None,
+        enabled bool = false
     ) {
         let sources = List[string]()
         sources.Add(source)
 
-        StartOperation(kind, sources, destination, name, clipboardVersion)
+        StartOperation(kind, sources, destination, name, clipboardVersion, completed, permission, enabled)
     }
 
     internal func StartOperation(
@@ -110,7 +114,10 @@ class FileOperationQueue {
         sources List[string],
         destination string,
         name string,
-        clipboardVersion int32 = -1
+        clipboardVersion int32 = -1,
+        completed Action[List[OperationResult]]? = nil,
+        permission UnixFileMode = UnixFileMode.None,
+        enabled bool = false
     ) {
         if controller.IsDisposed || closeRequested {
             return
@@ -140,13 +147,22 @@ class FileOperationQueue {
                 Destination: destination,
                 Name: name,
                 ClipboardVersion: clipboardVersion,
+                Completed: completed,
+                Permission: permission,
+                Enabled: enabled,
             }
         )
 
         if admission == OperationAdmission.Full || admission == OperationAdmission.Closed {
-            controller.Status = kind.ToString() +
-                ": File operation queue is " +
-                (admission == OperationAdmission.Full ? "full": "closed")
+            let error = "File operation queue is " + (admission == OperationAdmission.Full ? "full": "closed")
+
+            if kind == OperationKind.Permissions {
+                let results = List[OperationResult](1)
+                results.Add(OperationResult{Source: sources[0], FinalPath: sources[0], Error: error})
+                completed?(results)
+            } else {
+                controller.Status = kind.ToString() + ": " + error
+            }
 
             controller.Notify()
 
@@ -160,7 +176,9 @@ class FileOperationQueue {
         }
 
         operationCount++
-        controller.Status = "Working…"
+        if kind != OperationKind.Permissions {
+            controller.Status = "Working…"
+        }
 
         controller.Notify()
 
@@ -217,7 +235,7 @@ class FileOperationQueue {
             controller.Directories.RefreshLoadedPanes()
         }
 
-        if failed > 0 {
+        if failed > 0 && request.Kind != OperationKind.Permissions {
             let operation = request.Kind == OperationKind.CreateFolder ? "Create folder": request.Kind.ToString()
             controller.Status = results.Count == 1
             ? operation + " failed for " + firstError
@@ -226,7 +244,7 @@ class FileOperationQueue {
             if closeRequested && closeFailure == "" {
                 closeFailure = controller.Status
             }
-        } else if closeFailure == "" {
+        } else if closeFailure == "" && request.Kind != OperationKind.Permissions {
             controller.Status = "Done"
         }
 
@@ -239,6 +257,8 @@ class FileOperationQueue {
                 closeFailure = ""
             }
         }
+
+        request.Completed?(results)
 
         controller.Notify()
     }
@@ -269,6 +289,11 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                     case OperationKind.Restore: trash.Restore(source)
                     case OperationKind.Delete: trash.Delete(source)
                     case OperationKind.Empty: trash.Empty()
+                    case OperationKind.Permissions: PropertiesService.SetPermission(
+                        source,
+                        request.Permission,
+                        request.Enabled
+                    )
                     default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
                 }
             } catch (failure Exception) {

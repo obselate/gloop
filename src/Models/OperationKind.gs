@@ -12,4 +12,5 @@ enum OperationKind {
     Restore;
     Delete;
     Empty;
+    Permissions;
 }
