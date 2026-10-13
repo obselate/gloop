@@ -13,12 +13,15 @@ partial class BrowserView {
     private var bulkNames List[string] = List[string]()
     private var bulkResults List[OperationResult]?
     private var bulkBusy bool
+    private var bulkSummary string = ""
+    private let bulkInputs Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle]()
 
     private func OpenBulkRename() {
         bulkSources = Model.ActivePane().SelectionPaths()
         bulkOptions = BulkRenameOptions()
         bulkResults = nil
         bulkBusy = false
+        bulkSummary = ""
 
         OpenDialog(DialogKind.BulkRename, "")
         UpdateBulkPreview()
@@ -44,17 +47,13 @@ partial class BrowserView {
         Rebuild()
     }
 
-    private func BulkField(
-        label string,
-        value string,
-        change Action[string],
-        handle ElementHandle? = nil
-    ) Blob -> Container{
-        FlexShrink: 0,
-        MinWidth: 0,
-        Gap: 4,
-        Ui.Label(label, palette.Muted, 12),
-        TextField.Build(
+    private func BulkField(label string, value string, change Action[string], handle ElementHandle? = nil) Blob {
+        if !bulkInputs.TryGetValue(label, out var input) {
+            input = handle ?? ElementHandle()
+            bulkInputs[label] = input
+        }
+
+        let field = TextField.Build(
             value,
             next -> {
                 change(next)
@@ -63,9 +62,12 @@ partial class BrowserView {
             (_) -> SubmitBulkRename(),
             label,
             palette,
-            handle: handle,
+            handle: input,
             autoFocus: handle != nil
-        ),
+        )
+        field.OnFocus = (_) -> input.ScrollIntoView()
+
+        return Container{FlexShrink: 0, MinWidth: 0, Gap: 4, Ui.Label(label, palette.Muted, 12), field}
     }
 
     private func BulkRenameDialog() Blob {
@@ -140,8 +142,45 @@ partial class BrowserView {
             rows.Add(Ui.ErrorText(dialogError, p))
         }
 
-        rows.Add(Ui.Label("Old name → New name", p.Text, 13, 600))
+        if bulkSummary != "" {
+            rows.Add(Ui.Label(bulkSummary, p.Muted, 12))
+        }
 
+        rows.Add(Ui.Label("Old name → New name", p.Text, 13, 600))
+        BulkPreviewRows(rows, p)
+
+        let actions = Container{FlexDirection: FlexDirection.Row, JustifyContent: JustifyContent.FlexEnd, Gap: 8}
+        actions.Children.Add(DialogButton(bulkResults != nil ? "Close": "Cancel", () -> CloseDialog(), p))
+
+        if !bulkBusy && bulkResults == nil && dialogError == "" && !Model.Operations.IsOperating {
+            actions.Children.Add(DialogButton("Rename selection", () -> SubmitBulkRename(), p, true))
+        }
+
+        return DialogShell.Build(
+            "Bulk rename" + (bulkBusy ? " · Working…": ""),
+            DialogShell.ScrollColumn(
+                rows.ToArray(),
+                p,
+                8,
+                Math.Min(
+                    (bulkBusy || bulkResults != nil ? 60: 380) + bulkSources.Count * 54,
+                    Math.Clamp(height * .88 - 150, 160, 620)
+                )
+            ),
+            actions,
+            dialogHandle,
+            () -> CloseDialog(),
+            HandleKey,
+            WidgetKeyBindings.Editing(window?.PlatformInput),
+            Host,
+            p,
+            720,
+            height < 600,
+            bulkBusy
+        )
+    }
+
+    private func BulkPreviewRows(rows List[Blob], p Palette) {
         for index in 0 ... bulkSources.Count {
             let source = bulkSources[index]
             let oldName = Path.GetFileName(source)
@@ -175,28 +214,6 @@ partial class BrowserView {
                 }
             )
         }
-
-        let actions = Container{FlexDirection: FlexDirection.Row, JustifyContent: JustifyContent.FlexEnd, Gap: 8}
-        actions.Children.Add(DialogButton(bulkResults != nil ? "Close": "Cancel", () -> CloseDialog(), p))
-
-        if !bulkBusy && bulkResults == nil && dialogError == "" && !Model.Operations.IsOperating {
-            actions.Children.Add(DialogButton("Rename selection", () -> SubmitBulkRename(), p, true))
-        }
-
-        return DialogShell.Build(
-            "Bulk rename" + (bulkBusy ? " · Working…": ""),
-            DialogShell.ScrollColumn(rows.ToArray(), p, 8, Math.Clamp(height * .88 - 150, 160, 620)),
-            actions,
-            dialogHandle,
-            () -> CloseDialog(),
-            HandleKey,
-            WidgetKeyBindings.Editing(window?.PlatformInput),
-            Host,
-            p,
-            720,
-            height < 600,
-            bulkBusy
-        )
     }
 
     private func SubmitBulkRename() {
@@ -243,7 +260,7 @@ partial class BrowserView {
                     }
                 }
 
-                dialogError = (results.Count - failed).ToString() + " renamed, " + failed.ToString() + " failed."
+                bulkSummary = (results.Count - failed).ToString() + " renamed, " + failed.ToString() + " failed."
             },
             names: names
         )
