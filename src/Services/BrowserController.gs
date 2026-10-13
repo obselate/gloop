@@ -67,19 +67,16 @@ class BrowserController {
     }
 
     internal prop InRecent bool {
-        get -> Locations.IsRecent(ActivePane().DirectoryPath)
+        get -> ActivePane().Kind == LocationKind.Recent
     }
 
     internal prop InTrashView bool {
-        get -> InTrash(ActivePane().DirectoryPath)
+        get -> ActivePane().Kind == LocationKind.Trash
     }
 
     internal prop AtTrashRoot bool {
-        get -> TrashDirectory != "" && ActivePane().DirectoryPath == TrashDirectory
+        get -> ActivePane().AtTrashRoot
     }
-
-    internal func InTrash(path string) bool -> TrashDirectory != "" &&
-        (path == TrashDirectory || path.StartsWith(TrashDirectory + "/", StringComparison.Ordinal))
 
     internal func CanRun(action string, menu bool = false) bool {
         if InTrashView {
@@ -165,7 +162,7 @@ class BrowserController {
         if path == "" {
             return
         }
-        if Locations.IsRecent(path) {
+        if InRecent {
             Navigate(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
             return
         }
@@ -195,9 +192,11 @@ class BrowserController {
     }
 
     internal func Refresh() {
+        ResetTypeSelect()
         Places.Refresh()
         let pane = ActivePane()
         if pane.DirectoryPath != "" {
+            Previews.RequestReload()
             Directories.NavigateTo(pane.DirectoryPath, pane, "refresh", pane.HistoryIndex, pane.FocusedPath())
         }
     }
@@ -293,14 +292,16 @@ class BrowserController {
 
     internal func OpenTerminal(inSelection bool = true) {
         var directory = ActivePane().DirectoryPath
+        var kind = ActivePane().Kind
         if inSelection {
             if let entry = ActivePane().SingleSelectedEntry() {
                 if entry.IsDirectory {
                     directory = entry.FullPath
+                    kind = LocationKind.Folder
                 }
             }
         }
-        if disposed || directory == "" || Locations.IsRecent(directory) || terminalOpening {
+        if disposed || directory == "" || kind == LocationKind.Recent || terminalOpening {
             return
         }
         terminalOpening = true
@@ -419,7 +420,7 @@ class BrowserController {
 
     internal func Paste() {
         let destination = ActivePane().DirectoryPath
-        if clipboardPaths.Count == 0 || destination == "" || DropBlocked(destination) {
+        if clipboardPaths.Count == 0 || destination == "" || ActivePane().Kind != LocationKind.Folder {
             return
         }
         Operations.StartOperation(
@@ -434,7 +435,7 @@ class BrowserController {
     internal func CanDrag(paneIndex int32) bool -> Operations.AcceptingOperations &&
         paneIndex >= 0 &&
         paneIndex < VisiblePaneCount &&
-        !InTrash(Pane(paneIndex).DirectoryPath)
+        Pane(paneIndex).Kind != LocationKind.Trash
 
     internal func CanDrop(destination string) bool -> Operations.AcceptingOperations && !DropBlocked(destination)
 
@@ -529,7 +530,8 @@ class BrowserController {
         }
     }
 
-    private func DropBlocked(destination string) bool -> Locations.IsRecent(destination) || InTrash(destination)
+    private func DropBlocked(destination string) bool ->
+    Locations.Resolve(destination, TrashDirectory, out var fullPath, out var atTrashRoot) != LocationKind.Folder
 
     internal func ResetTypeSelect() {
         resetTypeSelect()
@@ -537,7 +539,7 @@ class BrowserController {
 
     internal func Notify() {
         if !disposed {
-            Places.Watch(ActivePane().DirectoryPath)
+            Places.Watch(ActivePane().DirectoryPath, ActivePane().Kind)
             changed()
         }
     }

@@ -9,7 +9,7 @@ import System.Collections.Generic
 internal data struct FileTableInput {
     var Host Window
     var Pane BrowserPane
-    var Location string
+    var Location LocationKind
     var Compact bool
     var ShowType bool
     var SizeText Func[FileEntry, string]
@@ -267,7 +267,7 @@ open class FileTable : Cell[FileTableInput] {
         internal func Empty(
             pane BrowserPane,
             p Palette,
-            location string,
+            location LocationKind,
             choosing bool = false,
             directoriesOnly bool = false
         ) Blob {
@@ -280,9 +280,9 @@ open class FileTable : Cell[FileTableInput] {
             let empty = pane.Filter == "" && (!choosing || pane.Entries.Count == 0)
             return Ui.Empty(
                 "folder_open",
-                if empty && location == "recent" {
+                if empty && location == LocationKind.Recent {
                     "No recent files"
-                } else if empty && location == "trash" {
+                } else if empty && location == LocationKind.Trash {
                     "Trash is empty"
                 } else if empty {
                     "This folder is empty"
@@ -295,9 +295,9 @@ open class FileTable : Cell[FileTableInput] {
                     "Create a folder here."
                 } else if choosing && pane.Filter == "" {
                     "Choose another folder or file type."
-                } else if pane.Filter == "" && location == "recent" {
+                } else if pane.Filter == "" && location == LocationKind.Recent {
                     "Files you open appear here."
-                } else if pane.Filter == "" && location == "trash" {
+                } else if pane.Filter == "" && location == LocationKind.Trash {
                     "Deleted items appear here."
                 } else if pane.Filter == "" {
                     "Create a folder or paste files here."

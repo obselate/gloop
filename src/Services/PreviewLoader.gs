@@ -22,6 +22,7 @@ class PreviewLoader {
     private var loadedPreviewHeight int32
     private var previewAtOriginalSize bool
     private var previewResizeError string = ""
+    private var previewEntry FileEntry?
 
     internal init(window Window, controller BrowserController, width int32, height int32) {
         this.window = window
@@ -66,7 +67,30 @@ class PreviewLoader {
         }
     }
 
+    internal func RequestReload() {
+        previewEntry = nil
+    }
+
     internal func QueuePreview() {
+        let selected = if controller.PreviewVisible && !controller.IsDisposed {
+            controller.ActivePane().SelectedEntry()
+        } else {
+            nil
+        }
+        if let entry = selected {
+            if let previous = previewEntry {
+                if entry.FullPath == previous.FullPath &&
+                    entry.Size == previous.Size &&
+                    entry.Modified == previous.Modified &&
+                    entry.Kind == previous.Kind &&
+                    entry.IsDirectory == previous.IsDirectory &&
+                    entry.IsSymlink == previous.IsSymlink {
+                    return
+                }
+            }
+        }
+        previewEntry = selected
+
         if controller.Status == previewResizeError && previewResizeError != "" {
             controller.Status = ""
         }
@@ -82,11 +106,7 @@ class PreviewLoader {
             source.Dispose()
         }
         PreviewImage = nil
-        if !controller.PreviewVisible || controller.IsDisposed {
-            Clear()
-            return
-        }
-        guard let entry = controller.ActivePane().SelectedEntry() else {
+        guard let entry = selected else {
             Clear()
             return
         }

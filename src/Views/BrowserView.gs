@@ -648,6 +648,7 @@ partial class BrowserView : Cell {
             "location-" + index.ToString(),
             BreadcrumbInput{
                 Path: pane.DirectoryPath,
+                Kind: pane.Kind,
                 Trash: Model.TrashDirectory,
                 Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                 Width: crumbWidth,
@@ -675,7 +676,7 @@ partial class BrowserView : Cell {
         let compact = availableWidth < 600
         let state = paneViews[index]
         let handle = PaneViewport(index)
-        let location = LocationKind(pane)
+        let location = pane.Kind
         let tools = List[Blob]()
         var toolsWidth = 0.0
         if !Model.Split && availableWidth >= 560 {
@@ -724,7 +725,7 @@ partial class BrowserView : Cell {
                     Host,
                     p,
                     false,
-                    location != ""
+                    location != LocationKind.Folder
                 )
             )
         }
@@ -767,7 +768,7 @@ partial class BrowserView : Cell {
                     Host,
                     p,
                     false,
-                    location == "recent"
+                    location == LocationKind.Recent
                 )
             )
         }

@@ -9,6 +9,7 @@ import System.IO
 
 internal data struct BreadcrumbInput {
     var Path string
+    var Kind LocationKind
     var Trash string
     var Home string
     var Width float64
@@ -33,12 +34,11 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let paths = List[string]()
         var destination = "/"
         var rest = value.Path
-        if Locations.IsRecent(value.Path) {
+        if value.Kind == LocationKind.Recent {
             destination = Locations.Recent
             rest = ""
             names.Add("Recent")
-        } else if value.Trash != "" &&
-            (value.Path == value.Trash || value.Path.StartsWith(value.Trash + "/", StringComparison.Ordinal)) {
+        } else if value.Kind == LocationKind.Trash {
             destination = value.Trash
             rest = value.Path.Substring(value.Trash.Length)
             names.Add("Trash")

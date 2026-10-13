@@ -9,13 +9,6 @@ partial class BrowserView {
         }
     }
 
-    private func LocationKind(pane BrowserPane) string {
-        if Locations.IsRecent(pane.DirectoryPath) {
-            return "recent"
-        }
-        return Model.InTrash(pane.DirectoryPath) ? "trash": ""
-    }
-
     private func SpaceStatus() Blob? {
         let space = Model.Places.Space
         if width < 760 || space.TotalBytes <= 0 || Model.InRecent {

@@ -41,8 +41,10 @@ class DirectoryLoader {
             return
         }
         var fullPath string
+        var kind LocationKind
+        var atTrashRoot bool
         try {
-            fullPath = Locations.IsRecent(path) ? Locations.Recent: Path.GetFullPath(path)
+            kind = Locations.Resolve(path, controller.TrashDirectory, out fullPath, out atTrashRoot)
         } catch (failure Exception) {
             pane.Error = failure.Message
             controller.Status = failure.Message
@@ -52,10 +54,12 @@ class DirectoryLoader {
         pane.LoadGeneration++
         pane.ViewGeneration++
         views[pane].Cancel()
-        if pane == controller.ActivePane() {
+        if pane == controller.ActivePane() && mode != "refresh" {
             controller.ResetTypeSelect()
         }
         pane.DirectoryPath = fullPath
+        pane.Kind = kind
+        pane.AtTrashRoot = atTrashRoot
         pane.PendingFocusPath = selectedPath
         pane.Loading = true
         pane.Error = ""
@@ -76,6 +80,8 @@ class DirectoryLoader {
             Pane: pane,
             Generation: pane.LoadGeneration,
             Path: fullPath,
+            Kind: kind,
+            AtTrashRoot: atTrashRoot,
             ShowHidden: settings.ShowHidden,
             Mode: mode,
             HistoryIndex: historyIndex,
@@ -236,7 +242,7 @@ class DirectoryLoader {
     }
 
     private func Load(queue LatestWork, generation int32, request DirectoryRequest) {
-        let snapshot = FileSystemService().List(request.Path, request.ShowHidden)
+        let snapshot = FileSystemService().List(request.Path, request.Kind, request.AtTrashRoot, request.ShowHidden)
         if !queue.IsCurrent(generation) {
             return
         }

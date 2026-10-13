@@ -5,6 +5,8 @@ import System.Collections.Generic
 
 class BrowserPane {
     internal var DirectoryPath string
+    internal var Kind LocationKind
+    internal var AtTrashRoot bool
     internal var Entries List[FileEntry]
     internal var VisibleEntries List[FileEntry]
     internal var Selected int32

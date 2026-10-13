@@ -10,10 +10,9 @@ import System.Text
 import System.Text.Unicode
 
 class FileSystemService {
-    internal func List(path string, showHidden bool) DirectorySnapshot {
-        let snapshot = DirectorySnapshot{}
-        if Locations.IsRecent(path) {
-            snapshot.DirectoryPath = Locations.Recent
+    internal func List(path string, kind LocationKind, atTrashRoot bool, showHidden bool) DirectorySnapshot {
+        let snapshot = DirectorySnapshot{DirectoryPath: path}
+        if kind == LocationKind.Recent {
             for entry in RecentService().List(200) {
                 if showHidden || !entry.Name.StartsWith('.') {
                     snapshot.Entries.Add(entry)
@@ -22,8 +21,7 @@ class FileSystemService {
             return snapshot
         }
         try {
-            snapshot.DirectoryPath = Path.GetFullPath(path)
-            if snapshot.DirectoryPath == TrashService().FilesDirectory() && !Directory.Exists(snapshot.DirectoryPath) {
+            if atTrashRoot && !Directory.Exists(snapshot.DirectoryPath) {
                 return snapshot
             }
             let kinds = Dictionary[string, string](StringComparer.OrdinalIgnoreCase)
