@@ -112,7 +112,7 @@ class FileOperationQueue {
                 if !movingSources.Contains(source) {
                     continue
                 }
-                controller.Status = "File operation already in progress"
+                controller.Status = kind.ToString() + " failed for " + source + ": File operation already in progress"
                 controller.Notify()
                 return
             }
@@ -127,7 +127,9 @@ class FileOperationQueue {
             }
         )
         if admission == OperationAdmission.Full || admission == OperationAdmission.Closed {
-            controller.Status = admission == OperationAdmission.Full ? "File operation queue is full": "File operation queue is closed"
+            controller.Status = kind.ToString() +
+                ": File operation queue is " +
+                (admission == OperationAdmission.Full ? "full": "closed")
             controller.Notify()
             return
         }
@@ -164,7 +166,9 @@ class FileOperationQueue {
             if result.Error != "" {
                 failed++
                 if firstError == "" {
-                    firstError = result.Source + ": " + result.Error
+                    firstError = (request.Kind == OperationKind.CreateFolder ? request.Name: result.Source) +
+                        ": " +
+                        result.Error
                 }
                 continue
             }
@@ -180,8 +184,10 @@ class FileOperationQueue {
             controller.Directories.RefreshLoadedPanes()
         }
         if failed > 0 {
-            controller.Status = succeeded.ToString() + " done, " + failed.ToString()
-            + " failed: " + firstError
+            let operation = request.Kind == OperationKind.CreateFolder ? "Create folder": request.Kind.ToString()
+            controller.Status = results.Count == 1
+            ? operation + " failed for " + firstError
+            : operation + ": " + succeeded.ToString() + " done, " + failed.ToString() + " failed. " + firstError
             if closeRequested && closeFailure == "" {
                 closeFailure = controller.Status
             }
@@ -232,6 +238,6 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
         }
         try {
             window.Post(() -> queue.CompleteOperation(request, results))
-        } catch (failure Exception) { }
+        } catch (failure InvalidOperationException) { }
     }
 }

@@ -12,8 +12,9 @@ class TerminalService {
         try {
             let path = Path.GetFullPath(directory)
             if !Directory.Exists(path) {
-                return "Folder does not exist: " + path
+                return "Open terminal failed for " + directory + ": Folder does not exist"
             }
+            var lastError = ""
             for candidate in Candidates() {
                 try {
                     let start = ProcessStartInfo(candidate)
@@ -44,17 +45,28 @@ class TerminalService {
                     }
                     let process = Process.Start(start)
                     if let launched = process {
-                        let failed = launched.WaitForExit(StartupCheckMilliseconds) && launched.ExitCode != 0
+                        let exited = launched.WaitForExit(StartupCheckMilliseconds)
+                        let code = exited ? launched.ExitCode: 0
                         launched.Dispose()
-                        if !failed {
+                        if !exited || code == 0 {
                             return ""
                         }
+                        lastError = candidate + " exited with code " + code.ToString()
+                    } else {
+                        lastError = candidate + " did not start"
                     }
-                } catch (failure Exception) { }
+                } catch (failure Exception) when failure is System
+                    .ComponentModel
+                    .Win32Exception ||
+                    failure is InvalidOperationException ||
+                    failure is IOException ||
+                    failure is UnauthorizedAccessException {
+                    lastError = candidate + ": " + failure.Message
+                }
             }
-            return "Could not find a desktop terminal"
-        } catch (failure Exception) {
-            return failure.Message
+            return "Open terminal failed for " + directory + ": Could not find a desktop terminal. " + lastError
+        } catch (failure ArgumentException) {
+            return "Open terminal failed for " + directory + ": " + failure.Message
         }
     }
 

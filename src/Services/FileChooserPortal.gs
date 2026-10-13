@@ -68,8 +68,11 @@ internal class FileChooserPortal : IPathMethodHandler {
             }
             try {
                 Submit(PortalMessages.Read(context))
-            } catch (error Exception) {
-                Console.Error.WriteLine("Invalid file chooser request: " + error.Message)
+            } catch (error Exception) when error is InvalidDataException ||
+                error is DBusReadException ||
+                error is DBusUnexpectedValueException ||
+                error is DecoderFallbackException {
+                Console.Error.WriteLine("Read file chooser request failed for " + path + ": " + error.Message)
                 PortalMessages.Reply(context, PortalChooserResult{Response: 2})
             }
         } else if context.IsPropertiesInterfaceRequest {
@@ -133,10 +136,15 @@ internal class FileChooserPortal : IPathMethodHandler {
                 } catch (error Exception) {
                     try {
                         PortalMessages.Reply(current.Context, PortalChooserResult{Response: Canceled(current) ? 1: 2})
-                    } catch (closed Exception) { }
-                    if !Canceled(current) {
-                        Console.Error.WriteLine("File chooser failed: " + error.Message)
+                    } catch (closed Exception) when closed is DBusConnectionClosedException ||
+                        closed is ObjectDisposedException {
+                        Console.Error.WriteLine(
+                            "Reply file chooser failed for " + current.Handle + ": " + closed.Message
+                        )
                     }
+                    Console.Error.WriteLine(
+                        current.Request.Method + " failed for " + current.Handle + ": " + error.Message
+                    )
                 } finally {
                     current.Context.Dispose()
                     lock gate {
@@ -237,7 +245,12 @@ internal class FileChooserPortal : IPathMethodHandler {
         if call == active && child != nil {
             try {
                 child?.Kill(true)
-            } catch (error InvalidOperationException) { }
+            } catch (error Exception) when error is InvalidOperationException ||
+                error is System
+                .ComponentModel
+                .Win32Exception {
+                Console.Error.WriteLine("Cancel file chooser failed for " + call.Handle + ": " + error.Message)
+            }
         }
     }
 
@@ -305,77 +318,72 @@ internal class FileChooserPortal : IPathMethodHandler {
     }
     shared {
         internal func Run() int32 {
-            try {
-                using let connection = DBusConnection(
-                    DBusAddress.Session ?? throw InvalidOperationException("No session D-Bus address")
-                )
-                connection.ConnectAsync().AsTask().GetAwaiter().GetResult()
-                using let frontend = connection
-                    .WatchNameOwnerAsync("org.freedesktop.portal.Desktop")
-                    .GetAwaiter()
-                    .GetResult()
-                let portal = FileChooserPortal(frontend)
-                connection.AddMethodHandler(portal)
-                connection.RequestNameAsync(BusName, RequestNameOptions.None).GetAwaiter().GetResult()
-                using let owners = connection
-                    .AddMatchAsync[[]string](
-                    MatchRule{
-                        Type: MessageType.Signal,
-                        Sender: "org.freedesktop.DBus",
-                        Path: "/org/freedesktop/DBus",
-                        Interface: "org.freedesktop.DBus",
-                        Member: "NameOwnerChanged",
-                    },
-                    (message, _) -> {
-                        let reader = message.GetBodyReader()
-                        return []string{reader.ReadString(), reader.ReadString(), reader.ReadString()}
-                    },
-                    (error, values, _, _) -> {
-                        if error != nil {
-                            return
-                        }
-                        let frontendChanged = values[0] == "org.freedesktop.portal.Desktop" &&
-                            values[1] != "" &&
-                            values[1] != values[2]
-                        let senderDisconnected = values[0].StartsWith(":", StringComparison.Ordinal) && values[2] == ""
-                        if frontendChanged || senderDisconnected {
-                            portal.CancelSender(values[1])
-                        }
-                    },
-                    ObserverFlags.None,
-                    emitOnCapturedContext: false
-                )
-                    .AsTask()
-                    .GetAwaiter()
-                    .GetResult()
-                using let terminate = PosixSignalRegistration.Create(
-                    PosixSignal.SIGTERM,
-                    context -> {
-                        context.Cancel = true
-                        connection.Dispose()
+            using let connection = DBusConnection(
+                DBusAddress.Session ?? throw InvalidOperationException("No session D-Bus address")
+            )
+            connection.ConnectAsync().AsTask().GetAwaiter().GetResult()
+            using let frontend = connection
+                .WatchNameOwnerAsync("org.freedesktop.portal.Desktop")
+                .GetAwaiter()
+                .GetResult()
+            let portal = FileChooserPortal(frontend)
+            connection.AddMethodHandler(portal)
+            connection.RequestNameAsync(BusName, RequestNameOptions.None).GetAwaiter().GetResult()
+            using let owners = connection
+                .AddMatchAsync[[]string](
+                MatchRule{
+                    Type: MessageType.Signal,
+                    Sender: "org.freedesktop.DBus",
+                    Path: "/org/freedesktop/DBus",
+                    Interface: "org.freedesktop.DBus",
+                    Member: "NameOwnerChanged",
+                },
+                (message, _) -> {
+                    let reader = message.GetBodyReader()
+                    return []string{reader.ReadString(), reader.ReadString(), reader.ReadString()}
+                },
+                (error, values, _, _) -> {
+                    if error != nil {
+                        return
                     }
-                )
-                using let interrupt = PosixSignalRegistration.Create(
-                    PosixSignal.SIGINT,
-                    context -> {
-                        context.Cancel = true
-                        connection.Dispose()
+                    let frontendChanged = values[0] == "org.freedesktop.portal.Desktop" &&
+                        values[1] != "" &&
+                        values[1] != values[2]
+                    let senderDisconnected = values[0].StartsWith(":", StringComparison.Ordinal) && values[2] == ""
+                    if frontendChanged || senderDisconnected {
+                        portal.CancelSender(values[1])
                     }
-                )
-                try {
-                    let failure = connection.DisconnectedAsync().GetAwaiter().GetResult()
-                    if failure != nil {
-                        Console.Error.WriteLine("File chooser portal disconnected: " + failure.Message)
-                        return 1
-                    }
-                } finally {
-                    portal.Stop()
+                },
+                ObserverFlags.None,
+                emitOnCapturedContext: false
+            )
+                .AsTask()
+                .GetAwaiter()
+                .GetResult()
+            using let terminate = PosixSignalRegistration.Create(
+                PosixSignal.SIGTERM,
+                context -> {
+                    context.Cancel = true
+                    connection.Dispose()
                 }
-                return 0
-            } catch (error Exception) {
-                Console.Error.WriteLine("File chooser portal failed: " + error.Message)
-                return 1
+            )
+            using let interrupt = PosixSignalRegistration.Create(
+                PosixSignal.SIGINT,
+                context -> {
+                    context.Cancel = true
+                    connection.Dispose()
+                }
+            )
+            try {
+                let failure = connection.DisconnectedAsync().GetAwaiter().GetResult()
+                if failure != nil {
+                    Console.Error.WriteLine("File chooser portal disconnected: " + failure.Message)
+                    return 1
+                }
+            } finally {
+                portal.Stop()
             }
+            return 0
         }
 
         private func ValidateResult(request PortalChooserRequest, result PortalChooserResult) {

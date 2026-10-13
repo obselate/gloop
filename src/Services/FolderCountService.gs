@@ -20,7 +20,7 @@ class FolderCountService {
     private const NotifyIntervalMilliseconds int64 = 100
 
     private let window Window
-    private let changed Action
+    private let changed Action[string]
     private let gate object = Object()
     private let counts Dictionary[string, int32] = Dictionary[string, int32](StringComparer.Ordinal)
     private let pending List[FolderCountRequest] = List[FolderCountRequest]()
@@ -28,9 +28,10 @@ class FolderCountService {
     private var workers int32
     private var posted bool
     private var lastPost int64
+    private var error string = ""
     private var closed bool
 
-    internal init(window Window, changed Action) {
+    internal init(window Window, changed Action[string]) {
         this.window = window
         this.changed = changed
     }
@@ -77,6 +78,7 @@ class FolderCountService {
 
     internal func Process(request FolderCountRequest) {
         var count int32
+        var error = ""
         try {
             let options = EnumerationOptions()
             options.AttributesToSkip = FileAttributes(0)
@@ -92,8 +94,9 @@ class FolderCountService {
                     return
                 }
             }
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             count = -2
+            error = "Count folder failed for " + request.Path + ": " + failure.Message
         }
         var notify bool
         lock gate {
@@ -105,6 +108,9 @@ class FolderCountService {
             }
             counts[request.Key] = count
             queued.Remove(request.Key)
+            if error != "" {
+                this.error = error
+            }
             let now = Environment.TickCount64
             if !posted && (pending.Count == 0 || now - lastPost >= NotifyIntervalMilliseconds) {
                 posted = true
@@ -115,7 +121,7 @@ class FolderCountService {
         if notify {
             try {
                 window.Post(() -> flush())
-            } catch (failure Exception) { }
+            } catch (failure InvalidOperationException) { }
         }
     }
 
@@ -129,13 +135,16 @@ class FolderCountService {
     }
 
     private func flush() {
+        var error string
         lock gate {
             posted = false
+            error = this.error
+            this.error = ""
             if closed {
                 return
             }
         }
-        changed()
+        changed(error)
     }
 
     private func isClosed() bool {
@@ -143,10 +152,25 @@ class FolderCountService {
             return closed
         }
     }
+
+    internal func ReportFailure(request FolderCountRequest, failure Exception) {
+        lock gate {
+            queued.Remove(request.Key)
+            counts[request.Key] = -2
+            error = "Count folder failed for " + request.Path + ": " + failure.Message
+        }
+        try {
+            window.Post(() -> flush())
+        } catch (closed InvalidOperationException) { }
+    }
 }
 
 func folderCountWorker(service FolderCountService) {
     while let request = service.Take() {
-        service.Process(request)
+        try {
+            service.Process(request)
+        } catch (failure Exception) {
+            service.ReportFailure(request, failure)
+        }
     }
 }

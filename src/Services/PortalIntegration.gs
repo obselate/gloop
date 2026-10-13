@@ -156,6 +156,7 @@ internal class PortalIntegration {
         }
 
         private func RequireUserBackendSupport() {
+            var lastError = ""
             for executable in[]string{
                 "/usr/libexec/xdg-desktop-portal",
                 "/usr/lib/xdg-desktop-portal",
@@ -168,10 +169,16 @@ internal class PortalIntegration {
                     if version >= Version(1, 20, 1) {
                         return
                     }
-                } catch (failure Exception) { }
+                } catch (failure Exception) when failure is IOException ||
+                    failure is FormatException ||
+                    failure is ArgumentException ||
+                    failure is OverflowException {
+                    lastError = executable + ": " + failure.Message
+                }
             }
             throw InvalidOperationException(
-                "Chooser backends in user data or /usr/local/share require xdg-desktop-portal 1.20.1 or newer. Older desktops require a system package with its portal descriptor in /usr/share."
+                "Check file chooser backend failed: Chooser backends in user data or /usr/local/share require xdg-desktop-portal 1.20.1 or newer. Older desktops require a system package with its portal descriptor in /usr/share. " +
+                    lastError
             )
         }
 

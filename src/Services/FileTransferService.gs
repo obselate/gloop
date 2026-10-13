@@ -60,7 +60,7 @@ class FileTransferService {
             var source string
             try {
                 source = Path.GetFullPath(path)
-            } catch (failure Exception) {
+            } catch (failure ArgumentException) {
                 return false
             }
             if Path.GetDirectoryName(source) == target {

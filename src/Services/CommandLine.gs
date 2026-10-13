@@ -83,8 +83,8 @@ internal class CommandLine {
                 } else {
                     options.Error = "Path does not exist: " + fullPath
                 }
-            } catch (e Exception) {
-                options.Error = "Invalid path: " + path
+            } catch (e ArgumentException) {
+                options.Error = "Open failed for " + path + ": " + e.Message
             }
             return options
         }

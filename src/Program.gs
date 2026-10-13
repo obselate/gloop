@@ -23,7 +23,14 @@ func Main(args[]string) int32 {
         return 0
     }
     if launch.Portal {
-        return FileChooserPortal.Run()
+        try {
+            return FileChooserPortal.Run()
+        } catch (e Exception) {
+            Console.Error.WriteLine(
+                "Run file chooser portal failed for " + FileChooserPortal.BusName + ": " + e.Message
+            )
+            return 1
+        }
     }
     if launch.InstallDesktop ||
         launch.SetDefault ||
@@ -31,25 +38,30 @@ func Main(args[]string) int32 {
         launch.SetDefaultChooser ||
         launch
         .RestoreDefaultChooser {
+        var operation = "Install desktop entry"
         try {
             if !launch.RestoreDefaultChooser {
                 Console.WriteLine(DesktopIntegration.Install())
             }
             if launch.SetDefault {
+                operation = "Set default file manager"
                 Console.WriteLine(DesktopIntegration.SetDefault())
             }
             if launch.InstallPortal || launch.SetDefaultChooser {
+                operation = "Register portal"
                 Console.WriteLine(PortalIntegration.Install())
             }
             if launch.SetDefaultChooser {
+                operation = "Set default file chooser"
                 Console.WriteLine(PortalIntegration.SetDefault())
             }
             if launch.RestoreDefaultChooser {
+                operation = "Restore default file chooser"
                 Console.WriteLine(PortalIntegration.RestoreDefault())
             }
             return 0
         } catch (e Exception) {
-            Console.Error.WriteLine("Desktop installation failed: " + e.Message)
+            Console.Error.WriteLine(operation + " failed: " + e.Message)
             return 1
         }
     }
@@ -57,7 +69,7 @@ func Main(args[]string) int32 {
         try {
             launch.ChooserRequest = PortalChooserCodec.ReadRequest(launch.ChooserRequestPath)
         } catch (e Exception) {
-            Console.Error.WriteLine("Could not load chooser request: " + e.Message)
+            Console.Error.WriteLine("Load chooser request failed for " + launch.ChooserRequestPath + ": " + e.Message)
             return 2
         }
     }
@@ -99,7 +111,7 @@ func Main(args[]string) int32 {
         try {
             PortalChooserCodec.WriteResult(launch.ChooserResultPath, view.ChooserResult)
         } catch (e Exception) {
-            Console.Error.WriteLine("Could not write chooser result: " + e.Message)
+            Console.Error.WriteLine("Write chooser result failed for " + launch.ChooserResultPath + ": " + e.Message)
             return 2
         }
     }

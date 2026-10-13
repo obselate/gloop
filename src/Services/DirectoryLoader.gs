@@ -53,9 +53,9 @@ class DirectoryLoader {
         var atTrashRoot bool
         try {
             kind = Locations.Resolve(path, controller.TrashDirectory, out fullPath, out atTrashRoot)
-        } catch (failure Exception) {
-            pane.Error = failure.Message
-            controller.Status = failure.Message
+        } catch (failure ArgumentException) {
+            pane.Error = "Open folder failed for " + path + ": " + failure.Message
+            controller.Status = pane.Error
             controller.Notify()
             return
         }
@@ -98,7 +98,10 @@ class DirectoryLoader {
         queue.Submit(
             generation -> Load(queue, generation, request),
             (_, failure) -> {
-                let snapshot = DirectorySnapshot{DirectoryPath: request.Path, Error: failure.Message}
+                let snapshot = DirectorySnapshot{
+                    DirectoryPath: request.Path,
+                    Error: "List folder failed for " + request.Path + ": " + failure.Message
+                }
                 try {
                     window.Post(
                         () -> ApplyDirectory(
@@ -110,7 +113,7 @@ class DirectoryLoader {
                             request.SelectedPath
                         )
                     )
-                } catch (postFailure Exception) { }
+                } catch (postFailure InvalidOperationException) { }
             }
         )
     }
@@ -196,10 +199,10 @@ class DirectoryLoader {
                             request.Generation,
                             List[FileEntry](),
                             request.SelectedPath,
-                            failure.Message
+                            "Build folder view failed for " + request.Pane.DirectoryPath + ": " + failure.Message
                         )
                     )
-                } catch (postFailure Exception) { }
+                } catch (postFailure InvalidOperationException) { }
             }
         )
     }
@@ -265,7 +268,7 @@ class DirectoryLoader {
                     request.SelectedPath
                 )
             )
-        } catch (failure Exception) { }
+        } catch (failure InvalidOperationException) { }
     }
 
     private func BuildView(queue LatestWork, generation int32, request ViewRequest) {
@@ -273,44 +276,39 @@ class DirectoryLoader {
             return
         }
         var visible = List[FileEntry]()
-        var error = ""
-        try {
-            if request.Filter == "" && request.EntryFilter == nil {
-                visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
-            } else {
-                let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
-                var count = 0
-                for entry in request.Entries {
-                    if (count & CancellationCheckMask) == 0 && !queue.IsCurrent(generation) {
-                        break
-                    }
-                    count++
-                    if let entryFilter = request.EntryFilter {
-                        if !entryFilter(entry) {
-                            continue
-                        }
-                    }
-                    let matches = if wildcard {
-                        FileSystemName.MatchesSimpleExpression(request.Filter.AsSpan(), entry.Name.AsSpan(), true)
-                    } else {
-                        entry.Name.Contains(request.Filter, StringComparison.OrdinalIgnoreCase)
-                    }
-                    if matches {
-                        visible.Add(entry)
+        if request.Filter == "" && request.EntryFilter == nil {
+            visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
+        } else {
+            let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
+            var count = 0
+            for entry in request.Entries {
+                if (count & CancellationCheckMask) == 0 && !queue.IsCurrent(generation) {
+                    break
+                }
+                count++
+                if let entryFilter = request.EntryFilter {
+                    if !entryFilter(entry) {
+                        continue
                     }
                 }
-                if queue.IsCurrent(generation) {
-                    FileSystemService().SortInPlace(visible, request.Column, request.Descending)
+                let matches = if wildcard {
+                    FileSystemName.MatchesSimpleExpression(request.Filter.AsSpan(), entry.Name.AsSpan(), true)
+                } else {
+                    entry.Name.Contains(request.Filter, StringComparison.OrdinalIgnoreCase)
+                }
+                if matches {
+                    visible.Add(entry)
                 }
             }
-        } catch (failure Exception) {
-            error = failure.Message
+            if queue.IsCurrent(generation) {
+                FileSystemService().SortInPlace(visible, request.Column, request.Descending)
+            }
         }
         if !queue.IsCurrent(generation) {
             return
         }
         try {
-            window.Post(() -> ApplyView(request.Pane, request.Generation, visible, request.SelectedPath, error))
-        } catch (failure Exception) { }
+            window.Post(() -> ApplyView(request.Pane, request.Generation, visible, request.SelectedPath, ""))
+        } catch (failure InvalidOperationException) { }
     }
 }

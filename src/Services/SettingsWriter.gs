@@ -142,12 +142,14 @@ internal class SettingsWriter {
             try {
                 error = service.Save(current.Snapshot)
             } catch (failure Exception) {
-                error = "Could not save settings: " + failure.Message
+                error = "Save settings failed for " + service.FilePath + ": " + failure.Message
             }
             if error != "" {
                 try {
                     window.Post(() -> ReportError(current.Version, error))
-                } catch (failure Exception) { }
+                } catch (failure InvalidOperationException) {
+                    Console.Error.WriteLine(error)
+                }
             }
         }
     }

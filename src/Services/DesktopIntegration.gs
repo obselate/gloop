@@ -194,10 +194,15 @@ internal class DesktopIntegration {
                     throw InvalidOperationException(tool + " exited with code " + process.ExitCode.ToString())
                 }
                 return output.ToString()
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is System
+                .ComponentModel
+                .Win32Exception ||
+                failure is InvalidOperationException ||
+                failure is IOException {
                 if required {
-                    throw InvalidOperationException("Cannot set the default file manager: " + failure.Message)
+                    throw IOException("Run " + tool + " failed: " + failure.Message)
                 }
+                Console.Error.WriteLine("Run " + tool + " failed: " + failure.Message)
                 return ""
             }
         }

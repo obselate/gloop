@@ -10,9 +10,25 @@ internal class PortalChooserCodec {
     shared {
         internal func ReadRequest(path string) PortalChooserRequest {
             using let document = Read(path)
+            RequireKind(document.RootElement, JsonValueKind.Object, "Portal request", "root")
             let request = PortalChooserRequest()
             for property in document.RootElement.EnumerateObject() {
                 let value = property.Value
+                let kind = switch property.Name {
+                    case "modal" or "multiple" or "directory": JsonValueKind.True
+                    case "files" or "filters" or "choices": JsonValueKind.Array
+                    case "currentFilter": JsonValueKind.Object
+                    case "method" or "appId" or "parentWindow" or "title" or "acceptLabel"
+                    or "currentFolder" or "currentFile" or "currentName": JsonValueKind.String
+                    default: JsonValueKind.Undefined
+                }
+                if kind != JsonValueKind.Undefined &&
+                    !(
+                    value.ValueKind == JsonValueKind.Null
+                    && (kind == JsonValueKind.String || property.Name == "currentFilter")
+                ) {
+                    RequireKind(value, kind, "Portal request", property.Name)
+                }
                 if property.Name == "method" {
                     request.Method = value.GetString() ?? "OpenFile"
                 } else if property.Name == "appId" {
@@ -36,33 +52,71 @@ internal class PortalChooserCodec {
                 } else if property.Name == "currentName" {
                     request.CurrentName = value.GetString() ?? ""
                 } else if property.Name == "files" {
+                    var index = 0
                     for item in value.EnumerateArray() {
+                        RequireKind(item, JsonValueKind.String, "Portal request", "files[" + index.ToString() + "]")
                         request.Files.Add(item.GetString() ?? "")
+                        index++
                     }
                 } else if property.Name == "filters" {
+                    var index = 0
                     for item in value.EnumerateArray() {
-                        request.Filters.Add(ReadFilter(item))
+                        request.Filters.Add(ReadFilter(item, "Portal request", "filters[" + index.ToString() + "]"))
+                        index++
                     }
                 } else if property.Name == "currentFilter" {
                     if value.ValueKind != JsonValueKind.Null {
-                        request.CurrentFilter = ReadFilter(value)
+                        request.CurrentFilter = ReadFilter(value, "Portal request", property.Name)
                     }
                 } else if property.Name == "choices" {
+                    var index = 0
                     for item in value.EnumerateArray() {
+                        let field = "choices[" + index.ToString() + "]"
+                        RequireKind(item, JsonValueKind.Object, "Portal request", field)
                         let choice = PortalChoice{
-                            Id: item.GetProperty("id").GetString() ?? "",
-                            Label: item.GetProperty("label").GetString() ?? "",
-                            Selected: item.GetProperty("selected").GetString() ?? "",
+                            Id: ReadField(item, "id", JsonValueKind.String, "Portal request", field).GetString() ?? "",
+                            Label: ReadField(
+                                item,
+                                "label",
+                                JsonValueKind.String,
+                                "Portal request",
+                                field
+                            ).GetString() ?? "",
+                            Selected: ReadField(
+                                item,
+                                "selected",
+                                JsonValueKind.String,
+                                "Portal request",
+                                field
+                            ).GetString() ?? "",
                         }
-                        for option in item.GetProperty("options").EnumerateArray() {
+                        var optionIndex = 0
+                        for option in ReadField(item, "options", JsonValueKind.Array, "Portal request", field)
+                            .EnumerateArray() {
+                            let optionField = field + ".options[" + optionIndex.ToString() + "]"
+                            RequireKind(option, JsonValueKind.Object, "Portal request", optionField)
                             choice.Options.Add(
                                 PortalChoiceOption{
-                                    Id: option.GetProperty("id").GetString() ?? "",
-                                    Label: option.GetProperty("label").GetString() ?? "",
+                                    Id: ReadField(
+                                        option,
+                                        "id",
+                                        JsonValueKind.String,
+                                        "Portal request",
+                                        optionField
+                                    ).GetString() ?? "",
+                                    Label: ReadField(
+                                        option,
+                                        "label",
+                                        JsonValueKind.String,
+                                        "Portal request",
+                                        optionField
+                                    ).GetString() ?? "",
                                 }
                             )
+                            optionIndex++
                         }
                         request.Choices.Add(choice)
+                        index++
                     }
                 }
             }
@@ -122,27 +176,49 @@ internal class PortalChooserCodec {
 
         internal func ReadResult(path string) PortalChooserResult {
             using let document = Read(path)
+            RequireKind(document.RootElement, JsonValueKind.Object, "Portal result", "root")
             let result = PortalChooserResult()
             for property in document.RootElement.EnumerateObject() {
                 let value = property.Value
                 if property.Name == "response" {
-                    result.Response = value.GetUInt32()
+                    result.Response = ReadUInt32(value, "Portal result", property.Name)
                 } else if property.Name == "uris" {
+                    RequireKind(value, JsonValueKind.Array, "Portal result", property.Name)
+                    var index = 0
                     for item in value.EnumerateArray() {
+                        RequireKind(item, JsonValueKind.String, "Portal result", "uris[" + index.ToString() + "]")
                         result.Uris.Add(item.GetString() ?? "")
+                        index++
                     }
                 } else if property.Name == "currentFilter" {
                     if value.ValueKind != JsonValueKind.Null {
-                        result.CurrentFilter = ReadFilter(value)
+                        result.CurrentFilter = ReadFilter(value, "Portal result", property.Name)
                     }
                 } else if property.Name == "choices" {
+                    RequireKind(value, JsonValueKind.Array, "Portal result", property.Name)
+                    var index = 0
                     for item in value.EnumerateArray() {
+                        let field = "choices[" + index.ToString() + "]"
+                        RequireKind(item, JsonValueKind.Object, "Portal result", field)
                         result.Choices.Add(
                             PortalChoiceResult{
-                                Id: item.GetProperty("id").GetString() ?? "",
-                                Value: item.GetProperty("value").GetString() ?? "",
+                                Id: ReadField(
+                                    item,
+                                    "id",
+                                    JsonValueKind.String,
+                                    "Portal result",
+                                    field
+                                ).GetString() ?? "",
+                                Value: ReadField(
+                                    item,
+                                    "value",
+                                    JsonValueKind.String,
+                                    "Portal result",
+                                    field
+                                ).GetString() ?? "",
                             }
                         )
+                        index++
                     }
                 }
             }
@@ -186,17 +262,61 @@ internal class PortalChooserCodec {
             return JsonDocument.Parse(File.ReadAllText(path))
         }
 
-        private func ReadFilter(value JsonElement) PortalFilter {
-            let filter = PortalFilter{Name: value.GetProperty("name").GetString() ?? ""}
-            for item in value.GetProperty("patterns").EnumerateArray() {
+        private func ReadFilter(value JsonElement, format string, field string) PortalFilter {
+            RequireKind(value, JsonValueKind.Object, format, field)
+            let filter = PortalFilter{
+                Name: ReadField(value, "name", JsonValueKind.String, format, field).GetString() ?? "",
+            }
+            var index = 0
+            for item in ReadField(value, "patterns", JsonValueKind.Array, format, field).EnumerateArray() {
+                let patternField = field + ".patterns[" + index.ToString() + "]"
+                RequireKind(item, JsonValueKind.Object, format, patternField)
                 filter.Patterns.Add(
                     PortalFilterPattern{
-                        Type: item.GetProperty("type").GetUInt32(),
-                        Value: item.GetProperty("value").GetString() ?? "",
+                        Type: ReadUInt32(
+                            ReadField(item, "type", JsonValueKind.Number, format, patternField),
+                            format,
+                            patternField + ".type"
+                        ),
+                        Value: ReadField(item, "value", JsonValueKind.String, format, patternField).GetString() ?? "",
                     }
                 )
+                index++
             }
             return filter
+        }
+
+        private func ReadField(
+            value JsonElement,
+            name string,
+            kind JsonValueKind,
+            format string,
+            field string
+        ) JsonElement {
+            var property JsonElement
+            if !value.TryGetProperty(name, out property) {
+                throw InvalidDataException(format + ": field " + field + "." + name + " is required")
+            }
+            RequireKind(property, kind, format, field + "." + name)
+            return property
+        }
+
+        private func RequireKind(value JsonElement, kind JsonValueKind, format string, field string) {
+            if value.ValueKind == kind || (kind == JsonValueKind.True && value.ValueKind == JsonValueKind.False) {
+                return
+            }
+            let typeName = kind == JsonValueKind.True ? "boolean": kind.ToString().ToLowerInvariant()
+            let article = kind == JsonValueKind.Array || kind == JsonValueKind.Object ? "an ": "a "
+            throw InvalidDataException(format + ": field " + field + " must be " + article + typeName)
+        }
+
+        private func ReadUInt32(value JsonElement, format string, field string) uint32 {
+            RequireKind(value, JsonValueKind.Number, format, field)
+            var number uint32
+            if !value.TryGetUInt32(out number) {
+                throw InvalidDataException(format + ": field " + field + " must be an unsigned 32-bit integer")
+            }
+            return number
         }
 
         private func WriteFilter(writer Utf8JsonWriter, filter PortalFilter) {

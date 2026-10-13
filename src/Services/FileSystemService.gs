@@ -49,8 +49,8 @@ unsafe class FileSystemService {
             for item in enumeration {
                 snapshot.Entries.Add(item)
             }
-        } catch (failure Exception) {
-            snapshot.Error = failure.Message
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+            snapshot.Error = "List folder failed for " + path + ": " + failure.Message
         }
         return snapshot
     }
@@ -137,8 +137,14 @@ unsafe class FileSystemService {
             return PreviewData{Kind: PreviewKind.Cancelled, Path: path}
         } catch (failure DecoderFallbackException) {
             return PreviewData{Kind: PreviewKind.Metadata, Text: "Binary file", Path: path}
-        } catch (failure Exception) {
-            return PreviewData{Kind: PreviewKind.Error, Text: "", Path: path, Error: failure.Message}
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
+            return PreviewData{
+                Kind: PreviewKind.Error,
+                Path: path,
+                Error: "Preview failed for " + path + ": " + failure.Message
+            }
         }
     }
 
@@ -194,17 +200,13 @@ unsafe class FileSystemService {
         if size == 0 {
             return false
         }
-        try {
-            using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-            let buffer = [TextProbeBytes]uint8
-            var count = stream.Read(buffer, 0, buffer.Length)
-            if size > int64(count) {
-                count = TextContent.CompleteUtf8Length(buffer, count)
-            }
-            return TextContent.IsText(buffer, count)
-        } catch (failure Exception) {
-            return false
+        using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+        let buffer = [TextProbeBytes]uint8
+        var count = stream.Read(buffer, 0, buffer.Length)
+        if size > int64(count) {
+            count = TextContent.CompleteUtf8Length(buffer, count)
         }
+        return TextContent.IsText(buffer, count)
     }
 
     internal func Open(path string) string {
@@ -216,12 +218,17 @@ unsafe class FileSystemService {
             start.UseShellExecute = false
             let process = Process.Start(start)
             guard let launched = process else {
-                return "Could not launch xdg-open"
+                return "Open failed for " + path + ": xdg-open did not start"
             }
             launched.Dispose()
             return ""
-        } catch (failure Exception) {
-            return failure.Message
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is System
+            .ComponentModel
+            .Win32Exception ||
+            failure is ArgumentException {
+            return "Open failed for " + path + ": " + failure.Message
         }
     }
 
@@ -246,9 +253,7 @@ unsafe class FileSystemService {
             try {
                 File.GetAttributes(path)
                 return true
-            } catch (failure FileNotFoundException) {
-                return false
-            } catch (failure DirectoryNotFoundException) {
+            } catch (failure Exception) when failure is FileNotFoundException || failure is DirectoryNotFoundException {
                 return false
             }
         }
@@ -314,8 +319,8 @@ unsafe class FileSystemService {
                     entry.Kind = kind
                 }
             }
-        } catch (failure Exception) {
-            entry.Kind = "Unavailable"
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+            entry.Kind = "Read metadata failed for " + name + ": " + failure.Message
         }
         return entry
     }

@@ -56,7 +56,7 @@ class Xdg {
                 if File.Exists(path) && FileInfo(path).Length <= MaxFileSize {
                     lines.AddRange(File.ReadLines(path))
                 }
-            } catch (failure Exception) { }
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
             return lines
         }
 
@@ -103,7 +103,7 @@ class Xdg {
         private func isExecutable(path string) bool {
             try {
                 return File.Exists(path) && (int32(File.GetUnixFileMode(path)) & 73) != 0
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 return false
             }
         }
