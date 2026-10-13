@@ -19,6 +19,7 @@ data struct FileProperties {
     internal var Mode UnixFileMode
     internal var IsLink bool
     internal var Owner string = ""
+    internal var OwnerId uint32
     internal var Group string = ""
     internal var LinkTarget string = ""
     internal var Error string = ""

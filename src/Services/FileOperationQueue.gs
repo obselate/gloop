@@ -154,9 +154,15 @@ class FileOperationQueue {
         )
 
         if admission == OperationAdmission.Full || admission == OperationAdmission.Closed {
-            controller.Status = kind.ToString() +
-                ": File operation queue is " +
-                (admission == OperationAdmission.Full ? "full": "closed")
+            let error = "File operation queue is " + (admission == OperationAdmission.Full ? "full": "closed")
+
+            if kind == OperationKind.Permissions {
+                let results = List[OperationResult](1)
+                results.Add(OperationResult{Source: sources[0], FinalPath: sources[0], Error: error})
+                completed?(results)
+            } else {
+                controller.Status = kind.ToString() + ": " + error
+            }
 
             controller.Notify()
 
@@ -170,7 +176,9 @@ class FileOperationQueue {
         }
 
         operationCount++
-        controller.Status = "Working…"
+        if kind != OperationKind.Permissions {
+            controller.Status = "Working…"
+        }
 
         controller.Notify()
 
@@ -227,7 +235,7 @@ class FileOperationQueue {
             controller.Directories.RefreshLoadedPanes()
         }
 
-        if failed > 0 {
+        if failed > 0 && request.Kind != OperationKind.Permissions {
             let operation = request.Kind == OperationKind.CreateFolder ? "Create folder": request.Kind.ToString()
             controller.Status = results.Count == 1
             ? operation + " failed for " + firstError
@@ -236,7 +244,7 @@ class FileOperationQueue {
             if closeRequested && closeFailure == "" {
                 closeFailure = controller.Status
             }
-        } else if closeFailure == "" {
+        } else if closeFailure == "" && request.Kind != OperationKind.Permissions {
             controller.Status = "Done"
         }
 

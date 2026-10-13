@@ -103,9 +103,15 @@ partial class BrowserView {
                 if info.IsLink {
                     rows.Add(PropertiesRow("Editing", "Symbolic link permissions are read-only"))
                 } else {
-                    rows.Add(PermissionRow("Owner", 6))
-                    rows.Add(PermissionRow("Group", 3))
-                    rows.Add(PermissionRow("Other", 0))
+                    let uid = PropertiesService.EffectiveUserId()
+                    let canEdit = uid == 0 || uid == info.OwnerId
+                    rows.Add(PermissionRow("Owner", 6, canEdit))
+                    rows.Add(PermissionRow("Group", 3, canEdit))
+                    rows.Add(PermissionRow("Other", 0, canEdit))
+
+                    if !canEdit {
+                        rows.Add(Ui.Label("Only the owner can change permissions", p.Muted, 13))
+                    }
                 }
             }
         }
@@ -145,7 +151,7 @@ partial class BrowserView {
         true
     )
 
-    private func PermissionRow(label string, shift int32) Blob {
+    private func PermissionRow(label string, shift int32, canEdit bool) Blob {
         let controls = List[Blob](3)
         let names = []string{"Read", "Write", "Execute"}
 
@@ -156,7 +162,7 @@ partial class BrowserView {
                 AccessibilityName: label + " " + names[index].ToLowerInvariant(),
                 State: (propertiesInfo.Mode & bit) != UnixFileMode.None ?
                 AccessibilityChecked.True: AccessibilityChecked.False,
-                Disabled: Model.Operations.IsOperating || !Model.Operations.AcceptingOperations,
+                Disabled: !canEdit || Model.Operations.IsOperating || !Model.Operations.AcceptingOperations,
                 OnChange: state -> ChangePermission(bit, state == AccessibilityChecked.True),
                 LabelColor: palette.Text,
                 LabelFontSize: 13,

@@ -18,6 +18,9 @@ unsafe class PropertiesService {
     shared {
         private const MaxItems int32 = 2000000
 
+        @DllImport("libc", EntryPoint: "geteuid")
+        internal func EffectiveUserId() uint32;
+
         internal func SetPermission(path string, permission UnixFileMode, enabled bool) OperationResult {
             var result = OperationResult{Source: path, FinalPath: path, Error: ""}
 
@@ -173,7 +176,8 @@ unsafe class PropertiesService {
         result.Mode = UnixFileMode(bits & 4095)
         result.IsLink = (bits & FileSystemService.FileTypeMask) == 40960
         result.Permissions = Permissions(result.Mode)
-        result.Owner = identity("/etc/passwd", uint32(Marshal.ReadInt32(buffer, 20)))
+        result.OwnerId = uint32(Marshal.ReadInt32(buffer, 20))
+        result.Owner = identity("/etc/passwd", result.OwnerId)
         result.Group = identity("/etc/group", uint32(Marshal.ReadInt32(buffer, 24)))
 
         if (uint32(Marshal.ReadInt32(buffer, 0)) & FileSystemService.StatBirthTime) != 0 {
