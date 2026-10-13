@@ -36,6 +36,98 @@ class FileOperationQueue {
         get -> !controller.IsDisposed && !closeRequested
     }
 
+    internal func CanUseArchive(action string) bool {
+        let pane = controller.ActivePane()
+
+        if pane.Kind == LocationKind.Archive &&
+            (
+            action == "Rename" ||
+                action == "Trash" ||
+                action == "Cut" ||
+                action == "Copy" ||
+                action == "Paste" ||
+                action == "NewFolder" ||
+                action == "Compress" ||
+                action == "Properties" ||
+                action == "OpenTerminal" ||
+                action == "OpenTerminalHere" ||
+                action == "ToggleBookmark"
+        ) {
+            return false
+        }
+
+        if action == "Extract" || action == "Compress" {
+            if pane.Kind == LocationKind.Trash || pane.Kind == LocationKind.Recent || pane.SelectedPaths.Count == 0 {
+                return false
+            }
+
+            if action == "Extract" && pane.Kind != LocationKind.Archive {
+                for source in pane.SelectionPaths() {
+                    if !ArchiveService.Supported(source) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        return true
+    }
+
+    internal func CanDrag(paneIndex int32) bool -> AcceptingOperations &&
+        paneIndex >= 0 &&
+        paneIndex < controller.VisiblePaneCount &&
+        controller
+        .Pane(paneIndex).Kind != LocationKind.Trash && controller.Pane(paneIndex).Kind != LocationKind.Archive
+
+    internal func CanDrop(destination string) bool -> AcceptingOperations && controller.Archives.Source(
+        destination
+    ) == "" &&
+        Locations.Resolve(
+        destination,
+        controller.TrashDirectory,
+        out var fullPath,
+        out var atTrashRoot
+    ) == LocationKind.Folder
+
+    internal func Drop(sources List[string], destination string, copy bool) {
+        if CanDrop(destination) && sources.Count > 0 {
+            StartOperation(copy ? OperationKind.Copy: OperationKind.Move, sources, destination, "")
+        }
+    }
+
+    internal func Extract(destination string) {
+        var folder = controller.ActivePane().DirectoryPath
+
+        if controller.ActivePane().Kind == LocationKind.Archive {
+            folder = Path.GetDirectoryName(controller.Archives.Source(folder)) ?? folder
+        }
+
+        try {
+            if destination.StartsWith('~') {
+                throw ArgumentException("Use a folder path without '~'")
+            }
+
+            StartOperation(
+                OperationKind.Extract,
+                controller.ActivePane().SelectionPaths(),
+                Path.GetFullPath(destination, folder),
+                ""
+            )
+        } catch (failure ArgumentException) {
+            controller.Status = "Extract failed for " + destination + ": " + failure.Message
+            controller.Notify()
+        }
+    }
+
+    internal func Compress(name string) {
+        StartOperation(
+            OperationKind.Compress,
+            controller.ActivePane().SelectionPaths(),
+            controller.ActivePane().DirectoryPath,
+            name
+        )
+    }
+
     internal func CloseSafely() bool {
         if !IsOperating {
             return true

@@ -7,16 +7,16 @@ import System.Formats.Tar
 import System.IO
 import System.IO.Compression
 
-class ArchiveService {
+partial class ArchiveService {
     private const PreviewByteLimit int64 = 16777216
     private const PreviewBufferSize int32 = 65536
-    private const ListingCacheLimit int32 = 4096
+    private const ArchiveModeMask int32 = 511
+    private const OwnerReadWrite int32 = 384
+    private const OwnerFullAccess int32 = 448
 
     private let gate object = Object()
     private let previews Dictionary[string, string] = Dictionary[string, string](StringComparer.Ordinal)
     private let active HashSet[string] = HashSet[string](StringComparer.Ordinal)
-    private let listings Dictionary[string, ValueTuple[DateTime, List[FileEntry]]] =
-    Dictionary[string, ValueTuple[DateTime, List[FileEntry]]](StringComparer.Ordinal)
 
     shared {
         internal func Supported(path string) bool -> path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
@@ -72,12 +72,19 @@ class ArchiveService {
 
                     if entry.FullName.Replace('\\', '/').EndsWith('/') {
                         Directory.CreateDirectory(path)
+                        File.SetUnixFileMode(
+                            path,
+                            UnixFileMode((entry.ExternalAttributes >> 16 & ArchiveModeMask) | OwnerFullAccess)
+                        )
                     } else {
                         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
                         using let input = entry.Open()
                         using let output = FileStream(path, FileMode.CreateNew, FileAccess.Write)
                         input.CopyTo(output)
-                        File.SetUnixFileMode(path, UnixFileMode((entry.ExternalAttributes >> 16 & 511) | 384))
+                        File.SetUnixFileMode(
+                            path,
+                            UnixFileMode((entry.ExternalAttributes >> 16 & ArchiveModeMask) | OwnerReadWrite)
+                        )
                     }
                 }
 
@@ -108,11 +115,12 @@ class ArchiveService {
                     links.Add(entry)
                 } else if entry.EntryType == TarEntryType.Directory {
                     Directory.CreateDirectory(path)
+                    File.SetUnixFileMode(path, UnixFileMode((int32(entry.Mode) & ArchiveModeMask) | OwnerFullAccess))
                 } else if entry.EntryType == TarEntryType.RegularFile || entry.EntryType == TarEntryType.V7RegularFile {
                     Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
                     using let output = FileStream(path, FileMode.CreateNew, FileAccess.Write)
                     entry.DataStream?.CopyTo(output)
-                    File.SetUnixFileMode(path, UnixFileMode((int32(entry.Mode) & 511) | 384))
+                    File.SetUnixFileMode(path, UnixFileMode((int32(entry.Mode) & ArchiveModeMask) | OwnerReadWrite))
                 } else {
                     throw IOException("Unsupported TAR entry: " + entry.Name + " (" + entry.EntryType.ToString() + ")")
                 }
@@ -202,141 +210,6 @@ class ArchiveService {
         return ""
     }
 
-    internal func ListArchive(path string, showHidden bool, cancelled Func[bool]? = nil) DirectorySnapshot {
-        let source = Source(path)
-        let prefix = path == source ? "": Path.GetRelativePath(source, path).TrimEnd('/') + "/"
-        let snapshot = DirectorySnapshot{DirectoryPath: path}
-        let names = HashSet[string](StringComparer.Ordinal)
-        let modified = File.GetLastWriteTimeUtc(source)
-        var cached ValueTuple[DateTime, List[FileEntry]]
-        var found bool
-
-        lock gate {
-            found = listings.TryGetValue(source, out cached)
-        }
-
-        if found && cached.Item1 == modified {
-            for entry in cached.Item2 {
-                if cancelled?.Invoke() == true {
-                    throw OperationCanceledException()
-                }
-
-                AddEntry(snapshot, names, source, prefix, entry.Name, entry.Size, entry.Modified, showHidden)
-            }
-
-            return snapshot
-        }
-
-        let entries = List[FileEntry]()
-
-        if source.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) {
-            using let archive = ZipFile.OpenRead(source)
-
-            for entry in archive.Entries {
-                if cancelled?.Invoke() == true {
-                    throw OperationCanceledException()
-                }
-
-                AddEntry(
-                    snapshot,
-                    names,
-                    source,
-                    prefix,
-                    entry.FullName,
-                    entry.Length,
-                    entry.LastWriteTime.DateTime,
-                    showHidden,
-                    entries
-                )
-            }
-        } else {
-            using let input = File.OpenRead(source)
-            using let stream Stream = source.EndsWith(".tar", StringComparison.OrdinalIgnoreCase)
-            ? input: GZipStream(input, CompressionMode.Decompress, true)
-            using let reader = TarReader(stream, true)
-
-            while let entry = reader.GetNextEntry() {
-                if cancelled?.Invoke() == true {
-                    throw OperationCanceledException()
-                }
-
-                if entry.EntryType == TarEntryType.GlobalExtendedAttributes {
-                    continue
-                }
-
-                AddEntry(
-                    snapshot,
-                    names,
-                    source,
-                    prefix,
-                    entry.Name,
-                    entry.Length,
-                    entry.ModificationTime.DateTime,
-                    showHidden,
-                    entries
-                )
-            }
-        }
-
-        if entries.Count <= ListingCacheLimit {
-            lock gate {
-                if active.Contains(source) {
-                    listings[source] = ValueTuple[DateTime, List[FileEntry]](modified, entries)
-                }
-            }
-        }
-
-        return snapshot
-    }
-
-    private func AddEntry(
-        snapshot DirectorySnapshot,
-        names HashSet[string],
-        source string,
-        prefix string,
-        name string,
-        size int64,
-        modified DateTime,
-        showHidden bool,
-        cache List[FileEntry]? = nil
-    ) {
-        let normalized = Path.GetRelativePath(source, EntryPath(source, name))
-
-        if let entries = cache {
-            if entries.Count <= ListingCacheLimit {
-                entries.Add(FileEntry{Name: name, Size: size, Modified: modified})
-            }
-        }
-
-        if normalized == "." {
-            return
-        }
-
-        if !normalized.StartsWith(prefix, StringComparison.Ordinal) {
-            return
-        }
-
-        let relative = normalized.Substring(prefix.Length)
-        let slash = relative.IndexOf('/')
-        let directory = slash >= 0 || name.Replace('\\', '/').EndsWith('/')
-        let child = slash < 0 ? relative: relative.Substring(0, slash)
-
-        if child == "" || (!showHidden && child.StartsWith('.')) || !names.Add(child) {
-            return
-        }
-
-        snapshot.Entries.Add(
-            FileEntry{
-                Name: child,
-                FullPath: Path.Combine(snapshot.DirectoryPath, child),
-                IsDirectory: directory,
-                Size: directory ? 0: size,
-                Modified: modified,
-                Kind: directory ? "Folder": Path.GetExtension(child).TrimStart('.'),
-            }
-        )
-    }
-
     internal func Preview(path string, cancelled Func[bool]? = nil) string {
         let source = Source(path)
 
@@ -380,8 +253,7 @@ class ArchiveService {
                     previews.Remove(previous)
                 }
 
-                Directory.CreateDirectory(root)
-                File.SetUnixFileMode(root, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute)
+                Directory.CreateDirectory(root, UnixFileMode(OwnerFullAccess))
                 previews[path] = target
             }
             let name = Path.GetRelativePath(source, path)
@@ -511,8 +383,8 @@ class ArchiveService {
         let root = Path.Combine(staging, name)
 
         try {
+            Directory.CreateDirectory(staging, UnixFileMode(OwnerFullAccess))
             Directory.CreateDirectory(root)
-            File.SetUnixFileMode(staging, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute)
             let selected = source == archive ? "": Path.GetRelativePath(archive, source)
             Unpack(archive, root, selected)
             let entries = Directory.GetFileSystemEntries(root)

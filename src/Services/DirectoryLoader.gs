@@ -40,6 +40,8 @@ class DirectoryLoader {
         for queue in views.Values {
             queue.Close()
         }
+
+        controller.Archives.Close()
     }
 
     internal func AddPane(pane BrowserPane) {

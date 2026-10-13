@@ -91,35 +91,8 @@ class BrowserController {
     }
 
     internal func CanRun(action string) bool {
-        if ActivePane().Kind == LocationKind.Archive &&
-            (
-            action == "Rename" ||
-                action == "Trash" ||
-                action == "Cut" ||
-                action == "Copy" ||
-                action == "Paste" ||
-                action == "NewFolder" ||
-                action == "Compress" ||
-                action == "Properties" ||
-                action == "OpenTerminal" ||
-                action == "OpenTerminalHere" ||
-                action == "ToggleBookmark"
-        ) {
+        if !Operations.CanUseArchive(action) {
             return false
-        }
-
-        if action == "Extract" || action == "Compress" {
-            if InTrashView || InRecent || ActivePane().SelectedPaths.Count == 0 {
-                return false
-            }
-
-            if action == "Extract" && ActivePane().Kind != LocationKind.Archive {
-                for source in ActivePane().SelectionPaths() {
-                    if !ArchiveService.Supported(source) {
-                        return false
-                    }
-                }
-            }
         }
 
         if InTrashView {
@@ -522,18 +495,12 @@ class BrowserController {
         )
     }
 
-    internal func CanDrag(paneIndex int32) bool -> Operations.AcceptingOperations &&
-        paneIndex >= 0 &&
-        paneIndex < VisiblePaneCount &&
-        Pane(paneIndex).Kind != LocationKind.Trash && Pane(paneIndex).Kind != LocationKind.Archive
+    internal func CanDrag(paneIndex int32) bool -> Operations.CanDrag(paneIndex)
 
-    internal func CanDrop(destination string) bool -> Operations.AcceptingOperations && !DropBlocked(destination)
+    internal func CanDrop(destination string) bool -> Operations.CanDrop(destination)
 
-    internal func QueueFileDrop(sources List[string], destination string, copy bool) {
-        if CanDrop(destination) && sources.Count > 0 {
-            Operations.StartOperation(copy ? OperationKind.Copy: OperationKind.Move, sources, destination, "")
-        }
-    }
+    internal func QueueFileDrop(sources List[string], destination string, copy bool) ->
+    Operations.Drop(sources, destination, copy)
 
     internal func DragTooLarge() {
         Status = "Selection is too large to drag into another app"
@@ -580,38 +547,9 @@ class BrowserController {
         }
     }
 
-    internal func Extract(destination string) {
-        var folder = ActivePane().DirectoryPath
+    internal func Extract(destination string) -> Operations.Extract(destination)
 
-        if ActivePane().Kind == LocationKind.Archive {
-            folder = Path.GetDirectoryName(Archives.Source(folder)) ?? folder
-        }
-
-        try {
-            if destination.StartsWith('~') {
-                throw ArgumentException("Use a folder path without '~'")
-            }
-
-            Operations.StartOperation(
-                OperationKind.Extract,
-                ActivePane().SelectionPaths(),
-                Path.GetFullPath(destination, folder),
-                ""
-            )
-        } catch (failure ArgumentException) {
-            Status = "Extract failed for " + destination + ": " + failure.Message
-            Notify()
-        }
-    }
-
-    internal func Compress(name string) {
-        Operations.StartOperation(
-            OperationKind.Compress,
-            ActivePane().SelectionPaths(),
-            ActivePane().DirectoryPath,
-            name
-        )
-    }
+    internal func Compress(name string) -> Operations.Compress(name)
 
     internal func Dispose() {
         if disposed {
@@ -624,7 +562,6 @@ class BrowserController {
         Directories.Close()
         Operations.Close()
         Previews.Close()
-        Archives.Close()
     }
 
     internal func CompleteClipboardMove(request OperationRequest, results List[OperationResult]) {
@@ -648,14 +585,6 @@ class BrowserController {
             Operations.StartOperation(kind, sources, "", "")
         }
     }
-
-    private func DropBlocked(destination string) bool ->
-    Archives.Source(destination) != "" || Locations.Resolve(
-        destination,
-        TrashDirectory,
-        out var fullPath,
-        out var atTrashRoot
-    ) != LocationKind.Folder
 
     internal func ResetTypeSelect() {
         resetTypeSelect()
