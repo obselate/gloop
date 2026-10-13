@@ -1,6 +1,7 @@
 package gloop
 
 import System
+import System.IO
 
 data struct FileProperties {
     internal var Count int32
@@ -15,6 +16,8 @@ data struct FileProperties {
     internal var Accessed DateTime
     internal var Created DateTime
     internal var Permissions string = ""
+    internal var Mode UnixFileMode
+    internal var IsLink bool
     internal var Owner string = ""
     internal var Group string = ""
     internal var LinkTarget string = ""

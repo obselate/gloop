@@ -3,6 +3,7 @@ package gloop
 import Goo
 import System
 import System.Collections.Generic
+import System.IO
 
 class FileOperationQueue {
     private const QueueLimit int32 = 16
@@ -97,12 +98,15 @@ class FileOperationQueue {
         source string,
         destination string,
         name string,
-        clipboardVersion int32 = -1
+        clipboardVersion int32 = -1,
+        completed Action[List[OperationResult]]? = nil,
+        permission UnixFileMode = UnixFileMode.None,
+        enabled bool = false
     ) {
         let sources = List[string]()
         sources.Add(source)
 
-        StartOperation(kind, sources, destination, name, clipboardVersion)
+        StartOperation(kind, sources, destination, name, clipboardVersion, completed, permission, enabled)
     }
 
     internal func StartOperation(
@@ -110,7 +114,10 @@ class FileOperationQueue {
         sources List[string],
         destination string,
         name string,
-        clipboardVersion int32 = -1
+        clipboardVersion int32 = -1,
+        completed Action[List[OperationResult]]? = nil,
+        permission UnixFileMode = UnixFileMode.None,
+        enabled bool = false
     ) {
         if controller.IsDisposed || closeRequested {
             return
@@ -140,6 +147,9 @@ class FileOperationQueue {
                 Destination: destination,
                 Name: name,
                 ClipboardVersion: clipboardVersion,
+                Completed: completed,
+                Permission: permission,
+                Enabled: enabled,
             }
         )
 
@@ -240,6 +250,8 @@ class FileOperationQueue {
             }
         }
 
+        request.Completed?(results)
+
         controller.Notify()
     }
 
@@ -269,6 +281,11 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                     case OperationKind.Restore: trash.Restore(source)
                     case OperationKind.Delete: trash.Delete(source)
                     case OperationKind.Empty: trash.Empty()
+                    case OperationKind.Permissions: PropertiesService.SetPermission(
+                        source,
+                        request.Permission,
+                        request.Enabled
+                    )
                     default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
                 }
             } catch (failure Exception) {
