@@ -96,7 +96,7 @@ class BrowserController {
         }
 
         if InTrashView {
-            if action == "NewFolder" || action == "Rename" || action == "Copy"
+            if action == "NewFolder" || action == "Copy"
             || action == "Cut" || action == "Paste" || action == "Trash" {
                 return false
             }

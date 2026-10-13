@@ -42,6 +42,7 @@ class FileOperationQueue {
         if pane.Kind == LocationKind.Archive &&
             (
             action == "Rename" ||
+                action == "BulkRename" ||
                 action == "Trash" ||
                 action == "Cut" ||
                 action == "Copy" ||
@@ -54,6 +55,10 @@ class FileOperationQueue {
                 action == "ToggleBookmark"
         ) {
             return false
+        }
+
+        if action == "Rename" || action == "BulkRename" {
+            return pane.Kind != LocationKind.Trash && pane.SelectedPaths.Count > 0 && AcceptingOperations
         }
 
         if action == "Extract" || action == "Compress" {
