@@ -6,11 +6,14 @@ import System.Globalization
 import System.IO
 
 class RecentService {
+    private const SourceByteLimit int64 = 16777216
+    private const EntryLimit int32 = 1000
+
     internal func List(limit int32) List[FileEntry] {
         let entries = System.Collections.Generic.List[FileEntry]()
         try {
             let source = Path.Combine(Xdg.UserDirectory("XDG_DATA_HOME", ".local/share"), "recently-used.xbel")
-            if limit <= 0 || FileInfo(source).Length > 16777216 {
+            if limit <= 0 || FileInfo(source).Length > SourceByteLimit {
                 return entries
             }
             let text = File.ReadAllText(source)
@@ -39,7 +42,7 @@ class RecentService {
                 }
             )
             for path in paths {
-                if entries.Count >= Math.Min(limit, 1000) {
+                if entries.Count >= Math.Min(limit, EntryLimit) {
                     break
                 }
                 try {

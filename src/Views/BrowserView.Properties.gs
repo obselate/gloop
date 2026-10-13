@@ -37,7 +37,7 @@ partial class BrowserView {
                 Rebuild()
             }
         )
-        OpenDialog("Properties", "")
+        OpenDialog(DialogKind.Properties, "")
     }
 
     private func PropertiesDialog() Blob {
@@ -70,9 +70,14 @@ partial class BrowserView {
         }
         rows.Add(PropertiesRow("Size", propertiesStage == 2 ? SizeText(info): "Calculating…"))
         if single {
-            rows.Add(PropertiesRow("Modified", propertiesStage >= 1 ? DateText(info.Modified): wait))
+            rows.Add(
+                PropertiesRow(
+                    "Modified",
+                    propertiesStage >= 1 ? FileEntry.FormatDate(info.Modified, CultureInfo.InvariantCulture): wait
+                )
+            )
             if propertiesStage >= 1 && info.Created != DateTime.MinValue {
-                rows.Add(PropertiesRow("Created", DateText(info.Created)))
+                rows.Add(PropertiesRow("Created", FileEntry.FormatDate(info.Created, CultureInfo.InvariantCulture)))
             }
             rows.Add(PropertiesRow("Permissions", propertiesStage >= 1 ? info.Permissions: wait))
             rows.Add(PropertiesRow("Owner / Group", propertiesStage >= 1 ? info.Owner + " / " + info.Group: wait))
@@ -81,7 +86,7 @@ partial class BrowserView {
             rows.Add(Ui.ErrorText(info.Error, p))
         }
         return DialogShell.Build(
-            dialog,
+            DialogTitle(dialog),
             DialogShell.ScrollColumn(rows.ToArray(), p, 6),
             Container{
                 FlexDirection: FlexDirection.Row,
@@ -120,6 +125,4 @@ partial class BrowserView {
         }
         return info.Complete ? text: text + " (incomplete)"
     }
-
-    private func DateText(value DateTime) string -> value.ToString("dd MMM yyyy, HH:mm", CultureInfo.InvariantCulture)
 }

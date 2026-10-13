@@ -6,6 +6,8 @@ import System.Diagnostics
 import System.IO
 
 class TerminalService {
+    private const StartupCheckMilliseconds int32 = 200
+
     internal func Open(directory string) string {
         try {
             let path = Path.GetFullPath(directory)
@@ -42,7 +44,7 @@ class TerminalService {
                     }
                     let process = Process.Start(start)
                     if let launched = process {
-                        let failed = launched.WaitForExit(200) && launched.ExitCode != 0
+                        let failed = launched.WaitForExit(StartupCheckMilliseconds) && launched.ExitCode != 0
                         launched.Dispose()
                         if !failed {
                             return ""

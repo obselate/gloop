@@ -13,6 +13,12 @@ data struct FolderCountRequest {
 }
 
 class FolderCountService {
+    private const QueueLimit int32 = 64
+    private const WorkerLimit int32 = 2
+    private const CacheLimit int32 = 4096
+    private const CancellationCheckMask int32 = 1023
+    private const NotifyIntervalMilliseconds int64 = 100
+
     private let window Window
     private let changed Action
     private let gate object = Object()
@@ -40,12 +46,12 @@ class FolderCountService {
                 return count
             }
             if queued.Add(key) {
-                if pending.Count >= 64 {
+                if pending.Count >= QueueLimit {
                     queued.Remove(pending[0].Key)
                     pending.RemoveAt(0)
                 }
                 pending.Add(FolderCountRequest{Key: key, Path: entry.FullPath, ShowHidden: showHidden})
-                if workers < 2 {
+                if workers < WorkerLimit {
                     workers++
                     started = true
                 }
@@ -82,7 +88,7 @@ class FolderCountService {
             }
             for item in enumeration {
                 count++
-                if (count & 1023) == 0 && isClosed() {
+                if (count & CancellationCheckMask) == 0 && isClosed() {
                     return
                 }
             }
@@ -94,13 +100,13 @@ class FolderCountService {
             if closed {
                 return
             }
-            if counts.Count >= 4096 {
+            if counts.Count >= CacheLimit {
                 counts.Clear()
             }
             counts[request.Key] = count
             queued.Remove(request.Key)
             let now = Environment.TickCount64
-            if !posted && (pending.Count == 0 || now - lastPost >= 100) {
+            if !posted && (pending.Count == 0 || now - lastPost >= NotifyIntervalMilliseconds) {
                 posted = true
                 lastPost = now
                 notify = true

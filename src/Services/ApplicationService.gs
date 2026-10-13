@@ -6,6 +6,8 @@ import System.Diagnostics
 import System.IO
 
 class ApplicationService {
+    private const TextProbeBytes int32 = 8192
+
     private let gate object = Object()
     private var mime MimeDatabase?
 
@@ -146,7 +148,7 @@ class ApplicationService {
         if FileInfo(path).Length == 0 {
             return true
         }
-        let buffer = [8192]uint8
+        let buffer = [TextProbeBytes]uint8
         using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
         let count = stream.Read(buffer, 0, buffer.Length)
         return TextContent.IsText(buffer, count, count < buffer.Length)

@@ -10,6 +10,22 @@ import System.IO
 partial class BrowserView {
     private let dialogButtons Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle]()
 
+    private func DialogTitle(kind DialogKind) string -> switch kind {
+        case DialogKind.Preferences: "Preferences"
+        case DialogKind.DesktopSetup: "Desktop setup"
+        case DialogKind.Properties: "Properties"
+        case DialogKind.Bookmarks: "Bookmarks"
+        case DialogKind.OpenLocation: "Open location"
+        case DialogKind.FilterFiles: "Filter files"
+        case DialogKind.NewFolder: "New folder"
+        case DialogKind.Rename: "Rename"
+        case DialogKind.MoveToTrash: "Move to Trash"
+        case DialogKind.DeletePermanently: "Delete permanently"
+        case DialogKind.EmptyTrash: "Empty Trash"
+        case DialogKind.ReplaceFile: "Replace file"
+        default: ""
+    }
+
     private func DialogButton(label string, action Action, p Palette, primary bool = false) Blob {
         if !dialogButtons.TryGetValue(label, out var handle) {
             handle = ElementHandle()
@@ -20,15 +36,15 @@ partial class BrowserView {
 
     private func Dialog() Blob {
         let p = palette
-        if dialog == "Desktop setup" {
+        if dialog == DialogKind.DesktopSetup {
             return SetupDialog()
         }
-        if dialog == "Properties" {
+        if dialog == DialogKind.Properties {
             return PropertiesDialog()
         }
-        if dialog == "Bookmarks" {
+        if dialog == DialogKind.Bookmarks {
             return DialogShell.Build(
-                dialog,
+                DialogTitle(dialog),
                 BookmarkChoices(),
                 Container{FlexDirection: FlexDirection.Row, Gap: 8, DialogButton("Close", () -> CloseDialog(), p)},
                 dialogHandle,
@@ -43,7 +59,7 @@ partial class BrowserView {
         let content = DialogContent(p)
         let actions = DialogActions(p)
         return DialogShell.Build(
-            dialog,
+            DialogTitle(dialog),
             content,
             actions,
             dialogHandle,
@@ -52,31 +68,31 @@ partial class BrowserView {
             WidgetKeyBindings.Editing(window?.PlatformInput),
             Host,
             p,
-            if dialog == "Preferences" {
+            if dialog == DialogKind.Preferences {
                 Math.Clamp(width - 80, 360, 600)
-            } else if dialog == "Open location" {
+            } else if dialog == DialogKind.OpenLocation {
                 520
             } else {
                 440
             },
-            dialog == "Preferences" && height < 600,
-            maxHeight: dialog == "Preferences" ? 80: 88
+            dialog == DialogKind.Preferences && height < 600,
+            maxHeight: dialog == DialogKind.Preferences ? 80: 88
         )
     }
 
     private func DialogContent(p Palette) Blob {
         let contents = List[Blob]()
-        if dialog == "Preferences" {
+        if dialog == DialogKind.Preferences {
             contents.Add(PreferencesContent())
-        } else if dialog == "Move to Trash" {
+        } else if dialog == DialogKind.MoveToTrash {
             contents.Add(Text{Content: "Move " + dialogValue + " to Trash?", FontSize: 14, Color: p.Text})
             contents.Add(
                 Text{Content: "You can restore these items from your desktop's Trash.", FontSize: 12, Color: p.Muted}
             )
-        } else if dialog == "Delete permanently" || dialog == "Empty Trash" {
+        } else if dialog == DialogKind.DeletePermanently || dialog == DialogKind.EmptyTrash {
             contents.Add(Text{Content: "Delete " + dialogValue + " permanently?", FontSize: 14, Color: p.Text})
             contents.Add(Text{Content: "This cannot be undone.", FontSize: 12, Color: p.Muted})
-        } else if dialog == "Replace file" {
+        } else if dialog == DialogKind.ReplaceFile {
             contents.Add(
                 Text{Content: "A file already exists at this location. Replace it?", FontSize: 14, Color: p.Text}
             )
@@ -87,7 +103,7 @@ partial class BrowserView {
                     dialogValue,
                     value -> dialogValue = value,
                     (_) -> SubmitDialog(),
-                    dialog,
+                    DialogTitle(dialog),
                     p,
                     handle: dialogInput,
                     autoFocus: true,
@@ -101,7 +117,7 @@ partial class BrowserView {
         }
         let content = Container{
             MinHeight: 0,
-            FlexShrink: dialog == "Preferences" ? 1: 0,
+            FlexShrink: dialog == DialogKind.Preferences ? 1: 0,
             Gap: 14,
             Children: contents.ToArray(),
         }
@@ -110,7 +126,7 @@ partial class BrowserView {
 
     private func DialogActions(p Palette) Blob {
         let buttons = List[Blob]()
-        if dialog == "Preferences" {
+        if dialog == DialogKind.Preferences {
             buttons.Add(DialogButton("Reset " + preferenceTab.ToLowerInvariant(), () -> ResetPreferencesTab(), p))
             buttons.Add(Container{FlexGrow: 1})
             let close = DialogButton("Close", () -> CloseDialog(), p)
@@ -119,16 +135,18 @@ partial class BrowserView {
         } else {
             buttons.Add(DialogButton("Cancel", () -> CloseDialog(), p))
         }
-        if dialog != "Preferences" {
+        if dialog != DialogKind.Preferences {
             buttons.Add(
                 DialogButton(
-                    if dialog == "Move to Trash" || dialog == "Delete permanently" || dialog == "Empty Trash" {
-                        dialog
-                    } else if dialog == "Replace file" {
+                    if dialog == DialogKind.MoveToTrash ||
+                        dialog == DialogKind.DeletePermanently ||
+                        dialog == DialogKind.EmptyTrash {
+                        DialogTitle(dialog)
+                    } else if dialog == DialogKind.ReplaceFile {
                         "Replace"
-                    } else if dialog == "New folder" {
+                    } else if dialog == DialogKind.NewFolder {
                         "Create folder"
-                    } else if dialog == "Open location" {
+                    } else if dialog == DialogKind.OpenLocation {
                         "Open"
                     } else {
                         "Apply"
@@ -165,7 +183,7 @@ partial class BrowserView {
             rows.Add(
                 PlacesSidebar.Bookmark(
                     path,
-                    FolderName(path),
+                    Locations.DisplayName(path, home),
                     Model.ActivePane().DirectoryPath,
                     destination -> {
                         CloseDialog()
@@ -190,7 +208,7 @@ partial class BrowserView {
         )
     }
 
-    private func OpenDialog(kind string, value string) {
+    private func OpenDialog(kind DialogKind, value string) {
         locationEditing = false
         locationFocusPending = false
         dialog = kind
@@ -207,31 +225,31 @@ partial class BrowserView {
         Selection.CancelDescribe()
         focusScope?.Dispose()
         focusScope = nil
-        dialog = ""
+        dialog = DialogKind.None
         dialogError = ""
         preferenceInputs.Clear()
         Rebuild()
     }
 
     private func SubmitDialog() {
-        if dialog == "Replace file" {
+        if dialog == DialogKind.ReplaceFile {
             CloseDialog()
             AcceptChooser(true)
             return
         }
-        if dialog == "New folder" {
+        if dialog == DialogKind.NewFolder {
             Model.CreateFolder(dialogValue)
-        } else if dialog == "Rename" {
+        } else if dialog == DialogKind.Rename {
             Model.Rename(dialogValue)
-        } else if dialog == "Move to Trash" {
+        } else if dialog == DialogKind.MoveToTrash {
             Model.Trash()
-        } else if dialog == "Delete permanently" {
+        } else if dialog == DialogKind.DeletePermanently {
             Model.DeletePermanently()
-        } else if dialog == "Empty Trash" {
+        } else if dialog == DialogKind.EmptyTrash {
             Model.EmptyTrash()
-        } else if dialog == "Filter files" {
+        } else if dialog == DialogKind.FilterFiles {
             Model.SetFilter(dialogValue)
-        } else if dialog == "Open location" {
+        } else if dialog == DialogKind.OpenLocation {
             Model.Navigate(dialogValue)
         }
         CloseDialog()

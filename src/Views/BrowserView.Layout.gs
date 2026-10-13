@@ -66,7 +66,7 @@ partial class BrowserView {
 
     private func PageSize() int32 {
         let list = PaneViewport(Model.ActiveIndex)
-        let tiles = settings.ViewMode == "tiles"
+        let tiles = settings.ViewMode == ViewMode.Tiles
         let rowHeight = if tiles {
             FileTiles.TileHeight + FileTiles.Gap
         } else {

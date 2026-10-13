@@ -4,11 +4,14 @@ import System
 import System.Diagnostics
 
 partial class BrowserView {
+    private const TypeAheadCharacterLimit int32 = 256
+    private const TypeAheadTimeoutMilliseconds int32 = 1000
+
     private var typedPrefix string = ""
     private var typedAt int64
 
     private func TypeSelect(text string) bool {
-        if Model.IsDisposed || text == "" || text.Length > 256 {
+        if Model.IsDisposed || text == "" || text.Length > TypeAheadCharacterLimit {
             return false
         }
         for letter in text {
@@ -22,7 +25,8 @@ partial class BrowserView {
             return false
         }
         let now = Stopwatch.GetTimestamp()
-        let fresh = typedPrefix == "" || Stopwatch.GetElapsedTime(typedAt, now).TotalMilliseconds > 1000
+        let fresh = typedPrefix == "" || Stopwatch.GetElapsedTime(typedAt, now)
+            .TotalMilliseconds > TypeAheadTimeoutMilliseconds
         var repeated = !fresh && text.Length == 1
         if repeated {
             for letter in typedPrefix {
@@ -42,7 +46,7 @@ partial class BrowserView {
         } else {
             pane.Selected
         }
-        if prefix.Length > 256 {
+        if prefix.Length > TypeAheadCharacterLimit {
             prefix = text
             start = pane.Selected + 1
         }

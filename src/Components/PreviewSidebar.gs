@@ -45,7 +45,7 @@ class PreviewSidebar {
                     },
                 }
             }
-            if value.Preview.Kind == "text" {
+            if value.Preview.Kind == PreviewKind.Text {
                 return Cell.Mount[TextPreviewInput, TextPreview](
                     nil,
                     TextPreviewInput{
@@ -56,7 +56,7 @@ class PreviewSidebar {
                     }
                 )
             }
-            if value.Preview.Kind == "loading" {
+            if value.Preview.Kind == PreviewKind.Loading {
                 return Container{
                     FlexGrow: 1,
                     FlexBasis: 0,
@@ -66,7 +66,7 @@ class PreviewSidebar {
                     Ui.Label("Loading…", p.Muted, 12),
                 }
             }
-            if value.Preview.Kind == "error" {
+            if value.Preview.Kind == PreviewKind.Error {
                 return Ui.Empty("image", "Preview unavailable", value.Preview.Error, p)
             }
             guard let entry = value.Entry else {
@@ -81,10 +81,10 @@ class PreviewSidebar {
                 OverflowY: Overflow.Scroll,
                 ScrollbarY: Ui.ScrollbarStyle(p, 8),
                 ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                Ui.Icon(FileTable.IconName(entry), p.Accent, 48),
+                Ui.Icon(FileKinds.IconName(entry), p.Accent, 48),
                 Ui.Label(entry.Kind, p.Text, 13),
                 PropertyRow.Build("Size", value.SizeText, p),
-                PropertyRow.Build("Modified", entry.Modified.ToString("dd MMM yyyy, HH:mm"), p),
+                PropertyRow.Build("Modified", FileEntry.FormatDate(entry.Modified), p),
                 Text{Content: value.Detail, Color: p.Muted, FontSize: 12, TextWrap: TextWrap.Wrap},
             }
         }

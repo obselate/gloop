@@ -15,12 +15,15 @@ data struct MountEntry {
 }
 
 class VolumeService {
+    private const TimeoutSeconds int32 = 10
+    private const SectorBytes int64 = 512
+
     private const BusName string = "org.freedesktop.UDisks2"
     private const BlockInterface string = "org.freedesktop.UDisks2.Block"
     private const DriveInterface string = "org.freedesktop.UDisks2.Drive"
     private const FilesystemInterface string = "org.freedesktop.UDisks2.Filesystem"
     private const MaxVolumes int32 = 64
-    private let Timeout TimeSpan = TimeSpan.FromSeconds(10)
+    private let Timeout TimeSpan = TimeSpan.FromSeconds(TimeoutSeconds)
 
     internal func List() List[Volume] {
         let volumes = System.Collections.Generic.List[Volume]()
@@ -291,7 +294,7 @@ class VolumeService {
         var label = ""
         var bytes int64
         try {
-            bytes = Int64.Parse(File.ReadAllText("/sys/class/block/" + name + "/size").Trim()) * 512
+            bytes = Int64.Parse(File.ReadAllText("/sys/class/block/" + name + "/size").Trim()) * SectorBytes
             label = decode(value(properties, "ID_FS_LABEL_ENC"))
         } catch (failure Exception) { }
         let removable = value(properties, "ID_BUS") == "usb" || value(properties, "ID_INTEGRATION") == "external"
@@ -314,7 +317,7 @@ class VolumeService {
     }
 
     private func sizeName(bytes int64) string {
-        if bytes >= 1048576 {
+        if bytes >= FileSystemService.BytesPerMiB {
             return FileSystemService.FormatSize(bytes, true) + " volume"
         }
         return "Volume"

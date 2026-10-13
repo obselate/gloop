@@ -24,6 +24,7 @@ partial class BrowserView : Cell {
     private let filterHandle ElementHandle = ElementHandle()
     private let dialogHandle ElementHandle = ElementHandle()
     private let dialogInput ElementHandle = ElementHandle()
+    private let home string = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
     private let smoothScrollingRow ElementHandle = ElementHandle()
     private let previewWordWrapRow ElementHandle = ElementHandle()
     private let previewLineNumbersRow ElementHandle = ElementHandle()
@@ -48,7 +49,7 @@ partial class BrowserView : Cell {
     private var locationEditing bool
     private var locationFocusPending bool
     private var locationText string = ""
-    private var dialog string = ""
+    private var dialog DialogKind = DialogKind.None
     private var dialogValue string = ""
     private var dialogError string = ""
     private var notice string
@@ -69,8 +70,8 @@ partial class BrowserView : Cell {
                 (Math.Abs(width - metrics.ContentBox.Width) > 1 || Math.Abs(height - metrics.ContentBox.Height) > 1) {
                 width = metrics.ContentBox.Width
                 height = metrics.ContentBox.Height
-                if locationEditing && dialog == "" && PaneWidth(Model.ActiveIndex) < 360 {
-                    OpenDialog("Open location", locationText)
+                if locationEditing && dialog == DialogKind.None && PaneWidth(Model.ActiveIndex) < 360 {
+                    OpenDialog(DialogKind.OpenLocation, locationText)
                 } else {
                     Rebuild()
                 }
@@ -78,20 +79,20 @@ partial class BrowserView : Cell {
         }
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
-                let textEntry = dialog != "Preferences" &&
-                    dialog != "Desktop setup" &&
-                    dialog != "Move to Trash" &&
-                    dialog != "Delete permanently" &&
-                    dialog != "Empty Trash" &&
-                    dialog != "Bookmarks" &&
-                    dialog != "Properties" &&
-                    dialog != "Replace file"
+                let textEntry = dialog != DialogKind.Preferences &&
+                    dialog != DialogKind.DesktopSetup &&
+                    dialog != DialogKind.MoveToTrash &&
+                    dialog != DialogKind.DeletePermanently &&
+                    dialog != DialogKind.EmptyTrash &&
+                    dialog != DialogKind.Bookmarks &&
+                    dialog != DialogKind.Properties &&
+                    dialog != DialogKind.ReplaceFile
                 focusScope = dialogHandle.BeginFocusScope(
                     FocusScopeOptions{
                         Modal: true,
                         InitialFocus: if textEntry {
                             dialogInput
-                        } else if dialog == "Desktop setup" {
+                        } else if dialog == DialogKind.DesktopSetup {
                             setupChoiceHandle
                         } else {
                             dialogHandle
@@ -100,7 +101,9 @@ partial class BrowserView : Cell {
                 )
                 if textEntry {
                     dialogInput.Focus()
-                    if dialog == "Rename" || dialog == "Filter files" || dialog == "Open location" {
+                    if dialog == DialogKind.Rename ||
+                        dialog == DialogKind.FilterFiles ||
+                        dialog == DialogKind.OpenLocation {
                         Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
                     }
                 }
@@ -151,7 +154,7 @@ partial class BrowserView : Cell {
                 settingsService,
                 error -> {
                     notice = error
-                    if dialog == "Preferences" {
+                    if dialog == DialogKind.Preferences {
                         dialogError = error
                     }
                     Rebuild()
@@ -193,10 +196,10 @@ partial class BrowserView : Cell {
 
     internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
 
-    private func PaneFocus(index int32) ElementHandle -> settings.ViewMode == "tiles" ?
+    private func PaneFocus(index int32) ElementHandle -> settings.ViewMode == ViewMode.Tiles ?
     paneViews[index].TileFocus: paneViews[index].ListFocus
 
-    private func PaneViewport(index int32) ElementHandle -> settings.ViewMode == "tiles" ?
+    private func PaneViewport(index int32) ElementHandle -> settings.ViewMode == ViewMode.Tiles ?
     paneViews[index].TileViewport: paneViews[index].ListViewport
 
     private func SyncPaneViews() {
@@ -298,7 +301,7 @@ partial class BrowserView : Cell {
         children.Add(chrome)
         children.Add(main)
         children.Add(chooser != nil ? ChooserBar(): StatusBar())
-        if dialog != "" {
+        if dialog != DialogKind.None {
             children.Add(Dialog())
         }
         children.Add(ContextMenu())
@@ -433,6 +436,7 @@ partial class BrowserView : Cell {
                 Host,
                 p,
                 Model.Places.StandardPlaces,
+                home,
                 destination -> FileDropTarget(destination),
                 dropPath,
                 chooser == nil,
@@ -471,19 +475,5 @@ partial class BrowserView : Cell {
         )
         main.Key = "main"
         return main
-    }
-
-    private func FolderName(path string) string {
-        var directory = path
-        while directory.Length > 1 && Path.EndsInDirectorySeparator(directory) {
-            directory = Path.TrimEndingDirectorySeparator(directory)
-        }
-        if directory == "/" {
-            return "File system"
-        }
-        if directory == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) {
-            return "Home"
-        }
-        return Path.GetFileName(directory)
     }
 }

@@ -5,6 +5,8 @@ import System.IO
 import System.Text
 
 class TrashService {
+    private const InfoByteLimit int64 = 65536
+
     private let operations FileOperationService = FileOperationService()
 
     internal func Trash(source string) OperationResult {
@@ -169,7 +171,7 @@ class TrashService {
         var item = TrashItem{TrashPath: source}
         try {
             let infoPath = infoFile(source)
-            if FileInfo(infoPath).Length > 65536 {
+            if FileInfo(infoPath).Length > InfoByteLimit {
                 return item
             }
             item = TrashInfo.Parse(source, File.ReadLines(infoPath))

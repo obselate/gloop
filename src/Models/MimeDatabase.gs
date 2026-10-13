@@ -4,6 +4,9 @@ import System
 import System.Collections.Generic
 
 class MimeDatabase {
+    private const GlobWeightScale int32 = 4096
+    private const AncestorLimit int32 = 16
+
     private let globs List[MimeGlob] = List[MimeGlob]()
     private let canonical Dictionary[string, string] = Dictionary[string, string]()
     private let synonyms Dictionary[string, List[string]] = Dictionary[string, List[string]]()
@@ -56,7 +59,7 @@ class MimeDatabase {
         var best = -1
         for glob in globs {
             let sensitive = glob.Folded == ""
-            let score = (glob.Weight * 4096 + glob.Pattern.Length) * 2 + (sensitive ? 1: 0)
+            let score = (glob.Weight * GlobWeightScale + glob.Pattern.Length) * 2 + (sensitive ? 1: 0)
             if score > best && matches(sensitive ? glob.Pattern: glob.Folded, sensitive ? fileName: lower) {
                 found = glob.Type
                 best = score
@@ -79,7 +82,7 @@ class MimeDatabase {
     internal func Ancestors(name string) List[string] {
         let found = List[string]{canonicalName(name)}
         var index = 0
-        while index < found.Count && found.Count < 16 {
+        while index < found.Count && found.Count < AncestorLimit {
             let current = found[index]
             index++
             if parents.TryGetValue(current, out var direct) {

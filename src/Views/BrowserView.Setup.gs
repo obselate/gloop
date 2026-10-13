@@ -30,7 +30,7 @@ partial class BrowserView {
             error = failure.Message
         }
         setupFirstStep = setupStep
-        OpenDialog("Desktop setup", "")
+        OpenDialog(DialogKind.DesktopSetup, "")
         dialogError = error
     }
 
@@ -72,7 +72,7 @@ partial class BrowserView {
             actions.Children = []Blob{done}
         }
         return DialogShell.Build(
-            "Desktop setup",
+            DialogTitle(DialogKind.DesktopSetup),
             QuestionPrompt.Build(question, detail, progress, dialogError, setupBusy, p),
             actions,
             dialogHandle,
@@ -130,7 +130,7 @@ partial class BrowserView {
                     Rebuild()
                     Host.Post(
                         () -> {
-                            if dialog == "Desktop setup" && !setupBusy {
+                            if dialog == DialogKind.DesktopSetup && !setupBusy {
                                 setupChoiceHandle.Focus()
                             }
                         }

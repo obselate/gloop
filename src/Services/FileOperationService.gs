@@ -6,6 +6,8 @@ import System.IO
 import System.Runtime.InteropServices
 
 unsafe class FileOperationService {
+    private const SymlinkDepthLimit int32 = 32
+
     shared {
         private const RenameNoReplace uint32 = 1u
         private const CrossDeviceError int32 = 18
@@ -135,7 +137,7 @@ unsafe class FileOperationService {
     }
 
     private func physicalPath(path string, depth int32) string {
-        if depth > 32 {
+        if depth > SymlinkDepthLimit {
             throw IOException("Too many symbolic links in path")
         }
         let fullPath = Path.GetFullPath(path)

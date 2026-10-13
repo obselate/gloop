@@ -21,7 +21,7 @@ partial class BrowserView {
             }
             if room != metrics.ContentBox.Width {
                 room = metrics.ContentBox.Width
-                if settings.ViewMode == "tiles" {
+                if settings.ViewMode == ViewMode.Tiles {
                     Rebuild()
                 }
             }
@@ -64,7 +64,7 @@ partial class BrowserView {
                 Path: pane.DirectoryPath,
                 Kind: pane.Kind,
                 Trash: Model.TrashDirectory,
-                Home: Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Home: home,
                 Width: crumbWidth,
                 Window: Host,
                 Palette: p,
@@ -199,7 +199,7 @@ partial class BrowserView {
                 },
                 Host,
                 p,
-                settings.ViewMode == "list"
+                settings.ViewMode == ViewMode.List
             )
         )
         tools.Add(
@@ -212,7 +212,7 @@ partial class BrowserView {
                 },
                 Host,
                 p,
-                settings.ViewMode == "tiles"
+                settings.ViewMode == ViewMode.Tiles
             )
         )
         if chooser == nil {
@@ -222,8 +222,7 @@ partial class BrowserView {
                     "Open terminal",
                     () -> {
                         Model.SetActive(index)
-                        notice = ""
-                        Model.OpenTerminal(false)
+                        Invoke("OpenTerminalHere")
                     },
                     Host,
                     p,
@@ -256,7 +255,7 @@ partial class BrowserView {
                 ShowType: settings.ShowTypeColumn,
                 SizeText: FileSizeText,
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
-                Tiles: settings.ViewMode == "tiles",
+                Tiles: settings.ViewMode == ViewMode.Tiles,
                 TileWidth: TileWidth(index),
                 Active: active,
                 AutoFocus: active && !(chooser?.Saving ?? false),
@@ -342,7 +341,7 @@ partial class BrowserView {
         let pane = state.Pane
         if pane.Selected >= 0 {
             let list = PaneViewport(index)
-            let tiles = settings.ViewMode == "tiles"
+            let tiles = settings.ViewMode == ViewMode.Tiles
             let row = if tiles {
                 pane.Selected / TileColumns(index)
             } else {
@@ -378,7 +377,7 @@ partial class BrowserView {
 
     private func EditLocation() {
         if PaneWidth(Model.ActiveIndex) < 360 {
-            OpenDialog("Open location", Model.ActivePane().DirectoryPath)
+            OpenDialog(DialogKind.OpenLocation, Model.ActivePane().DirectoryPath)
             return
         }
         locationText = Model.ActivePane().DirectoryPath

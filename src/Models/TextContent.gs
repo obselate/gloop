@@ -5,6 +5,8 @@ import System.Buffers
 import System.Text
 
 class TextContent {
+    private const CancellationCheckMask int32 = 65535
+
     shared {
         private let Utf8 UTF8Encoding = UTF8Encoding(false, true)
 
@@ -15,7 +17,7 @@ class TextContent {
             cancelled Func[bool]? = nil
         ) bool {
             for index in 0 ... count {
-                if (index & 65535) == 0 && cancelled?.Invoke() == true {
+                if (index & CancellationCheckMask) == 0 && cancelled?.Invoke() == true {
                     throw OperationCanceledException()
                 }
                 let value = buffer[index]

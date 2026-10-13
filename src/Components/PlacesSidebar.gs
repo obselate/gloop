@@ -20,6 +20,7 @@ class PlacesSidebar {
             window Window,
             p Palette,
             standardPlaces IReadOnlyList[KeyValuePair[string, string]],
+            home string,
             drop Func[string, DropTarget]? = nil,
             dropPath string = "",
             showPreferences bool = true,
@@ -44,6 +45,7 @@ class PlacesSidebar {
                 bookmarkKey,
                 window,
                 p,
+                home,
                 drop,
                 dropPath,
                 bookmarkDrop,
@@ -136,6 +138,7 @@ class PlacesSidebar {
             bookmarkKey string,
             window Window,
             p Palette,
+            home string,
             drop Func[string, DropTarget]?,
             dropPath string,
             bookmarkDrop Func[int32, DropTarget]?,
@@ -166,11 +169,7 @@ class PlacesSidebar {
             }
             for index in 0 ... bookmarks.Count {
                 let bookmark = bookmarks[index]
-                let name = if bookmark == "/" {
-                    "File system"
-                } else {
-                    Path.GetFileName(bookmark)
-                }
+                let name = Locations.DisplayName(bookmark, home)
                 if let insert = bookmarkDrop {
                     saved.Children.Add(
                         DropInsertion.Build(

@@ -100,6 +100,7 @@ class BrowserController {
         if InRecent &&
             (
             action == "NewFolder" || action == "Paste" || action == "ToggleBookmark"
+            || action == "OpenTerminalHere"
             || (action == "OpenTerminal" && !(ActivePane().SingleSelectedEntry()?.IsDirectory ?? false))
         ) {
             return false
@@ -113,6 +114,7 @@ class BrowserController {
         }
         if ActivePane().DirectoryPath == "" || ActivePane().Error != "" {
             return action != "OpenTerminal" &&
+                action != "OpenTerminalHere" &&
                 (
                 !empty || (action != "NewFolder" && action != "Paste" && action != "CopyPath" && action != "Properties")
             )
@@ -124,7 +126,7 @@ class BrowserController {
 
     internal func Start(path string, selectedPath string = "") {
         for pane in Panes {
-            Directories.NavigateTo(path, pane, "push", -1, pane == ActivePane() ? selectedPath: "")
+            Directories.NavigateTo(path, pane, DirectoryMode.Push, -1, pane == ActivePane() ? selectedPath: "")
         }
     }
 
@@ -134,7 +136,7 @@ class BrowserController {
         } else {
             paneIndex
         }
-        Directories.NavigateTo(path, Pane(index), "push", -1, "")
+        Directories.NavigateTo(path, Pane(index), DirectoryMode.Push, -1, "")
     }
 
     internal func Back() {
@@ -143,7 +145,7 @@ class BrowserController {
             Directories.NavigateTo(
                 pane.History[pane.HistoryIndex - 1],
                 pane,
-                "history",
+                DirectoryMode.History,
                 pane.HistoryIndex - 1,
                 pane.DirectoryPath
             )
@@ -153,7 +155,13 @@ class BrowserController {
     internal func Forward() {
         let pane = ActivePane()
         if pane.CanForward() {
-            Directories.NavigateTo(pane.History[pane.HistoryIndex + 1], pane, "history", pane.HistoryIndex + 1, "")
+            Directories.NavigateTo(
+                pane.History[pane.HistoryIndex + 1],
+                pane,
+                DirectoryMode.History,
+                pane.HistoryIndex + 1,
+                ""
+            )
         }
     }
 
@@ -168,7 +176,7 @@ class BrowserController {
         }
         let parent = Path.GetDirectoryName(path)
         if parent != nil && parent != path {
-            Directories.NavigateTo(parent, ActivePane(), "push", -1, path)
+            Directories.NavigateTo(parent, ActivePane(), DirectoryMode.Push, -1, path)
         }
     }
 
@@ -177,7 +185,7 @@ class BrowserController {
             return
         }
         if let directory = Path.GetDirectoryName(entry.FullPath) {
-            Directories.NavigateTo(directory, ActivePane(), "push", -1, entry.FullPath)
+            Directories.NavigateTo(directory, ActivePane(), DirectoryMode.Push, -1, entry.FullPath)
         }
     }
 
@@ -186,7 +194,7 @@ class BrowserController {
         for pane in Panes {
             let path = pane.DirectoryPath
             if path == mountPath || path.StartsWith(mountPath.TrimEnd('/') + "/", StringComparison.Ordinal) {
-                Directories.NavigateTo(home, pane, "push", -1, "")
+                Directories.NavigateTo(home, pane, DirectoryMode.Push, -1, "")
             }
         }
     }
@@ -197,7 +205,13 @@ class BrowserController {
         let pane = ActivePane()
         if pane.DirectoryPath != "" {
             Previews.RequestReload()
-            Directories.NavigateTo(pane.DirectoryPath, pane, "refresh", pane.HistoryIndex, pane.FocusedPath())
+            Directories.NavigateTo(
+                pane.DirectoryPath,
+                pane,
+                DirectoryMode.Refresh,
+                pane.HistoryIndex,
+                pane.FocusedPath()
+            )
         }
     }
 
@@ -282,8 +296,8 @@ class BrowserController {
         Notify()
     }
 
-    internal func SetViewMode(mode string) {
-        if (mode != "list" && mode != "tiles") || settings.ViewMode == mode {
+    internal func SetViewMode(mode ViewMode) {
+        if (mode != ViewMode.List && mode != ViewMode.Tiles) || settings.ViewMode == mode {
             return
         }
         settings.ViewMode = mode
@@ -329,7 +343,7 @@ class BrowserController {
             }
             let pane = Panes[1]
             if pane.DirectoryPath == "" && ActivePane().DirectoryPath != "" {
-                Directories.NavigateTo(ActivePane().DirectoryPath, pane, "push", -1, "")
+                Directories.NavigateTo(ActivePane().DirectoryPath, pane, DirectoryMode.Push, -1, "")
             }
         } else {
             ActiveIndex = 0
@@ -379,8 +393,11 @@ class BrowserController {
         Notify()
     }
 
-    internal func Sort(column string) {
-        if column != "name" && column != "size" && column != "modified" && column != "kind" {
+    internal func Sort(column SortColumn) {
+        if column != SortColumn.Name &&
+            column != SortColumn.Size &&
+            column != SortColumn.Modified &&
+            column != SortColumn.Kind {
             return
         }
         ResetTypeSelect()

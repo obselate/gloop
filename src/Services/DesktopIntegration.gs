@@ -7,6 +7,10 @@ import System.Runtime.CompilerServices
 import System.Text
 
 internal class DesktopIntegration {
+    private const ToolTimeoutMilliseconds int32 = 10000
+    internal const OutputBufferCharacters int32 = 1024
+    internal const OutputCharacterLimit int32 = 4096
+
     shared {
         internal const AppId string = "io.github.obselate.gloop"
         internal const SystemBinaryPath string = "/usr/bin/gloop"
@@ -181,7 +185,7 @@ internal class DesktopIntegration {
                     if required {
                         go desktopReadOutput(process.StandardOutput, output)
                     }
-                    if !process.WaitForExit(10000) {
+                    if !process.WaitForExit(ToolTimeoutMilliseconds) {
                         process.Kill(true)
                         throw InvalidOperationException(tool + " timed out")
                     }
@@ -212,11 +216,11 @@ internal class DesktopIntegration {
 }
 
 func desktopReadOutput(reader StreamReader, output StringBuilder) {
-    let buffer = [1024]char
+    let buffer = [DesktopIntegration.OutputBufferCharacters]char
     var count = reader.Read(buffer, 0, buffer.Length)
     while count > 0 {
         lock output {
-            output.Append(buffer, 0, Math.Min(count, 4096 - output.Length))
+            output.Append(buffer, 0, Math.Min(count, DesktopIntegration.OutputCharacterLimit - output.Length))
         }
         count = reader.Read(buffer, 0, buffer.Length)
     }

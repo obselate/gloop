@@ -19,7 +19,7 @@ partial class BrowserView {
     }
 
     private func OpenBookmarkContextMenu(path string, point Point) {
-        if dialog != "" || chooser != nil {
+        if dialog != DialogKind.None || chooser != nil {
             return
         }
         contextMenuBookmark = path
@@ -30,13 +30,7 @@ partial class BrowserView {
     }
 
     private func OpenBookmarkKeyboardContextMenu(path string, e KeyEvent, point Point) {
-        let action = settings.ActionFor(
-            e.Key.ToString(),
-            e.Modifiers.Ctrl,
-            e.Modifiers.Alt,
-            e.Modifiers.Shift,
-            e.Modifiers.Super
-        )
+        let action = ActionFor(e)
         if chooser == nil && (action == "ContextMenu" || action == "ContextMenuAlternate") {
             e.PreventDefault()
             e.StopPropagation()
@@ -45,7 +39,7 @@ partial class BrowserView {
     }
 
     private func OpenPathMenu(index int32, paths[]string, point Point) {
-        if dialog != "" {
+        if dialog != DialogKind.None {
             return
         }
         Model.SetActive(index)
@@ -57,7 +51,7 @@ partial class BrowserView {
     }
 
     private func OpenColumnMenu(index int32, point Point) {
-        if dialog != "" {
+        if dialog != DialogKind.None {
             return
         }
         Model.SetActive(index)
@@ -70,7 +64,7 @@ partial class BrowserView {
     }
 
     private func OpenContextMenu(index int32, row int32, point Point) {
-        if dialog != "" {
+        if dialog != DialogKind.None {
             return
         }
         Model.SetActive(index)
@@ -101,7 +95,7 @@ partial class BrowserView {
         }
         let viewport = PaneViewport(index)
         let bounds = viewport.ContentBox
-        let tiles = settings.ViewMode == "tiles"
+        let tiles = settings.ViewMode == ViewMode.Tiles
         let columns = tiles ? TileColumns(index): 1
         let selected = Math.Max(0, pane.Selected)
         let row = selected / columns
@@ -149,7 +143,9 @@ partial class BrowserView {
             )
         } else if contextMenuPaths.Length > 0 {
             for path in contextMenuPaths {
-                items.Add(FileContextMenu.Item("Navigate:" + path, FolderName(path), "folder", "", palette))
+                items.Add(
+                    FileContextMenu.Item("Navigate:" + path, Locations.DisplayName(path, home), "folder", "", palette)
+                )
             }
         } else if contextMenuBookmark != "" {
             items.Add(FileContextMenu.Item("RemoveBookmark", "Remove bookmark", "bookmark_remove", "", palette))
@@ -161,10 +157,7 @@ partial class BrowserView {
                 items.Add(MenuItem{Id: "open-separator", Separator: true})
             }
             items.Add(ContextMenuItem("NewFolder", "New folder", "create_new_folder"))
-            items.Add(ContextMenuItem("Refresh", "Refresh", "refresh"))
-            items.Add(
-                ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden)
-            )
+            FolderMenuItems(items)
         } else if Model.InTrashView {
             if count > 0 {
                 items.Add(ContextMenuItem("Open", "Open", "open_in_new"))
@@ -177,28 +170,14 @@ partial class BrowserView {
             } else {
                 items.Add(ContextMenuItem("EmptyTrash", "Empty Trash", "delete_forever"))
                 items.Add(MenuItem{Id: "trash-separator", Separator: true})
-                items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
-                items.Add(ContextMenuItem("Refresh", "Refresh", "refresh"))
-                items.Add(
-                    ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden)
-                )
-                items.Add(MenuItem{Id: "properties-separator", Separator: true})
-                items.Add(ContextMenuItem("Properties", "Properties", "info"))
+                FolderMenuItems(items)
             }
         } else if count > 0 {
             SelectionMenuItems(items, count)
         } else {
             items.Add(ContextMenuItem("NewFolder", "New folder", "create_new_folder"))
             items.Add(ContextMenuItem("Paste", "Paste", "content_paste", !Model.HasClipboard))
-            items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
-            items.Add(MenuItem{Id: "folder-separator", Separator: true})
-            items.Add(ContextMenuItem("OpenTerminal", "Open terminal here", "terminal"))
-            items.Add(ContextMenuItem("Refresh", "Refresh", "refresh"))
-            items.Add(
-                ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden)
-            )
-            items.Add(MenuItem{Id: "properties-separator", Separator: true})
-            items.Add(ContextMenuItem("Properties", "Properties", "info"))
+            FolderMenuItems(items, terminal: true)
         }
         return Cell.Mount[FileContextMenuInput, FileContextMenu](
             "file-context-menu",
@@ -233,6 +212,22 @@ partial class BrowserView {
                 },
             }
         )
+    }
+
+    private func FolderMenuItems(items List[MenuItem], terminal bool = false) {
+        if chooser == nil {
+            items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
+        }
+        if terminal {
+            items.Add(MenuItem{Id: "folder-separator", Separator: true})
+            items.Add(ContextMenuItem("OpenTerminal", "Open terminal here", "terminal"))
+        }
+        items.Add(ContextMenuItem("Refresh", "Refresh", "refresh"))
+        items.Add(ContextMenuItem("ToggleHidden", "Show hidden files", "visibility_off", false, settings.ShowHidden))
+        if chooser == nil {
+            items.Add(MenuItem{Id: "properties-separator", Separator: true})
+            items.Add(ContextMenuItem("Properties", "Properties", "info"))
+        }
     }
 
     private func ContextMenuItem(

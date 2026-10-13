@@ -76,7 +76,7 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
                 }
             )
         } else {
-            canvas.Children.Add(Ui.FileIcon(FileTable.IconName(entry), p, value.Tile ? 48: 18))
+            canvas.Children.Add(Ui.FileIcon(FileKinds.IconName(entry), p, value.Tile ? 48: 18))
         }
         return canvas
     }

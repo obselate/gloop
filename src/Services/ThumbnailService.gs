@@ -67,10 +67,21 @@ class ThumbnailItem {
 }
 
 class ThumbnailService : IDisposable {
+    private const MaximumEdgePixels int32 = 160
+    private const CacheItemLimit int32 = 128
+    private const QueueLimit int32 = 64
+    private const CacheByteLimit int64 = 16777216
+    private const EncodedImageByteLimit int32 = 268435456
+    private const ImageSidePixelLimit int32 = 16384
+    private const TextByteLimit int32 = 4096
+    private const TextLineLimit int32 = 6
+    private const TextCharacterLimit int32 = 600
+    private const TextColumnLimit int32 = 96
+
     shared {
         internal let ImageLimits ImageDecodeLimits = ImageDecodeLimits{
-            MaxEncodedBytes: 268435456,
-            MaxPixelsPerSide: 16384
+            MaxEncodedBytes: EncodedImageByteLimit,
+            MaxPixelsPerSide: ImageSidePixelLimit
         }
     }
 
@@ -98,7 +109,7 @@ class ThumbnailService : IDisposable {
         if !supported || maxEdge <= 0 {
             return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
         }
-        let edge = Math.Min(maxEdge, 160)
+        let edge = Math.Min(maxEdge, MaximumEdgePixels)
         let key = entry.FullPath + "\0" + entry.Modified.Ticks.ToString() + "\0" + entry.Size.ToString() +
             "\0" +
             edge.ToString()
@@ -109,7 +120,7 @@ class ThumbnailService : IDisposable {
             if !closed {
                 if !items.TryGetValue(key, out item) {
                     makeRoom()
-                    if waiting.Count == 0 && items.Count < 128 && pending.Count < 64 {
+                    if waiting.Count == 0 && items.Count < CacheItemLimit && pending.Count < QueueLimit {
                         item = ThumbnailItem(key, entry, image, edge)
                         items.Add(key, item)
                         pending.Add(item)
@@ -280,7 +291,7 @@ class ThumbnailService : IDisposable {
                     continue
                 }
                 makeRoom()
-                if items.Count >= 128 || pending.Count >= 64 {
+                if items.Count >= CacheItemLimit || pending.Count >= QueueLimit {
                     capacityBlocked = true
                     index++
                     continue
@@ -314,7 +325,7 @@ class ThumbnailService : IDisposable {
     }
 
     private func makeRoom() {
-        while items.Count >= 128 || bytes > 16777216 {
+        while items.Count >= CacheItemLimit || bytes > CacheByteLimit {
             var oldest ThumbnailItem?
             for candidate in items.Values {
                 if candidate
@@ -351,7 +362,7 @@ class ThumbnailService : IDisposable {
     }
 
     private func loadText(item ThumbnailItem) ThumbnailData {
-        let limit = int32(Math.Min(item.Entry.Size, int64(4096)))
+        let limit = int32(Math.Min(item.Entry.Size, int64(TextByteLimit)))
         let buffer = [limit]uint8
         var count int32
         using let stream = FileStream(item.Entry.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
@@ -386,7 +397,7 @@ class ThumbnailService : IDisposable {
         var lines int32 = 0
         var columns int32 = 0
         for character in text {
-            if lines >= 6 || output.Length >= 600 {
+            if lines >= TextLineLimit || output.Length >= TextCharacterLimit {
                 break
             }
             if Char.IsControl(character) && character != '\r' && character != '\n' && character != '\t' {
@@ -399,7 +410,7 @@ class ThumbnailService : IDisposable {
                 output.Append('\n')
                 lines++
                 columns = 0
-            } else if columns < 96 {
+            } else if columns < TextColumnLimit {
                 output.Append(
                     if character == '\t' {
                         ' '

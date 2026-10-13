@@ -72,13 +72,13 @@ open class FileTable : Cell[FileTableInput] {
                         FileTransferUi.Select(pane.VisibleEntries[index], index, value, clicks, ctrl, shift)
                     }
                 },
-                SortColumnId: pane.SortColumn,
+                SortColumnId: ColumnId(pane.SortColumn),
                 SortDirection: if pane.Descending {
                     DataGridSort.Descending
                 } else {
                     DataGridSort.Ascending
                 },
-                OnSort: (column, _) -> value.OnSort(column),
+                OnSort: (column, _) -> value.OnSort(ColumnKind(column)),
                 Height: Percent(100),
                 RowHeight: RowHeight,
                 HeaderHeight: 28,
@@ -155,6 +155,7 @@ open class FileTable : Cell[FileTableInput] {
     private func BuildHeader(column DataGridColumn, value FileTableInput) Blob {
         let pane = value.Pane
         let p = value.Palette
+        let sorted = pane.SortColumn == ColumnKind(column.Id ?? "")
         return Container{
             Width: Percent(100),
             MinWidth: 0,
@@ -180,9 +181,9 @@ open class FileTable : Cell[FileTableInput] {
             },
             Container{
                 FlexDirection: FlexDirection.Row,
-                Gap: pane.SortColumn == column.Id ? 6: 0,
-                Ui.Label(column.Label ?? "", pane.SortColumn == column.Id ? p.Text: p.Muted, 11, 500),
-                Ui.Label(pane.SortColumn != column.Id ? "": pane.Descending ? "↓": "↑", p.Accent, 11, 700),
+                Gap: sorted ? 6: 0,
+                Ui.Label(column.Label ?? "", sorted ? p.Text: p.Muted, 11, 500),
+                Ui.Label(!sorted ? "": pane.Descending ? "↓": "↑", p.Accent, 11, 700),
             },
         }
     }
@@ -205,9 +206,7 @@ open class FileTable : Cell[FileTableInput] {
         }
         let today = column == "modified" && entry.Modified.Date == DateTime.Today
         let text = switch column {
-            case "modified": entry.Modified.ToString(
-                entry.Modified.Date == DateTime.Today ? "'Today' HH:mm": "dd MMM yyyy"
-            )
+            case "modified": FileEntry.FormatDate(entry.Modified, compact: true)
             case "kind": entry.Kind
             default: value.SizeText(entry)
         }
@@ -223,6 +222,20 @@ open class FileTable : Cell[FileTableInput] {
     }
 
     shared {
+        private func ColumnKind(id string) SortColumn -> switch id {
+            case "modified": SortColumn.Modified
+            case "kind": SortColumn.Kind
+            case "size": SortColumn.Size
+            default: SortColumn.Name
+        }
+
+        private func ColumnId(column SortColumn) string -> switch column {
+            case SortColumn.Modified: "modified"
+            case SortColumn.Kind: "kind"
+            case SortColumn.Size: "size"
+            default: "name"
+        }
+
         internal func Empty(
             pane BrowserPane,
             p Palette,
@@ -265,21 +278,6 @@ open class FileTable : Cell[FileTableInput] {
                 },
                 p
             )
-        }
-
-        internal func IconName(entry FileEntry) string {
-            if entry.IsDirectory {
-                return "folder"
-            }
-            let extension = System.IO.Path.GetExtension(entry.Name).ToLowerInvariant()
-            return switch extension {
-                case ".png" or ".jpg" or ".jpeg" or ".gif" or ".webp" or ".svg": "image"
-                case ".zip" or ".gz" or ".tar" or ".7z" or ".xz": "folder_zip"
-                case ".mp3" or ".flac" or ".wav" or ".ogg": "audio_file"
-                case ".mp4" or ".mkv" or ".webm": "video_file"
-                case ".gs" or ".cs" or ".rs" or ".go" or ".js" or ".ts" or ".py" or ".sh" or ".json": "code"
-                default: "draft"
-            }
         }
     }
 }

@@ -37,7 +37,7 @@ internal data struct FileTableInput {
     var OnContextMenu Action[int32, Point]
     var AcquireThumbnail Func[FileEntry, int32, Action, ThumbnailLease]
     var OnOpen Action
-    var OnSort Action[string]
+    var OnSort Action[SortColumn]
     var OnText Action[string]
     var Palette Palette
 }

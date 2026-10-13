@@ -5,6 +5,8 @@ import System
 import System.Collections.Generic
 
 class FileOperationQueue {
+    private const QueueLimit int32 = 16
+
     private let window Window
     private let controller BrowserController
     private let gate object = Object()
@@ -48,7 +50,7 @@ class FileOperationQueue {
             if closed {
                 return OperationAdmission.Closed
             }
-            if pending.Count >= 16 {
+            if pending.Count >= QueueLimit {
                 return OperationAdmission.Full
             }
             pending.Add(request)

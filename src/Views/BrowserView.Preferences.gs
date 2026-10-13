@@ -70,7 +70,7 @@ partial class BrowserView {
         preferenceTab = "Appearance"
         themeColorRole = "Background"
         revealThemeEditor = false
-        OpenDialog("Preferences", "")
+        OpenDialog(DialogKind.Preferences, "")
     }
 
     private func ResetPreferencesTab() {
@@ -148,7 +148,7 @@ partial class BrowserView {
             let input = preferenceInputs.TryGetValue(action, out var typed) ? typed: pair.Value
             rows.Add(
                 PreferenceRow(
-                    ActionLabel(action),
+                    AppSettings.ActionCatalog[action].Label,
                     input,
                     value -> SetPreferenceBinding(action, value),
                     () -> CommitPreferenceBinding(action),
@@ -205,8 +205,8 @@ partial class BrowserView {
                     "scroll-speed",
                     SliderInput{
                         Value: values.ScrollSpeed,
-                        Minimum: .25,
-                        Maximum: 4,
+                        Minimum: AppSettings.MinimumScrollSpeed,
+                        Maximum: AppSettings.MaximumScrollSpeed,
                         Step: .25,
                         Label: "Scroll speed",
                         ShowValue: true,
@@ -238,12 +238,12 @@ partial class BrowserView {
         let choices = List[Blob]()
         choices.Add(
             ThemeChoice.Build(
-                "Custom",
+                AppSettings.CustomThemeName,
                 values.CustomTheme,
-                values.ThemeName == "Custom",
+                values.ThemeName == AppSettings.CustomThemeName,
                 p.Keyboard,
                 () -> {
-                    values.SelectTheme("Custom")
+                    values.SelectTheme(AppSettings.CustomThemeName)
                     revealThemeEditor = true
                     ApplyPreferences()
                 }
@@ -279,7 +279,7 @@ partial class BrowserView {
             }
             rows.Add(pair)
         }
-        if values.ThemeName == "Custom" {
+        if values.ThemeName == AppSettings.CustomThemeName {
             AppearanceColorRows(rows, values, p, compact)
         }
     }
@@ -377,22 +377,5 @@ partial class BrowserView {
         field.OnFocus = (_) -> handle.ScrollIntoView()
         field.OnBlur = (_) -> commit()
         return PreferenceRow.Build(label, field, p)
-    }
-
-    private func ActionLabel(action string) string {
-        if action == "ContextMenu" {
-            return "Open context menu"
-        }
-        if action == "ContextMenuAlternate" {
-            return "Open context menu (alternate)"
-        }
-        let result = System.Text.StringBuilder()
-        for index in 0 ... action.Length {
-            if index > 0 && Char.IsUpper(action[index]) {
-                result.Append(' ')
-            }
-            result.Append(action[index])
-        }
-        return result.ToString()
     }
 }

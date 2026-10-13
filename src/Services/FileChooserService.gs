@@ -19,6 +19,8 @@ data struct ChooserPattern {
 }
 
 unsafe class FileChooserService {
+    private const MimeExpansionLimit int32 = 64
+
     internal let Request PortalChooserRequest
     internal let Saving bool
     internal let SavingMany bool
@@ -53,7 +55,8 @@ unsafe class FileChooserService {
 
     internal func Allows(action string) bool -> action != "Cut" && action != "Copy"
     && action != "Paste" && action != "Trash" && action != "Rename" && action != "ToggleSplit"
-    && action != "NextPane" && action != "OpenTerminal" && action != "ToggleBookmark" && action != "OpenSettings"
+    && action != "NextPane" && action != "OpenTerminal" && action != "OpenTerminalHere"
+    && action != "ToggleBookmark" && action != "OpenSettings"
     && action != "Restore" && action != "DeletePermanently" && action != "EmptyTrash"
 
     internal func CreateEntryFilter(filter PortalFilter?) Func[FileEntry, bool] {
@@ -305,7 +308,7 @@ unsafe class FileChooserService {
                 } catch (failure IOException) { } catch (failure UnauthorizedAccessException) { }
             }
         }
-        for iteration in 0 ... 64 {
+        for iteration in 0 ... MimeExpansionLimit {
             var changed = false
             for link in links {
                 let fields = link.Split(' ')
