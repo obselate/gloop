@@ -27,17 +27,7 @@ open class FileTable : Cell[FileTableInput] {
         let pane = value.Pane
         let p = value.Palette
 
-        if !Object.ReferenceEquals(entries, pane.VisibleEntries) {
-            entries = pane.VisibleEntries
-            rows = [pane.VisibleEntries.Count]DataGridRow
-            indices = Dictionary[string, int32](pane.VisibleEntries.Count, StringComparer.Ordinal)
-
-            for index in 0 ... pane.VisibleEntries.Count {
-                let entry = pane.VisibleEntries[index]
-                rows[index] = DataGridRow{Id: entry.FullPath, Label: entry.Name}
-                indices[entry.FullPath] = index
-            }
-        }
+        UpdateRows(pane)
 
         let columns = BuildColumns(value)
         let selected = [pane.SelectedPaths.Count]string
@@ -135,6 +125,20 @@ open class FileTable : Cell[FileTableInput] {
         )
 
         return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6}, grid,}
+    }
+
+    private func UpdateRows(pane BrowserPane) {
+        if !Object.ReferenceEquals(entries, pane.VisibleEntries) {
+            entries = pane.VisibleEntries
+            rows = [pane.VisibleEntries.Count]DataGridRow
+            indices = Dictionary[string, int32](pane.VisibleEntries.Count, StringComparer.Ordinal)
+
+            for index in 0 ... pane.VisibleEntries.Count {
+                let entry = pane.VisibleEntries[index]
+                rows[index] = DataGridRow{Id: entry.FullPath, Label: entry.Name}
+                indices[entry.FullPath] = index
+            }
+        }
     }
 
     private func BuildColumns(value FileTableInput)[]DataGridColumn {

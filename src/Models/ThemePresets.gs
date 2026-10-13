@@ -124,6 +124,10 @@ internal class ThemePresets {
                 )
             }
 
+            return CreateAlternativePresets(name)
+        }
+
+        private func CreateAlternativePresets(name string) ThemePalette {
             if name == "Rose Pine" {
                 return Make(
                     "#191724",

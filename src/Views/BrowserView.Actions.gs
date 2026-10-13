@@ -239,11 +239,11 @@ partial class BrowserView {
                 return true
             }
             case "OpenTerminal" {
-                Model.OpenTerminal()
+                Model.Launches.OpenTerminal()
                 return true
             }
             case "OpenTerminalHere" {
-                Model.OpenTerminal(false)
+                Model.Launches.OpenTerminal(false)
                 return true
             }
             case "CopyPath" {

@@ -19,34 +19,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let p = value.Palette
         let names = List[string]()
         let paths = List[string]()
-        var destination = "/"
-        var rest = value.Path
-
-        if value.Kind == LocationKind.Recent {
-            destination = Locations.Recent
-            rest = ""
-            names.Add("Recent")
-        } else if value.Kind == LocationKind.Trash {
-            destination = value.Trash
-            rest = value.Path.Substring(value.Trash.Length)
-            names.Add("Trash")
-        } else if value
-            .Home
-            .Length > 1 &&
-            (value.Path == value.Home || value.Path.StartsWith(value.Home + "/", StringComparison.Ordinal)) {
-            destination = value.Home
-            rest = value.Path.Substring(value.Home.Length)
-            names.Add("Home")
-        } else {
-            names.Add("/")
-        }
-        paths.Add(destination)
-
-        for name in rest.Split('/', StringSplitOptions.RemoveEmptyEntries) {
-            destination = Path.Combine(destination, name)
-            names.Add(name)
-            paths.Add(destination)
-        }
+        BuildSegments(value, names, paths)
 
         for known in List[string](handles.Keys) {
             if !paths.Contains(known) {
@@ -138,6 +111,37 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             AlignItems: AlignItems.Center,
             OverflowX: Overflow.Hidden,
             Children: children.ToArray(),
+        }
+    }
+
+    private func BuildSegments(value BreadcrumbInput, names List[string], paths List[string]) {
+        var destination = "/"
+        var rest = value.Path
+
+        if value.Kind == LocationKind.Recent {
+            destination = Locations.Recent
+            rest = ""
+            names.Add("Recent")
+        } else if value.Kind == LocationKind.Trash {
+            destination = value.Trash
+            rest = value.Path.Substring(value.Trash.Length)
+            names.Add("Trash")
+        } else if value
+            .Home
+            .Length > 1 &&
+            (value.Path == value.Home || value.Path.StartsWith(value.Home + "/", StringComparison.Ordinal)) {
+            destination = value.Home
+            rest = value.Path.Substring(value.Home.Length)
+            names.Add("Home")
+        } else {
+            names.Add("/")
+        }
+        paths.Add(destination)
+
+        for name in rest.Split('/', StringSplitOptions.RemoveEmptyEntries) {
+            destination = Path.Combine(destination, name)
+            names.Add(name)
+            paths.Add(destination)
         }
     }
 

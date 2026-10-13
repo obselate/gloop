@@ -16,7 +16,6 @@ class BrowserController {
     internal let Places PlacesService
     internal let TrashDirectory string = TrashService().FilesDirectory()
 
-    private let window Window
     private let settings AppSettings
     private let changed Action
     internal let Directories DirectoryLoader
@@ -26,7 +25,7 @@ class BrowserController {
     private let clipboardPaths List[string]
     private var clipboardCut bool
     private var clipboardGeneration int32
-    private var terminalOpening bool
+    internal let Launches BrowserLaunchService
     private var disposed bool
 
     internal init(
@@ -37,7 +36,6 @@ class BrowserController {
         previewWidth int32,
         previewHeight int32
     ) {
-        this.window = window
         this.settings = settings
         this.changed = changed
         this.resetTypeSelect = resetTypeSelect
@@ -56,6 +54,7 @@ class BrowserController {
         Directories = DirectoryLoader(window, this, settings)
         Operations = FileOperationQueue(window, this)
         Previews = PreviewLoader(window, this, previewWidth, previewHeight)
+        Launches = BrowserLaunchService(window, this)
         Places = PlacesService(
             window,
             error -> {
@@ -319,23 +318,6 @@ class BrowserController {
         }
     }
 
-    internal func OpenSelected() {
-        ResetTypeSelect()
-
-        guard let entry = ActivePane().SelectedEntry() else {
-            return
-        }
-
-        if entry.IsDirectory {
-            Navigate(entry.FullPath)
-        } else if !InTrashView {
-            let owner = window
-            let controller = this
-
-            go browserOpen(owner, controller, entry.FullPath)
-        }
-    }
-
     internal func ToggleHidden() {
         settings.ShowHidden = !settings.ShowHidden
         settings.LaunchShowHiddenOriginal = nil
@@ -352,30 +334,6 @@ class BrowserController {
         settings.ViewMode = mode
 
         Notify()
-    }
-
-    internal func OpenTerminal(inSelection bool = true) {
-        var directory = ActivePane().DirectoryPath
-        var kind = ActivePane().Kind
-
-        if inSelection {
-            if let entry = ActivePane().SingleSelectedEntry() {
-                if entry.IsDirectory {
-                    directory = entry.FullPath
-                    kind = LocationKind.Folder
-                }
-            }
-        }
-
-        if disposed || directory == "" || kind == LocationKind.Recent || terminalOpening {
-            return
-        }
-
-        terminalOpening = true
-        let owner = window
-        let controller = this
-
-        go browserOpenTerminal(owner, controller, directory)
     }
 
     internal func TogglePreview() {
@@ -608,21 +566,6 @@ class BrowserController {
         }
     }
 
-    internal func CompleteOpen(error string) {
-        if disposed {
-            return
-        }
-
-        Status = error
-
-        Notify()
-    }
-
-    internal func CompleteTerminal(error string) {
-        terminalOpening = false
-        CompleteOpen(error)
-    }
-
     private func TrashOperation(kind OperationKind) {
         if !AtTrashRoot {
             return
@@ -648,32 +591,4 @@ class BrowserController {
             changed()
         }
     }
-}
-
-func browserOpen(window Window, controller BrowserController, path string) {
-    var error string
-
-    try {
-        error = FileSystemService().Open(path)
-    } catch (failure Exception) {
-        error = "Open failed for " + path + ": " + failure.Message
-    }
-
-    try {
-        window.Post(() -> controller.CompleteOpen(error))
-    } catch (failure InvalidOperationException) { }
-}
-
-func browserOpenTerminal(window Window, controller BrowserController, directory string) {
-    var error string
-
-    try {
-        error = TerminalService().Open(directory)
-    } catch (failure Exception) {
-        error = "Open terminal failed for " + directory + ": " + failure.Message
-    }
-
-    try {
-        window.Post(() -> controller.CompleteTerminal(error))
-    } catch (failure InvalidOperationException) { }
 }

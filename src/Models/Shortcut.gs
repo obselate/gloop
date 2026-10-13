@@ -199,6 +199,10 @@ internal data struct Shortcut {
                 return "Insert"
             }
 
+            return KeyPunctuationAlias(key)
+        }
+
+        private func KeyPunctuationAlias(key string) string {
             if key == "'" || key == "APOSTROPHE" {
                 return "Apostrophe"
             }
@@ -239,6 +243,10 @@ internal data struct Shortcut {
                 return "GraveAccent"
             }
 
+            return KeySystemAlias(key)
+        }
+
+        private func KeySystemAlias(key string) string {
             if key == "CAPSLOCK" {
                 return "CapsLock"
             }
