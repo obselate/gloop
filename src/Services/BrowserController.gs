@@ -354,9 +354,20 @@ class BrowserController {
 
             if pane.DirectoryPath == "" && ActivePane().DirectoryPath != "" {
                 Directories.NavigateTo(ActivePane().DirectoryPath, pane, DirectoryMode.Push, -1, "")
+            } else if pane.DirectoryPath != "" {
+                Directories.NavigateTo(
+                    pane.DirectoryPath,
+                    pane,
+                    DirectoryMode.Refresh,
+                    pane.HistoryIndex,
+                    pane.FocusedPath()
+                )
             }
+
+            Directories.WatchPane(pane)
         } else {
             ActiveIndex = 0
+            Directories.StopWatch(Panes[1])
         }
 
         Previews.QueuePreview()
