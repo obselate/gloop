@@ -311,6 +311,7 @@ internal class AppSettings {
             "Refresh": KeybindingAction{Label: "Refresh", Default: "F5"},
             "NewFolder": KeybindingAction{Label: "New Folder", Default: "Ctrl+Shift+N"},
             "Rename": KeybindingAction{Label: "Rename", Default: "F2"},
+            "BulkRename": KeybindingAction{Label: "Bulk Rename", Default: "Shift+F2"},
             "Copy": KeybindingAction{Label: "Copy", Default: "Ctrl+C"},
             "Cut": KeybindingAction{Label: "Cut", Default: "Ctrl+X"},
             "Paste": KeybindingAction{Label: "Paste", Default: "Ctrl+V"},

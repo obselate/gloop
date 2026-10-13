@@ -117,7 +117,8 @@ class FileOperationQueue {
         clipboardVersion int32 = -1,
         completed Action[List[OperationResult]]? = nil,
         permission UnixFileMode = UnixFileMode.None,
-        enabled bool = false
+        enabled bool = false,
+        names List[string]? = nil
     ) {
         if controller.IsDisposed || closeRequested {
             return
@@ -150,6 +151,7 @@ class FileOperationQueue {
                 Completed: completed,
                 Permission: permission,
                 Enabled: enabled,
+                Names: names ?? sources,
             }
         )
 
@@ -222,21 +224,26 @@ class FileOperationQueue {
 
             succeeded++
 
-            if succeeded == 1 && request.Kind == OperationKind.Rename {
+            if request.Kind == OperationKind.Rename || request.Kind == OperationKind.BulkRename {
                 for pane in controller.Panes {
                     pane.RetargetSelection(result.Source, result.FinalPath)
                 }
-
-                controller.Directories.RefreshLoadedPanes(result.Source, result.FinalPath)
             }
         }
 
-        if succeeded > 0 && request.Kind != OperationKind.Rename {
-            controller.Directories.RefreshLoadedPanes()
+        if succeeded > 0 {
+            controller.Directories.RefreshLoadedPanes(
+                request.Kind == OperationKind.Rename || request.Kind == OperationKind.BulkRename
+                ? results: default(List[OperationResult]?)
+            )
         }
 
         if failed > 0 && request.Kind != OperationKind.Permissions {
-            let operation = request.Kind == OperationKind.CreateFolder ? "Create folder": request.Kind.ToString()
+            let operation = switch request.Kind {
+                case OperationKind.CreateFolder: "Create folder"
+                case OperationKind.BulkRename: "Bulk rename"
+                default: request.Kind.ToString()
+            }
             controller.Status = results.Count == 1
             ? operation + " failed for " + firstError
             : operation + ": " + succeeded.ToString() + " done, " + failed.ToString() + " failed. " + firstError
@@ -266,6 +273,7 @@ class FileOperationQueue {
     private func TracksSources(kind OperationKind) bool -> kind == OperationKind.Move ||
         kind == OperationKind.Trash ||
         kind == OperationKind.Rename ||
+        kind == OperationKind.BulkRename ||
         kind == OperationKind.Restore ||
         kind == OperationKind.Delete
 }
@@ -276,13 +284,15 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
         let operations = FileOperationService()
         let trash = TrashService()
 
-        for source in request.Sources {
+        for index in 0 ... request.Sources.Count {
+            let source = request.Sources[index]
             var result OperationResult
 
             try {
                 result = switch request.Kind {
                     case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
                     case OperationKind.Rename: operations.Rename(source, request.Name)
+                    case OperationKind.BulkRename: operations.Rename(source, request.Names[index])
                     case OperationKind.Copy: operations.Copy(source, request.Destination)
                     case OperationKind.Move: operations.Move(source, request.Destination)
                     case OperationKind.Trash: trash.Trash(source)

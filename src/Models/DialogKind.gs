@@ -11,6 +11,7 @@ enum DialogKind {
     FilterFiles;
     NewFolder;
     Rename;
+    BulkRename;
     MoveToTrash;
     DeletePermanently;
     EmptyTrash;

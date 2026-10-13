@@ -1,6 +1,7 @@
 package gloop
 
 import System
+import System.Collections.Generic
 import System.ComponentModel
 import System.IO
 import System.Runtime.InteropServices
@@ -75,6 +76,47 @@ unsafe class FileOperationService {
             failure is ArgumentException {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
+    }
+
+    internal func RenameErrors(sources List[string], names List[string]) List[string] {
+        let destinations = List[string](sources.Count)
+        let counts = Dictionary[string, int32](StringComparer.Ordinal)
+        let errors = List[string](sources.Count)
+
+        for index in 0 ... sources.Count {
+            if Path.GetFileName(sources[index]) == names[index] {
+                destinations.Add("")
+                errors.Add("")
+                continue
+            }
+
+            try {
+                FileNames.Validate(names[index])
+
+                let destination = Path.Combine(Path.GetDirectoryName(sources[index]) ?? "", names[index])
+                destinations.Add(destination)
+                counts[destination] = counts.TryGetValue(destination, out var count) ? count + 1: 1
+                errors.Add("")
+            } catch (failure Exception) when failure is IOException || failure is ArgumentException {
+                destinations.Add("")
+                errors.Add("Invalid name " + names[index] + ": " + failure.Message)
+            }
+        }
+
+        for index in 0 ... sources.Count {
+            let destination = destinations[index]
+
+            if destination == "" {
+                continue
+            }
+            if counts[destination] > 1 {
+                errors[index] = counts[destination].ToString() + " items would be named " + names[index]
+            } else if sources[index] != destination && FileSystemService.Exists(destination) {
+                errors[index] = names[index] + " already exists. Swaps and rename chains are not supported."
+            }
+        }
+
+        return errors
     }
 
     internal func Copy(source string, destinationDirectory string) OperationResult {

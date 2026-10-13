@@ -12,5 +12,6 @@ data struct OperationRequest {
     internal var ClipboardVersion int32
     internal var Permission UnixFileMode
     internal var Enabled bool
+    internal var Names List[string]
     internal var Completed Action[List[OperationResult]]?
 }

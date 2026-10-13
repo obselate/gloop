@@ -165,9 +165,12 @@ class Ui {
             p Palette,
             primary bool = false,
             handle ElementHandle? = nil,
-            maxWidth Length = default(Length)
+            maxWidth Length = default(Length),
+            disabled bool = false
         ) Blob {
             let button = Button{
+                Disabled: disabled,
+                DisabledStyle: Style{Opacity: .45},
                 Handle: handle,
                 MaxWidth: maxWidth,
                 MinWidth: 0,

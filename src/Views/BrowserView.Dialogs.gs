@@ -29,13 +29,19 @@ partial class BrowserView {
         default: ""
     }
 
-    private func DialogButton(label string, action Action, p Palette, primary bool = false) Blob {
+    private func DialogButton(
+        label string,
+        action Action,
+        p Palette,
+        primary bool = false,
+        disabled bool = false
+    ) Blob {
         if !dialogButtons.TryGetValue(label, out var handle) {
             handle = ElementHandle()
             dialogButtons[label] = handle
         }
 
-        return Ui.ActionButton(label, action, p, primary, handle)
+        return Ui.ActionButton(label, action, p, primary, handle, disabled: disabled)
     }
 
     private func Dialog() Blob {
@@ -47,6 +53,10 @@ partial class BrowserView {
 
         if dialog == DialogKind.Properties {
             return PropertiesDialog()
+        }
+
+        if dialog == DialogKind.BulkRename {
+            return BulkRenameDialog()
         }
 
         if dialog == DialogKind.Bookmarks {
@@ -259,7 +269,7 @@ partial class BrowserView {
     }
 
     private func CloseDialog() {
-        if setupBusy {
+        if setupBusy || bulkBusy {
             return
         }
 

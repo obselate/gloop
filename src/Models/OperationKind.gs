@@ -6,6 +6,7 @@ import System.Collections.Generic
 enum OperationKind {
     CreateFolder;
     Rename;
+    BulkRename;
     Copy;
     Move;
     Trash;
