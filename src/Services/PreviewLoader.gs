@@ -277,7 +277,7 @@ class PreviewLoader {
         var source ImageSource?
 
         try {
-            let path = controller.Archives.Preview(request.Path)
+            let path = controller.Archives.Preview(request.Path, () -> !work.IsCurrent(generation))
             data = FileSystemService().ReadPreview(path, () -> !work.IsCurrent(generation))
 
             if data.Kind == PreviewKind.Image && work.IsCurrent(generation) {

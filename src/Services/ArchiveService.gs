@@ -10,10 +10,13 @@ import System.IO.Compression
 class ArchiveService {
     private const PreviewByteLimit int64 = 16777216
     private const PreviewBufferSize int32 = 65536
+    private const ListingCacheLimit int32 = 4096
 
     private let gate object = Object()
     private let previews Dictionary[string, string] = Dictionary[string, string](StringComparer.Ordinal)
     private let active HashSet[string] = HashSet[string](StringComparer.Ordinal)
+    private let listings Dictionary[string, ValueTuple[DateTime, List[FileEntry]]] =
+    Dictionary[string, ValueTuple[DateTime, List[FileEntry]]](StringComparer.Ordinal)
 
     shared {
         internal func Supported(path string) bool -> path.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ||
@@ -26,7 +29,7 @@ class ArchiveService {
         private func EntryPath(root string, name string) string {
             let normalized = name.Replace('\\', '/')
 
-            if Path.IsPathRooted(normalized) || normalized.Contains(':') {
+            if Path.IsPathRooted(normalized) {
                 throw IOException("Unsafe archive entry: " + name)
             }
 
@@ -51,10 +54,6 @@ class ArchiveService {
 
                 for entry in archive.Entries {
                     EntryPath(root, entry.FullName)
-
-                    if ((entry.ExternalAttributes >> 16) & 61440) == 40960 {
-                        throw IOException("Symbolic link is not supported in ZIP: " + entry.FullName)
-                    }
                 }
 
                 for entry in archive.Entries {
@@ -67,14 +66,18 @@ class ArchiveService {
                     ) {
                         continue
                     }
+                    if ((entry.ExternalAttributes >> 16) & 61440) == 40960 {
+                        throw IOException("Symbolic link is not supported in ZIP: " + entry.FullName)
+                    }
 
-                    if entry.FullName.EndsWith('/') {
+                    if entry.FullName.Replace('\\', '/').EndsWith('/') {
                         Directory.CreateDirectory(path)
                     } else {
                         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
                         using let input = entry.Open()
                         using let output = FileStream(path, FileMode.CreateNew, FileAccess.Write)
                         input.CopyTo(output)
+                        File.SetUnixFileMode(path, UnixFileMode((entry.ExternalAttributes >> 16 & 511) | 384))
                     }
                 }
 
@@ -88,6 +91,10 @@ class ArchiveService {
             let links = List[TarEntry]()
 
             while let entry = reader.GetNextEntry() {
+                if entry.EntryType == TarEntryType.GlobalExtendedAttributes {
+                    continue
+                }
+
                 let path = EntryPath(root, entry.Name)
                 let name = Path.GetRelativePath(root, path)
 
@@ -96,13 +103,7 @@ class ArchiveService {
                 }
 
                 if entry.EntryType == TarEntryType.SymbolicLink || entry.EntryType == TarEntryType.HardLink {
-                    let basePath = entry.EntryType == TarEntryType.HardLink ? root: Path.GetDirectoryName(path) ?? root
-                    EntryPath(basePath, entry.LinkName)
-                    let target = Path.GetFullPath(Path.Combine(basePath, entry.LinkName))
-
-                    if !Locations.Contains(root, target) {
-                        throw IOException("Archive link leaves destination: " + entry.Name)
-                    }
+                    LinkTarget(root, path, entry.LinkName, entry.EntryType == TarEntryType.HardLink)
 
                     links.Add(entry)
                 } else if entry.EntryType == TarEntryType.Directory {
@@ -111,6 +112,7 @@ class ArchiveService {
                     Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
                     using let output = FileStream(path, FileMode.CreateNew, FileAccess.Write)
                     entry.DataStream?.CopyTo(output)
+                    File.SetUnixFileMode(path, UnixFileMode((int32(entry.Mode) & 511) | 384))
                 } else {
                     throw IOException("Unsupported TAR entry: " + entry.Name + " (" + entry.EntryType.ToString() + ")")
                 }
@@ -118,8 +120,7 @@ class ArchiveService {
 
             for entry in links {
                 let path = EntryPath(root, entry.Name)
-                let basePath = entry.EntryType == TarEntryType.HardLink ? root: Path.GetDirectoryName(path) ?? root
-                let target = Path.GetFullPath(Path.Combine(basePath, entry.LinkName))
+                let target = LinkTarget(root, path, entry.LinkName, entry.EntryType == TarEntryType.HardLink)
                 Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
 
                 if entry.EntryType == TarEntryType.HardLink {
@@ -131,6 +132,52 @@ class ArchiveService {
                 } else {
                     File.CreateSymbolicLink(path, entry.LinkName)
                 }
+            }
+        }
+
+        private func LinkTarget(root string, path string, name string, hardLink bool) string {
+            let normalized = name.Replace('\\', '/')
+
+            if Path.IsPathRooted(normalized) {
+                throw IOException("Archive link leaves destination: " + name)
+            }
+
+            var entered bool
+
+            for part in normalized.Split('/') {
+                if part == ".." && entered {
+                    throw IOException("Unsafe archive link target: " + name)
+                }
+
+                if part != "" && part != "." && part != ".." {
+                    entered = true
+                }
+            }
+
+            let parent = Path.GetDirectoryName(path) ?? root
+            let target = Path.GetFullPath(Path.Combine(hardLink ? root: parent, normalized))
+
+            if !Locations.Contains(root, target) {
+                throw IOException("Archive link leaves destination: " + name)
+            }
+
+            RequireLinkParents(root, parent)
+            RequireLinkParents(root, Path.GetDirectoryName(target) ?? root)
+
+            return target
+        }
+
+        private func RequireLinkParents(root string, parent string) {
+            var current = parent
+
+            while current != root && Locations.Contains(root, current) {
+                if FileSystemService.Exists(current) && File.GetAttributes(current).HasFlag(
+                    FileAttributes.ReparsePoint
+                ) {
+                    throw IOException("Archive link parent is a symbolic link: " + current)
+                }
+
+                current = Path.GetDirectoryName(current) ?? root
             }
         }
 
@@ -155,16 +202,41 @@ class ArchiveService {
         return ""
     }
 
-    internal func ListArchive(path string, showHidden bool) DirectorySnapshot {
+    internal func ListArchive(path string, showHidden bool, cancelled Func[bool]? = nil) DirectorySnapshot {
         let source = Source(path)
         let prefix = path == source ? "": Path.GetRelativePath(source, path).TrimEnd('/') + "/"
         let snapshot = DirectorySnapshot{DirectoryPath: path}
         let names = HashSet[string](StringComparer.Ordinal)
+        let modified = File.GetLastWriteTimeUtc(source)
+        var cached ValueTuple[DateTime, List[FileEntry]]
+        var found bool
+
+        lock gate {
+            found = listings.TryGetValue(source, out cached)
+        }
+
+        if found && cached.Item1 == modified {
+            for entry in cached.Item2 {
+                if cancelled?.Invoke() == true {
+                    throw OperationCanceledException()
+                }
+
+                AddEntry(snapshot, names, source, prefix, entry.Name, entry.Size, entry.Modified, showHidden)
+            }
+
+            return snapshot
+        }
+
+        let entries = List[FileEntry]()
 
         if source.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) {
             using let archive = ZipFile.OpenRead(source)
 
             for entry in archive.Entries {
+                if cancelled?.Invoke() == true {
+                    throw OperationCanceledException()
+                }
+
                 AddEntry(
                     snapshot,
                     names,
@@ -173,7 +245,8 @@ class ArchiveService {
                     entry.FullName,
                     entry.Length,
                     entry.LastWriteTime.DateTime,
-                    showHidden
+                    showHidden,
+                    entries
                 )
             }
         } else {
@@ -183,6 +256,14 @@ class ArchiveService {
             using let reader = TarReader(stream, true)
 
             while let entry = reader.GetNextEntry() {
+                if cancelled?.Invoke() == true {
+                    throw OperationCanceledException()
+                }
+
+                if entry.EntryType == TarEntryType.GlobalExtendedAttributes {
+                    continue
+                }
+
                 AddEntry(
                     snapshot,
                     names,
@@ -191,8 +272,17 @@ class ArchiveService {
                     entry.Name,
                     entry.Length,
                     entry.ModificationTime.DateTime,
-                    showHidden
+                    showHidden,
+                    entries
                 )
+            }
+        }
+
+        if entries.Count <= ListingCacheLimit {
+            lock gate {
+                if active.Contains(source) {
+                    listings[source] = ValueTuple[DateTime, List[FileEntry]](modified, entries)
+                }
             }
         }
 
@@ -207,9 +297,16 @@ class ArchiveService {
         name string,
         size int64,
         modified DateTime,
-        showHidden bool
+        showHidden bool,
+        cache List[FileEntry]? = nil
     ) {
         let normalized = Path.GetRelativePath(source, EntryPath(source, name))
+
+        if let entries = cache {
+            if entries.Count <= ListingCacheLimit {
+                entries.Add(FileEntry{Name: name, Size: size, Modified: modified})
+            }
+        }
 
         if normalized == "." {
             return
@@ -221,6 +318,7 @@ class ArchiveService {
 
         let relative = normalized.Substring(prefix.Length)
         let slash = relative.IndexOf('/')
+        let directory = slash >= 0 || name.Replace('\\', '/').EndsWith('/')
         let child = slash < 0 ? relative: relative.Substring(0, slash)
 
         if child == "" || (!showHidden && child.StartsWith('.')) || !names.Add(child) {
@@ -231,15 +329,15 @@ class ArchiveService {
             FileEntry{
                 Name: child,
                 FullPath: Path.Combine(snapshot.DirectoryPath, child),
-                IsDirectory: slash >= 0,
-                Size: slash >= 0 ? 0: size,
+                IsDirectory: directory,
+                Size: directory ? 0: size,
                 Modified: modified,
-                Kind: slash >= 0 ? "Folder": Path.GetExtension(child).TrimStart('.'),
+                Kind: directory ? "Folder": Path.GetExtension(child).TrimStart('.'),
             }
         )
     }
 
-    internal func Preview(path string) string {
+    internal func Preview(path string, cancelled Func[bool]? = nil) string {
         let source = Source(path)
 
         if source == "" || path == source {
@@ -251,7 +349,7 @@ class ArchiveService {
                 throw OperationCanceledException()
             }
 
-            if previews.TryGetValue(path, out var cached) {
+            if previews.TryGetValue(path, out var cached) && File.Exists(cached) {
                 return cached
             }
         }
@@ -269,7 +367,11 @@ class ArchiveService {
 
                 for preview in previews {
                     if Source(preview.Key) == source {
-                        Directory.Delete(Path.GetDirectoryName(preview.Value) ?? "", true)
+                        let previous = Path.GetDirectoryName(preview.Value) ?? ""
+
+                        if Directory.Exists(previous) {
+                            Directory.Delete(previous, true)
+                        }
                         expired.Add(preview.Key)
                     }
                 }
@@ -287,7 +389,7 @@ class ArchiveService {
             try {
                 if source.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) {
                     using let archive = ZipFile.OpenRead(source)
-                    let entry = archive.GetEntry(name) ?? throw IOException("Archive entry is unavailable: " + name)
+                    let entry = FindZipEntry(archive, source, name, cancelled)
 
                     if entry.Length > PreviewByteLimit {
                         throw IOException("Archive preview exceeds 16 MiB: " + name)
@@ -295,7 +397,7 @@ class ArchiveService {
 
                     using let input = entry.Open()
                     using let output = FileStream(target, FileMode.CreateNew, FileAccess.Write)
-                    CopyPreview(input, output)
+                    CopyPreview(input, output, cancelled)
                 } else {
                     using let input = File.OpenRead(source)
                     using let stream Stream = source.EndsWith(".tar", StringComparison.OrdinalIgnoreCase)
@@ -303,6 +405,14 @@ class ArchiveService {
                     using let reader = TarReader(stream, true)
 
                     while let entry = reader.GetNextEntry() {
+                        if cancelled?.Invoke() == true {
+                            throw OperationCanceledException()
+                        }
+
+                        if entry.EntryType == TarEntryType.GlobalExtendedAttributes {
+                            continue
+                        }
+
                         if Path.GetRelativePath(source, EntryPath(source, entry.Name)) != name {
                             continue
                         }
@@ -316,7 +426,7 @@ class ArchiveService {
                         }
 
                         using let output = FileStream(target, FileMode.CreateNew, FileAccess.Write)
-                        CopyPreview(content, output)
+                        CopyPreview(content, output, cancelled)
                         break
                     }
                 }
@@ -332,9 +442,7 @@ class ArchiveService {
                 }
 
                 return target
-            } catch (failure Exception) when failure is IOException ||
-                failure is UnauthorizedAccessException ||
-                failure is OperationCanceledException {
+            } catch (failure Exception) {
                 lock gate {
                     if previews.TryGetValue(path, out var current) && current == target {
                         previews.Remove(path)
@@ -349,7 +457,7 @@ class ArchiveService {
         }
     }
 
-    private func CopyPreview(input Stream, output Stream) {
+    private func CopyPreview(input Stream, output Stream, cancelled Func[bool]?) {
         let buffer = ArrayPool[uint8].Shared.Rent(PreviewBufferSize)
         var total int64
 
@@ -357,6 +465,10 @@ class ArchiveService {
             var count = input.Read(buffer, 0, buffer.Length)
 
             while count > 0 {
+                if cancelled?.Invoke() == true {
+                    throw OperationCanceledException()
+                }
+
                 total += count
 
                 if total > PreviewByteLimit {
@@ -371,43 +483,51 @@ class ArchiveService {
         }
     }
 
+    private func FindZipEntry(archive ZipArchive, source string, name string, cancelled Func[bool]?) ZipArchiveEntry {
+        for entry in archive.Entries {
+            if cancelled?.Invoke() == true {
+                throw OperationCanceledException()
+            }
+
+            if Path.GetRelativePath(source, EntryPath(source, entry.FullName)) == name {
+                return entry
+            }
+        }
+
+        throw IOException("Archive entry is unavailable: " + name)
+    }
+
     internal func Extract(source string, destination string) OperationResult {
-        let staging = Path.Combine(Path.GetTempPath(), "gloop-extract-" + Guid.NewGuid().ToString("N"))
+        let parent = Path.GetFullPath(destination)
+
+        if !Directory.Exists(parent) {
+            throw IOException("Destination folder is unavailable: " + parent)
+        }
+
+        let archive = Source(source)
+        let name = Stem(archive)
+        FileNames.Validate(name)
+        let staging = Path.Combine(parent, ".gloop-extract-" + Guid.NewGuid().ToString("N"))
+        let root = Path.Combine(staging, name)
 
         try {
-            Directory.CreateDirectory(staging)
+            Directory.CreateDirectory(root)
             File.SetUnixFileMode(staging, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute)
-            let archive = Source(source)
             let selected = source == archive ? "": Path.GetRelativePath(archive, source)
-            Unpack(archive, staging, selected)
-
-            if selected != "" {
-                return FileOperationService().Copy(Path.Combine(staging, selected), destination)
-            }
-            let entries = Directory.GetFileSystemEntries(staging)
-            let operations = FileOperationService()
-
-            if entries.Length > 1 {
-                FileNames.Validate(Stem(source))
-                let container = Path.Combine(staging, Guid.NewGuid().ToString("N"))
-                Directory.CreateDirectory(container)
-                Directory.CreateDirectory(Path.Combine(container, Stem(source)))
-
-                for entry in entries {
-                    let result = operations.Move(entry, Path.Combine(container, Stem(source)))
-                    if result.Error != "" {
-                        throw IOException(result.Error)
-                    }
-                }
-
-                return operations.Copy(Path.Combine(container, Stem(source)), destination)
-            }
+            Unpack(archive, root, selected)
+            let entries = Directory.GetFileSystemEntries(root)
 
             if entries.Length == 0 {
                 throw IOException("Archive is empty")
             }
 
-            return operations.Copy(entries[0], destination)
+            let from = selected != "" ? Path.Combine(root, selected): entries.Length == 1 ? entries[0]: root
+            let finalPath = Path.Combine(parent, Path.GetFileName(from))
+            let operations = FileOperationService()
+            operations.RequireAbsent(finalPath)
+            operations.MoveEntry(from, finalPath)
+
+            return OperationResult{Source: source, FinalPath: finalPath, Error: ""}
         } finally {
             if Directory.Exists(staging) {
                 Directory.Delete(staging, true)
@@ -500,13 +620,29 @@ class ArchiveService {
 
             for preview in previews {
                 if !active.Contains(Source(preview.Key)) {
-                    Directory.Delete(Path.GetDirectoryName(preview.Value) ?? "", true)
+                    let root = Path.GetDirectoryName(preview.Value) ?? ""
+
+                    if Directory.Exists(root) {
+                        Directory.Delete(root, true)
+                    }
                     expired.Add(preview.Key)
                 }
             }
 
             for path in expired {
                 previews.Remove(path)
+            }
+
+            expired.Clear()
+
+            for source in listings.Keys {
+                if !active.Contains(source) {
+                    expired.Add(source)
+                }
+            }
+
+            for source in expired {
+                listings.Remove(source)
             }
         }
     }
@@ -516,10 +652,15 @@ class ArchiveService {
             active.Clear()
 
             for preview in previews.Values {
-                Directory.Delete(Path.GetDirectoryName(preview) ?? "", true)
+                let root = Path.GetDirectoryName(preview) ?? ""
+
+                if Directory.Exists(root) {
+                    Directory.Delete(root, true)
+                }
             }
 
             previews.Clear()
+            listings.Clear()
         }
     }
 }

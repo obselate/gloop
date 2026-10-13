@@ -344,7 +344,7 @@ class DirectoryLoader {
 
     private func Load(queue LatestWork, generation int32, request DirectoryRequest) {
         let snapshot = request.Kind == LocationKind.Archive
-        ? controller.Archives.ListArchive(request.Path, request.ShowHidden)
+        ? controller.Archives.ListArchive(request.Path, request.ShowHidden, () -> !queue.IsCurrent(generation))
         : FileSystemService().List(request.Path, request.Kind, request.AtTrashRoot, request.ShowHidden)
 
         if !queue.IsCurrent(generation) {
