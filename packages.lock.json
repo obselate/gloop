@@ -4,9 +4,9 @@
     "net10.0": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.7.31, 0.7.31]",
-        "resolved": "0.7.31",
-        "contentHash": "P6TkYf8M3Sbx520q9G2N6taETZ0DHdsWYIgz3QwrEJoPv2YeD5FrzfJtF0ctGZ/LeC9R/TOMmhRO1dmaI7PURQ==",
+        "requested": "[0.7.32, 0.7.32]",
+        "resolved": "0.7.32",
+        "contentHash": "XcgRb9Gutgh3XEPwzk3w78BnLKFsUThhUmAxpC4JruXSVlBs+LCFJh2DZRSdcDY+TY8jjcmDOvAlhfNxDU3E/A==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
           "Unicode.Bidi": "0.3.18"
@@ -23,11 +23,11 @@
       },
       "Goo.Svg": {
         "type": "Direct",
-        "requested": "[0.7.31, 0.7.31]",
-        "resolved": "0.7.31",
-        "contentHash": "tjbbGPs4ySP10Ii79pF/mEl0dNg+J3gAimEj+SL2KNv06ESujl3AZ8FNPHa97n3Y0B8W/Pm4nUgmGXumMVrciQ==",
+        "requested": "[0.7.32, 0.7.32]",
+        "resolved": "0.7.32",
+        "contentHash": "m1gILb7zeN30vAIAWG4OirGbcmcFt9oaLLRzVaGxRnbiiwXz6uwG/XJfALre8EniqepcaMBTRRRWCBQTLkdP7A==",
         "dependencies": {
-          "Goo": "0.7.31"
+          "Goo": "0.7.32"
         }
       },
       "Goo.Widgets": {
@@ -80,9 +80,9 @@
     "net10.0/linux-x64": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.7.31, 0.7.31]",
-        "resolved": "0.7.31",
-        "contentHash": "P6TkYf8M3Sbx520q9G2N6taETZ0DHdsWYIgz3QwrEJoPv2YeD5FrzfJtF0ctGZ/LeC9R/TOMmhRO1dmaI7PURQ==",
+        "requested": "[0.7.32, 0.7.32]",
+        "resolved": "0.7.32",
+        "contentHash": "XcgRb9Gutgh3XEPwzk3w78BnLKFsUThhUmAxpC4JruXSVlBs+LCFJh2DZRSdcDY+TY8jjcmDOvAlhfNxDU3E/A==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
           "Unicode.Bidi": "0.3.18"
