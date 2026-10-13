@@ -167,6 +167,8 @@ partial class ArchiveService {
                 throw IOException("Archive link leaves destination: " + name)
             }
 
+            let parent = Path.GetDirectoryName(path) ?? root
+            var ancestor = parent
             var entered bool
 
             for part in normalized.Split('/') {
@@ -174,12 +176,19 @@ partial class ArchiveService {
                     throw IOException("Unsafe archive link target: " + name)
                 }
 
+                if part == ".." && !hardLink {
+                    ancestor = Path.GetDirectoryName(ancestor) ?? root
+
+                    if !Locations.Contains(root, ancestor) {
+                        throw IOException("Archive link leaves destination: " + name)
+                    }
+                }
+
                 if part != "" && part != "." && part != ".." {
                     entered = true
                 }
             }
 
-            let parent = Path.GetDirectoryName(path) ?? root
             let target = Path.GetFullPath(Path.Combine(hardLink ? archiveRoot: parent, normalized))
 
             if !Locations.Contains(root, target) {
