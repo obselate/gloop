@@ -20,7 +20,8 @@ internal class BrowserLaunchService {
             return
         }
 
-        if entry.IsDirectory || ArchiveService.Supported(entry.FullPath) {
+        if entry.IsDirectory ||
+            (controller.ActivePane().Kind != LocationKind.Archive && ArchiveService.Supported(entry.FullPath)) {
             controller.Navigate(entry.FullPath)
         } else if controller.ActivePane().Kind == LocationKind.Archive {
             if !controller.PreviewVisible {

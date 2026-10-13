@@ -267,7 +267,7 @@ partial class BrowserView {
                 Location: location,
                 Compact: compact,
                 ShowType: settings.ShowTypeColumn,
-                SizeText: FileSizeText,
+                SizeText: entry -> pane.Kind == LocationKind.Archive && entry.IsDirectory ? "—": FileSizeText(entry),
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
                 Tiles: settings.ViewMode == ViewMode.Tiles,
                 TileWidth: TileWidth(index),

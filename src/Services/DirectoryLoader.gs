@@ -224,7 +224,7 @@ class DirectoryLoader {
         pane.Entries = snapshot.Entries
 
         if mode != DirectoryMode.Refresh {
-            controller.Status = ""
+            controller.Status = pane.Kind == LocationKind.Archive ? "Archive (read-only)": ""
         }
 
         RequestView(pane, selectedPath)
