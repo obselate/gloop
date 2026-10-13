@@ -70,21 +70,21 @@ partial class ArchiveService {
                         throw IOException("Symbolic link is not supported in ZIP: " + entry.FullName)
                     }
 
+                    let mode = entry.ExternalAttributes >> 16 & ArchiveModeMask
+
                     if entry.FullName.Replace('\\', '/').EndsWith('/') {
                         Directory.CreateDirectory(path)
-                        File.SetUnixFileMode(
-                            path,
-                            UnixFileMode((entry.ExternalAttributes >> 16 & ArchiveModeMask) | OwnerFullAccess)
-                        )
+                        if mode != 0 {
+                            File.SetUnixFileMode(path, UnixFileMode(mode | OwnerFullAccess))
+                        }
                     } else {
                         Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
                         using let input = entry.Open()
                         using let output = FileStream(path, FileMode.CreateNew, FileAccess.Write)
                         input.CopyTo(output)
-                        File.SetUnixFileMode(
-                            path,
-                            UnixFileMode((entry.ExternalAttributes >> 16 & ArchiveModeMask) | OwnerReadWrite)
-                        )
+                        if mode != 0 {
+                            File.SetUnixFileMode(path, UnixFileMode(mode | OwnerReadWrite))
+                        }
                     }
                 }
 
@@ -110,7 +110,8 @@ partial class ArchiveService {
                 }
 
                 if entry.EntryType == TarEntryType.SymbolicLink || entry.EntryType == TarEntryType.HardLink {
-                    LinkTarget(root, path, entry.LinkName, entry.EntryType == TarEntryType.HardLink)
+                    LinkTarget(root, path, entry.LinkName, entry.EntryType == TarEntryType.HardLink, root)
+                    Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
 
                     links.Add(entry)
                 } else if entry.EntryType == TarEntryType.Directory {
@@ -126,9 +127,25 @@ partial class ArchiveService {
                 }
             }
 
+            if links.Count == 0 {
+                return
+            }
+
+            let entries = List[string](Directory.GetFileSystemEntries(root))
+
             for entry in links {
                 let path = EntryPath(root, entry.Name)
-                let target = LinkTarget(root, path, entry.LinkName, entry.EntryType == TarEntryType.HardLink)
+
+                if Path.GetDirectoryName(path) == root && !entries.Contains(path) {
+                    entries.Add(path)
+                }
+            }
+
+            let boundary = selected != "" ? Path.Combine(root, selected): entries.Count == 1 ? entries[0]: root
+
+            for entry in links {
+                let path = EntryPath(root, entry.Name)
+                let target = LinkTarget(boundary, path, entry.LinkName, entry.EntryType == TarEntryType.HardLink, root)
                 Directory.CreateDirectory(Path.GetDirectoryName(path) ?? root)
 
                 if entry.EntryType == TarEntryType.HardLink {
@@ -143,7 +160,7 @@ partial class ArchiveService {
             }
         }
 
-        private func LinkTarget(root string, path string, name string, hardLink bool) string {
+        private func LinkTarget(root string, path string, name string, hardLink bool, archiveRoot string) string {
             let normalized = name.Replace('\\', '/')
 
             if Path.IsPathRooted(normalized) {
@@ -163,7 +180,7 @@ partial class ArchiveService {
             }
 
             let parent = Path.GetDirectoryName(path) ?? root
-            let target = Path.GetFullPath(Path.Combine(hardLink ? root: parent, normalized))
+            let target = Path.GetFullPath(Path.Combine(hardLink ? archiveRoot: parent, normalized))
 
             if !Locations.Contains(root, target) {
                 throw IOException("Archive link leaves destination: " + name)
@@ -281,11 +298,14 @@ partial class ArchiveService {
                             throw OperationCanceledException()
                         }
 
-                        if entry.EntryType == TarEntryType.GlobalExtendedAttributes {
-                            continue
-                        }
+                        if entry.EntryType == TarEntryType.GlobalExtendedAttributes || Path.GetRelativePath(
+                            source,
+                            EntryPath(source, entry.Name)
+                        ) != name {
+                            if stream is GZipStream {
+                                DrainEntry(entry, cancelled)
+                            }
 
-                        if Path.GetRelativePath(source, EntryPath(source, entry.Name)) != name {
                             continue
                         }
 
@@ -349,6 +369,28 @@ partial class ArchiveService {
 
                 output.Write(buffer, 0, count)
                 count = input.Read(buffer, 0, buffer.Length)
+            }
+        } finally {
+            ArrayPool[uint8].Shared.Return(buffer)
+        }
+    }
+
+    private func DrainEntry(entry TarEntry, cancelled Func[bool]?) {
+        guard let input = entry.DataStream else {
+            return
+        }
+
+        let buffer = ArrayPool[uint8].Shared.Rent(PreviewBufferSize)
+
+        try {
+            while true {
+                if cancelled?.Invoke() == true {
+                    throw OperationCanceledException()
+                }
+
+                if input.Read(buffer, 0, buffer.Length) == 0 {
+                    return
+                }
             }
         } finally {
             ArrayPool[uint8].Shared.Return(buffer)

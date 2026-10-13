@@ -70,6 +70,10 @@ partial class ArchiveService {
                     throw OperationCanceledException()
                 }
 
+                if stream is GZipStream {
+                    DrainEntry(entry, cancelled)
+                }
+
                 if entry.EntryType == TarEntryType.GlobalExtendedAttributes {
                     continue
                 }
@@ -81,7 +85,7 @@ partial class ArchiveService {
                     prefix,
                     entry.Name,
                     entry.Length,
-                    entry.ModificationTime.DateTime,
+                    entry.ModificationTime.LocalDateTime,
                     showHidden,
                     entries
                 )

@@ -36,7 +36,7 @@ class FileOperationQueue {
         get -> !controller.IsDisposed && !closeRequested
     }
 
-    internal func CanUseArchive(action string) bool {
+    internal func AllowsAction(action string) bool {
         let pane = controller.ActivePane()
 
         if pane.Kind == LocationKind.Archive &&

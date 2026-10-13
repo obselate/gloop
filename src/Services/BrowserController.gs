@@ -91,7 +91,7 @@ class BrowserController {
     }
 
     internal func CanRun(action string) bool {
-        if !Operations.CanUseArchive(action) {
+        if !Operations.AllowsAction(action) {
             return false
         }
 
