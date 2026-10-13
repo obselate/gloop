@@ -172,8 +172,12 @@ unsafe class FileChooserService {
                 result.Uris.Add("file://" + Uri.EscapeDataString(path).Replace("%2F", "/"))
             }
             return ChooserValidation{Result: result}
-        } catch (failure Exception) {
-            return ChooserValidation{Error: failure.Message}
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
+            return ChooserValidation{
+                Error: Request.Method + " failed for " + pane.DirectoryPath + ": " + failure.Message
+            }
         }
     }
 
@@ -238,7 +242,9 @@ unsafe class FileChooserService {
         try {
             requireDirectory(path, 5)
             return true
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return false
         }
     }
@@ -305,7 +311,7 @@ unsafe class FileChooserService {
                             }
                         }
                     }
-                } catch (failure IOException) { } catch (failure UnauthorizedAccessException) { }
+                } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
             }
         }
         for iteration in 0 ... MimeExpansionLimit {
@@ -346,7 +352,7 @@ unsafe class FileChooserService {
                     }
                 }
                 removed.UnionWith(overridden)
-            } catch (failure IOException) { } catch (failure UnauthorizedAccessException) { }
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
         }
     }
 

@@ -205,11 +205,11 @@ class PreviewLoader {
                         Kind: PreviewKind.Error,
                         Text: "",
                         Path: request.Path,
-                        Error: failure.Message
+                        Error: "Preview failed for " + request.Path + ": " + failure.Message
                     }
                     try {
                         window.Post(() -> ApplyPreview(request, data, nil))
-                    } catch (postFailure Exception) { }
+                    } catch (postFailure InvalidOperationException) { }
                 }
             )
         }
@@ -260,16 +260,17 @@ class PreviewLoader {
                     cancellation.Dispose()
                 }
             }
-        } catch (failure Exception) {
-            let error = if data.Kind == PreviewKind.Image && failure is ImageLimitException {
-                "This image is too large to preview."
-            } else if data.Kind == PreviewKind.Image &&
-                (failure is InvalidDataException || failure is NotSupportedException) {
-                "This image could not be read. It may be damaged or use an unsupported format."
-            } else {
-                failure.Message
+        } catch (failure OperationCanceledException) {
+            data = PreviewData{Kind: PreviewKind.Cancelled, Path: request.Path}
+        } catch (failure Exception) when failure is ImageLimitException ||
+            failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is NotSupportedException {
+            data = PreviewData{
+                Kind: PreviewKind.Error,
+                Path: request.Path,
+                Error: "Preview failed for " + request.Path + ": " + failure.Message
             }
-            data = PreviewData{Kind: PreviewKind.Error, Text: "", Path: request.Path, Error: error}
         }
         if !work.IsCurrent(generation) {
             if let staleSource = source {
@@ -279,7 +280,7 @@ class PreviewLoader {
         }
         try {
             window.Post(() -> ApplyPreview(request, data, source))
-        } catch (failure Exception) {
+        } catch (failure InvalidOperationException) {
             if let failedSource = source {
                 failedSource.Dispose()
             }

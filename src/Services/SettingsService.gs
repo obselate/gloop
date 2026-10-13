@@ -31,14 +31,14 @@ internal class SettingsService {
             using let document = JsonDocument.Parse(File.ReadAllText(FilePath))
             let root = document.RootElement
             if root.ValueKind != JsonValueKind.Object {
-                throw FormatException("Expected a JSON object")
+                throw InvalidDataException("Settings: field root must be an object")
             }
             let seen = HashSet[string](StringComparer.Ordinal)
             var hasThemeName = false
             var hasCustomTheme = false
             for property in root.EnumerateObject() {
                 if !seen.Add(property.Name) {
-                    throw FormatException("Duplicate setting: " + property.Name)
+                    throw InvalidDataException("Settings: duplicate field " + property.Name)
                 }
                 if property.Name == "showHidden" {
                     settings.ShowHidden = readBool(property.Value, property.Name)
@@ -54,14 +54,14 @@ internal class SettingsService {
                     settings.SplitView = readBool(property.Value, property.Name)
                 } else if property.Name == "viewMode" {
                     if property.Value.ValueKind != JsonValueKind.String {
-                        throw FormatException("viewMode must be a string")
+                        throw InvalidDataException("Settings: field viewMode must be a string")
                     }
                     settings.ViewMode = AppSettings.ParseViewMode(property.Value.GetString() ?? "")
                 } else if property.Name == "smoothScrolling" {
                     settings.SmoothScrolling = readBool(property.Value, property.Name)
                 } else if property.Name == "scrollSpeed" {
                     if property.Value.ValueKind != JsonValueKind.Number {
-                        throw FormatException("scrollSpeed must be a number")
+                        throw InvalidDataException("Settings: field scrollSpeed must be a number")
                     }
                     settings.ScrollSpeed = property.Value.GetDouble()
                 } else if property.Name == "bookmarks" {
@@ -69,15 +69,15 @@ internal class SettingsService {
                 } else if property.Name == "keybindings" {
                     readKeybindings(settings, property.Value)
                 } else if property.Name == "theme" {
-                    readTheme(settings.Theme, property.Value)
+                    readTheme(settings.Theme, property.Value, property.Name)
                 } else if property.Name == "themeName" {
                     if property.Value.ValueKind != JsonValueKind.String {
-                        throw FormatException("themeName must be a string")
+                        throw InvalidDataException("Settings: field themeName must be a string")
                     }
                     settings.ThemeName = property.Value.GetString() ?? ""
                     hasThemeName = true
                 } else if property.Name == "customTheme" {
-                    readTheme(settings.CustomTheme, property.Value)
+                    readTheme(settings.CustomTheme, property.Value, property.Name)
                     hasCustomTheme = true
                 } else {
                     settings.UnknownSettings[property.Name] = property.Value.Clone()
@@ -89,23 +89,28 @@ internal class SettingsService {
                 throw FormatException(error)
             }
             return SettingsLoadResult(settings, "")
-        } catch (e Exception) {
-            return SettingsLoadResult(AppSettings(), "Could not load settings: " + e.Message)
+        } catch (e Exception) when e is IOException ||
+            e is UnauthorizedAccessException ||
+            e is JsonException ||
+            e is FormatException ||
+            e is InvalidDataException {
+            return SettingsLoadResult(AppSettings(), "Load settings failed for " + FilePath + ": " + e.Message)
         }
     }
 
     internal func Save(settings AppSettings) string {
         let error = AppSettings.Validate(settings)
         if error != "" {
-            return error
+            return "Save settings failed for " + FilePath + ": " + error
         }
         if File.Exists(FilePath) {
             let existing = Load()
             if existing.Error != "" {
-                return "Could not save settings: existing file is invalid"
+                return "Save settings failed for " + FilePath + ": " + existing.Error
             }
         }
         let temporary = FilePath + "." + Guid.NewGuid().ToString("N") + ".tmp"
+        var failure = ""
         try {
             let parent = Path.GetDirectoryName(FilePath) ?? ""
             if parent != "" {
@@ -150,12 +155,15 @@ internal class SettingsService {
             }
             File.Move(temporary, FilePath, true)
             return ""
-        } catch (e Exception) {
-            if File.Exists(temporary) {
-                File.Delete(temporary)
-            }
-            return "Could not save settings: " + e.Message
+        } catch (e Exception) when e is IOException || e is UnauthorizedAccessException {
+            failure = e.Message
         }
+        try {
+            File.Delete(temporary)
+        } catch (e Exception) when e is IOException || e is UnauthorizedAccessException {
+            failure += ". Remove temporary settings failed for " + temporary + ": " + e.Message
+        }
+        return "Save settings failed for " + FilePath + ": " + failure
     }
 
     shared {
@@ -182,20 +190,20 @@ internal class SettingsService {
             if value.ValueKind == JsonValueKind.False {
                 return false
             }
-            throw FormatException(name + " must be true or false")
+            throw InvalidDataException("Settings: field " + name + " must be true or false")
         }
 
         private func readKeybindings(settings AppSettings, value JsonElement) {
             if value.ValueKind != JsonValueKind.Object {
-                throw FormatException("keybindings must be an object")
+                throw InvalidDataException("Settings: field keybindings must be an object")
             }
             let bindings = Dictionary[string, string](StringComparer.Ordinal)
             for property in value.EnumerateObject() {
                 if bindings.ContainsKey(property.Name) {
-                    throw FormatException("Duplicate action: " + property.Name)
+                    throw InvalidDataException("Settings: duplicate field keybindings." + property.Name)
                 }
                 if property.Value.ValueKind != JsonValueKind.String {
-                    throw FormatException("Shortcut for " + property.Name + " must be a string")
+                    throw InvalidDataException("Settings: field keybindings." + property.Name + " must be a string")
                 }
                 bindings[property.Name] = property.Value.GetString() ?? ""
             }
@@ -204,31 +212,33 @@ internal class SettingsService {
 
         private func readBookmarks(settings AppSettings, value JsonElement) {
             if value.ValueKind != JsonValueKind.Array {
-                throw FormatException("bookmarks must be an array")
+                throw InvalidDataException("Settings: field bookmarks must be an array")
             }
+            var index = 0
             for entry in value.EnumerateArray() {
                 if entry.ValueKind != JsonValueKind.String {
-                    throw FormatException("bookmarks must contain folder paths")
+                    throw InvalidDataException("Settings: field bookmarks[" + index.ToString() + "] must be a string")
                 }
                 settings.Bookmarks.Add(BookmarkPath.Normalize(entry.GetString() ?? ""))
+                index++
             }
         }
 
-        private func readTheme(theme ThemePalette, value JsonElement) {
+        private func readTheme(theme ThemePalette, value JsonElement, name string) {
             if value.ValueKind != JsonValueKind.Object {
-                throw FormatException("theme must be an object")
+                throw InvalidDataException("Settings: field " + name + " must be an object")
             }
             let seen = HashSet[string](StringComparer.Ordinal)
             for property in value.EnumerateObject() {
                 if !seen.Add(property.Name) {
-                    throw FormatException("Duplicate theme color: " + property.Name)
+                    throw InvalidDataException("Settings: duplicate field " + name + "." + property.Name)
                 }
                 if property.Value.ValueKind != JsonValueKind.String {
-                    throw FormatException("Theme color " + property.Name + " must be a string")
+                    throw InvalidDataException("Settings: field " + name + "." + property.Name + " must be a string")
                 }
                 let color = property.Value.GetString() ?? ""
                 if !AppSettings.ValidColor(color) {
-                    throw FormatException("Invalid theme color: " + property.Name)
+                    throw InvalidDataException("Settings: field " + name + "." + property.Name + " must be #RRGGBB")
                 }
                 if property.Name == "background" {
                     theme.Background = color
@@ -245,7 +255,7 @@ internal class SettingsService {
                 } else if property.Name == "selection" {
                     theme.Selection = color
                 } else {
-                    throw FormatException("Unknown theme color: " + property.Name)
+                    throw InvalidDataException("Settings: unknown field " + name + "." + property.Name)
                 }
             }
         }

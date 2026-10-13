@@ -3,6 +3,7 @@ package gloop
 import Goo
 import Goo.Widgets
 import System
+import System.IO
 
 partial class BrowserView {
     private var setupStep int32
@@ -26,8 +27,8 @@ partial class BrowserView {
             if FirstRunSetup.IsSystemRegistered() {
                 setupStep = 1
             }
-        } catch (failure Exception) {
-            error = failure.Message
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+            error = "Check desktop entry failed for Gloop: " + failure.Message
         }
         setupFirstStep = setupStep
         OpenDialog(DialogKind.DesktopSetup, "")
@@ -103,6 +104,11 @@ partial class BrowserView {
 
     private func ApplySetupChoice(step int32, accept bool, next int32, done chan[bool]) {
         var error = ""
+        var operation = switch step {
+            case 0: "Install desktop entry"
+            case 1: "Set default file manager"
+            default: "Register portal and set default file chooser"
+        }
         try {
             if accept {
                 let action = switch step {
@@ -113,10 +119,11 @@ partial class BrowserView {
                 FirstRunSetup.Apply(action)
             }
             if next == 3 {
+                operation = "Complete desktop setup"
                 FirstRunSetup.Complete()
             }
         } catch (failure Exception) {
-            error = failure.Message
+            error = operation + " failed for Gloop: " + failure.Message
         }
         try {
             Host.Post(
@@ -137,6 +144,8 @@ partial class BrowserView {
                     )
                 }
             )
+        } catch (failure InvalidOperationException) {
+            return
         } finally {
             done.Close()
         }

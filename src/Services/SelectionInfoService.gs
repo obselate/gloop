@@ -27,7 +27,15 @@ class SelectionInfoService {
             generation -> {
                 let choices = service.Applications(path)
                 choices.RemoveAll(choice -> choice.Id == DesktopIntegration.AppId + ".desktop")
-                deliver(owner, work, generation, () -> done(choices, ""))
+                deliver(
+                    owner,
+                    work,
+                    generation,
+                    () -> done(
+                        choices,
+                        choices.Count == 0 ? "Open With failed for " + path + ": No matching applications": ""
+                    )
+                )
             },
             (generation, failure) -> deliver(
                 owner,
@@ -59,7 +67,12 @@ class SelectionInfoService {
                 owner,
                 work,
                 generation,
-                () -> done(FileProperties{Count: paths.Count, Error: failure.Message})
+                () -> done(
+                    FileProperties{
+                        Count: paths.Count,
+                        Error: "Read properties failed for " + String.Join(", ", paths) + ": " + failure.Message
+                    }
+                )
             )
         )
     }
@@ -102,7 +115,7 @@ class SelectionInfoService {
                         }
                     }
                 )
-            } catch (failure Exception) { }
+            } catch (failure InvalidOperationException) { }
         }
     }
 }
@@ -119,10 +132,10 @@ func launchWorker(
     try {
         error = service.Launch(id, paths)
     } catch (failure Exception) {
-        error = failure.Message
+        error = "Open With failed for " + String.Join(", ", paths) + ": " + failure.Message
     }
     session.FinishLaunch()
     try {
         window.Post(() -> done(error))
-    } catch (failure Exception) { }
+    } catch (failure InvalidOperationException) { }
 }

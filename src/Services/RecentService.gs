@@ -47,9 +47,9 @@ class RecentService {
                 }
                 try {
                     entries.Add(readEntry(path))
-                } catch (failure Exception) { }
+                } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
             }
-        } catch (failure Exception) { }
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
         return entries
     }
 
@@ -78,7 +78,7 @@ class RecentService {
             return Path.TrimEndingDirectorySeparator(
                 Path.GetFullPath(Uri.UnescapeDataString(markup.Replace("&amp;", "&")))
             )
-        } catch (failure Exception) {
+        } catch (failure ArgumentException) {
             return ""
         }
     }

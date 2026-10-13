@@ -353,8 +353,11 @@ internal class AppSettings {
             if settings.ThemeName != CustomThemeName && !ThemePresets.Contains(settings.ThemeName) {
                 return "Unknown theme: " + settings.ThemeName
             }
-            if !validTheme(settings.Theme) || !validTheme(settings.CustomTheme) {
-                return "Theme colors must be #RRGGBB"
+            if !validTheme(settings.Theme) {
+                return "Settings: field theme colors must be #RRGGBB"
+            }
+            if !validTheme(settings.CustomTheme) {
+                return "Settings: field customTheme colors must be #RRGGBB"
             }
             return ""
         }

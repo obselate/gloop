@@ -30,7 +30,7 @@ unsafe class PropertiesService {
         var result = FileProperties{Count: paths.Count}
         try {
             if paths.Count == 0 {
-                result.Error = "Nothing is selected"
+                result.Error = "Read properties failed for selection: Nothing is selected"
                 return result
             }
             if paths.Count == 1 {
@@ -52,8 +52,10 @@ unsafe class PropertiesService {
             result.Complete = tally.Complete
             result.Error = tally.Error
             result.Location = common ? location: ""
-        } catch (failure Exception) {
-            result.Error = failure.Message
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
+            result.Error = "Read properties failed for " + String.Join(", ", paths) + ": " + failure.Message
             result.Complete = false
         }
         return result
@@ -72,7 +74,9 @@ unsafe class PropertiesService {
             required | FileSystemService.StatBirthTime,
             buffer
         ) != 0 {
-            result.Error = Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path
+            result.Error = "Read properties failed for " + path + ": " + Win32Exception(
+                Marshal.GetLastWin32Error()
+            ).Message
             return
         }
         if (uint32(Marshal.ReadInt32(buffer, 0)) & required) != required {
@@ -105,10 +109,10 @@ unsafe class PropertiesService {
             } else {
                 tally.Size += FileInfo(path).Length
             }
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             tally.Complete = false
             if tally.Error == "" {
-                tally.Error = failure.Message
+                tally.Error = "Measure failed for " + path + ": " + failure.Message
             }
         }
     }
@@ -137,10 +141,10 @@ unsafe class PropertiesService {
                         pending.Push(entry.Subfolder)
                     }
                 }
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 tally.Complete = false
-                if directory == root && tally.Error == "" {
-                    tally.Error = failure.Message
+                if tally.Error == "" {
+                    tally.Error = "Measure failed for " + directory + ": " + failure.Message
                 }
             }
         }

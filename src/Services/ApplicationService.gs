@@ -27,7 +27,7 @@ class ApplicationService {
                 return known
             }
             return isText(fullPath) ? "text/plain": "application/octet-stream"
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             return "application/octet-stream"
         }
     }
@@ -36,23 +36,21 @@ class ApplicationService {
     /// for the exact type, then those for its parent types such as text/plain.
     internal func Applications(path string) List[AppChoice] {
         let choices = List[AppChoice]()
-        try {
-            let types = database()
-            let associations = associationDatabase()
-            let kind = MimeType(path)
-            let chain = List[string]{kind}
-            chain.AddRange(types.Ancestors(kind))
-            let seen = HashSet[string]()
-            for name in chain {
-                for id in associations.Ids(types.Names(name)) {
-                    if choices.Count < MaxChoices && seen.Add(id) {
-                        if let app = find(id) {
-                            choices.Add(AppChoice{Id: id, Name: app.Name, Default: choices.Count == 0})
-                        }
+        let types = database()
+        let associations = associationDatabase()
+        let kind = MimeType(path)
+        let chain = List[string]{kind}
+        chain.AddRange(types.Ancestors(kind))
+        let seen = HashSet[string]()
+        for name in chain {
+            for id in associations.Ids(types.Names(name)) {
+                if choices.Count < MaxChoices && seen.Add(id) {
+                    if let app = find(id) {
+                        choices.Add(AppChoice{Id: id, Name: app.Name, Default: choices.Count == 0})
                     }
                 }
             }
-        } catch (failure Exception) { }
+        }
         return choices
     }
 
@@ -61,17 +59,22 @@ class ApplicationService {
     internal func Launch(id string, paths List[string]) string {
         try {
             guard let app = find(id) else {
-                return "Application not found: " + id
+                return "Open With failed for " + String.Join(", ", paths) + ": Application not found: " + id
             }
             for command in plan(app, paths) {
                 let error = start(command, app.WorkingDirectory)
                 if error != "" {
-                    return error
+                    return "Open With failed for " + String.Join(", ", paths) + ": " + error
                 }
             }
             return ""
-        } catch (failure Exception) {
-            return failure.Message
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is System
+            .ComponentModel
+            .Win32Exception ||
+            failure is InvalidOperationException {
+            return "Open With failed for " + String.Join(", ", paths) + ": " + failure.Message
         }
     }
 

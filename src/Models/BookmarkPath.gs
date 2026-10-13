@@ -16,7 +16,7 @@ internal class BookmarkPath {
                     return ""
                 }
                 return Path.TrimEndingDirectorySeparator(Path.GetFullPath(value))
-            } catch (e Exception) {
+            } catch (e ArgumentException) {
                 return ""
             }
         }

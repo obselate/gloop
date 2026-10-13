@@ -14,7 +14,7 @@ data struct PlacesRequest {
 
 class PlacesService {
     private let window Window
-    private let changed Action
+    private let changed Action[string]
     private let gate object = Object()
     private var volumesPending bool
     private var spacePending string = ""
@@ -29,7 +29,7 @@ class PlacesService {
     internal var TrashCount int32
     internal var Space Volume = Volume{}
 
-    internal init(window Window, changed Action) {
+    internal init(window Window, changed Action[string]) {
         this.window = window
         this.changed = changed
     }
@@ -92,7 +92,7 @@ class PlacesService {
         }
         try {
             window.Post(() -> Apply(request, places, volumes, trashCount, space))
-        } catch (failure Exception) { }
+        } catch (failure InvalidOperationException) { }
     }
 
     internal func CompleteDevice(done Action[string, string], path string, error string) {
@@ -155,7 +155,7 @@ class PlacesService {
         if request.SpacePath != "" && request.SpaceGeneration == spaceGeneration {
             Space = space
         }
-        changed()
+        changed("")
     }
 
     private func StartDevice(volume Volume, mount bool, done Action[string, string]) {
@@ -163,7 +163,13 @@ class PlacesService {
             return
         }
         if deviceBusy {
-            done("", "Another disk operation is still running")
+            done(
+                "",
+                (mount ? "Mount": "Eject") +
+                    " failed for " +
+                    volume.Device +
+                    ": Another disk operation is still running"
+            )
             return
         }
         deviceBusy = true
@@ -171,23 +177,47 @@ class PlacesService {
         let service = this
         go placesDevice(owner, service, volume, mount, done)
     }
+
+    internal func ReportFailure(request PlacesRequest, failure Exception) {
+        try {
+            window.Post(
+                () -> changed(
+                    "Refresh places failed for " +
+                        (request.SpacePath == "" ? "volumes and Trash": request.SpacePath) +
+                        ": " +
+                        failure.Message
+                )
+            )
+        } catch (closed InvalidOperationException) { }
+    }
 }
 
 func placesWorker(window Window, service PlacesService) {
     while let request = service.Take() {
-        service.Process(request)
+        try {
+            service.Process(request)
+        } catch (failure Exception) {
+            service.ReportFailure(request, failure)
+        }
     }
 }
 
 func placesDevice(window Window, service PlacesService, volume Volume, mount bool, done Action[string, string]) {
     var path = ""
     var error string
-    if mount {
-        error = VolumeService().Mount(volume.Device, out path)
-    } else {
-        error = VolumeService().Eject(volume)
+    try {
+        if mount {
+            error = VolumeService().Mount(volume.Device, out path)
+        } else {
+            error = VolumeService().Eject(volume)
+        }
+    } catch (failure Exception) {
+        error = failure.Message
+    }
+    if error != "" {
+        error = (mount ? "Mount": "Eject") + " failed for " + volume.Device + ": " + error
     }
     try {
         window.Post(() -> service.CompleteDevice(done, path, error))
-    } catch (failure Exception) { }
+    } catch (failure InvalidOperationException) { }
 }

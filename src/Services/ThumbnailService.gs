@@ -218,6 +218,8 @@ class ThumbnailService : IDisposable {
 
     internal func Process(item ThumbnailItem) {
         var result = ThumbnailData{}
+        var loadedSource ImageSource?
+        var completed bool
         try {
             let info = FileInfo(item.Entry.FullPath)
             if info.Length == item.Entry.Size && info.LastWriteTime == item.Entry.Modified {
@@ -226,6 +228,7 @@ class ThumbnailService : IDisposable {
                 } else {
                     result = loadText(item)
                 }
+                loadedSource = result.Source
                 info.Refresh()
                 if info.Length != item.Entry.Size || info.LastWriteTime != item.Entry.Modified {
                     if let source = result.Source {
@@ -234,12 +237,22 @@ class ThumbnailService : IDisposable {
                     result = ThumbnailData{}
                 }
             }
-        } catch (failure Exception) {
-            if let source = result.Source {
-                source.Dispose()
-            }
+            completed = true
+        } catch (failure Exception) when failure is OperationCanceledException ||
+            failure is ImageLimitException ||
+            failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is NotSupportedException {
             result = ThumbnailData{}
+        } finally {
+            if !completed {
+                loadedSource?.Dispose()
+            }
         }
+        Complete(item, result)
+    }
+
+    internal func Complete(item ThumbnailItem, result ThumbnailData) {
         let notify = List[ThumbnailLease]()
         var keep bool
         lock gate {
@@ -274,7 +287,7 @@ class ThumbnailService : IDisposable {
         for lease in leases {
             try {
                 window.Post(() -> Notify(lease))
-            } catch (failure Exception) { }
+            } catch (failure InvalidOperationException) { }
         }
     }
 
@@ -451,6 +464,16 @@ class ThumbnailService : IDisposable {
 
 func thumbnailWorker(service ThumbnailService) {
     while let item = service.Take() {
-        service.Process(item)
+        try {
+            service.Process(item)
+        } catch (failure Exception) {
+            service.Complete(
+                item,
+                ThumbnailData{
+                    Kind: "text",
+                    Text: "Thumbnail failed for " + item.Entry.FullPath + ": " + failure.Message
+                }
+            )
+        }
     }
 }

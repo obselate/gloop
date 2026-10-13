@@ -38,29 +38,28 @@ class TrashService {
                 writeTrashInfo(infoPath, from)
                 metadataCreated = true
                 operations.MoveEntry(from, dataPath)
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 if metadataCreated {
                     try {
                         File.Delete(infoPath)
-                    } catch (cleanupFailure Exception) {
-                        throw IOException(failure.Message + ". Trash metadata remains at " + infoPath)
+                    } catch (cleanupFailure Exception) when cleanupFailure is IOException ||
+                        cleanupFailure is UnauthorizedAccessException {
+                        throw IOException(
+                            failure.Message + ". Trash metadata remains at " + infoPath + ": " + cleanupFailure.Message
+                        )
                     }
                 }
-                throw failure
+                rethrow
             }
             return OperationResult{Source: source, FinalPath: dataPath, Error: ""}
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
 
-    internal func FilesDirectory() string {
-        try {
-            return Path.GetFullPath(Path.Combine(TrashRoot(), "files"))
-        } catch (failure Exception) {
-            return ""
-        }
-    }
+    internal func FilesDirectory() string -> Path.GetFullPath(Path.Combine(TrashRoot(), "files"))
 
     internal func Count() int32 {
         try {
@@ -69,7 +68,7 @@ class TrashService {
                 count++
             }
             return count
-        } catch (failure Exception) {
+        } catch (failure DirectoryNotFoundException) {
             return 0
         }
     }
@@ -88,11 +87,13 @@ class TrashService {
             finalPath = target
             try {
                 File.Delete(infoFile(source))
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 throw IOException("Restored " + target + ". Trash metadata remains: " + failure.Message)
             }
             return OperationResult{Source: trashPath, FinalPath: finalPath, Error: ""}
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return OperationResult{Source: trashPath, FinalPath: finalPath, Error: failure.Message}
         }
     }
@@ -103,7 +104,9 @@ class TrashService {
             FileSystemService.Remove(source)
             File.Delete(infoFile(source))
             return OperationResult{Source: trashPath, FinalPath: "", Error: ""}
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return OperationResult{Source: trashPath, FinalPath: "", Error: failure.Message}
         }
     }
@@ -116,8 +119,8 @@ class TrashService {
                 try {
                     FileSystemService.Remove(entry)
                     File.Delete(infoFile(entry))
-                } catch (failure Exception) {
-                    result = result == "" ? failure.Message: result
+                } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+                    result = result == "" ? entry + ": " + failure.Message: result
                 }
             }
             for orphan in entries(infoDirectory()) {
@@ -127,11 +130,11 @@ class TrashService {
                     ) {
                         File.Delete(orphan)
                     }
-                } catch (failure Exception) {
-                    result = result == "" ? failure.Message: result
+                } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+                    result = result == "" ? orphan + ": " + failure.Message: result
                 }
             }
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             return OperationResult{Source: FilesDirectory(), FinalPath: "", Error: failure.Message}
         }
         return OperationResult{Source: FilesDirectory(), FinalPath: "", Error: result}
@@ -172,10 +175,12 @@ class TrashService {
         try {
             let infoPath = infoFile(source)
             if FileInfo(infoPath).Length > InfoByteLimit {
-                return item
+                throw InvalidDataException("Trash metadata exceeds " + InfoByteLimit.ToString() + " bytes: " + infoPath)
             }
             item = TrashInfo.Parse(source, File.ReadLines(infoPath))
-        } catch (failure Exception) { }
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+            throw IOException("Read Trash metadata failed for " + source + ": " + failure.Message)
+        }
         return item
     }
 
@@ -184,14 +189,17 @@ class TrashService {
         try {
             using let writer = StreamWriter(stream)
             writer.Write(TrashInfo.Format(source, DateTime.Now))
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             stream.Dispose()
             try {
                 File.Delete(path)
-            } catch (cleanupFailure Exception) {
-                throw IOException(failure.Message + ". Trash metadata remains at " + path)
+            } catch (cleanupFailure Exception) when cleanupFailure is IOException ||
+                cleanupFailure is UnauthorizedAccessException {
+                throw IOException(
+                    failure.Message + ". Trash metadata remains at " + path + ": " + cleanupFailure.Message
+                )
             }
-            throw failure
+            rethrow
         }
     }
 

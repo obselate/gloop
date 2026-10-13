@@ -145,7 +145,15 @@ partial class BrowserView : Cell {
         value.MetricsChanged += PreviewWindowMetrics
         thumbnails = ThumbnailService(value)
         selectionInfo = SelectionInfoService(value)
-        folderCounts = FolderCountService(value, () -> Rebuild())
+        folderCounts = FolderCountService(
+            value,
+            error -> {
+                if error != "" {
+                    Model.Status = error
+                }
+                Rebuild()
+            }
+        )
         value.FocusChanged += RefreshPlacesOnFocus
         Model.Places.Refresh()
         if launch.ChooserRequest == nil {

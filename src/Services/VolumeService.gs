@@ -92,7 +92,7 @@ class VolumeService {
                     volumes.Add(volume)
                 }
             }
-        } catch (failure Exception) { }
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
         return volumes
     }
 
@@ -107,7 +107,7 @@ class VolumeService {
                 }
             }
             return withSpace(volume, volume.MountPath != "" ? volume.MountPath: fullPath)
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             return volume
         }
     }
@@ -155,7 +155,9 @@ class VolumeService {
             return ""
         } catch (failure DBusErrorReplyException) {
             return failure.ErrorMessage != "" ? failure.ErrorMessage: failure.ErrorName
-        } catch (failure Exception) {
+        } catch (failure DBusConnectFailedException) {
+            return failure.Message
+        } catch (failure DBusConnectionClosedException) {
             select {
                 case <- expired {
                     return "Disk service did not answer within " + Timeout.TotalSeconds.ToString() + " s"
@@ -286,7 +288,7 @@ class VolumeService {
                     properties[line.Substring(2, split - 2)] = line.Substring(split + 1)
                 }
             }
-        } catch (failure Exception) { }
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
         return properties
     }
 
@@ -296,7 +298,11 @@ class VolumeService {
         try {
             bytes = Int64.Parse(File.ReadAllText("/sys/class/block/" + name + "/size").Trim()) * SectorBytes
             label = decode(value(properties, "ID_FS_LABEL_ENC"))
-        } catch (failure Exception) { }
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is FormatException ||
+            failure is OverflowException ||
+            failure is ArgumentException { }
         let removable = value(properties, "ID_BUS") == "usb" || value(properties, "ID_INTEGRATION") == "external"
         return Volume{Name: label != "" ? label: sizeName(bytes), Removable: removable, Ejectable: removable}
     }
@@ -329,7 +335,7 @@ class VolumeService {
             let drive = DriveInfo(path)
             result.TotalBytes = drive.TotalSize
             result.FreeBytes = drive.AvailableFreeSpace
-        } catch (failure Exception) { }
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
         return result
     }
 }

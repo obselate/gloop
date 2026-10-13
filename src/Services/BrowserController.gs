@@ -53,7 +53,15 @@ class BrowserController {
         Directories = DirectoryLoader(window, this, settings)
         Operations = FileOperationQueue(window, this)
         Previews = PreviewLoader(window, this, previewWidth, previewHeight)
-        Places = PlacesService(window, changed)
+        Places = PlacesService(
+            window,
+            error -> {
+                if error != "" {
+                    Status = error
+                }
+                changed()
+            }
+        )
     }
 
     internal func ActivePane() BrowserPane -> Pane(ActiveIndex)
@@ -567,16 +575,21 @@ func browserOpen(window Window, controller BrowserController, path string) {
     try {
         error = FileSystemService().Open(path)
     } catch (failure Exception) {
-        error = failure.Message
+        error = "Open failed for " + path + ": " + failure.Message
     }
     try {
         window.Post(() -> controller.CompleteOpen(error))
-    } catch (failure Exception) { }
+    } catch (failure InvalidOperationException) { }
 }
 
 func browserOpenTerminal(window Window, controller BrowserController, directory string) {
-    let error = TerminalService().Open(directory)
+    var error string
+    try {
+        error = TerminalService().Open(directory)
+    } catch (failure Exception) {
+        error = "Open terminal failed for " + directory + ": " + failure.Message
+    }
     try {
         window.Post(() -> controller.CompleteTerminal(error))
-    } catch (failure Exception) { }
+    } catch (failure InvalidOperationException) { }
 }

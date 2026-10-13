@@ -6,6 +6,7 @@ class LatestWork {
     private let gate object = Object()
     private var generation int32
     private var pending Action?
+    private var pendingFailure Action[Exception]?
     private var running bool
     private var closed bool
 
@@ -17,13 +18,8 @@ class LatestWork {
             }
             generation++
             let current = generation
-            pending = () -> {
-                try {
-                    job(current)
-                } catch (failure Exception) {
-                    failed(current, failure)
-                }
-            }
+            pending = () -> job(current)
+            pendingFailure = failure -> failed(current, failure)
             start = !running
             running = true
         }
@@ -53,10 +49,12 @@ class LatestWork {
         }
     }
 
-    internal func Take() Action? {
+    internal func Take(out failed Action[Exception]?) Action? {
         lock gate {
             let job = pending
             pending = nil
+            failed = pendingFailure
+            pendingFailure = nil
             if job == nil {
                 running = false
             }
@@ -66,7 +64,18 @@ class LatestWork {
 }
 
 func latestWorker(work LatestWork) {
-    while let job = work.Take() {
-        job()
+    while true {
+        var failed Action[Exception]?
+        guard let job = work.Take(out failed) else {
+            return
+        }
+        try {
+            job()
+        } catch (failure Exception) {
+            guard let report = failed else {
+                throw Exception("Latest work has no failure handler", failure)
+            }
+            report(failure)
+        }
     }
 }

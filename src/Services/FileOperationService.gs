@@ -33,15 +33,17 @@ unsafe class FileOperationService {
             try {
                 Directory.CreateDirectory(staging)
                 MoveEntry(staging, destination)
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 if !cleanup(staging) {
                     throw IOException(failure.Message + ". Partial folder remains at " + staging)
                 }
-                throw failure
+                rethrow
             }
             return OperationResult{Source: directory, FinalPath: destination, Error: ""}
-        } catch (failure Exception) {
-            return OperationResult{Source: directory, FinalPath: "", Error: failure.Message}
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
+            return OperationResult{Source: name, FinalPath: "", Error: failure.Message}
         }
     }
 
@@ -57,7 +59,9 @@ unsafe class FileOperationService {
             RequireAbsent(destination)
             MoveEntry(from, destination)
             return OperationResult{Source: source, FinalPath: destination, Error: ""}
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
@@ -72,14 +76,16 @@ unsafe class FileOperationService {
             try {
                 copyEntry(from, staging)
                 MoveEntry(staging, destination)
-            } catch (failure Exception) {
+            } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
                 if !cleanup(staging) {
                     throw IOException(failure.Message + ". Partial copy remains at " + staging)
                 }
-                throw failure
+                rethrow
             }
             return OperationResult{Source: source, FinalPath: destination, Error: ""}
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
@@ -92,7 +98,9 @@ unsafe class FileOperationService {
             validateDestination(from, parent, destination)
             MoveEntry(from, destination)
             return OperationResult{Source: source, FinalPath: destination, Error: ""}
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException ||
+            failure is UnauthorizedAccessException ||
+            failure is ArgumentException {
             return OperationResult{Source: source, FinalPath: "", Error: failure.Message}
         }
     }
@@ -241,7 +249,7 @@ unsafe class FileOperationService {
                 FileSystemService.Remove(path)
             }
             return true
-        } catch (failure Exception) {
+        } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             return false
         }
     }
