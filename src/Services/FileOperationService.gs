@@ -327,6 +327,11 @@ unsafe class FileOperationService {
             return
         }
 
+        RequireRegularFile(source)
+        File.Copy(source, destination, false)
+    }
+
+    internal func RequireRegularFile(source string) {
         if OperatingSystem.IsLinux() {
             let buffer *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
             let pointer = IntPtr(buffer)
@@ -349,8 +354,6 @@ unsafe class FileOperationService {
                 throw IOException("Cannot copy non-regular file: " + source)
             }
         }
-
-        File.Copy(source, destination, false)
     }
 
     private func cleanup(path string) bool {
