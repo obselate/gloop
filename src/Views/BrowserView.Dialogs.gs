@@ -9,10 +9,12 @@ import System.IO
 
 partial class BrowserView {
     private let dialogButtons Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle]()
+    private let shortcutsScroll ElementHandle = ElementHandle()
+    private const ShortcutScrollStep float64 = 26
 
     private func DialogTitle(kind DialogKind) string -> switch kind {
         case DialogKind.Preferences: "Preferences"
-        case DialogKind.Shortcuts: AppSettings.ActionCatalog["ShowShortcuts"].Label
+        case DialogKind.Shortcuts: "Keyboard shortcuts"
         case DialogKind.DesktopSetup: "Desktop setup"
         case DialogKind.Properties: "Properties"
         case DialogKind.Bookmarks: "Bookmarks"
@@ -141,23 +143,15 @@ partial class BrowserView {
         let rows = List[Blob](settings.Keybindings.Count)
 
         for binding in settings.Keybindings {
-            let row = PreferenceRow.Build(
-                AppSettings.ActionCatalog[binding.Key].Label,
-                Text{
-                    Content: binding.Value,
-                    Color: p.Muted,
-                    FontSize: 13,
-                    Width: 160,
-                    FlexShrink: 0,
-                    TextWrap: TextWrap.Wrap,
-                },
-                p
-            )
+            let row = PreferenceRow.Build(AppSettings.ActionCatalog[binding.Key].Label, Ui.KeyHint(binding.Value, p), p)
             row.MinHeight = 0
             rows.Add(row)
         }
 
-        return DialogShell.ScrollColumn(rows.ToArray(), p)
+        let list = DialogShell.ScrollColumn(rows.ToArray(), p)
+        list.Handle = shortcutsScroll
+
+        return list
     }
 
     private func DialogActions(p Palette) Blob {
