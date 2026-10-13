@@ -21,18 +21,22 @@ unsafe class FileSystemService {
 
     internal func List(path string, kind LocationKind, atTrashRoot bool, showHidden bool) DirectorySnapshot {
         let snapshot = DirectorySnapshot{DirectoryPath: path}
+
         if kind == LocationKind.Recent {
             for entry in RecentService().List(RecentEntryLimit) {
                 if showHidden || !entry.Name.StartsWith('.') {
                     snapshot.Entries.Add(entry)
                 }
             }
+
             return snapshot
         }
+
         try {
             if atTrashRoot && !Directory.Exists(snapshot.DirectoryPath) {
                 return snapshot
             }
+
             let kinds = Dictionary[string, string](StringComparer.OrdinalIgnoreCase)
             let options = EnumerationOptions()
             options.AttributesToSkip = FileAttributes(0)
@@ -42,22 +46,27 @@ unsafe class FileSystemService {
                 (ref raw FileSystemEntry) -> readEntry(ref raw, kinds),
                 options
             )
+
             if !showHidden {
                 enumeration.ShouldIncludePredicate = (ref raw FileSystemEntry) ->
                 raw.FileName.Length == 0 || raw.FileName[0] != '.'
             }
+
             for item in enumeration {
                 snapshot.Entries.Add(item)
             }
         } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             snapshot.Error = "List folder failed for " + path + ": " + failure.Message
         }
+
         return snapshot
     }
 
     internal func Sort(entries List[FileEntry], column SortColumn, descending bool) List[FileEntry] {
         let sorted = System.Collections.Generic.List[FileEntry](entries)
+
         SortInPlace(sorted, column, descending)
+
         return sorted
     }
 
@@ -70,38 +79,49 @@ unsafe class FileSystemService {
             let fullPath = Path.GetFullPath(path)
             let attributes = File.GetAttributes(fullPath)
             let name = Path.GetFileName(fullPath)
+
             if attributes.HasFlag(FileAttributes.ReparsePoint) {
                 return PreviewData{Kind: PreviewKind.Metadata, Text: "Symbolic link", Path: fullPath}
             }
             if attributes.HasFlag(FileAttributes.Directory) {
                 return PreviewData{Kind: PreviewKind.Metadata, Text: "Folder", Path: fullPath}
             }
+
             let size = FileInfo(fullPath).Length
             let extension = Path.GetExtension(name).ToLowerInvariant()
+
             if FileKinds.IsImage(extension) {
                 return PreviewData{Kind: PreviewKind.Image, Text: FormatSize(size), Path: fullPath}
             }
             if !FileKinds.IsText(extension) && !hasTextPrefix(fullPath, size) {
                 return PreviewData{Kind: PreviewKind.Metadata, Text: FormatSize(size), Path: fullPath}
             }
+
             if size == 0 {
                 return PreviewData{Kind: PreviewKind.Text, Text: "", Path: fullPath,}
             }
+
             let limit = int32(Math.Min(size, int64(PreviewByteLimit)))
             let buffer = [limit]uint8
             var count int32 = 0
             using let stream = FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+
             while count < limit {
                 if cancelled() {
                     throw OperationCanceledException()
                 }
+
                 let read = stream.Read(buffer, count, buffer.Length - count)
+
                 if read == 0 {
                     break
                 }
+
                 count += read
             }
+
             let sourceTruncated = size > int64(count)
+
             if TextContent.HasBinaryBytes(buffer, count, cancelled: cancelled) {
                 return PreviewData{
                     Kind: PreviewKind.Metadata,
@@ -109,14 +129,17 @@ unsafe class FileSystemService {
                     Path: fullPath
                 }
             }
+
             if sourceTruncated {
                 count = TextContent.CompleteUtf8Length(buffer, count)
             }
+
             let decoded = TextContent.Decode(buffer, count)
             let content = NormalizePreview(decoded, cancelled, out var shortened)
             let language = PreviewSyntaxService.DetectLanguage(extension, content)
             let highlighting = PreviewSyntaxService.Highlight(content, language, cancelled)
             var warning = ""
+
             if sourceTruncated {
                 warning = "Preview limited to the first " + (PreviewByteLimit / BytesPerMiB).ToString() + " MiB."
             }
@@ -126,6 +149,7 @@ unsafe class FileSystemService {
             if highlighting.Limited {
                 warning += " Syntax highlighting was limited."
             }
+
             return PreviewData{
                 Kind: PreviewKind.Text,
                 Text: content,
@@ -155,19 +179,25 @@ unsafe class FileSystemService {
         var lineShortened = false
         var index = 0
         var lastCheck = 0
+
         while index < decoded.Length {
             if index - lastCheck >= CancellationCheckCharacters {
                 if cancelled() {
                     throw OperationCanceledException()
                 }
+
                 lastCheck = index
             }
+
             let character = decoded[index]
+
             if character == '\r' || character == '\n' {
                 normalized.Append('\n')
+
                 if character == '\r' && index + 1 < decoded.Length && decoded[index + 1] == '\n' {
                     index++
                 }
+
                 lineBytes = 0
                 lineShortened = false
             } else if !lineShortened {
@@ -182,6 +212,7 @@ unsafe class FileSystemService {
                 } else {
                     3
                 }
+
                 if lineBytes + width <= PreviewLineByteLimit {
                     normalized.Append(character)
                     lineBytes += width
@@ -191,8 +222,10 @@ unsafe class FileSystemService {
                     lineShortened = true
                 }
             }
+
             index++
         }
+
         return normalized.ToString()
     }
 
@@ -200,12 +233,15 @@ unsafe class FileSystemService {
         if size == 0 {
             return false
         }
+
         using let stream = FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
         let buffer = [TextProbeBytes]uint8
         var count = stream.Read(buffer, 0, buffer.Length)
+
         if size > int64(count) {
             count = TextContent.CompleteUtf8Length(buffer, count)
         }
+
         return TextContent.IsText(buffer, count)
     }
 
@@ -213,14 +249,19 @@ unsafe class FileSystemService {
         try {
             let fullPath = Path.GetFullPath(path)
             File.GetAttributes(fullPath)
+
             let start = ProcessStartInfo("xdg-open")
             start.ArgumentList.Add(fullPath)
             start.UseShellExecute = false
+
             let process = Process.Start(start)
+
             guard let launched = process else {
                 return "Open failed for " + path + ": xdg-open did not start"
             }
+
             launched.Dispose()
+
             return ""
         } catch (failure Exception) when failure is IOException ||
             failure is UnauthorizedAccessException ||
@@ -252,6 +293,7 @@ unsafe class FileSystemService {
         internal func Exists(path string) bool {
             try {
                 File.GetAttributes(path)
+
                 return true
             } catch (failure Exception) when failure is FileNotFoundException || failure is DirectoryNotFoundException {
                 return false
@@ -260,12 +302,14 @@ unsafe class FileSystemService {
 
         internal func Remove(path string) {
             let attributes = File.GetAttributes(path)
+
             if attributes.HasFlag(FileAttributes.Directory) {
                 if !attributes.HasFlag(FileAttributes.ReparsePoint) {
                     for child in Directory.EnumerateFileSystemEntries(path) {
                         Remove(child)
                     }
                 }
+
                 Directory.Delete(path, false)
             } else {
                 File.Delete(path)
@@ -276,6 +320,7 @@ unsafe class FileSystemService {
             if size < BytesPerKiB {
                 return size.ToString() + " B"
             }
+
             if size < BytesPerMiB {
                 let value = float64(size) / BytesPerKiB
                 return (rounded ? Math.Round(value): value).ToString(
@@ -284,6 +329,7 @@ unsafe class FileSystemService {
                 ) +
                     " KiB"
             }
+
             if size < BytesPerGiB {
                 let value = float64(size) / BytesPerMiB
                 return (rounded ? Math.Round(value): value).ToString(
@@ -292,7 +338,9 @@ unsafe class FileSystemService {
                 ) +
                     " MiB"
             }
+
             let value = float64(size) / BytesPerGiB
+
             return (rounded ? Math.Round(value): value).ToString(rounded ? "0": "0.0", CultureInfo.InvariantCulture) +
                 " GiB"
         }
@@ -301,27 +349,32 @@ unsafe class FileSystemService {
     private func readEntry(ref raw FileSystemEntry, kinds Dictionary[string, string]) FileEntry {
         let name = raw.FileName.ToString()
         var entry = FileEntry{Name: name, FullPath: raw.ToFullPath(), Kind: "File"}
+
         try {
             let attributes = raw.Attributes
             entry.IsDirectory = attributes.HasFlag(FileAttributes.Directory)
             entry.IsSymlink = attributes.HasFlag(FileAttributes.ReparsePoint)
             entry.Modified = raw.LastWriteTimeUtc.LocalDateTime
+
             if entry.IsSymlink || entry.IsDirectory {
                 entry.Kind = FileKinds.EntryKind("", entry.IsDirectory, entry.IsSymlink)
             } else {
                 entry.Size = raw.Length
                 let extension = Path.GetExtension(name)
+
                 if extension != "" {
                     if !kinds.TryGetValue(extension, out var kind) {
                         kind = FileKinds.EntryKind(extension)
                         kinds.Add(extension, kind)
                     }
+
                     entry.Kind = kind
                 }
             }
         } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             entry.Kind = "Read metadata failed for " + name + ": " + failure.Message
         }
+
         return entry
     }
 
@@ -329,7 +382,9 @@ unsafe class FileSystemService {
         if left.IsDirectory != right.IsDirectory {
             return left.IsDirectory ? -1: 1
         }
+
         var result int32 = 0
+
         if column == SortColumn.Size {
             result = left.Size.CompareTo(right.Size)
         } else if column == SortColumn.Modified {
@@ -339,12 +394,14 @@ unsafe class FileSystemService {
         } else {
             result = String.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase)
         }
+
         if result == 0 {
             result = String.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase)
         }
         if result == 0 {
             result = String.Compare(left.Name, right.Name, StringComparison.Ordinal)
         }
+
         return descending ? -result: result
     }
 }

@@ -29,63 +29,85 @@ internal class SettingsWriter {
 
     internal func Save(settings AppSettings) string {
         let error = AppSettings.Validate(settings)
+
         if error != "" {
             return error
         }
+
         let snapshot = settings.Clone()
         var started chan[bool]?
+
         lock gate {
             if disposed {
                 return "Settings writer is closed"
             }
+
             version++
             pending = SettingsWriteRequest{Snapshot: snapshot, Version: version}
+
             if !running {
                 running = true
                 started = chan[bool](1)
                 completion = started
             }
         }
+
         if let done = started {
             go WriteLoop(done)
         }
+
         return ""
     }
 
     internal func ToggleBookmark(settings AppSettings, path string) string {
         let normalized = BookmarkPath.Normalize(path)
+
         if normalized == "" {
             return "Bookmark must be an absolute folder path"
         }
+
         let draft = settings.Clone()
+
         if !draft.Bookmarks.Remove(normalized) {
             if !Directory.Exists(normalized) {
                 return "Folder does not exist: " + normalized
             }
+
             draft.Bookmarks.Add(normalized)
         }
+
         let error = Save(draft)
+
         if error != "" {
             return error
         }
+
         settings.ApplyFrom(draft)
+
         return ""
     }
 
     internal func RemoveBookmark(settings AppSettings, path string) string {
         let normalized = BookmarkPath.Normalize(path)
+
         if normalized == "" {
             return "Bookmark must be an absolute folder path"
         }
+
         let draft = settings.Clone()
+
         if !draft.Bookmarks.Remove(normalized) {
             return ""
         }
+
         let error = Save(draft)
+
         if error != "" {
             return error
         }
+
         settings.ApplyFrom(draft)
+
         return ""
     }
 
@@ -93,31 +115,40 @@ internal class SettingsWriter {
         guard let folders = BookmarkDropService.NormalizePaths(paths) else {
             return "Drop existing local folders to add bookmarks"
         }
+
         let originalIndex = Math.Clamp(insertionIndex, 0, settings.Bookmarks.Count)
         let moved = HashSet[string](folders, StringComparer.Ordinal)
         var index = originalIndex
+
         for i in 0 ... originalIndex {
             if moved.Contains(settings.Bookmarks[i]) {
                 index--
             }
         }
+
         let draft = settings.Clone()
         draft.Bookmarks.RemoveAll(bookmark -> moved.Contains(bookmark))
         draft.Bookmarks.InsertRange(index, folders)
+
         let error = Save(draft)
+
         if error != "" {
             return error
         }
+
         settings.ApplyFrom(draft)
+
         return ""
     }
 
     internal func Dispose() {
         var done chan[bool]?
+
         lock gate {
             disposed = true
             done = completion
         }
+
         if let finished = done {
             <-finished
         }
@@ -126,24 +157,31 @@ internal class SettingsWriter {
     private func WriteLoop(done chan[bool]) {
         while true {
             var request SettingsWriteRequest?
+
             lock gate {
                 request = pending
                 pending = nil
+
                 if request == nil {
                     running = false
                     completion = nil
                 }
             }
+
             guard let current = request else {
                 done.Close()
+
                 return
             }
+
             var error string
+
             try {
                 error = service.Save(current.Snapshot)
             } catch (failure Exception) {
                 error = "Save settings failed for " + service.FilePath + ": " + failure.Message
             }
+
             if error != "" {
                 try {
                     window.Post(() -> ReportError(current.Version, error))
@@ -160,6 +198,7 @@ internal class SettingsWriter {
                 return
             }
         }
+
         onError(error)
     }
 }

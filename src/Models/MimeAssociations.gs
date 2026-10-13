@@ -20,6 +20,7 @@ class MimeAssociations {
                 }
             )
         }
+
         for group in cacheGroups {
             caches.Add(section(group, "MIME Cache"))
         }
@@ -31,22 +32,28 @@ class MimeAssociations {
         let defaults = List[string]()
         let added = List[string]()
         let removed = HashSet[string]()
+
         for file in files {
             let denied = HashSet[string](removed)
+
             for name in names {
                 collect(defaults, file.Defaults, name, denied)
                 collect(added, file.Added, name, denied)
                 removed.UnionWith(split(file.Removed, name))
             }
         }
+
         let ids = List[string](defaults)
         ids.AddRange(added)
+
         for cache in caches {
             for name in names {
                 ids.AddRange(split(cache, name))
             }
         }
+
         ids.RemoveAll(id -> removed.Contains(id))
+
         return ids
     }
 

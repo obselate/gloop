@@ -27,10 +27,13 @@ class FileKinds {
             if entry.IsDirectory {
                 return "folder"
             }
+
             let extension = Path.GetExtension(entry.Name).ToLowerInvariant()
+
             if IsImage(extension, true) {
                 return "image"
             }
+
             return switch extension {
                 case ".zip" or ".gz" or ".tar" or ".7z" or ".xz": "folder_zip"
                 case ".mp3" or ".flac" or ".wav" or ".ogg": "audio_file"

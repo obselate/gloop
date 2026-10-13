@@ -31,17 +31,21 @@ partial class BrowserView {
             handle = ElementHandle()
             dialogButtons[label] = handle
         }
+
         return Ui.ActionButton(label, action, p, primary, handle)
     }
 
     private func Dialog() Blob {
         let p = palette
+
         if dialog == DialogKind.DesktopSetup {
             return SetupDialog()
         }
+
         if dialog == DialogKind.Properties {
             return PropertiesDialog()
         }
+
         if dialog == DialogKind.Bookmarks {
             return DialogShell.Build(
                 DialogTitle(dialog),
@@ -56,8 +60,10 @@ partial class BrowserView {
                 520
             )
         }
+
         let content = DialogContent(p)
         let actions = DialogActions(p)
+
         return DialogShell.Build(
             DialogTitle(dialog),
             content,
@@ -82,6 +88,7 @@ partial class BrowserView {
 
     private func DialogContent(p Palette) Blob {
         let contents = List[Blob]()
+
         if dialog == DialogKind.Preferences {
             contents.Add(PreferencesContent())
         } else if dialog == DialogKind.MoveToTrash {
@@ -112,20 +119,24 @@ partial class BrowserView {
                 )
             )
         }
+
         if dialogError != "" {
             contents.Add(Ui.ErrorText(dialogError, p))
         }
+
         let content = Container{
             MinHeight: 0,
             FlexShrink: dialog == DialogKind.Preferences ? 1: 0,
             Gap: 14,
             Children: contents.ToArray(),
         }
+
         return content
     }
 
     private func DialogActions(p Palette) Blob {
         let buttons = List[Blob]()
+
         if dialog == DialogKind.Preferences {
             buttons.Add(DialogButton("Reset " + preferenceTab.ToLowerInvariant(), () -> ResetPreferencesTab(), p))
             buttons.Add(Container{FlexGrow: 1})
@@ -135,6 +146,7 @@ partial class BrowserView {
         } else {
             buttons.Add(DialogButton("Cancel", () -> CloseDialog(), p))
         }
+
         if dialog != DialogKind.Preferences {
             buttons.Add(
                 DialogButton(
@@ -157,17 +169,20 @@ partial class BrowserView {
                 )
             )
         }
+
         let actions = Container{
             FlexDirection: FlexDirection.Row,
             JustifyContent: JustifyContent.FlexEnd,
             Gap: 10,
             Children: buttons.ToArray(),
         }
+
         return actions
     }
 
     private func BookmarkChoices() Blob {
         let p = palette
+
         if settings.Bookmarks.Count == 0 {
             return Text{
                 Content: "No bookmarks yet. Use " +
@@ -178,7 +193,9 @@ partial class BrowserView {
                 TextWrap: TextWrap.Wrap,
             }
         }
+
         let rows = List[Blob]()
+
         for path in settings.Bookmarks {
             rows.Add(
                 PlacesSidebar.Bookmark(
@@ -196,6 +213,7 @@ partial class BrowserView {
                 )
             )
         }
+
         return DialogShell.ScrollColumn(
             rows.ToArray(),
             p,
@@ -214,6 +232,7 @@ partial class BrowserView {
         dialog = kind
         dialogValue = value
         dialogError = ""
+
         Rebuild()
     }
 
@@ -221,13 +240,16 @@ partial class BrowserView {
         if setupBusy {
             return
         }
+
         CommitPreferenceBindings()
         Selection.CancelDescribe()
+
         focusScope?.Dispose()
         focusScope = nil
         dialog = DialogKind.None
         dialogError = ""
         preferenceInputs.Clear()
+
         Rebuild()
     }
 
@@ -237,6 +259,7 @@ partial class BrowserView {
             AcceptChooser(true)
             return
         }
+
         if dialog == DialogKind.NewFolder {
             Model.CreateFolder(dialogValue)
         } else if dialog == DialogKind.Rename {
@@ -252,6 +275,7 @@ partial class BrowserView {
         } else if dialog == DialogKind.OpenLocation {
             Model.Navigate(dialogValue)
         }
+
         CloseDialog()
         FocusFiles()
     }

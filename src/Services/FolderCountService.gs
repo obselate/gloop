@@ -39,6 +39,7 @@ class FolderCountService {
     internal func Count(entry FileEntry, showHidden bool) int32 {
         let key = entry.FullPath + "\0" + entry.Modified.Ticks.ToString() + (showHidden ? "\0h": "")
         var started bool
+
         lock gate {
             if closed {
                 return -1
@@ -46,21 +47,26 @@ class FolderCountService {
             if counts.TryGetValue(key, out var count) {
                 return count
             }
+
             if queued.Add(key) {
                 if pending.Count >= QueueLimit {
                     queued.Remove(pending[0].Key)
                     pending.RemoveAt(0)
                 }
+
                 pending.Add(FolderCountRequest{Key: key, Path: entry.FullPath, ShowHidden: showHidden})
+
                 if workers < WorkerLimit {
                     workers++
                     started = true
                 }
             }
         }
+
         if started {
             go folderCountWorker(this)
         }
+
         return -1
     }
 
@@ -68,10 +74,13 @@ class FolderCountService {
         lock gate {
             if closed || pending.Count == 0 {
                 workers--
+
                 return nil
             }
+
             let request = pending[pending.Count - 1]
             pending.RemoveAt(pending.Count - 1)
+
             return request
         }
     }
@@ -79,17 +88,21 @@ class FolderCountService {
     internal func Process(request FolderCountRequest) {
         var count int32
         var error = ""
+
         try {
             let options = EnumerationOptions()
             options.AttributesToSkip = FileAttributes(0)
             options.IgnoreInaccessible = false
             let enumeration = FileSystemEnumerable[bool](request.Path, (ref raw FileSystemEntry) -> true, options)
+
             if !request.ShowHidden {
                 enumeration.ShouldIncludePredicate = (ref raw FileSystemEntry) ->
                 raw.FileName.Length == 0 || raw.FileName[0] != '.'
             }
+
             for item in enumeration {
                 count++
+
                 if (count & CancellationCheckMask) == 0 && isClosed() {
                     return
                 }
@@ -98,26 +111,34 @@ class FolderCountService {
             count = -2
             error = "Count folder failed for " + request.Path + ": " + failure.Message
         }
+
         var notify bool
+
         lock gate {
             if closed {
                 return
             }
+
             if counts.Count >= CacheLimit {
                 counts.Clear()
             }
+
             counts[request.Key] = count
             queued.Remove(request.Key)
+
             if error != "" {
                 this.error = error
             }
+
             let now = Environment.TickCount64
+
             if !posted && (pending.Count == 0 || now - lastPost >= NotifyIntervalMilliseconds) {
                 posted = true
                 lastPost = now
                 notify = true
             }
         }
+
         if notify {
             try {
                 window.Post(() -> flush())
@@ -136,14 +157,17 @@ class FolderCountService {
 
     private func flush() {
         var error string
+
         lock gate {
             posted = false
             error = this.error
             this.error = ""
+
             if closed {
                 return
             }
         }
+
         changed(error)
     }
 
@@ -159,6 +183,7 @@ class FolderCountService {
             counts[request.Key] = -2
             error = "Count folder failed for " + request.Path + ": " + failure.Message
         }
+
         try {
             window.Post(() -> flush())
         } catch (closed InvalidOperationException) { }

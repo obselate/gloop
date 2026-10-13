@@ -7,6 +7,7 @@ import System
 open class FileContextMenu : Cell[FileContextMenuInput] {
     protected override func Build(value FileContextMenuInput) Blob {
         let p = value.Palette
+
         return Cell.Mount[MenuInput, Menu](
             "menu",
             MenuInput{
@@ -68,13 +69,17 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                 AlignItems: AlignItems.Center,
                 Gap: 8,
             }
+
             if icon != "" || checked {
                 content.Children.Add(Ui.Icon(checked ? "check": icon, p.Text, 16))
             }
+
             content.Children.Add(Container{FlexGrow: 1, MinWidth: 0, Ui.Label(label, p.Text, 13)})
+
             if shortcut != "" {
                 content.Children.Add(Ui.Label(shortcut, p.Muted, 11))
             }
+
             return MenuItem{Id: action, Label: label, Disabled: disabled, Content: content}
         }
     }

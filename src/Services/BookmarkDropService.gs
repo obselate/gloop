@@ -12,10 +12,12 @@ internal class BookmarkDropService {
         if preview {
             return true
         }
+
         if !Object.ReferenceEquals(lastPaths, paths) {
             lastPaths = paths
             lastValid = NormalizePaths(paths) != nil
         }
+
         return lastValid
     }
 
@@ -29,17 +31,22 @@ internal class BookmarkDropService {
             if paths.Count == 0 {
                 return nil
             }
+
             let folders = List[string]()
             let seen = HashSet[string](StringComparer.Ordinal)
+
             for path in paths {
                 let normalized = BookmarkPath.Normalize(path)
+
                 if normalized == "" || !Directory.Exists(normalized) {
                     return nil
                 }
+
                 if seen.Add(normalized) {
                     folders.Add(normalized)
                 }
             }
+
             return folders
         }
     }

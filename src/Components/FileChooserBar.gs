@@ -21,9 +21,13 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
             BorderColor: p.Border,
             BackgroundColor: p.Bar,
         }
+
         BuildFields(root, value)
+
         BuildChoices(root, value)
+
         BuildActions(root, value)
+
         return root
     }
 
@@ -31,6 +35,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
         let p = value.Palette
         let request = value.Request
         let fields = Container{FlexDirection: FlexDirection.Row, AlignItems: AlignItems.Center, Gap: 8, MinWidth: 0}
+
         if request.Method == "SaveFile" {
             fields.Children.Add(Ui.Label("File name", p.Muted, 12))
             fields.Children.Add(
@@ -46,8 +51,10 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 120}
             )
         }
+
         if request.Filters.Count > 0 {
             let options = [request.Filters.Count]ComboBoxOption
+
             for index in 0 ... options.Length {
                 let filter = request.Filters[index]
                 options[index] = ComboBoxOption{
@@ -56,6 +63,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     Content: Ui.Label(filter.Name, p.Text, 12),
                 }
             }
+
             fields.Children.Add(
                 Select(
                     "file-type",
@@ -67,6 +75,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 )
             )
         }
+
         if fields.Children.Count > 0 {
             root.Children.Add(fields)
         }
@@ -75,6 +84,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
     private func BuildChoices(root Container, value FileChooserBarInput) {
         let p = value.Palette
         let request = value.Request
+
         if request.Choices.Count > 0 {
             let choices = Container{
                 FlexDirection: FlexDirection.Row,
@@ -85,9 +95,11 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 OverflowY: Overflow.Scroll,
                 ScrollbarY: Ui.ScrollbarStyle(p),
             }
+
             for choice in request.Choices {
                 let id = choice.Id
                 let selected = value.Choices[id]
+
                 if choice.Options.Count == 0 {
                     let toggle = Checkbox{
                         Label: choice.Label,
@@ -108,6 +120,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     toggle.Width = 320
                     toggle.MinWidth = 0
                     toggle.MaxWidth = 320
+
                     if toggle is Button {
                         for child in toggle.Children {
                             if child is Text {
@@ -122,9 +135,11 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                             }
                         }
                     }
+
                     choices.Children.Add(Tip("boolean-" + id, choice.Label, toggle, 320, value))
                 } else {
                     let options = [choice.Options.Count]ComboBoxOption
+
                     for index in 0 ... options.Length {
                         let option = choice.Options[index]
                         options[index] = ComboBoxOption{
@@ -133,6 +148,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                             Content: Ui.Label(option.Label, p.Text, 12)
                         }
                     }
+
                     choices.Children.Add(
                         Container{
                             Width: 328,
@@ -169,6 +185,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     )
                 }
             }
+
             root.Children.Add(choices)
         }
     }
@@ -176,9 +193,11 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
     private func BuildActions(root Container, value FileChooserBarInput) {
         let p = value.Palette
         let request = value.Request
+
         if value.Error != "" {
             root.Children.Add(Ui.ErrorText(value.Error, p))
         }
+
         root.Children.Add(
             Container{
                 FlexDirection: FlexDirection.Row,
@@ -236,24 +255,29 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 },
             }
         )
+
         var description = label
+
         for option in options {
             if option.Id == selected {
                 description = option.Label ?? label
                 break
             }
         }
+
         return Tip(key + "-label", description, selector, 210, value)
     }
 
     private func ActionButton(label string, action Action, value FileChooserBarInput, primary bool = false) Blob {
         let p = value.Palette
         let button = Ui.ActionButton(label, action, p, primary, primary ? acceptHandle: cancelHandle, 200)
+
         return Tip("action-" + label, label, button, 200, value)
     }
 
     private func Tip(key string, label string, target Blob, maxWidth float64, value FileChooserBarInput) Blob {
         let p = value.Palette
+
         return Container{
             MaxWidth: maxWidth,
             MinWidth: 0,

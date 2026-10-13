@@ -45,6 +45,7 @@ class PreviewSidebar {
                     },
                 }
             }
+
             if value.Preview.Kind == PreviewKind.Text {
                 return Cell.Mount[TextPreviewInput, TextPreview](
                     nil,
@@ -56,6 +57,7 @@ class PreviewSidebar {
                     }
                 )
             }
+
             if value.Preview.Kind == PreviewKind.Loading {
                 return Container{
                     FlexGrow: 1,
@@ -66,12 +68,15 @@ class PreviewSidebar {
                     Ui.Label("Loading…", p.Muted, 12),
                 }
             }
+
             if value.Preview.Kind == PreviewKind.Error {
                 return Ui.Empty("image", "Preview unavailable", value.Preview.Error, p)
             }
+
             guard let entry = value.Entry else {
                 return Ui.Empty("preview", "Nothing selected", "Select a file to take a closer look.", p)
             }
+
             return Container{
                 FlexGrow: 1,
                 FlexBasis: 0,

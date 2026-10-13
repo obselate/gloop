@@ -19,6 +19,7 @@ class DirectoryLoader {
         this.window = window
         this.controller = controller
         this.settings = settings
+
         for pane in controller.Panes {
             AddPane(pane)
         }
@@ -28,6 +29,7 @@ class DirectoryLoader {
         for queue in loads.Values {
             queue.Close()
         }
+
         for queue in views.Values {
             queue.Close()
         }
@@ -48,23 +50,30 @@ class DirectoryLoader {
         if controller.IsDisposed || !controller.Panes.Contains(pane) {
             return
         }
+
         var fullPath string
         var kind LocationKind
         var atTrashRoot bool
+
         try {
             kind = Locations.Resolve(path, controller.TrashDirectory, out fullPath, out atTrashRoot)
         } catch (failure ArgumentException) {
             pane.Error = "Open folder failed for " + path + ": " + failure.Message
             controller.Status = pane.Error
+
             controller.Notify()
+
             return
         }
+
         pane.LoadGeneration++
         pane.ViewGeneration++
         views[pane].Cancel()
+
         if pane == controller.ActivePane() && mode != DirectoryMode.Refresh {
             controller.ResetTypeSelect()
         }
+
         pane.DirectoryPath = fullPath
         pane.Kind = kind
         pane.AtTrashRoot = atTrashRoot
@@ -72,17 +81,21 @@ class DirectoryLoader {
         pane.Loading = true
         pane.Error = ""
         pane.Refreshing = mode == DirectoryMode.Refresh
+
         if !pane.Refreshing {
             pane.Entries = List[FileEntry]()
             pane.VisibleEntries = List[FileEntry]()
             pane.Selected = -1
             pane.SelectedPaths.Clear()
             pane.SelectionAnchorPath = ""
+
             if pane == controller.ActivePane() {
                 controller.Previews.QueuePreview()
             }
         }
+
         controller.Notify()
+
         let queue = loads[pane]
         let request = DirectoryRequest{
             Pane: pane,
@@ -95,6 +108,7 @@ class DirectoryLoader {
             HistoryIndex: historyIndex,
             SelectedPath: selectedPath,
         }
+
         queue.Submit(
             generation -> Load(queue, generation, request),
             (_, failure) -> {
@@ -132,8 +146,10 @@ class DirectoryLoader {
         if generation != pane.LoadGeneration {
             return
         }
+
         pane.DirectoryPath = snapshot.DirectoryPath
         pane.UpdateHistory(snapshot.DirectoryPath, mode, historyIndex)
+
         if snapshot.Error != "" {
             pane.Loading = false
             pane.Refreshing = false
@@ -144,16 +160,22 @@ class DirectoryLoader {
             pane.SelectedPaths.Clear()
             pane.Error = snapshot.Error
             controller.Status = snapshot.Error
+
             if pane == controller.ActivePane() {
                 controller.Previews.QueuePreview()
             }
+
             controller.Notify()
+
             return
         }
+
         pane.Entries = snapshot.Entries
+
         if mode != DirectoryMode.Refresh {
             controller.Status = ""
         }
+
         RequestView(pane, selectedPath)
     }
 
@@ -161,7 +183,9 @@ class DirectoryLoader {
         if controller.IsDisposed || !controller.Panes.Contains(pane) {
             return
         }
+
         pane.ViewGeneration++
+
         if pane.Entries.Count == 0 {
             views[pane].Cancel()
             pane.VisibleEntries = List[FileEntry]()
@@ -170,14 +194,19 @@ class DirectoryLoader {
             pane.SelectionAnchorPath = ""
             pane.PendingFocusPath = ""
             pane.Loading = false
+
             if pane == controller.ActivePane() {
                 controller.Previews.QueuePreview()
             }
+
             controller.Notify()
             pane.Refreshing = false
+
             return
         }
+
         pane.Loading = true
+
         let queue = views[pane]
         let request = ViewRequest{
             Pane: pane,
@@ -189,6 +218,7 @@ class DirectoryLoader {
             Descending: pane.Descending,
             SelectedPath: selectedPath,
         }
+
         queue.Submit(
             generation -> BuildView(queue, generation, request),
             (_, failure) -> {
@@ -223,16 +253,21 @@ class DirectoryLoader {
 
         pane.Loading = false
         pane.Error = error
+
         if error == "" && pane.Filter == "" && controller.EntryFilter == nil {
             pane.Entries = entries
         }
+
         pane.ReconcileSelection(entries, selectedPath, controller.SelectFirstEntry)
+
         if error != "" {
             controller.Status = error
         }
+
         if pane == controller.ActivePane() {
             controller.Previews.QueuePreview()
         }
+
         controller.Notify()
         pane.Refreshing = false
     }
@@ -241,6 +276,7 @@ class DirectoryLoader {
         for pane in controller.Panes {
             if pane.DirectoryPath != "" {
                 let selected = pane.FocusedPath()
+
                 NavigateTo(
                     pane.DirectoryPath,
                     pane,
@@ -254,9 +290,11 @@ class DirectoryLoader {
 
     private func Load(queue LatestWork, generation int32, request DirectoryRequest) {
         let snapshot = FileSystemService().List(request.Path, request.Kind, request.AtTrashRoot, request.ShowHidden)
+
         if !queue.IsCurrent(generation) {
             return
         }
+
         try {
             window.Post(
                 () -> ApplyDirectory(
@@ -275,38 +313,48 @@ class DirectoryLoader {
         if !queue.IsCurrent(generation) {
             return
         }
+
         var visible = List[FileEntry]()
+
         if request.Filter == "" && request.EntryFilter == nil {
             visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
         } else {
             let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
             var count = 0
+
             for entry in request.Entries {
                 if (count & CancellationCheckMask) == 0 && !queue.IsCurrent(generation) {
                     break
                 }
+
                 count++
+
                 if let entryFilter = request.EntryFilter {
                     if !entryFilter(entry) {
                         continue
                     }
                 }
+
                 let matches = if wildcard {
                     FileSystemName.MatchesSimpleExpression(request.Filter.AsSpan(), entry.Name.AsSpan(), true)
                 } else {
                     entry.Name.Contains(request.Filter, StringComparison.OrdinalIgnoreCase)
                 }
+
                 if matches {
                     visible.Add(entry)
                 }
             }
+
             if queue.IsCurrent(generation) {
                 FileSystemService().SortInPlace(visible, request.Column, request.Descending)
             }
         }
+
         if !queue.IsCurrent(generation) {
             return
         }
+
         try {
             window.Post(() -> ApplyView(request.Pane, request.Generation, visible, request.SelectedPath, ""))
         } catch (failure InvalidOperationException) { }

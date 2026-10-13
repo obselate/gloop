@@ -19,7 +19,9 @@ internal class FirstRunSetup {
 
         internal func Apply(action SetupAction) {
             RequireNative()
+
             using let stateLock = AcquireLock()
+
             if action == SetupAction.Launcher {
                 DesktopIntegration.Install()
             } else if action == SetupAction.Folders {
@@ -34,7 +36,9 @@ internal class FirstRunSetup {
 
         internal func Complete() {
             RequireNative()
+
             using let stateLock = AcquireLock()
+
             Xdg.WriteText(CompletionPath(), "1\n")
         }
 
@@ -51,7 +55,9 @@ internal class FirstRunSetup {
 
         private func AcquireLock() FileStream {
             let directory = DirectoryPath()
+
             Directory.CreateDirectory(directory)
+
             try {
                 return FileStream(
                     Path.Combine(directory, "setup.lock"),

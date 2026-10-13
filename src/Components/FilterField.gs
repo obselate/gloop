@@ -8,6 +8,7 @@ open class FilterField : Cell[FilterFieldInput] {
 
     protected override func Build(value FilterFieldInput) Blob {
         let p = value.Palette
+
         return Container{
             Width: value.Width,
             BasedOn: TextField.FieldStyle(p),

@@ -23,17 +23,21 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
     protected override func Build(value TextPreviewInput) Blob {
         let preview = value.Preview
         let p = value.Palette
+
         if controller == nil || path != preview.Path || !Object.ReferenceEquals(text, preview.Text) {
             Dispose()
             text = preview.Text
             path = preview.Path
+
             let document = TextDocument(text)
             controller = TextEditorController(document)
             layer = TextPresentationLayer(document)
         }
+
         guard let editorController = controller, let syntax = layer else {
             throw InvalidOperationException("Preview document was not initialized")
         }
+
         if palette?.Muted != p.Muted || palette?.Keyword != p.Keyword || palette?.String != p.String
         || palette?.Number != p.Number || palette?.Type != p.Type {
             let colors = Dictionary[string, Style]()
@@ -43,13 +47,17 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
             colors["number"] = Style{Color: p.Number}
             colors["type"] = Style{Color: p.Type}
             let spans = [preview.Styles.Length]TextStyleSpan
+
             for index in 0 ... spans.Length {
                 let span = preview.Styles[index]
                 spans[index] = TextStyleSpan(index.ToString(), TextRange(span.Start, span.Length), colors[span.Kind])
             }
+
             syntax.ReplaceStyles(spans)
         }
+
         palette = p
+
         let children = List[Blob]()
         children.Add(
             Container{
@@ -87,6 +95,7 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
                 },
             }
         )
+
         if preview.Warning != "" {
             children.Add(
                 Container{
@@ -99,6 +108,7 @@ open class TextPreview : Cell[TextPreviewInput], IDisposable {
                 }
             )
         }
+
         return Container{
             FlexGrow: 1,
             FlexBasis: 0,

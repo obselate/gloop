@@ -21,6 +21,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         let paths = List[string]()
         var destination = "/"
         var rest = value.Path
+
         if value.Kind == LocationKind.Recent {
             destination = Locations.Recent
             rest = ""
@@ -40,29 +41,36 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             names.Add("/")
         }
         paths.Add(destination)
+
         for name in rest.Split('/', StringSplitOptions.RemoveEmptyEntries) {
             destination = Path.Combine(destination, name)
             names.Add(name)
             paths.Add(destination)
         }
+
         for known in List[string](handles.Keys) {
             if !paths.Contains(known) {
                 handles.Remove(known)
                 widths.Remove(known)
             }
         }
+
         let editable = value.Width >= 160
         let available = value.Width - (editable ? EditWidth: 0)
         var total = (names.Count - 1) * SeparatorWidth
+
         for index in 0 ... names.Count {
             total += SegmentWidth(names[index], paths[index])
         }
+
         var first = 0
         while first < names.Count - 1 && total + (first > 0 ? MoreWidth + SeparatorWidth: 0) > available {
             total -= SegmentWidth(names[first], paths[first]) + SeparatorWidth
             first++
         }
+
         let children = List[Blob]()
+
         if first > 0 {
             let hidden = paths.GetRange(0, first).ToArray()
             let button = Button{
@@ -84,9 +92,11 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: "Show parent folders"},
                 Ui.Label("…", p.Muted, 12),
             }
+
             WidgetKeyBindings.BindActivation(button)
             children.Add(Ui.HoverLabel("more", "Show parent folders", button, value.Window, p))
         }
+
         for index in first ... names.Count {
             if index > 0 {
                 children.Add(
@@ -99,6 +109,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                     }
                 )
             }
+
             children.Add(
                 Segment(
                     names[index],
@@ -110,12 +121,14 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 )
             )
         }
+
         if editable {
             let edit = Ui.Tool("edit", "Edit location", value.Edit, value.Window, p)
             edit.Key = "edit"
             edit.Margin = Edges{Left: 2}
             children.Add(edit)
         }
+
         return Container{
             Width: value.Width,
             MinWidth: 0,
@@ -146,6 +159,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         alone bool
     ) Blob {
         let p = value.Palette
+
         if !handles.TryGetValue(destination, out var handle) {
             handle = ElementHandle()
             handles[destination] = handle
@@ -153,13 +167,16 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 if !metrics.IsMounted {
                     return
                 }
+
                 let measured = metrics.BorderBox.Width
+
                 if !widths.TryGetValue(destination, out var known) || Math.Abs(known - measured) > .5 {
                     widths[destination] = measured
                     Rebuild()
                 }
             }
         }
+
         let button = Button{
             Handle: handle,
             Height: 26,
@@ -184,7 +201,9 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                 Ui.Label(label, last ? p.Text: p.Muted, 13, last ? 600: 400),
             },
         }
+
         WidgetKeyBindings.BindActivation(button)
+
         return Ui.HoverLabel(destination, destination, button, value.Window, p, wrap: true)
     }
 }

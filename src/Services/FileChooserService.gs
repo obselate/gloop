@@ -35,19 +35,23 @@ unsafe class FileChooserService {
         var folder = request.CurrentFolder
         var selected = ""
         var name = request.CurrentName
+
         if Saving && Path.IsPathFullyQualified(request.CurrentFile) {
             selected = Path.GetFullPath(request.CurrentFile)
             folder = Path.GetDirectoryName(selected) ?? folder
+
             if name == "" {
                 name = Path.GetFileName(request.CurrentFile)
             }
         }
+
         if !accessibleDirectory(folder) {
             folder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
         }
         if !accessibleDirectory(folder) {
             folder = Environment.CurrentDirectory
         }
+
         InitialDirectory = Path.GetFullPath(folder)
         InitialSelectedPath = Path.GetDirectoryName(selected) == InitialDirectory ? selected: ""
         InitialName = name
@@ -64,6 +68,7 @@ unsafe class FileChooserService {
         let patterns = List[ChooserPattern]()
         let mimes = List[string]()
         let accepted = HashSet[string](StringComparer.Ordinal)
+
         if let active = filter {
             for pattern in active.Patterns {
                 if pattern.Type == 0 {
@@ -73,10 +78,13 @@ unsafe class FileChooserService {
                 }
             }
         }
+
         if mimes.Count > 0 {
             addMimePatterns(mimes, patterns, accepted)
         }
+
         let filtering = filter != nil
+
         return (entry FileEntry) -> {
             if entry.IsDirectory {
                 return true
@@ -87,11 +95,13 @@ unsafe class FileChooserService {
             if !filtering {
                 return true
             }
+
             for pattern in patterns {
                 if matchName(pattern.Value, entry.Name, pattern.Flags) == 0 {
                     return true
                 }
             }
+
             return false
         }
     }
@@ -107,57 +117,72 @@ unsafe class FileChooserService {
             if pane.Loading {
                 throw IOException("Wait for the folder to finish loading")
             }
+
             let result = PortalChooserResult{Response: 0u, CurrentFilter: filter}
             addChoices(result, choices)
             let paths = List[string]()
             let replacements = List[string]()
+
             if Saving {
                 FileNames.Validate(name)
+
                 let folder = requireDirectory(pane.DirectoryPath, 3)
                 let destination = Path.Combine(folder, name)
+
                 if FileSystemService.Exists(destination) {
                     requireFile(destination, 2)
                     replacements.Add(destination)
                 }
+
                 paths.Add(destination)
             } else if SavingMany {
                 let folder = requireDirectory(selectedFolder(pane), 3)
+
                 if Request.Files.Count == 0 {
                     throw IOException("No file names were supplied")
                 }
+
                 let used = HashSet[string](StringComparer.Ordinal)
+
                 for requested in Request.Files {
                     FileNames.Validate(requested)
+
                     var leaf = requested
                     var number = 0
+
                     while used.Contains(leaf) || FileSystemService.Exists(Path.Combine(folder, leaf)) {
                         number++
                         leaf = uniqueName(requested, number)
                     }
+
                     used.Add(leaf)
                     paths.Add(Path.Combine(folder, leaf))
                 }
             } else if Request.Method == "OpenFile" {
                 if Request.Directory {
                     let selected = selectedPaths(pane)
+
                     if selected.Count == 0 {
                         paths.Add(requireDirectory(pane.DirectoryPath, 5))
                     } else {
                         if !Request.Multiple && selected.Count > 1 {
                             throw IOException("Select one folder")
                         }
+
                         for path in selected {
                             paths.Add(requireDirectory(path, 5))
                         }
                     }
                 } else {
                     let selected = selectedPaths(pane)
+
                     if selected.Count == 0 {
                         throw IOException("Select a file")
                     }
                     if !Request.Multiple && selected.Count > 1 {
                         throw IOException("Select one file")
                     }
+
                     for path in selected {
                         paths.Add(requireFile(path, 4))
                     }
@@ -165,12 +190,15 @@ unsafe class FileChooserService {
             } else {
                 throw IOException("Unsupported file chooser method")
             }
+
             if replacements.Count > 0 && !replace {
                 return ChooserValidation{ReplacePaths: replacements}
             }
+
             for path in paths {
                 result.Uris.Add("file://" + Uri.EscapeDataString(path).Replace("%2F", "/"))
             }
+
             return ChooserValidation{Result: result}
         } catch (failure Exception) when failure is IOException ||
             failure is UnauthorizedAccessException ||
@@ -183,22 +211,27 @@ unsafe class FileChooserService {
 
     private func selectedPaths(pane BrowserPane) List[string] {
         let paths = List[string]()
+
         for entry in pane.VisibleEntries {
             if pane.SelectedPaths.Contains(entry.FullPath) {
                 paths.Add(entry.FullPath)
             }
         }
+
         if paths.Count != pane.SelectedPaths.Count {
             throw IOException("The selection changed. Select the items again")
         }
+
         return paths
     }
 
     private func selectedFolder(pane BrowserPane) string {
         let selected = selectedPaths(pane)
+
         if selected.Count > 1 {
             throw IOException("Select one destination folder")
         }
+
         return selected.Count == 0 ? pane.DirectoryPath: selected[0]
     }
 
@@ -207,7 +240,9 @@ unsafe class FileChooserService {
             if !values.TryGetValue(choice.Id, out var value) {
                 throw IOException("Choose a value for " + choice.Label)
             }
+
             var valid = false
+
             if choice.Options.Count == 0 {
                 valid = value == "true" || value == "false"
             } else {
@@ -218,9 +253,11 @@ unsafe class FileChooserService {
                     }
                 }
             }
+
             if !valid {
                 throw IOException("Invalid choice for " + choice.Label)
             }
+
             result.Choices.Add(PortalChoiceResult{Id: choice.Id, Value: value})
         }
     }
@@ -229,18 +266,23 @@ unsafe class FileChooserService {
         let extension = Path.GetExtension(name)
         var suffix = " (" + number.ToString() + ")" + extension
         var stem = name.Substring(0, name.Length - extension.Length)
+
         if Encoding.UTF8.GetByteCount(suffix) > FileNames.MaxBytes {
             suffix = " (" + number.ToString() + ")"
             stem = name
         }
+
         let candidate = FileNames.Truncate(stem, FileNames.MaxBytes - Encoding.UTF8.GetByteCount(suffix)) + suffix
+
         FileNames.Validate(candidate)
+
         return candidate
     }
 
     private func accessibleDirectory(path string) bool {
         try {
             requireDirectory(path, 5)
+
             return true
         } catch (failure Exception) when failure is IOException ||
             failure is UnauthorizedAccessException ||
@@ -251,19 +293,25 @@ unsafe class FileChooserService {
 
     private func requireDirectory(path string, access int32) string {
         let fullPath = absolutePath(path)
+
         if fileType(fullPath) != FileSystemService.DirectoryFileType {
             throw IOException("Select an accessible folder: " + fullPath)
         }
+
         requireAccess(fullPath, access)
+
         return fullPath
     }
 
     private func requireFile(path string, access int32) string {
         let fullPath = absolutePath(path)
+
         if fileType(fullPath) != FileSystemService.RegularFileType {
             throw IOException("Select a regular file: " + fullPath)
         }
+
         requireAccess(fullPath, access)
+
         return fullPath
     }
 
@@ -271,12 +319,14 @@ unsafe class FileChooserService {
         if !Path.IsPathFullyQualified(path) || path.Contains('\0') {
             throw IOException("Only local absolute paths are supported")
         }
+
         return Path.GetFullPath(path)
     }
 
     private func fileType(path string) int32 {
         let buffer *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
         let pointer = IntPtr(buffer)
+
         if FileSystemService.ReadStat(
             FileSystemService.AtCurrentDirectory,
             path,
@@ -286,6 +336,7 @@ unsafe class FileChooserService {
         ) != 0 {
             throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path)
         }
+
         return int32(Marshal.ReadInt16(pointer, 28)) & FileSystemService.FileTypeMask
     }
 
@@ -298,14 +349,18 @@ unsafe class FileChooserService {
     private func addMimePatterns(mimes List[string], patterns List[ChooserPattern], accepted HashSet[string]) {
         let roots = Xdg.DataDirs()
         let links = List[string]()
+
         for root in roots {
             for kind in[]string{"aliases", "subclasses"} {
                 let path = Path.Combine(root, "mime", kind)
+
                 try {
                     for line in File.ReadLines(path) {
                         let fields = line.Split(' ')
+
                         if fields.Length == 2 {
                             links.Add(line)
+
                             if kind == "aliases" {
                                 links.Add(fields[1] + " " + fields[0])
                             }
@@ -314,31 +369,42 @@ unsafe class FileChooserService {
                 } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
             }
         }
+
         for iteration in 0 ... MimeExpansionLimit {
             var changed = false
+
             for link in links {
                 let fields = link.Split(' ')
+
                 if acceptsMime(fields[1], mimes, accepted) && accepted.Add(fields[0]) {
                     changed = true
                 }
             }
+
             if !changed {
                 break
             }
         }
+
         let removed = HashSet[string](StringComparer.Ordinal)
+
         for root in roots {
             let database = Path.Combine(root, "mime", "globs2")
+
             if !File.Exists(database) {
                 continue
             }
+
             try {
                 let overridden = HashSet[string](StringComparer.Ordinal)
+
                 for line in File.ReadLines(database) {
                     if line.StartsWith('#') {
                         continue
                     }
+
                     let fields = line.Split(':')
+
                     if fields.Length < 3 || removed.Contains(fields[1]) {
                         continue
                     }
@@ -346,11 +412,13 @@ unsafe class FileChooserService {
                         overridden.Add(fields[1])
                         continue
                     }
+
                     if acceptsMime(fields[1], mimes, accepted) {
                         let sensitive = fields.Length > 3 && ("," + fields[3] + ",").Contains(",cs,")
                         patterns.Add(ChooserPattern{Value: fields[2], Flags: sensitive ? 0: 16})
                     }
                 }
+
                 removed.UnionWith(overridden)
             } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException { }
         }
@@ -363,6 +431,7 @@ unsafe class FileChooserService {
         if accepted.Contains(value) {
             return true
         }
+
         for mime in mimes {
             if value == mime ||
                 (
@@ -371,6 +440,7 @@ unsafe class FileChooserService {
                 return true
             }
         }
+
         return false
     }
 

@@ -15,8 +15,10 @@ partial class BrowserView {
         if chooser != nil {
             return
         }
+
         notice = ""
         let error = settingsWriter?.Save(settings) ?? ""
+
         if error != "" {
             notice = error
         }
@@ -24,10 +26,13 @@ partial class BrowserView {
 
     private func ApplyPreferences() {
         palette = Palette(settings.Theme, keyboardFocus)
+
         ApplyBackdrop()
         Host.WheelScrollScale = float32(settings.ScrollSpeed)
         Host.SmoothScrolling = settings.SmoothScrolling
+
         dialogError = ""
+
         SavePreferences()
         Rebuild()
     }
@@ -42,21 +47,27 @@ partial class BrowserView {
         if !preferenceInputs.TryGetValue(action, out var value) {
             return
         }
+
         dialogError = settings.SetBinding(action, value)
+
         if dialogError == "" {
             SavePreferences()
         }
+
         Rebuild()
     }
 
     private func CommitPreferenceBindings() {
         var changed = false
+
         for input in preferenceInputs {
             let previous = settings.Keybindings[input.Key]
+
             if settings.SetBinding(input.Key, input.Value) == "" && previous != settings.Keybindings[input.Key] {
                 changed = true
             }
         }
+
         if changed {
             SavePreferences()
         }
@@ -66,10 +77,12 @@ partial class BrowserView {
         if chooser != nil {
             return
         }
+
         preferenceInputs.Clear()
         preferenceTab = "Appearance"
         themeColorRole = "Background"
         revealThemeEditor = false
+
         OpenDialog(DialogKind.Preferences, "")
     }
 
@@ -84,6 +97,7 @@ partial class BrowserView {
             themeColorRole = "Background"
             revealThemeEditor = false
         }
+
         ApplyPreferences()
     }
 
@@ -92,6 +106,7 @@ partial class BrowserView {
         let values = settings
         let compact = height < 600
         let rows = List[Blob]()
+
         if preferenceTab == "Shortcuts" {
             ShortcutRows(rows, values, p)
         } else if preferenceTab == "Behavior" {
@@ -99,7 +114,9 @@ partial class BrowserView {
         } else {
             AppearanceRows(rows, values, p, compact)
         }
+
         let tabs = Container{FlexDirection: FlexDirection.Row, Gap: 6}
+
         for name in[]string{"Shortcuts", "Behavior", "Appearance"} {
             let tab = name
             let button = DialogButton(
@@ -117,6 +134,7 @@ partial class BrowserView {
             button.Padding = Edges{Left: 6, Right: 6}
             tabs.Children.Add(button)
         }
+
         return Container{
             MinHeight: 0,
             FlexShrink: 1,
@@ -146,6 +164,7 @@ partial class BrowserView {
         for pair in values.Keybindings {
             let action = pair.Key
             let input = preferenceInputs.TryGetValue(action, out var typed) ? typed: pair.Value
+
             rows.Add(
                 PreferenceRow(
                     AppSettings.ActionCatalog[action].Label,
@@ -236,6 +255,7 @@ partial class BrowserView {
 
     private func AppearanceRows(rows List[Blob], values AppSettings, p Palette, compact bool) {
         let choices = List[Blob]()
+
         choices.Add(
             ThemeChoice.Build(
                 AppSettings.CustomThemeName,
@@ -249,8 +269,10 @@ partial class BrowserView {
                 }
             )
         )
+
         for name in ThemePresets.Names() {
             let presetName = name
+
             choices.Add(
                 ThemeChoice.Build(
                     name,
@@ -265,20 +287,27 @@ partial class BrowserView {
                 )
             )
         }
+
         let columns = width >= 640 ? 2: 1
+
         for var index = 0;
         index < choices.Count;
         index += columns {
             let pair = Container{FlexDirection: FlexDirection.Row, FlexShrink: 0, Gap: 8}
+
             for offset in 0 ... columns {
                 let slot = Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0}
+
                 if index + offset < choices.Count {
                     slot.Children.Add(choices[index + offset])
                 }
+
                 pair.Children.Add(slot)
             }
+
             rows.Add(pair)
         }
+
         if values.ThemeName == AppSettings.CustomThemeName {
             AppearanceColorRows(rows, values, p, compact)
         }
@@ -300,6 +329,7 @@ partial class BrowserView {
                 },
                 p
             )
+
             if role == themeColorRole {
                 rows.Add(
                     Container{
@@ -362,6 +392,7 @@ partial class BrowserView {
             handle = ElementHandle()
             preferenceHandles[label] = handle
         }
+
         let field = TextField.Build(
             value,
             change,
@@ -376,6 +407,7 @@ partial class BrowserView {
         )
         field.OnFocus = (_) -> handle.ScrollIntoView()
         field.OnBlur = (_) -> commit()
+
         return PreferenceRow.Build(label, field, p)
     }
 }

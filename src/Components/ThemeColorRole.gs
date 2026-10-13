@@ -9,6 +9,7 @@ open class ThemeColorRole : Cell[ThemeColorRoleInput] {
 
     protected override func Build(value ThemeColorRoleInput) Blob {
         let p = value.Palette
+
         return ChoiceRow.Build(
             value.Role + " color " + value.Value,
             Ui.Label(value.Role, p.Text, 12, 500),

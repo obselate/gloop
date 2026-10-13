@@ -10,6 +10,7 @@ internal class CommandLine {
             var path = ""
             var positional = false
             var pendingOption = ""
+
             for arg in args {
                 if pendingOption != "" {
                     if pendingOption == "--chooser-request" {
@@ -17,6 +18,7 @@ internal class CommandLine {
                     } else {
                         options.ChooserResultPath = arg
                     }
+
                     pendingOption = ""
                 } else if !positional && (arg == "--chooser-request" || arg == "--chooser-result") {
                     pendingOption = arg
@@ -46,22 +48,28 @@ internal class CommandLine {
                     options.ShowHidden = true
                 } else if !positional && arg.StartsWith("-") {
                     options.Error = "Unknown option: " + arg
+
                     return options
                 } else if path != "" {
                     options.Error = "Expected one path, received more than one"
+
                     return options
                 } else {
                     path = arg
                 }
             }
+
             if pendingOption != "" {
                 options.Error = "Expected a path after " + pendingOption
+
                 return options
             }
             if (options.ChooserRequestPath == "") != (options.ChooserResultPath == "") {
                 options.Error = "Chooser mode requires --chooser-request and --chooser-result"
+
                 return options
             }
+
             if options.Portal ||
                 options.Help ||
                 options.Version ||
@@ -73,8 +81,10 @@ internal class CommandLine {
                 options.RestoreDefaultChooser {
                 return options
             }
+
             try {
                 let fullPath = Path.GetFullPath(path == "" ? ".": path)
+
                 if Directory.Exists(fullPath) {
                     options.DirectoryPath = fullPath
                 } else if File.Exists(fullPath) {
@@ -86,6 +96,7 @@ internal class CommandLine {
             } catch (e ArgumentException) {
                 options.Error = "Open failed for " + path + ": " + e.Message
             }
+
             return options
         }
 
@@ -98,8 +109,10 @@ internal class CommandLine {
         internal func LicenseText() string {
             if let stream = typeof(CommandLine).Assembly.GetManifestResourceStream("gloop.ThirdPartyNotices.txt") {
                 using let reader = StreamReader(stream)
+
                 return reader.ReadToEnd()
             }
+
             throw InvalidOperationException("Embedded license notices are missing")
         }
     }

@@ -11,6 +11,7 @@ partial class BrowserView {
     private func Toolbar() Blob {
         let pane = Model.ActivePane()
         let p = palette
+
         return Container{
             Key: "toolbar",
             Height: Ui.BarHeight,
@@ -117,6 +118,7 @@ partial class BrowserView {
         } else {
             total.ToString() + " items"
         }
+
         let bar = Container{
             Height: 26,
             Key: "status",
@@ -132,9 +134,11 @@ partial class BrowserView {
             Ui.Shortcut(settings.Keybindings["TogglePreview"], "Preview", p),
             Ui.Shortcut(settings.Keybindings["ToggleSplit"], "Split", p),
         }
+
         if let space = SpaceStatus() {
             bar.Children.Insert(1, space)
         }
+
         return bar
     }
 }

@@ -12,6 +12,7 @@ partial class BrowserView {
         var viewport float64 = -1
         var scrollRange float64 = -1
         var room float64 = -1
+
         handle.MetricsChanged += (metrics) -> {
             if !metrics.IsMounted {
                 viewport = -1
@@ -19,15 +20,19 @@ partial class BrowserView {
                 room = -1
                 return
             }
+
             if room != metrics.ContentBox.Width {
                 room = metrics.ContentBox.Width
+
                 if settings.ViewMode == ViewMode.Tiles {
                     Rebuild()
                 }
             }
+
             if viewport != metrics.ContentBox.Height || scrollRange != metrics.ScrollRange.Y {
                 viewport = metrics.ContentBox.Height
                 scrollRange = metrics.ScrollRange.Y
+
                 if state.RevealPending {
                     RevealSelection(state)
                 }
@@ -38,6 +43,7 @@ partial class BrowserView {
     private func Location(index int32, crumbWidth float64) Blob {
         let pane = Model.Pane(index)
         let p = palette
+
         if locationEditing && Model.ActiveIndex == index {
             return TextField
                 .Build(
@@ -58,6 +64,7 @@ partial class BrowserView {
                 fontSize: 12
             ){.Key: "location-edit"}
         }
+
         return Cell.Mount[BreadcrumbInput, BreadcrumbBar](
             "location-" + index.ToString(),
             BreadcrumbInput{
@@ -90,7 +97,9 @@ partial class BrowserView {
         let location = pane.Kind
         let tools = List[Blob]()
         var toolsWidth = 0.0
+
         PaneTools(index, pane, p, availableWidth, location, tools, ref toolsWidth)
+
         return Container{
             Key: "pane-" + index.ToString(),
             FlexGrow: 1,
@@ -173,6 +182,7 @@ partial class BrowserView {
                 )
             )
         }
+
         if availableWidth >= 400 {
             tools.Add(
                 Ui.Tool(
@@ -189,6 +199,7 @@ partial class BrowserView {
                 )
             )
         }
+
         tools.Add(
             Ui.Tool(
                 "view_list",
@@ -215,6 +226,7 @@ partial class BrowserView {
                 settings.ViewMode == ViewMode.Tiles
             )
         )
+
         if chooser == nil {
             tools.Add(
                 Ui.Tool(
@@ -231,6 +243,7 @@ partial class BrowserView {
                 )
             )
         }
+
         toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * Ui.ToolSize + (tools.Count - 1) * Ui.ToolsGap
     }
 
@@ -244,6 +257,7 @@ partial class BrowserView {
     ) Blob {
         let state = paneViews[index]
         let handle = PaneViewport(index)
+
         return Cell.Mount[FileTableInput, FileTable](
             "table-" + index.ToString(),
             FileTableInput{
@@ -326,19 +340,25 @@ partial class BrowserView {
         if !entry.IsDirectory {
             return FileSystemService.FormatSize(entry.Size)
         }
+
         let count = FolderCounts.Count(entry, settings.ShowHidden)
+
         if count < 0 {
             return count == -1 ? "": "—"
         }
+
         return count == 1 ? "1 item": count.ToString() + " items"
     }
 
     private func RevealSelection(state BrowserPaneViewState) {
         let index = Model.Panes.IndexOf(state.Pane)
+
         if index < 0 {
             return
         }
+
         let pane = state.Pane
+
         if pane.Selected >= 0 {
             let list = PaneViewport(index)
             let tiles = settings.ViewMode == ViewMode.Tiles
@@ -360,11 +380,13 @@ partial class BrowserView {
             }
             let offset = list.ScrollOffset.Y
             let viewport = list.ContentBox.Height
+
             if top < offset {
                 list.JumpTo(0, top)
             } else if bottom > offset + viewport {
                 list.JumpTo(0, Math.Max(0, bottom - viewport))
             }
+
             state.RevealPending = bottom > list.ScrollRange.Y + viewport
         } else {
             state.RevealPending = false
@@ -380,14 +402,17 @@ partial class BrowserView {
             OpenDialog(DialogKind.OpenLocation, Model.ActivePane().DirectoryPath)
             return
         }
+
         locationText = Model.ActivePane().DirectoryPath
         locationEditing = true
+
         if locationHandle.IsMounted {
             locationHandle.Focus()
             Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
         } else {
             locationFocusPending = true
         }
+
         Rebuild()
     }
 }

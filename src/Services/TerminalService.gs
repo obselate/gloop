@@ -11,16 +11,20 @@ class TerminalService {
     internal func Open(directory string) string {
         try {
             let path = Path.GetFullPath(directory)
+
             if !Directory.Exists(path) {
                 return "Open terminal failed for " + directory + ": Folder does not exist"
             }
+
             var lastError = ""
+
             for candidate in Candidates() {
                 try {
                     let start = ProcessStartInfo(candidate)
                     start.WorkingDirectory = path
                     start.UseShellExecute = false
                     let name = Path.GetFileName(candidate)
+
                     if name == "xdg-terminal-exec" {
                         start.ArgumentList.Add("--dir=" + path)
                     } else if name == "ghostty" {
@@ -43,14 +47,18 @@ class TerminalService {
                         start.ArgumentList.Add("--cwd")
                         start.ArgumentList.Add(path)
                     }
+
                     let process = Process.Start(start)
+
                     if let launched = process {
                         let exited = launched.WaitForExit(StartupCheckMilliseconds)
                         let code = exited ? launched.ExitCode: 0
                         launched.Dispose()
+
                         if !exited || code == 0 {
                             return ""
                         }
+
                         lastError = candidate + " exited with code " + code.ToString()
                     } else {
                         lastError = candidate + " did not start"
@@ -64,6 +72,7 @@ class TerminalService {
                     lastError = candidate + ": " + failure.Message
                 }
             }
+
             return "Open terminal failed for " + directory + ": Could not find a desktop terminal. " + lastError
         } catch (failure ArgumentException) {
             return "Open terminal failed for " + directory + ": " + failure.Message
@@ -82,15 +91,19 @@ class TerminalService {
         internal func Candidates() List[string] {
             let candidates = List[string]()
             let preferred = Environment.GetEnvironmentVariable("TERMINAL") ?? ""
+
             if preferred != "" && !preferred.Contains(" ") && !preferred.Contains("\t") {
                 candidates.Add(preferred)
             }
+
             let names = "xdg-terminal-exec,ghostty,konsole,foot,alacritty,kitty,wezterm,gnome-terminal,xfce4-terminal,xterm"
+
             for name in names.Split(',') {
                 if !candidates.Contains(name) {
                     candidates.Add(name)
                 }
             }
+
             return candidates
         }
     }

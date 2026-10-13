@@ -65,11 +65,13 @@ partial class BrowserView : Cell {
         this.launch = launch
         palette = Palette(settings.Theme)
         notice = warning
+
         rootHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted &&
                 (Math.Abs(width - metrics.ContentBox.Width) > 1 || Math.Abs(height - metrics.ContentBox.Height) > 1) {
                 width = metrics.ContentBox.Width
                 height = metrics.ContentBox.Height
+
                 if locationEditing && dialog == DialogKind.None && PaneWidth(Model.ActiveIndex) < 360 {
                     OpenDialog(DialogKind.OpenLocation, locationText)
                 } else {
@@ -77,6 +79,7 @@ partial class BrowserView : Cell {
                 }
             }
         }
+
         dialogHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && focusScope == nil {
                 let textEntry = dialog != DialogKind.Preferences &&
@@ -99,8 +102,10 @@ partial class BrowserView : Cell {
                         },
                     }
                 )
+
                 if textEntry {
                     dialogInput.Focus()
+
                     if dialog == DialogKind.Rename ||
                         dialog == DialogKind.FilterFiles ||
                         dialog == DialogKind.OpenLocation {
@@ -109,12 +114,14 @@ partial class BrowserView : Cell {
                 }
             }
         }
+
         themeEditorHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && revealThemeEditor {
                 revealThemeEditor = false
                 themeEditorHandle.ScrollIntoView()
             }
         }
+
         locationHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && locationFocusPending {
                 locationFocusPending = false
@@ -130,9 +137,11 @@ partial class BrowserView : Cell {
         value.MetricsChanged += WindowResized
         value.StateChanged += WindowStateChanged
         value.KeyPressed += KeyPressed
+
         ApplyBackdrop()
         value.WheelScrollScale = float32(settings.ScrollSpeed)
         value.SmoothScrolling = settings.SmoothScrolling
+
         browser = BrowserController(
             value,
             settings,
@@ -141,8 +150,10 @@ partial class BrowserView : Cell {
             Math.Max(1, value.Width),
             Math.Max(1, value.Height)
         )
+
         SyncPaneViews()
         value.MetricsChanged += PreviewWindowMetrics
+
         thumbnails = ThumbnailService(value)
         selectionInfo = SelectionInfoService(value)
         folderCounts = FolderCountService(
@@ -154,8 +165,10 @@ partial class BrowserView : Cell {
                 Rebuild()
             }
         )
+
         value.FocusChanged += RefreshPlacesOnFocus
         Model.Places.Refresh()
+
         if launch.ChooserRequest == nil {
             settingsWriter = SettingsWriter(
                 value,
@@ -169,11 +182,13 @@ partial class BrowserView : Cell {
                 }
             )
         }
+
         if let request = launch.ChooserRequest {
             let picker = AttachChooser(request)
             Model.Start(picker.InitialDirectory, picker.InitialSelectedPath)
         } else {
             Model.Start(launch.DirectoryPath, launch.SelectedPath)
+
             if launch.Setup || FirstRunSetup.ShouldOffer() {
                 OpenSetup()
             }
@@ -189,10 +204,13 @@ partial class BrowserView : Cell {
             attached.KeyPressed -= KeyPressed
             attached.FocusChanged -= RefreshPlacesOnFocus
         }
+
         if let done = setupCompletion {
             <-done
         }
+
         CommitPreferenceBindings()
+
         previewResizeTimer?.Dispose()
         previewResizeTimer = nil
         settingsWriter?.Dispose()
@@ -212,12 +230,14 @@ partial class BrowserView : Cell {
 
     private func SyncPaneViews() {
         var stateIndex = paneViews.Count - 1
+
         while stateIndex >= 0 {
             if !Model.Panes.Contains(paneViews[stateIndex].Pane) {
                 paneViews.RemoveAt(stateIndex)
             }
             stateIndex--
         }
+
         for index in paneViews.Count ... Model.Panes.Count {
             let state = BrowserPaneViewState(Model.Pane(index))
             paneViews.Add(state)
@@ -231,6 +251,7 @@ partial class BrowserView : Cell {
             guard let value = browser else {
                 throw InvalidOperationException("Browser is not attached")
             }
+
             return value
         }
     }
@@ -240,6 +261,7 @@ partial class BrowserView : Cell {
             guard let value = window else {
                 throw InvalidOperationException("Window is not attached")
             }
+
             return value
         }
     }
@@ -249,6 +271,7 @@ partial class BrowserView : Cell {
             guard let value = thumbnails else {
                 throw InvalidOperationException("Thumbnails are not attached")
             }
+
             return value
         }
     }
@@ -258,35 +281,45 @@ partial class BrowserView : Cell {
             guard let value = folderCounts else {
                 throw InvalidOperationException("Folder counts are not attached")
             }
+
             return value
         }
     }
 
     private func Changed() {
         SyncPaneViews()
+
         if window != nil {
             PreviewChanged()
+
             if Model.Operations.ReadyToClose {
                 Host.RequestClose()
             }
             Host.Title = ChooserTitle()
         }
+
         if let picker = chooser {
             let pane = Model.ActivePane()
+
             if !pane.Loading && chooserDirectory != pane.DirectoryPath {
                 chooserDirectory = pane.DirectoryPath
                 chooserError = ""
+
                 if picker.Request.Directory || picker.SavingMany {
                     Model.ClearSelection()
                 }
             }
         }
+
         Rebuild()
+
         for state in paneViews {
             let pane = state.Pane
             let selection = pane.DirectoryPath + "\0" + pane.Selected.ToString()
+
             if state.Selection != selection {
                 state.Selection = selection
+
                 if !pane.Refreshing {
                     state.RevealPending = true
                     Host.Post(() -> RevealSelection(state))
@@ -299,21 +332,26 @@ partial class BrowserView : Cell {
         if browser == nil {
             return Container{BackgroundColor: palette.Window}
         }
+
         let p = palette
         let browsing = BrowsingSplit(p)
         let browserArea = PreviewSplit(browsing, p)
         let main = PlacesSplit(browserArea, p)
         let children = List[Blob]()
+
         let chrome = WindowBar.Build(Host, Toolbar(), width, p)
         chrome.Key = "window-bar"
         children.Add(chrome)
         children.Add(main)
         children.Add(chooser != nil ? ChooserBar(): StatusBar())
+
         if dialog != DialogKind.None {
             children.Add(Dialog())
         }
+
         children.Add(ContextMenu())
         let rounded = Rounded()
+
         return Container{
             Handle: rootHandle,
             Width: Percent(100),
@@ -337,9 +375,11 @@ partial class BrowserView : Cell {
     private func BrowsingSplit(p Palette) Blob {
         let first = Pane(0)
         var second Blob? = nil
+
         if Model.Split {
             second = Pane(1)
         }
+
         return SplitDivider.Build(
             "browser-split",
             first,
@@ -377,9 +417,11 @@ partial class BrowserView : Cell {
 
     private func PreviewSplit(browsing Blob, p Palette) Blob {
         var preview Blob? = nil
+
         if Model.PreviewVisible {
             preview = PreviewSidebar.Build(PreviewInput(), Host, p)
         }
+
         let workspace = SplitDivider.Build(
             "preview-split",
             browsing,
@@ -410,6 +452,7 @@ partial class BrowserView : Cell {
             p
         )
         workspace.Key = "workspace"
+
         let browserArea = Container{
             Key: "browser-area",
             FlexGrow: 1,
@@ -418,6 +461,7 @@ partial class BrowserView : Cell {
             MinHeight: 0,
             workspace,
         }
+
         return browserArea
     }
 
@@ -425,12 +469,15 @@ partial class BrowserView : Cell {
         var bookmarkDrop Func[int32, DropTarget]? = nil
         var bookmarkMenu Action[string, Point]? = nil
         var bookmarkMenuKey Action[string, KeyEvent, Point]? = nil
+
         if chooser == nil {
             bookmarkDrop = index -> BookmarkDropTarget(index)
             bookmarkMenu = OpenBookmarkContextMenu
             bookmarkMenuKey = OpenBookmarkKeyboardContextMenu
         }
+
         var places Blob? = nil
+
         if width >= PlacesBreakpoint {
             places = PlacesSidebar.Build(
                 Model.ActivePane().DirectoryPath,
@@ -460,6 +507,7 @@ partial class BrowserView : Cell {
                 chooser == nil
             )
         }
+
         let main = SplitDivider.Build(
             "places-split",
             places,
@@ -482,6 +530,7 @@ partial class BrowserView : Cell {
             p
         )
         main.Key = "main"
+
         return main
     }
 }

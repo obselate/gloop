@@ -67,11 +67,14 @@ open class SidebarLink : Cell[SidebarLinkInput] {
                 }
             ),
         }
+
         if let trailing = value.Trailing {
             button.Children.Add(Container{FlexGrow: 1})
             button.Children.Add(trailing)
         }
+
         WidgetKeyBindings.BindActivation(button)
+
         return button
     }
 }

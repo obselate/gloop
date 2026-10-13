@@ -53,6 +53,7 @@ class Palette {
         Keyboard = keyboard
         let preset = ThemePresets.Match(theme)
         Glass = preset == "Glass"
+
         Background = Color.Parse(theme.Background)
         Surface = Color.Parse(theme.Surface)
         Text = Color.Parse(theme.Text)
@@ -70,6 +71,7 @@ class Palette {
         Edge = Glass ? Color.Rgba(184, 191, 201, 56): Border
         Blur = Glass ? 24: 0
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
+
         let syntax = preset == "" ? nil: ThemePresets.Create(preset)
         Keyword = Color.Parse(syntax?.Keyword ?? theme.Accent)
         String = Color.Parse(syntax?.String ?? theme.Text)

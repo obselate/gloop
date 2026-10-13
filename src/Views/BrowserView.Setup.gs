@@ -18,11 +18,13 @@ partial class BrowserView {
         if chooser != nil || setupBusy {
             return
         }
+
         CloseDialog()
         setupStep = 0
         setupChooserChanged = false
         setupAccepted = true
         var error = ""
+
         try {
             if FirstRunSetup.IsSystemRegistered() {
                 setupStep = 1
@@ -30,6 +32,7 @@ partial class BrowserView {
         } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
             error = "Check desktop entry failed for Gloop: " + failure.Message
         }
+
         setupFirstStep = setupStep
         OpenDialog(DialogKind.DesktopSetup, "")
         dialogError = error
@@ -57,6 +60,7 @@ partial class BrowserView {
             " of " +
             (3 - setupFirstStep).ToString(): "Setup complete"
         let actions = Container{FlexDirection: FlexDirection.Row, JustifyContent: JustifyContent.FlexEnd, Gap: 8}
+
         if setupStep < 3 {
             let no = Ui.ActionButton("No", () -> AnswerSetup(false), p, handle: setupChoiceHandle)
             no.Disabled = setupBusy
@@ -72,6 +76,7 @@ partial class BrowserView {
             let done = Ui.ActionButton("Start browsing", () -> CloseDialog(), p, true, setupChoiceHandle)
             actions.Children = []Blob{done}
         }
+
         return DialogShell.Build(
             DialogTitle(DialogKind.DesktopSetup),
             QuestionPrompt.Build(question, detail, progress, dialogError, setupBusy, p),
@@ -92,12 +97,14 @@ partial class BrowserView {
         if setupBusy || setupStep >= 3 {
             return
         }
+
         let next = setupStep == 0 && !accept ? 3: setupStep + 1
         setupAccepted = accept
         setupBusy = true
         dialogError = ""
         let done = chan[bool](1)
         setupCompletion = done
+
         go ApplySetupChoice(setupStep, accept, next, done)
         Rebuild()
     }
@@ -109,6 +116,7 @@ partial class BrowserView {
             case 1: "Set default file manager"
             default: "Register portal and set default file chooser"
         }
+
         try {
             if accept {
                 let action = switch step {
@@ -118,6 +126,7 @@ partial class BrowserView {
                 }
                 FirstRunSetup.Apply(action)
             }
+
             if next == 3 {
                 operation = "Complete desktop setup"
                 FirstRunSetup.Complete()
@@ -125,6 +134,7 @@ partial class BrowserView {
         } catch (failure Exception) {
             error = operation + " failed for Gloop: " + failure.Message
         }
+
         try {
             Host.Post(
                 () -> {

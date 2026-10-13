@@ -18,12 +18,15 @@ class FileNames {
 
         internal func Truncate(value string, maxBytes int32) string {
             var length = value.Length
+
             while length > 0 && Utf8.GetByteCount(value.AsSpan(0, length)) > maxBytes {
                 length--
+
                 if length > 0 && Char.IsHighSurrogate(value[length - 1]) {
                     length--
                 }
             }
+
             return value.Substring(0, length)
         }
     }

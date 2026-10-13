@@ -10,6 +10,7 @@ class QuestionPrompt {
             children.Add(Text{Content: progress, Color: p.Muted, FontSize: 11})
             children.Add(Text{Content: question, Color: p.Text, FontSize: 17, FontWeight: 600, TextWrap: TextWrap.Wrap})
             children.Add(Text{Content: detail, Color: p.Muted, FontSize: 13, TextWrap: TextWrap.Wrap})
+
             if error != "" {
                 children.Add(
                     Container{
@@ -21,9 +22,11 @@ class QuestionPrompt {
                     }
                 )
             }
+
             if busy {
                 children.Add(Text{Content: "Applying your choice…", Color: p.Muted, FontSize: 12})
             }
+
             return Container{MinHeight: 0, Gap: 8, Children: children.ToArray()}
         }
     }

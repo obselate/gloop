@@ -12,10 +12,12 @@ class LatestWork {
 
     internal func Submit(job Action[int32], failed Action[int32, Exception]) {
         var start bool
+
         lock gate {
             if closed {
                 return
             }
+
             generation++
             let current = generation
             pending = () -> job(current)
@@ -23,6 +25,7 @@ class LatestWork {
             start = !running
             running = true
         }
+
         if start {
             go latestWorker(this)
         }
@@ -55,9 +58,11 @@ class LatestWork {
             pending = nil
             failed = pendingFailure
             pendingFailure = nil
+
             if job == nil {
                 running = false
             }
+
             return job
         }
     }
@@ -66,15 +71,18 @@ class LatestWork {
 func latestWorker(work LatestWork) {
     while true {
         var failed Action[Exception]?
+
         guard let job = work.Take(out failed) else {
             return
         }
+
         try {
             job()
         } catch (failure Exception) {
             guard let report = failed else {
                 throw Exception("Latest work has no failure handler", failure)
             }
+
             report(failure)
         }
     }

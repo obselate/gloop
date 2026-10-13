@@ -42,15 +42,19 @@ class DesktopApp {
             if !groups.TryGetValue("Desktop Entry", out var entry) {
                 return nil
             }
+
             let exec = unescape(get(entry, "Exec"))
             let listed = get(entry, "Hidden") != "true" && get(entry, "NoDisplay") != "true" && shown(entry, desktops)
             let tryExec = unescape(get(entry, "TryExec"))
+
             if get(entry, "Type") != "Application" || exec.Trim() == "" ||
                 !listed ||
                 (tryExec != "" && findExecutable(tryExec) == "") {
                 return nil
             }
+
             let name = localizedName(entry, locales)
+
             return DesktopApp(
                 source,
                 name == "" ? fallbackName: name,
@@ -70,6 +74,7 @@ class DesktopApp {
             let only = get(entry, "OnlyShowIn").Split(';', StringSplitOptions.RemoveEmptyEntries)
             let hidden = get(entry, "NotShowIn").Split(';', StringSplitOptions.RemoveEmptyEntries)
             let allowed = only.Length == 0 || Array.Exists(only, name -> Array.IndexOf(current, name) >= 0)
+
             return allowed && !Array.Exists(hidden, name -> Array.IndexOf(current, name) >= 0)
         }
 
@@ -79,6 +84,7 @@ class DesktopApp {
                     return unescape(name)
                 }
             }
+
             return unescape(get(entry, "Name"))
         }
 
@@ -87,16 +93,20 @@ class DesktopApp {
             let replacements = " \n\r\t\\"
             let text = StringBuilder()
             var index = 0
+
             while index < value.Length {
                 let at = index + 1 < value.Length && value[index] == '\\' ? escapes.IndexOf(value[index + 1]): -1
+
                 if at >= 0 {
                     text.Append(replacements[at])
                     index++
                 } else {
                     text.Append(value[index])
                 }
+
                 index++
             }
+
             return text.ToString()
         }
 
@@ -107,10 +117,12 @@ class DesktopApp {
             var started = false
             var quote = '\0'
             var index = 0
+
             while index < text.Length {
                 let c = text[index]
                 let next = index + 1 < text.Length ? text[index + 1]: ' '
                 let escapable = quote == '"' && "\"`$\\".IndexOf(next) >= 0
+
                 if c == '\\' && (quote == '\0' || escapable) {
                     current.Append(next)
                     started = true
@@ -134,21 +146,26 @@ class DesktopApp {
                     current.Append(c)
                     started = true
                 }
+
                 index++
             }
+
             return tokens
         }
 
         private func fileUri(path string) string {
             let text = StringBuilder("file://")
+
             for value in Encoding.UTF8.GetBytes(path) {
                 let character = char(value)
+
                 if Char.IsAsciiLetterOrDigit(character) || "-._~/".IndexOf(character) >= 0 {
                     text.Append(character)
                 } else {
                     text.Append('%').Append(value.ToString("X2"))
                 }
             }
+
             return text.ToString()
         }
     }
@@ -159,12 +176,16 @@ class DesktopApp {
         if paths.Count > MaxFiles {
             throw InvalidOperationException("Cannot open more than " + MaxFiles.ToString() + " files at once")
         }
+
         let multiple = uses("FU")
+
         if paths.Count > 0 && !multiple && !uses("fu") {
             throw InvalidOperationException(Name + " does not open files")
         }
+
         let files = paths
         let groups = List[List[string]]()
+
         if multiple || files.Count == 0 {
             groups.Add(files)
         } else {
@@ -172,35 +193,45 @@ class DesktopApp {
                 groups.Add(List[string]{file})
             }
         }
+
         let commands = List[List[string]]()
+
         for group in groups {
             let command = arguments(group)
+
             if command.Count == 0 {
                 throw InvalidOperationException(Name + " has no command to run")
             }
+
             commands.Add(command)
         }
+
         return commands
     }
 
     private func uses(codes string) bool {
         for token in tokens {
             var index = 0
+
             while index + 1 < token.Length {
                 if token[index] == '%' {
                     if codes.IndexOf(token[index + 1]) >= 0 {
                         return true
                     }
+
                     index++
                 }
+
                 index++
             }
         }
+
         return false
     }
 
     private func arguments(files List[string]) List[string] {
         let argv = List[string]()
+
         for token in tokens {
             if token == "%F" {
                 argv.AddRange(files)
@@ -215,17 +246,20 @@ class DesktopApp {
                 }
             } else {
                 let text = substitute(token, files)
+
                 if text != "" || !token.Contains('%') {
                     argv.Add(text)
                 }
             }
         }
+
         return argv
     }
 
     private func substitute(token string, files List[string]) string {
         let text = StringBuilder()
         var index = 0
+
         while index < token.Length {
             if token[index] == '%' && index + 1 < token.Length {
                 index++
@@ -244,8 +278,10 @@ class DesktopApp {
             } else {
                 text.Append(token[index])
             }
+
             index++
         }
+
         return text.ToString()
     }
 }

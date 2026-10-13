@@ -11,10 +11,12 @@ internal class BookmarkPath {
             if value == "" {
                 return ""
             }
+
             try {
                 if !Path.IsPathFullyQualified(value) {
                     return ""
                 }
+
                 return Path.TrimEndingDirectorySeparator(Path.GetFullPath(value))
             } catch (e ArgumentException) {
                 return ""

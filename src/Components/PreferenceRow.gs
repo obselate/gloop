@@ -22,6 +22,7 @@ class PreferenceRow {
                 AlignItems: stacked ? AlignItems.Stretch: AlignItems.Center,
                 Gap: stacked ? 0: 18,
             }
+
             if label != "" {
                 root.Children.Add(
                     Container{
@@ -32,7 +33,9 @@ class PreferenceRow {
                     }
                 )
             }
+
             root.Children.Add(control)
+
             return root
         }
 

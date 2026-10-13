@@ -20,11 +20,14 @@ class TextContent {
                 if (index & CancellationCheckMask) == 0 && cancelled?.Invoke() == true {
                     throw OperationCanceledException()
                 }
+
                 let value = buffer[index]
+
                 if value == 0 || (controls && value < 32 && value != 9 && value != 10 && value != 13) {
                     return true
                 }
             }
+
             return false
         }
 
@@ -32,20 +35,27 @@ class TextContent {
             if HasBinaryBytes(buffer, count) {
                 return false
             }
+
             var remaining = ReadOnlySpan[uint8](buffer, 0, count)
+
             if System.Text.Unicode.Utf8.IsValid(remaining) {
                 return true
             }
+
             if complete {
                 return false
             }
+
             while !remaining.IsEmpty {
                 let status = Rune.DecodeFromUtf8(remaining, out var rune, out var consumed)
+
                 if status != OperationStatus.Done {
                     return status == OperationStatus.NeedMoreData
                 }
+
                 remaining = remaining.Slice(consumed)
             }
+
             return true
         }
 
@@ -55,6 +65,7 @@ class TextContent {
             } else {
                 0
             }
+
             return Utf8.GetString(buffer, start, count - start)
         }
 
@@ -62,10 +73,13 @@ class TextContent {
             if count == 0 {
                 return count
             }
+
             var start = count - 1
+
             while start > 0 && (int32(buffer[start]) & 192) == 128 {
                 start--
             }
+
             let lead = int32(buffer[start])
             let width = if lead < 128 {
                 1
@@ -78,6 +92,7 @@ class TextContent {
             } else {
                 1
             }
+
             return start + width > count ? start: count
         }
     }
