@@ -269,7 +269,7 @@ partial class BrowserView {
         icon,
         settings.Keybindings.GetValueOrDefault(action, ""),
         palette,
-        disabled || !(chooser?.Allows(action) ?? true) || (chooser == nil && !Model.CanRun(action, menu: true)),
+        disabled || !(chooser?.Allows(action) ?? true) || !Model.CanRun(action),
         checked
     )
 }

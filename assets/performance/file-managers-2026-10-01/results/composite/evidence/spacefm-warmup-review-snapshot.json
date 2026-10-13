@@ -1,7 +1,0 @@
-{
-  "warmups": {
-    "spacefm/list100": true,
-    "spacefm/list100000": true,
-    "spacefm/tiles100000": true
-  }
-}

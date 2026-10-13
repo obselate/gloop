@@ -232,6 +232,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 OnSelect: onSelect,
                 AccessibilityName: label,
                 OverlayHost: value.OverlayHost,
+                Placement: PopoverPlacement.TopStart,
                 Width: 210,
                 RowHeight: 30,
                 CreateTrigger: (_, row) -> {

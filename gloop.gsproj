@@ -82,6 +82,6 @@
     <PackageReference Include="Goo" Version="[0.7.32]" />
     <PackageReference Include="Goo.Animations" Version="[0.2.6]" />
     <PackageReference Include="Goo.Svg" Version="[0.7.32]" />
-    <PackageReference Include="Goo.Widgets" Version="[0.2.15]" />
+    <PackageReference Include="Goo.Widgets" Version="[0.2.16]" />
   </ItemGroup>
 </Project>

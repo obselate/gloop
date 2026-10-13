@@ -94,6 +94,13 @@ partial class BrowserView {
 
     private func Invoke(action string) {
         if !(chooser?.Allows(action) ?? true) || !Model.CanRun(action) {
+            notice = AppSettings.ActionCatalog[action].Label + " is not available here."
+
+            if chooser != nil {
+                chooserError = notice
+            }
+
+            Rebuild()
             return
         }
 
