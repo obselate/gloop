@@ -8,7 +8,7 @@ import System.Runtime.InteropServices
 unsafe class DirectoryWatch {
     private const QuietMilliseconds int32 = 150
     private const MaximumMilliseconds int32 = 350
-    private const PollMilliseconds int32 = 50
+    private const IdlePollMilliseconds int32 = 1000
     private const BufferBytes int32 = 65536
     private const NonBlockingCloseOnExec int32 = 0x80800
     private const ChangeMask uint32 = 0xfce
@@ -44,8 +44,11 @@ unsafe class DirectoryWatch {
 
     private func Post(error string) bool {
         lock gate {
-            if closed || posted {
+            if closed {
                 return false
+            }
+            if posted {
+                return true
             }
 
             posted = true
@@ -93,7 +96,21 @@ unsafe class DirectoryWatch {
             var dirty bool
 
             while !IsClosed() {
-                let ready = poll(pollBuffer, 1, PollMilliseconds)
+                let beforePoll = Environment.TickCount64
+                let timeout = if dirty {
+                    int32(
+                        Math.Max(
+                            0,
+                            Math.Min(
+                                QuietMilliseconds - (beforePoll - lastChange),
+                                MaximumMilliseconds - (beforePoll - firstChange)
+                            )
+                        )
+                    )
+                } else {
+                    IdlePollMilliseconds
+                }
+                let ready = poll(pollBuffer, 1, timeout)
 
                 if ready < 0 && Marshal.GetLastWin32Error() != Interrupted {
                     throw Win32Exception(Marshal.GetLastWin32Error())
