@@ -187,7 +187,7 @@ class FileOperationQueue {
         if admission == OperationAdmission.StartWorker {
             let queue = this
             let owner = window
-            go fileOperationWorker(owner, queue)
+            go fileOperationWorker(owner, queue, controller.Archives)
         }
     }
 
@@ -278,7 +278,7 @@ class FileOperationQueue {
         kind == OperationKind.Delete
 }
 
-func fileOperationWorker(window Window, queue FileOperationQueue) {
+func fileOperationWorker(window Window, queue FileOperationQueue, archives ArchiveService) {
     while let request = queue.Take() {
         let results = List[OperationResult](request.Sources.Count)
         let operations = FileOperationService()
@@ -304,12 +304,8 @@ func fileOperationWorker(window Window, queue FileOperationQueue) {
                         request.Permission,
                         request.Enabled
                     )
-                    case OperationKind.Extract: ArchiveService().Extract(source, request.Destination)
-                    case OperationKind.Compress: ArchiveService().Compress(
-                        request.Sources,
-                        request.Destination,
-                        request.Name
-                    )
+                    case OperationKind.Extract: archives.Extract(source, request.Destination)
+                    case OperationKind.Compress: archives.Compress(request.Sources, request.Destination, request.Name)
                     default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
                 }
             } catch (failure Exception) {
