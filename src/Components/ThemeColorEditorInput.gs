@@ -11,6 +11,5 @@ internal data struct ThemeColorEditorInput {
     var WheelSize float64
     var Gap float64
     var FocusColor Color
-    var ShowFocus bool
     var Change Action[int32]
 }

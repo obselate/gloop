@@ -151,7 +151,6 @@ class Ui {
                     BackgroundColor: Color.Transparent,
                     ActiveBackgroundColor: p.Selection,
                     HoverBackgroundColor: hoverColor ?? p.Border,
-                    ShowFocusHighlight: p.Keyboard,
                     FocusOutlineColor: p.Accent,
                 }.Build(),
                 window,

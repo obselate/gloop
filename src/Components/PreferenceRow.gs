@@ -50,7 +50,6 @@ class PreferenceRow {
                 ThumbColor: p.Text,
                 OnThumbColor: p.Background,
                 BorderColor: p.Border,
-                ShowFocusHighlight: p.Keyboard,
                 FocusBorderColor: p.Text,
             }.Build(),
             p,

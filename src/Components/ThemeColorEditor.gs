@@ -18,7 +18,6 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
             WheelSize: value.WheelSize,
             Gap: value.Gap,
             AccessibilityName: value.Role,
-            ShowFocusHighlight: value.ShowFocus,
             FocusOutlineColor: value.FocusColor,
             OnValueChanged: value.Change,
             CreateRoot: (input, wheel, slider) -> Container{
@@ -38,7 +37,6 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
             wheelSize float64,
             gap float64,
             focusColor Color,
-            showFocus bool,
             change Action[int32]
         ) Blob ->
         Cell.Mount[ThemeColorEditorInput, ThemeColorEditor](
@@ -49,7 +47,6 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
                 WheelSize: wheelSize,
                 Gap: gap,
                 FocusColor: focusColor,
-                ShowFocus: showFocus,
                 Change: change,
             }
         )
