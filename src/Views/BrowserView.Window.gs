@@ -16,7 +16,13 @@ partial class BrowserView {
             return
         }
 
-        host.Background = palette.Glass ? Color.Transparent: palette.Background
+        Theme.Attach(
+            host,
+            Theme.Default with{
+                CanvasColor = palette.Glass ? Color.Transparent: palette.Background,
+                TextColor = palette.Text,
+            }
+        )
         host.BackdropFallbackColor = palette.Background
         host.Backdrop = palette.Glass ? WindowBackdrop.Blur: WindowBackdrop.None
 
