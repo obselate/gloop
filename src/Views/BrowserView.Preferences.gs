@@ -242,7 +242,6 @@ partial class BrowserView {
                         ThumbBorderColor: p.Surface,
                         TrackThickness: 4,
                         ThumbSize: 14,
-                        ShowFocusHighlight: p.Keyboard,
                         FocusOutlineColor: p.Accent,
                     }
                 ),
@@ -364,7 +363,6 @@ partial class BrowserView {
                                     12
                                 },
                                 p.Accent,
-                                p.Keyboard,
                                 value -> {
                                     let color = "#" + ColorMath.Hex(value)
                                     values.SetCustomColor(selectedRole, color)
