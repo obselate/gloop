@@ -80,6 +80,6 @@
     <GooMaterialIcon Include="visibility_off" />
     <PackageReference Include="Tmds.DBus.Protocol" Version="[0.95.1]" />
     <PackageReference Include="Goo" Version="[0.8.1]" />
-    <PackageReference Include="Goo.Widgets" Version="[0.6.0]" />
+    <PackageReference Include="Goo.Widgets" Version="[0.6.1]" />
   </ItemGroup>
 </Project>
