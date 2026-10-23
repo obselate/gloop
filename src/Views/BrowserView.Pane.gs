@@ -271,6 +271,12 @@ partial class BrowserView {
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
                 Tiles: settings.ViewMode == ViewMode.Tiles,
                 TileWidth: TileWidth(index),
+                ScrollbarInset: if !Model.PreviewVisible &&
+                    (!Model.Split || BrowsingWidth() < SplitBreakpoint || index == Model.Panes.Count - 1) {
+                    Host.ResizeBand + 2
+                } else {
+                    2
+                },
                 Active: active,
                 AutoFocus: active && !(chooser?.Saving ?? false),
                 Choosing: chooser != nil,

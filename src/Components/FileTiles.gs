@@ -61,10 +61,10 @@ open class FileTiles : Cell[FileTableInput] {
         grid.FlexDirection = FlexDirection.Row
         grid.FlexWrap = FlexWrap.Wrap
         grid.Gap = Gap
-        grid.Padding = Padding
+        grid.Padding = Edges{Left: Padding, Top: Padding, Right: value.ScrollbarInset + 10, Bottom: Padding}
         grid.OverflowX = Overflow.Hidden
         grid.OverflowY = Overflow.Scroll
-        grid.ScrollbarY = Ui.ScrollbarStyle(p)
+        grid.ScrollbarY = Ui.ScrollbarStyle(p, value.ScrollbarInset)
         grid.ScrollbarVisibilityY = ScrollbarVisibility.Always
 
         root.Children.Add(grid)

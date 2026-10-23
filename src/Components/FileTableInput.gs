@@ -16,6 +16,7 @@ internal data struct FileTableInput {
     var OnHeaderMenu Action[Point]
     var Tiles bool
     var TileWidth float64
+    var ScrollbarInset float64
     var WordWrap bool
     var Active bool
     var AutoFocus bool
