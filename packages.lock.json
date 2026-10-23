@@ -14,11 +14,12 @@
       },
       "Goo.Widgets": {
         "type": "Direct",
-        "requested": "[0.6.1, 0.6.1]",
-        "resolved": "0.6.1",
-        "contentHash": "ziD0+GSHIDMv0/jfZgSlNnXIE+XTb7B/IXZO1n3xCT4QPFWqMaxf8TEBiibRGwLfZtjdNH6bZauJtpPNaG6Unw==",
+        "requested": "[0.7.0, 0.7.0]",
+        "resolved": "0.7.0",
+        "contentHash": "NxduyeiVnh9+d2iC8e99HDTsO+9k/WW0n33EWPBt+1bzFF7Axq9muJIUj2piYamA7tZDrcsb3ANTZQ/eO3A5jw==",
         "dependencies": {
-          "Goo": "0.7.51"
+          "Goo": "0.10.0",
+          "Goo.Gestures": "0.10.0"
         }
       },
       "Microsoft.DotNet.ILCompiler": {
@@ -38,6 +39,14 @@
         "requested": "[0.95.1, 0.95.1]",
         "resolved": "0.95.1",
         "contentHash": "IbGhqZAqqgB/DkT70+lAk4MNv95tZtsTMFQ+S3uGy0aTfOkGVeFjeNJsX8dBI/3+CPnO5XW6lRQKGeFEgHElKw=="
+      },
+      "Goo.Gestures": {
+        "type": "Transitive",
+        "resolved": "0.10.0",
+        "contentHash": "znHbiQWApHr90UTKZnHsCmJVqkoa8CtgGZlOMYv18tcOk5c/f+r2I4K1vgZG4STqjnkfNuT/v3EKJT9HOF4p6g==",
+        "dependencies": {
+          "Goo": "0.10.0"
+        }
       },
       "Hexa.NET.SDL3": {
         "type": "Transitive",
