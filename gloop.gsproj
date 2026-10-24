@@ -79,7 +79,7 @@
     <GooMaterialIcon Include="visibility" />
     <GooMaterialIcon Include="visibility_off" />
     <PackageReference Include="Tmds.DBus.Protocol" Version="[0.95.1]" />
-    <PackageReference Include="Goo" Version="[0.12.1]" />
+    <PackageReference Include="Goo" Version="[0.13.0]" />
     <PackageReference Include="Goo.Widgets" Version="[0.7.1]" />
   </ItemGroup>
 </Project>
