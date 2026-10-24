@@ -14,11 +14,11 @@
       },
       "Goo.Widgets": {
         "type": "Direct",
-        "requested": "[0.7.1, 0.7.1]",
-        "resolved": "0.7.1",
-        "contentHash": "flD9Y9jnwdGlsPOMxeWfzZES/qub3S5KX3IGRS+wz8g7+lb1C+hjJ8Mdif/4SQhkdQdA2cltw6Wepvuzk8GSMg==",
+        "requested": "[0.8.0, 0.8.0]",
+        "resolved": "0.8.0",
+        "contentHash": "WGfKoiXO1NrCNzLewHAG/LUl/M04UjPkzmbOwrtNSN3ZamZAJGX+sPbZTcqb0Uh/e6M4XeYaP/JDwwMHLXiAug==",
         "dependencies": {
-          "Goo": "0.10.0",
+          "Goo": "0.13.0",
           "Goo.Gestures": "0.10.0"
         }
       },
