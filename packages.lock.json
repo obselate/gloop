@@ -4,22 +4,22 @@
     "net10.0": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.15.0, 0.15.0]",
-        "resolved": "0.15.0",
-        "contentHash": "Ic0TraPErAzhotJMZjmdW5+vm57JL7DSAmJLmzBScRctfcD1lXvXS91gT2a55sB7wP9Y4Y6FzF9NDN2cx/eC6g==",
+        "requested": "[0.18.0, 0.18.0]",
+        "resolved": "0.18.0",
+        "contentHash": "AscrMxBYk5cbG7MKRs2vdyc1n+2TAQnKR+HlGdXL11AYwDO3ESs2wGgCAXQlpzcRxG0xexghPq6keX1oz1lTWg==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
+          "Tmds.DBus.Protocol": "0.95.1",
           "Unicode.Bidi": "0.3.18"
         }
       },
       "Goo.Widgets": {
         "type": "Direct",
-        "requested": "[0.8.0, 0.8.0]",
-        "resolved": "0.8.0",
-        "contentHash": "WGfKoiXO1NrCNzLewHAG/LUl/M04UjPkzmbOwrtNSN3ZamZAJGX+sPbZTcqb0Uh/e6M4XeYaP/JDwwMHLXiAug==",
+        "requested": "[0.13.0, 0.13.0]",
+        "resolved": "0.13.0",
+        "contentHash": "mdBh7VHq3zUl4trgZSOVzDd+pit4211+UnKcaer7Yj44V8f6Jsjez8SliXfJjORc3wEdQHqymz49GjKh1m6Lgw==",
         "dependencies": {
-          "Goo": "0.13.0",
-          "Goo.Gestures": "0.10.0"
+          "Goo": "0.18.0"
         }
       },
       "Microsoft.DotNet.ILCompiler": {
@@ -39,14 +39,6 @@
         "requested": "[0.95.1, 0.95.1]",
         "resolved": "0.95.1",
         "contentHash": "IbGhqZAqqgB/DkT70+lAk4MNv95tZtsTMFQ+S3uGy0aTfOkGVeFjeNJsX8dBI/3+CPnO5XW6lRQKGeFEgHElKw=="
-      },
-      "Goo.Gestures": {
-        "type": "Transitive",
-        "resolved": "0.10.0",
-        "contentHash": "znHbiQWApHr90UTKZnHsCmJVqkoa8CtgGZlOMYv18tcOk5c/f+r2I4K1vgZG4STqjnkfNuT/v3EKJT9HOF4p6g==",
-        "dependencies": {
-          "Goo": "0.10.0"
-        }
       },
       "Hexa.NET.SDL3": {
         "type": "Transitive",
@@ -70,11 +62,12 @@
     "net10.0/linux-x64": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.15.0, 0.15.0]",
-        "resolved": "0.15.0",
-        "contentHash": "Ic0TraPErAzhotJMZjmdW5+vm57JL7DSAmJLmzBScRctfcD1lXvXS91gT2a55sB7wP9Y4Y6FzF9NDN2cx/eC6g==",
+        "requested": "[0.18.0, 0.18.0]",
+        "resolved": "0.18.0",
+        "contentHash": "AscrMxBYk5cbG7MKRs2vdyc1n+2TAQnKR+HlGdXL11AYwDO3ESs2wGgCAXQlpzcRxG0xexghPq6keX1oz1lTWg==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
+          "Tmds.DBus.Protocol": "0.95.1",
           "Unicode.Bidi": "0.3.18"
         }
       },
