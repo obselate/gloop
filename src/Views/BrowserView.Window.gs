@@ -16,16 +16,7 @@ partial class BrowserView {
             return
         }
 
-        Theme.Attach(
-            host,
-            Theme.Default with{
-                CanvasColor = palette.Glass ? palette.Background.WithAlpha(0): palette.Background,
-                TextColor = palette.Text,
-            }
-        )
-        host.BackdropFallbackColor = palette.Background
-        host.Backdrop = palette.Glass ? WindowBackdrop.Blur: WindowBackdrop.None
-
+        Theme.Attach(host, palette.WidgetTheme)
         UpdateBackdropRegion()
     }
 
@@ -36,7 +27,7 @@ partial class BrowserView {
 
         host.WaylandBackdrop = Rounded() ? WaylandBackdropOptions{
             Region: ElementRect{X: 1, Y: 1, Width: Math.Max(0, host.Width - 2), Height: Math.Max(0, host.Height - 2)},
-            CornerRadius: WindowRadius - 1,
+            CornerRadius: Ui.WindowRadius - 1,
         }: WaylandBackdropOptions{}
     }
 

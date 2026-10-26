@@ -21,7 +21,8 @@ class SplitDivider {
             minimumSecond float64,
             name string,
             enabled bool,
-            palette Palette
+            palette Palette,
+            line bool = true
         ) Blob -> Cell
             .Mount[SplitPaneInput, SplitPane](
             key,
@@ -64,7 +65,7 @@ class SplitDivider {
                     } else {
                         Edges{Top: 1}
                     }
-                    divider.BorderColor = palette.Border
+                    divider.BorderColor = line ? palette.Border: Color.Transparent
                     divider.Hover = Style{BorderColor: palette.Accent}
                     divider.Focus = palette.FocusBorder()
                     if enabled {

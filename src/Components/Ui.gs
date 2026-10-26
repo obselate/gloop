@@ -15,6 +15,8 @@ class Ui {
     internal const ToolSize float64 = 30
     internal const ToolsGap float64 = 4
     internal const BarHeight float64 = 40
+    internal const WindowRadius float64 = 12
+    internal const CardInset float64 = 8
 
     shared {
         private let folder VectorAsset = Svg.Load(
@@ -52,7 +54,7 @@ class Ui {
         internal func BubbleStyle(p Palette) Style -> Style{
             BackgroundColor: p.Overlay,
             BackdropBlur: p.Blur,
-            BorderColor: p.Edge,
+            BorderColor: p.Border,
             BorderWidth: 1,
             Color: p.Text,
             FontSize: 11,
@@ -149,8 +151,8 @@ class Ui {
                     Height: size ?? ToolSize,
                     BorderRadius: 6,
                     BackgroundColor: Color.Transparent,
-                    ActiveBackgroundColor: p.Selection,
-                    HoverBackgroundColor: hoverColor ?? p.Border,
+                    ActiveBackgroundColor: p.ChromeSelection,
+                    HoverBackgroundColor: hoverColor ?? p.ChromeHover,
                     FocusOutlineColor: p.Accent,
                 }.Build(),
                 window,
@@ -206,14 +208,6 @@ class Ui {
             return button
         }
 
-        internal func Shortcut(key string, label string, p Palette) Blob -> Container{
-            FlexDirection: FlexDirection.Row,
-            AlignItems: AlignItems.Center,
-            Gap: 6,
-            KeyHint(key, p),
-            Label(label, p.Muted, 11),
-        }
-
         internal func KeyHint(key string, p Palette) Blob -> Container{
             FlexShrink: 0,
             Padding: Edges{Left: 5, Right: 5, Top: 2, Bottom: 2},
@@ -266,10 +260,6 @@ class Ui {
             },
         }
 
-        internal func Section(title string, p Palette) Blob -> Container{
-            Padding: Edges{Left: 12, Top: 14, Bottom: 6},
-            FlexShrink: 0,
-            Text{Content: title, FontSize: 10, FontWeight: 600, LetterSpacing: 1.1, Color: p.Muted},
-        }
+        internal func GroupGap() Blob -> Container{Height: 12, FlexShrink: 0}
     }
 }

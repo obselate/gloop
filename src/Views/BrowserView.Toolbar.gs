@@ -127,12 +127,10 @@ partial class BrowserView {
             AlignItems: AlignItems.Center,
             Padding: Edges{Left: 12, Right: 10},
             Gap: 14,
-            BorderWidth: Edges{Top: 1},
+            BorderWidth: Edges{Top: p.Glass ? 0: 1},
             BorderColor: p.Border,
             BackgroundColor: p.Bar,
             Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(info, p.Muted, 11)},
-            Ui.Shortcut(settings.Keybindings["TogglePreview"], "Preview", p),
-            Ui.Shortcut(settings.Keybindings["ToggleSplit"], "Split", p),
         }
 
         if let space = SpaceStatus() {
