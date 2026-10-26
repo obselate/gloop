@@ -19,7 +19,7 @@ partial class BrowserView {
         Theme.Attach(
             host,
             Theme.Default with{
-                CanvasColor = palette.Glass ? Color.Transparent: palette.Background,
+                CanvasColor = palette.Glass ? palette.Background.WithAlpha(0): palette.Background,
                 TextColor = palette.Text,
             }
         )

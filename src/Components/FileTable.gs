@@ -161,6 +161,7 @@ open class FileTable : Cell[FileTableInput] {
     private func BuildRoot(root Container, value FileTableInput) Container {
         root.FlexGrow = 1
         root.FlexBasis = 0
+        root.BorderWidth = 0
         root.BorderRadius = 0
         root.AutoFocus = value.AutoFocus
         root.KeyBindings = value.Keys
