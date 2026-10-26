@@ -81,6 +81,7 @@ open class FileTable : Cell[FileTableInput] {
                 BackgroundColor: p.Canvas,
                 TextColor: p.Text,
                 SelectedColor: value.Active ? p.Selection: p.Hover,
+                FocusColor: p.Keyboard ? p.Accent: Color.Transparent,
                 AccessibilityName: "Files in " + pane.DirectoryPath,
                 HeaderStyle: Style{BackgroundColor: p.Canvas, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
                 ResizeHandleStyle: Style{
@@ -238,7 +239,7 @@ open class FileTable : Cell[FileTableInput] {
             } else {
                 AlignItems.FlexStart
             },
-            Ui.Label(text, selected || today ? p.Text: p.Muted, 12, today ? 600: 400),
+            Ui.Label(text, selected || today ? p.Text: p.Muted, 12),
         }
     }
 

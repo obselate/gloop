@@ -4,6 +4,7 @@ internal class ThemePresets {
     shared {
         internal func Names()[]string -> []string{
             "Glass",
+            "Glass Light",
             "Catppuccin Mocha",
             "Tokyo Night",
             "Nord",
@@ -41,6 +42,22 @@ internal class ThemePresets {
                     "#8FD694",
                     "#F0A56B",
                     "#E8CF8A"
+                )
+            }
+
+            if name == "Glass Light" {
+                return Make(
+                    "#FBFBFA",
+                    "#EFEFEC",
+                    "#17181C",
+                    "#4B4E57",
+                    "#2F67E0",
+                    "#DCDCD8",
+                    "#DCE6FB",
+                    "#71468C",
+                    "#30672A",
+                    "#805019",
+                    "#19666C"
                 )
             }
 

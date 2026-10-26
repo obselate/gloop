@@ -31,7 +31,6 @@ partial class BrowserView : Cell {
     private let scrollSpeedRow ElementHandle = ElementHandle()
     private let themeEditorHandle ElementHandle = ElementHandle()
     private var focusScope FocusScope?
-    private const WindowRadius float64 = 12
     internal const DefaultWidth int32 = 1180
     internal const DefaultHeight int32 = 760
     private const SplitBreakpoint float64 = 660
@@ -354,14 +353,11 @@ partial class BrowserView : Cell {
         let rounded = Rounded()
 
         return Container{
+            BasedOn: rounded ? p.WidgetTheme.GlassStyle: Style{BackgroundColor: p.Window},
             Handle: rootHandle,
             Width: Percent(100),
             Height: Percent(100),
             MinHeight: 0,
-            BackgroundColor: p.Window,
-            BorderRadius: rounded ? WindowRadius: 0,
-            BorderWidth: rounded ? 1: 0,
-            BorderColor: p.Edge,
             Overflow: rounded ? Overflow.Hidden: Overflow.Visible,
             Color: p.Text,
             FontFamily: "sans-serif, Noto Sans CJK",
@@ -455,11 +451,14 @@ partial class BrowserView : Cell {
         workspace.Key = "workspace"
 
         let browserArea = Container{
+            BasedOn: p.Glass ? p.WidgetTheme.PanelStyle: Style{},
             Key: "browser-area",
             FlexGrow: 1,
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
+            MarginEnd: p.Glass ? Ui.CardInset: 0,
+            Overflow: p.Glass ? Overflow.Hidden: Overflow.Visible,
             workspace,
         }
 
@@ -488,7 +487,6 @@ partial class BrowserView : Cell {
                 },
                 () -> OpenPreferences(),
                 settings.Bookmarks,
-                chooser == nil ? settings.Keybindings["ToggleBookmark"]: "",
                 Host,
                 p,
                 Model.Places.StandardPlaces,
@@ -528,7 +526,8 @@ partial class BrowserView : Cell {
             WorkspaceMinimum,
             "Resize places sidebar",
             width >= PlacesBreakpoint,
-            p
+            p,
+            !p.Glass
         )
         main.Key = "main"
 

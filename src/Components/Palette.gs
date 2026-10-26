@@ -30,29 +30,31 @@ class Palette {
     internal let Sidebar Color
     internal let Preview Color
     internal let Hover Color
+    internal let ChromeHover Color
+    internal let ChromeSelection Color
     internal let Bar Color
     internal let Overlay Color
-    internal let Edge Color
     internal let Blur float64
     internal let Keyboard bool
+    internal let WidgetTheme Theme
     internal let Danger Color = Color.Parse("#9F3545")
-    internal let Scrim Color = Color.Rgba(0, 0, 0, 140)
+    internal let Scrim Color
     internal let Shadow Color = Color.Black
     internal let GlassGradient LinearGradient = LinearGradient(Color.Parse("#2B6FD6"), Color.Parse("#D43C8C"))
 
     internal func PopupStyle() Style -> Style{
-        BackgroundColor: Overlay,
-        BackdropBlur: Blur,
-        BorderWidth: 1,
-        BorderColor: Edge,
-        BorderRadius: 10,
         BoxShadow: Ui.Shadow(this),
+        BasedOn: WidgetTheme.OverlayStyle,
+        BackgroundColor: Overlay,
+        BorderWidth: 1,
+        BorderColor: Border,
+        BorderRadius: 10,
     }
 
     internal init(theme ThemePalette, keyboard bool = false) {
         Keyboard = keyboard
         let preset = ThemePresets.Match(theme)
-        Glass = preset == "Glass"
+        Glass = preset.StartsWith("Glass")
 
         Background = Color.Parse(theme.Background)
         Surface = Color.Parse(theme.Surface)
@@ -60,15 +62,33 @@ class Palette {
         Muted = Color.Parse(theme.MutedText)
         Accent = Color.Parse(theme.Accent)
         Border = Color.Parse(theme.Border)
-        Selection = Glass ? Accent.WithAlpha(.38): Color.Parse(theme.Selection)
-        Window = Glass ? Background.WithAlpha(.78): Background
-        Canvas = Glass ? Color.Transparent: Background
-        Sidebar = Glass ? Color.White.WithAlpha(.015): Surface
-        Preview = Glass ? Color.Rgba(0, 0, 0, 46): Surface
-        Hover = Glass ? Color.White.WithAlpha(.012): Surface
+
+        let dark = Background.R + Background.G + Background.B < Text.R + Text.G + Text.B
+        Scrim = Color.Black.WithAlpha(dark ? .55: .2)
+        let colors = (dark ? Theme.Ink: Theme.Bone) with{
+            CanvasColor = Background,
+            PanelColor = Background,
+            OverlayColor = Surface,
+            TextColor = Text,
+            MutedTextColor = Muted,
+            AccentColor = Accent,
+            BorderColor = Border,
+            FontFamily = "",
+            HeadingFontFamily = "",
+            PanelRadius = Ui.WindowRadius,
+        }
+        WidgetTheme = Glass ? colors.WithGlass(): colors
+
+        Selection = Glass ? Accent.WithAlpha(dark ? .32: .2): Color.Parse(theme.Selection)
+        Window = WidgetTheme.GlassColor ?? Background
+        Canvas = Background
+        Sidebar = Glass ? Color.Transparent: Surface
+        Preview = Surface
+        Hover = Glass ? Text.WithAlpha(.06): Surface
+        ChromeHover = Glass ? Text.WithAlpha(.08): Border
+        ChromeSelection = Glass ? Text.WithAlpha(.12): Selection
         Bar = Glass ? Color.Transparent: Surface
-        Overlay = Glass ? Surface.WithAlpha(.52): Surface
-        Edge = Glass ? Color.Rgba(184, 191, 201, 56): Border
+        Overlay = WidgetTheme.OverlayColor
         Blur = Glass ? 24: 0
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
 

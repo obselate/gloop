@@ -20,13 +20,13 @@ open class SidebarLink : Cell[SidebarLinkInput] {
             JustifyContent: JustifyContent.FlexStart,
             Gap: 8,
             Padding: Edges{Left: 12, Right: 10},
-            BorderRadius: 4,
+            BorderRadius: 6,
             BackgroundColor: if value.Active {
-                p.Selection
+                p.ChromeSelection
             } else {
                 Color.Transparent
             },
-            Hover: Style{BackgroundColor: p.Border},
+            Hover: Style{BackgroundColor: p.ChromeHover},
             Focus: p.Ring(),
             OnFocus: (_) -> handle.ScrollIntoView(),
             OnClick: value.Action,
@@ -61,7 +61,7 @@ open class SidebarLink : Cell[SidebarLinkInput] {
                 value.Muted ? p.Muted: p.Text,
                 13,
                 if value.Active {
-                    600
+                    500
                 } else {
                     400
                 }

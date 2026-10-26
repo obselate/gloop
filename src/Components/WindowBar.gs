@@ -14,9 +14,8 @@ class WindowBar {
             Height: Ui.BarHeight,
             ControlWidth: ControlWidth,
             BackgroundColor: p.Bar,
-            BorderColor: p.Border,
             ControlColor: p.Muted,
-            HoverBackgroundColor: p.Border,
+            HoverBackgroundColor: p.ChromeHover,
             EnableDoubleClick: true,
             CreateControlContent: (_, command) -> {
                 let name = command.ToString()
@@ -50,7 +49,7 @@ class WindowBar {
                     BackgroundColor: if command == WindowChromeAction.Close {
                         p.Danger
                     } else {
-                        p.Border
+                        p.ChromeHover
                     }
                 },
                 Focus: p.Ring(-2),

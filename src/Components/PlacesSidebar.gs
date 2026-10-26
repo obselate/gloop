@@ -16,7 +16,6 @@ class PlacesSidebar {
             navigate Action[string],
             settings Action,
             bookmarks IReadOnlyList[string],
-            bookmarkKey string,
             window Window,
             p Palette,
             standardPlaces IReadOnlyList[KeyValuePair[string, string]],
@@ -44,7 +43,6 @@ class PlacesSidebar {
                 path,
                 navigate,
                 bookmarks,
-                bookmarkKey,
                 window,
                 p,
                 home,
@@ -99,7 +97,7 @@ class PlacesSidebar {
             trashPath string,
             trashCount int32
         ) {
-            places.Add(Ui.Section("PLACES", p))
+            places.Add(Ui.GroupGap())
 
             for place in standardPlaces {
                 let icon = switch place.Key {
@@ -145,7 +143,6 @@ class PlacesSidebar {
             path string,
             navigate Action[string],
             bookmarks IReadOnlyList[string],
-            bookmarkKey string,
             window Window,
             p Palette,
             home string,
@@ -159,24 +156,16 @@ class PlacesSidebar {
             let saved = Container{
                 FlexShrink: 0,
                 DropTarget: bookmarkDrop?.Invoke(bookmarks.Count),
-                Ui.Section("BOOKMARKS", p),
-            }
-
-            if bookmarks.Count == 0 {
-                saved.Children.Add(
+                if bookmarks.Count == 0 {
                     Container{
-                        MinHeight: 32,
-                        Padding: Edges{Left: 12, Right: 8, Bottom: 6},
+                        MinHeight: SidebarLink.RowHeight,
+                        BorderRadius: 4,
                         BackgroundColor: bookmarkDropIndex == 0 ? p.Selection: Color.Transparent,
                         Accessibility: Accessibility{Name: "Add bookmarks"},
-                        Text{
-                            Content: bookmarkKey == "" ? "No bookmarks": "Drop folders here or " + bookmarkKey,
-                            Color: p.Muted,
-                            FontSize: 11,
-                            TextWrap: TextWrap.Wrap,
-                        },
                     }
-                )
+                } else {
+                    Ui.GroupGap()
+                },
             }
 
             for index in 0 ... bookmarks.Count {
@@ -249,7 +238,7 @@ class PlacesSidebar {
             openVolume Action[Volume]?,
             ejectVolume Action[Volume]?
         ) {
-            places.Add(Ui.Section("DEVICES", p))
+            places.Add(Ui.GroupGap())
             places.Add(Place("hard_drive", "File system", "/", path, navigate, p, drop, dropPath))
 
             for volume in volumes ?? List[Volume]() {
