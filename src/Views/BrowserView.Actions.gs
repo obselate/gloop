@@ -116,14 +116,14 @@ partial class BrowserView {
                 chooserError = notice
             }
 
-            Rebuild()
+            viewRevision.Value++
             return
         }
 
         notice = ""
 
         if InvokeNavigation(action) || InvokeView(action) || InvokeFileAction(action) {
-            Rebuild()
+            viewRevision.Value++
             return
         }
 
@@ -156,7 +156,7 @@ partial class BrowserView {
             }
         }
 
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func InvokeNavigation(action string) bool {
@@ -492,7 +492,7 @@ partial class BrowserView {
         }
 
         ChooserSelectionChanged()
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func ListKey(e KeyEvent) {

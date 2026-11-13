@@ -280,7 +280,7 @@ partial class BrowserView {
         dialogValue = value
         dialogError = ""
 
-        Rebuild()
+        viewRevision.Value++
         if kind == DialogKind.Rename || kind == DialogKind.FilterFiles || kind == DialogKind.OpenLocation {
             dialogInput.SelectText(0, value.Length)
         }
@@ -300,7 +300,7 @@ partial class BrowserView {
         dialogError = ""
         preferenceInputs.Clear()
 
-        Rebuild()
+        viewRevision.Value++
 
         if shortcuts {
             FocusFiles()

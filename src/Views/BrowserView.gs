@@ -11,6 +11,7 @@ partial class BrowserView : Cell {
     private let settings AppSettings
     private let settingsService SettingsService
     private let launch LaunchOptions
+    private let viewRevision State[int32] = State[int32](0)
     private var palette Palette
     private var keyboardFocus bool
     private var window Window?
@@ -248,7 +249,7 @@ partial class BrowserView : Cell {
             }
         }
 
-        Rebuild()
+        viewRevision.Value++
 
         for state in paneViews {
             let pane = state.Pane
@@ -265,6 +266,7 @@ partial class BrowserView : Cell {
     }
 
     override func Build() Blob {
+        let _ = viewRevision.Value
         if browser == nil {
             return Container{BackgroundColor: palette.Window}
         }

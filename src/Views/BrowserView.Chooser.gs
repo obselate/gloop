@@ -102,7 +102,7 @@ partial class BrowserView {
                 OnNameChange: value -> {
                     chooserName = value
                     chooserError = ""
-                    Rebuild()
+                    viewRevision.Value++
                 },
                 FilterIndex: chooserFilterIndex,
                 OnFilterChange: index -> {
@@ -113,7 +113,7 @@ partial class BrowserView {
                 Choices: chooserChoices,
                 OnChoiceChange: (id, value) -> {
                     chooserChoices[id] = value
-                    Rebuild()
+                    viewRevision.Value++
                 },
                 Summary: if picker.SavingMany {
                     picker.Request.Files.Count.ToString() + " files in " + Locations.DisplayName(
@@ -197,7 +197,7 @@ partial class BrowserView {
 
         if pane.Loading || pane.Error != "" {
             chooserError = pane.Loading ? "Wait for the folder to finish loading.": pane.Error
-            Rebuild()
+            viewRevision.Value++
             return
         }
 
@@ -223,7 +223,7 @@ partial class BrowserView {
 
         if validation.Error != "" {
             chooserError = validation.Error
-            Rebuild()
+            viewRevision.Value++
             return
         }
 

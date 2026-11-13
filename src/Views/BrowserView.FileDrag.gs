@@ -93,7 +93,7 @@ partial class BrowserView {
                 }
             } else if dropPath != destination {
                 dropPath = destination
-                Rebuild()
+                viewRevision.Value++
             }
         },
         true
@@ -141,7 +141,7 @@ partial class BrowserView {
                     notice = settingsWriter?.InsertBookmarks(settings, paths, index) ?? ""
                 }
                 ClearDropTarget()
-                Rebuild()
+                viewRevision.Value++
             } else if e.Kind == DragEventKind.Leave {
                 bookmarkDrops.Clear()
                 if bookmarkDropIndex == index {
@@ -150,7 +150,7 @@ partial class BrowserView {
             } else if bookmarkDropIndex != index {
                 bookmarkDropIndex = index
                 dropPath = ""
-                Rebuild()
+                viewRevision.Value++
             }
         },
         true
@@ -162,7 +162,7 @@ partial class BrowserView {
         if dropPath != "" || bookmarkDropIndex >= 0 {
             dropPath = ""
             bookmarkDropIndex = -1
-            Rebuild()
+            viewRevision.Value++
         }
     }
 }

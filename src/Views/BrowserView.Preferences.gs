@@ -34,13 +34,13 @@ partial class BrowserView {
         dialogError = ""
 
         SavePreferences()
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func SetPreferenceBinding(action string, value string) {
         preferenceInputs[action] = value
         dialogError = settings.ValidateBinding(action, value)
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func CommitPreferenceBinding(action string) {
@@ -54,7 +54,7 @@ partial class BrowserView {
             SavePreferences()
         }
 
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func CommitPreferenceBindings() {
@@ -124,7 +124,7 @@ partial class BrowserView {
                 () -> {
                     CommitPreferenceBindings()
                     preferenceTab = tab
-                    Rebuild()
+                    viewRevision.Value++
                 },
                 p,
                 preferenceTab == tab
@@ -323,7 +323,7 @@ partial class BrowserView {
                     if themeColorRole != selectedRole {
                         themeColorRole = selectedRole
                         revealThemeEditor = true
-                        Rebuild()
+                        viewRevision.Value++
                     }
                 },
                 p

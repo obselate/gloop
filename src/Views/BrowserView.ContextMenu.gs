@@ -28,7 +28,7 @@ partial class BrowserView {
         contextMenuPoint = point
         contextMenuOpen = true
 
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func OpenBookmarkKeyboardContextMenu(path string, e KeyEvent, point Point) {
@@ -53,7 +53,7 @@ partial class BrowserView {
         contextMenuPoint = point
         contextMenuOpen = true
 
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func OpenColumnMenu(index int32, point Point) {
@@ -69,7 +69,7 @@ partial class BrowserView {
         contextMenuPoint = point
         contextMenuOpen = true
 
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func OpenContextMenu(index int32, row int32, point Point) {
@@ -97,7 +97,7 @@ partial class BrowserView {
         contextMenuOpen = true
 
         LoadApplications()
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func OpenKeyboardContextMenu() {
@@ -129,7 +129,7 @@ partial class BrowserView {
         contextMenuOpen = true
 
         LoadApplications()
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func CloseContextMenu() {
@@ -143,7 +143,7 @@ partial class BrowserView {
         contextMenuPaths = []string{}
         contextMenuColumns = false
 
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func ContextMenu() Blob {
@@ -219,7 +219,7 @@ partial class BrowserView {
                             if action == "RemoveBookmark" {
                                 notice = settingsWriter?.RemoveBookmark(settings, bookmark) ?? ""
                                 FocusFiles()
-                                Rebuild()
+                                viewRevision.Value++
                             } else if action.StartsWith("Navigate:", StringComparison.Ordinal) {
                                 Model.Navigate(action.Substring(9))
                                 FocusFiles()

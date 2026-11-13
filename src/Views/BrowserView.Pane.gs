@@ -18,7 +18,7 @@ partial class BrowserView {
                 locationText,
                 value -> {
                     locationText = value
-                    Rebuild()
+                    viewRevision.Value++
                 },
                 value -> {
                     locationEditing = false
@@ -259,7 +259,7 @@ partial class BrowserView {
                         merged[pair.Key] = pair.Value
                     }
                     state.ColumnWidths = merged
-                    Rebuild()
+                    viewRevision.Value++
                 },
                 OnFocusRow: row -> {
                     Model.SetActive(index)
@@ -349,6 +349,6 @@ partial class BrowserView {
 
         locationHandle.SelectText(0, locationText.Length)
 
-        Rebuild()
+        viewRevision.Value++
     }
 }

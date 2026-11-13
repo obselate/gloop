@@ -106,7 +106,7 @@ partial class BrowserView {
         setupCompletion = done
 
         go ApplySetupChoice(setupStep, accept, next, done)
-        Rebuild()
+        viewRevision.Value++
     }
 
     private func ApplySetupChoice(step int32, accept bool, next int32, done chan[bool]) {
@@ -144,7 +144,7 @@ partial class BrowserView {
                         setupStep = next
                         setupChooserChanged = setupChooserChanged || (step == 2 && accept)
                     }
-                    Rebuild()
+                    viewRevision.Value++
                     Host.Post(
                         () -> {
                             if dialog == DialogKind.DesktopSetup && !setupBusy {

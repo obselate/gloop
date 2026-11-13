@@ -50,7 +50,7 @@ partial class BrowserView {
             keyboardFocus = value
             palette = Palette(settings.Theme, value)
 
-            Rebuild()
+            viewRevision.Value++
         }
     }
 
