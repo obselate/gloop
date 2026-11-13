@@ -24,7 +24,6 @@ partial class BrowserView {
                     Rebuild()
                 }
             }
-
         }
     }
 

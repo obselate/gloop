@@ -32,7 +32,7 @@ class Ui {
                 return Icon(icon, p.IconColor(icon), size)
             }
 
-            let scale = size / float64(folder.ViewBoxWidth)
+            let scale = size / folder.ViewBoxWidth
 
             return Shape{
                 Path: folder.PathForNode(1),
@@ -40,11 +40,8 @@ class Ui {
                 Height: size,
                 FlexShrink: 0,
                 Fit: ShapeFit.Contain,
-                Transform: PanelTransform{
-                    TranslateX: -float64(folder.ViewBoxX) * scale,
-                    TranslateY: -float64(folder.ViewBoxY) * scale,
-                },
-                BackgroundColor: p.Accent,
+                Transform: PanelTransform{TranslateX: -folder.ViewBoxX * scale, TranslateY: -folder.ViewBoxY * scale,},
+                Fill: VectorPaint(p.Accent),
                 Accessibility: Accessibility{Hidden: true},
             }
         }

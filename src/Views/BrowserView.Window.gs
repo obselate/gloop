@@ -26,7 +26,12 @@ partial class BrowserView {
         }
 
         host.WaylandBackdrop = Rounded() ? WaylandBackdropOptions{
-            Region: ElementRect{X: 1, Y: 1, Width: Math.Max(0, host.Size.Width - 2), Height: Math.Max(0, host.Size.Height - 2)},
+            Region: ElementRect{
+                X: 1,
+                Y: 1,
+                Width: Math.Max(0, host.Size.Width - 2),
+                Height: Math.Max(0, host.Size.Height - 2)
+            },
             CornerRadius: Ui.WindowRadius - 1,
         }: WaylandBackdropOptions{}
     }

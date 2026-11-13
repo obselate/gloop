@@ -37,8 +37,12 @@ partial class BrowserView : Cell {
     private const PaneMinimum float64 = 260
     private const VerticalPaneMinimum float64 = 120
     private const WorkspaceMinimum float64 = 560
-    private prop width float64 { get -> Host.Size.Width }
-    private prop height float64 { get -> Host.Size.Height }
+    private prop width float64 {
+        get -> Host.Size.Width
+    }
+    private prop height float64 {
+        get -> Host.Size.Height
+    }
     private var placesWidth float64 = 180
     private var paneRatio float64 = .5
     private var previewRatio float64 = .5
@@ -63,14 +67,12 @@ partial class BrowserView : Cell {
         palette = Palette(settings.Theme)
         notice = warning
 
-
         themeEditorHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && revealThemeEditor {
                 revealThemeEditor = false
                 themeEditorHandle.ScrollIntoView()
             }
         }
-
     }
 
     protected override func Mounted() {
@@ -88,7 +90,9 @@ partial class BrowserView : Cell {
         browser = BrowserController(
             value,
             settings,
-            () -> { Post(Changed) },
+            () -> {
+                Post(Changed)
+            },
             () -> ResetTypeSelect(),
             Math.Max(1, int32(value.Size.Width)),
             Math.Max(1, int32(value.Size.Height))
@@ -102,11 +106,13 @@ partial class BrowserView : Cell {
         folderCounts = FolderCountService(
             value,
             error -> {
-                Post(() -> {
-                    if error != "" {
-                        Model.Status = error
+                Post(
+                    () -> {
+                        if error != "" {
+                            Model.Status = error
+                        }
                     }
-                })
+                )
             }
         )
 
@@ -118,12 +124,14 @@ partial class BrowserView : Cell {
                 value,
                 settingsService,
                 error -> {
-                    Post(() -> {
-                        notice = error
-                        if dialog == DialogKind.Preferences {
-                            dialogError = error
+                    Post(
+                        () -> {
+                            notice = error
+                            if dialog == DialogKind.Preferences {
+                                dialogError = error
+                            }
                         }
-                    })
+                    )
                 }
             )
         }
@@ -200,7 +208,6 @@ partial class BrowserView : Cell {
         }
     }
 
-
     private prop Thumbnails ThumbnailService {
         get {
             guard let value = thumbnails else {
@@ -245,7 +252,6 @@ partial class BrowserView : Cell {
                 }
             }
         }
-
 
         for state in paneViews {
             let pane = state.Pane
