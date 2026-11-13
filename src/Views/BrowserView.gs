@@ -90,9 +90,7 @@ partial class BrowserView : Cell {
         browser = BrowserController(
             value,
             settings,
-            () -> {
-                Post(Changed)
-            },
+            Changed,
             () -> ResetTypeSelect(),
             Math.Max(1, int32(value.Size.Width)),
             Math.Max(1, int32(value.Size.Height))
@@ -252,6 +250,8 @@ partial class BrowserView : Cell {
                 }
             }
         }
+
+        Rebuild()
 
         for state in paneViews {
             let pane = state.Pane
