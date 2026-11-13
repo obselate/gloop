@@ -162,8 +162,6 @@ partial class BrowserView : Cell {
 
         CommitPreferenceBindings()
 
-        previewResizeTimer?.Dispose()
-        previewResizeTimer = nil
         settingsWriter?.Dispose()
         browser?.Dispose()
         thumbnails?.Dispose()
@@ -192,7 +190,6 @@ partial class BrowserView : Cell {
         for index in paneViews.Count ... Model.Panes.Count {
             let state = BrowserPaneViewState(Model.Pane(index))
             paneViews.Add(state)
-            WatchTileWidth(state.TileViewport)
         }
     }
 

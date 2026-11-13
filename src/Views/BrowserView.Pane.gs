@@ -8,25 +8,6 @@ import System.Collections.Generic
 import System.IO
 
 partial class BrowserView {
-    private func WatchTileWidth(handle ElementHandle) {
-        var room float64 = -1
-
-        handle.MetricsChanged += (metrics) -> {
-            if !metrics.IsMounted {
-                room = -1
-                return
-            }
-
-            if room != metrics.ContentBox.Width {
-                room = metrics.ContentBox.Width
-
-                if settings.ViewMode == ViewMode.Tiles {
-                    Rebuild()
-                }
-            }
-        }
-    }
-
     private func Location(index int32, crumbWidth float64) Blob {
         let pane = Model.Pane(index)
         let p = palette
@@ -257,7 +238,6 @@ partial class BrowserView {
                 SizeText: entry -> pane.Kind == LocationKind.Archive && entry.IsDirectory ? "—": FileSizeText(entry),
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
                 Tiles: settings.ViewMode == ViewMode.Tiles,
-                TileWidth: TileWidth(index),
                 ScrollbarInset: if !Model.PreviewVisible &&
                     (!Model.Split || BrowsingWidth() < SplitBreakpoint || index == Model.Panes.Count - 1) {
                     Host.ResizeBand + 2
