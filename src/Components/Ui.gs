@@ -185,8 +185,8 @@ class Ui {
                 } else {
                     p.Border
                 },
-                Hover: Style{Opacity: 0.82},
-                Focus: p.Ring(2, 2),
+                HoverStyle: Style{Opacity: 0.82},
+                FocusStyle: p.Ring(2, 2),
                 OnClick: action,
                 Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: label},
                 Text{
@@ -224,7 +224,7 @@ class Ui {
             MinThumbLength: 28,
             ReserveSpace: true,
             Track: Container{BackgroundColor: p.Hover},
-            Thumb: Container{BackgroundColor: p.Muted, BorderRadius: 3, Hover: Style{BackgroundColor: p.Accent},},
+            Thumb: Container{BackgroundColor: p.Muted, BorderRadius: 3, HoverStyle: Style{BackgroundColor: p.Accent},},
         }
 
         internal func Empty(icon string, title string, detail string, p Palette) Blob -> Container{

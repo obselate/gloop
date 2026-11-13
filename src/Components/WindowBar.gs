@@ -45,14 +45,14 @@ class WindowBar {
                 Height: Ui.BarHeight,
                 Padding: 0,
                 BackgroundColor: Color.Transparent,
-                Hover: Style{
+                HoverStyle: Style{
                     BackgroundColor: if command == WindowChromeAction.Close {
                         p.Danger
                     } else {
                         p.ChromeHover
                     }
                 },
-                Focus: p.Ring(-2),
+                FocusStyle: p.Ring(-2),
             },
         }.Build()
     }

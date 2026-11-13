@@ -93,7 +93,7 @@ open class FileTiles : Cell[FileTableInput] {
             },
             OutlineColor: p.Accent,
             OutlineOffset: -1,
-            Hover: Style{
+            HoverStyle: Style{
                 BackgroundColor: if selected {
                     p.Selection
                 } else {

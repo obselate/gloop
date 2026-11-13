@@ -136,7 +136,11 @@ partial class BrowserView {
             return
         }
 
-        Host.SetClipboardText(String.Join("\n", paths))
+        let result = Host.Clipboard.WriteText(String.Join("\n", paths))
+        if result.Status != DataTransferStatus.Success {
+            notice = "Copy paths failed: " + (result.Error != "" ? result.Error: result.Status.ToString())
+            return
+        }
         notice = paths.Count == 1 ? "Copied 1 path": "Copied " + paths.Count.ToString() + " paths"
     }
 }

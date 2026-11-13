@@ -26,8 +26,8 @@ open class SidebarLink : Cell[SidebarLinkInput] {
             } else {
                 Color.Transparent
             },
-            Hover: Style{BackgroundColor: p.ChromeHover},
-            Focus: p.Ring(),
+            HoverStyle: Style{BackgroundColor: p.ChromeHover},
+            FocusStyle: p.Ring(),
             OnFocus: (_) -> handle.ScrollIntoView(),
             OnClick: value.Action,
             OnPointerUp: e -> {

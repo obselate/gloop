@@ -14,8 +14,12 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                 Open: value.Open,
                 WindowPoint: value.Point,
                 Items: value.Items,
-                OnActivate: value.OnActivate,
-                OnDismiss: value.OnDismiss,
+                OnClick: value.OnActivate,
+                OnOpenChange: visible -> {
+                    if !visible {
+                        InvokeInputCallback(value.OnDismiss)
+                    }
+                },
                 Width: 240,
                 MaxHeight: 420,
                 AccessibilityName: value.Name,
@@ -40,8 +44,8 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                     row.Padding = Edges{Left: 8, Right: 8, Top: 4, Bottom: 4}
                     row.BorderRadius = 3
                     row.BackgroundColor = Color.Transparent
-                    row.Hover = Style{BackgroundColor: item.Disabled ? Color.Transparent: p.Selection}
-                    row.Focus = Style{BackgroundColor: p.Selection, BasedOn: p.Ring(-1)}
+                    row.HoverStyle = Style{BackgroundColor: item.Disabled ? Color.Transparent: p.Selection}
+                    row.FocusStyle = Style{BackgroundColor: p.Selection, BasedOn: p.Ring(-1)}
                     return row
                 },
                 CreateSeparator: (_, _) -> Container{

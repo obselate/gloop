@@ -101,7 +101,7 @@ partial class BrowserView {
                     RowHeight: 30,
                     CreateTrigger: (_, row) -> {
                         row.BasedOn = TextField.FieldStyle(p)
-                        row.Focus = p.FocusBorder()
+                        row.FocusStyle = p.FocusBorder()
                         return row
                     },
                     CreatePopup: (_, panel) -> {
@@ -110,7 +110,7 @@ partial class BrowserView {
                     },
                     CreateRow: (input, item, row) -> {
                         row.BackgroundColor = input.SelectedId == item.Id ? p.Selection: Color.Transparent
-                        row.Hover = Style{BackgroundColor: p.Selection}
+                        row.HoverStyle = Style{BackgroundColor: p.Selection}
                         return row
                     },
                 }
@@ -225,7 +225,7 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            WidgetKeyBindings.Editing(window?.PlatformInput),
+            []KeyBinding{},
             Host,
             p,
             720,

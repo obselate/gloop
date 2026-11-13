@@ -69,7 +69,7 @@ partial class BrowserView {
                 dialogHandle,
                 () -> CloseDialog(),
                 HandleKey,
-                WidgetKeyBindings.Editing(window?.PlatformInput),
+                []KeyBinding{},
                 Host,
                 p,
                 520
@@ -86,7 +86,7 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            WidgetKeyBindings.Editing(window?.PlatformInput),
+            []KeyBinding{},
             Host,
             p,
             if dialog == DialogKind.Preferences {

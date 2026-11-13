@@ -90,8 +90,8 @@ open class FileTable : Cell[FileTableInput] {
                     BorderColor: p.Border,
                 },
                 CreateResizeHandle: (_, _, handle) -> {
-                    handle.Hover = Style{BorderColor: p.Accent}
-                    handle.Focus = p.FocusBorder()
+                    handle.HoverStyle = Style{BorderColor: p.Accent}
+                    handle.FocusStyle = p.FocusBorder()
                     return handle
                 },
                 CreateRoot: (_, root) -> BuildRoot(root, value),
@@ -113,7 +113,7 @@ open class FileTable : Cell[FileTableInput] {
                     }
                     root.OutlineColor = p.Accent
                     root.BorderRadius = 6
-                    root.Hover = Style{
+                    root.HoverStyle = Style{
                         BackgroundColor: if selectedRow {
                             p.Selection
                         } else {

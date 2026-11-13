@@ -31,7 +31,7 @@ class TextField {
             fontSize float64 = 13,
             padding float64 = 8
         ) TextEntry -> TextEntry{
-            Focus: Style{BorderColor: invalid ? p.Error: p.Accent},
+            FocusStyle: Style{BorderColor: invalid ? p.Error: p.Accent},
             BasedOn: FieldStyle(p, invalid),
             FontSize: fontSize,
             Padding: Edges{Left: padding, Right: padding},

@@ -66,8 +66,8 @@ class SplitDivider {
                         Edges{Top: 1}
                     }
                     divider.BorderColor = line ? palette.Border: Color.Transparent
-                    divider.Hover = Style{BorderColor: palette.Accent}
-                    divider.Focus = palette.FocusBorder()
+                    divider.HoverStyle = Style{BorderColor: palette.Accent}
+                    divider.FocusStyle = palette.FocusBorder()
                     if enabled {
                         divider.Children.Add(
                             Container{

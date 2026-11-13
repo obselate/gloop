@@ -103,7 +103,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 if choice.Options.Count == 0 {
                     let toggle = Checkbox{
                         Label: choice.Label,
-                        State: selected == "true" ? AccessibilityChecked.True: AccessibilityChecked.False,
+                        Value: selected == "true" ? AccessibilityChecked.True: AccessibilityChecked.False,
                         OnChange: state -> value.OnChoiceChange(
                             id,
                             state == AccessibilityChecked.True ? "true": "false"
@@ -241,7 +241,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                     row.BackgroundColor = p.Surface
                     row.BorderColor = p.Border
                     row.BorderRadius = 4
-                    row.Focus = p.FocusBorder()
+                    row.FocusStyle = p.FocusBorder()
                     return row
                 },
                 CreatePopup: (_, panel) -> {
@@ -251,7 +251,7 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 CreateRow: (input, item, row) -> {
                     row.BackgroundColor = input.SelectedId == item.Id ? p.Selection: Color.Transparent
                     row.OutlineColor = p.Accent
-                    row.Hover = Style{BackgroundColor: p.Selection}
+                    row.HoverStyle = Style{BackgroundColor: p.Selection}
                     return row
                 },
             }

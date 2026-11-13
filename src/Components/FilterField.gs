@@ -51,7 +51,7 @@ open class FilterField : Cell[FilterFieldInput] {
                 .BackgroundColor: Color.Transparent,
                 .BorderWidth: 0,
                 .OutlineWidth: 0,
-                .Focus: Style{BorderWidth: 0, OutlineWidth: 0},
+                .FocusStyle: Style{BorderWidth: 0, OutlineWidth: 0},
             },
         }
     }
