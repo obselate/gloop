@@ -36,7 +36,7 @@ internal data struct FileTableInput {
     var DropPath string
     var OnClear Action
     var OnContextMenu Action[int32, Point]
-    var AcquireThumbnail Func[FileEntry, int32, Action, ThumbnailLease]
+    var AcquireThumbnail Func[FileEntry, int32, ThumbnailLease]
     var OnOpen Action
     var OnSort Action[SortColumn]
     var OnText Action[string]

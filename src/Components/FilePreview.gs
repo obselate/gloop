@@ -27,7 +27,7 @@ open class FilePreview : Cell[FilePreviewInput], IDisposable {
         }
 
         if !entry.IsDirectory && lease == nil {
-            lease = value.Acquire(entry, 160, () -> Rebuild())
+            lease = value.Acquire(entry, 160)
         }
 
         let data = lease?.Data
