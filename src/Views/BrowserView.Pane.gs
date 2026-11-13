@@ -8,15 +8,11 @@ import System.Collections.Generic
 import System.IO
 
 partial class BrowserView {
-    private func WatchList(handle ElementHandle, state BrowserPaneViewState) {
-        var viewport float64 = -1
-        var scrollRange float64 = -1
+    private func WatchTileWidth(handle ElementHandle) {
         var room float64 = -1
 
         handle.MetricsChanged += (metrics) -> {
             if !metrics.IsMounted {
-                viewport = -1
-                scrollRange = -1
                 room = -1
                 return
             }
@@ -29,14 +25,6 @@ partial class BrowserView {
                 }
             }
 
-            if viewport != metrics.ContentBox.Height || scrollRange != metrics.ScrollRange.Y {
-                viewport = metrics.ContentBox.Height
-                scrollRange = metrics.ScrollRange.Y
-
-                if state.RevealPending {
-                    RevealSelection(state)
-                }
-            }
         }
     }
 
@@ -358,44 +346,12 @@ partial class BrowserView {
 
     private func RevealSelection(state BrowserPaneViewState) {
         let index = Model.Panes.IndexOf(state.Pane)
-
         if index < 0 {
             return
         }
-
         let pane = state.Pane
-
-        if pane.Selected >= 0 {
-            let list = PaneViewport(index)
-            let tiles = settings.ViewMode == ViewMode.Tiles
-            let row = if tiles {
-                pane.Selected / TileColumns(index)
-            } else {
-                pane.Selected
-            }
-            let rowHeight = if tiles {
-                FileTiles.TileHeight + FileTiles.Gap
-            } else {
-                FileTable.RowHeight
-            }
-            let top = row * rowHeight
-            let bottom = top + if tiles {
-                FileTiles.TileHeight
-            } else {
-                rowHeight
-            }
-            let offset = list.ScrollOffset.Y
-            let viewport = list.ContentBox.Height
-
-            if top < offset {
-                list.JumpTo(0, top)
-            } else if bottom > offset + viewport {
-                list.JumpTo(0, Math.Max(0, bottom - viewport))
-            }
-
-            state.RevealPending = bottom > list.ScrollRange.Y + viewport
-        } else {
-            state.RevealPending = false
+        if pane.Selected >= 0 && pane.Selected < pane.VisibleEntries.Count {
+            PaneViewport(index).ScrollToItem(pane.VisibleEntries[pane.Selected].FullPath, ScrollAlignment.Nearest)
         }
     }
 
@@ -412,12 +368,7 @@ partial class BrowserView {
         locationText = Model.ActivePane().DirectoryPath
         locationEditing = true
 
-        if locationHandle.IsMounted {
-            locationHandle.Focus()
-            Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
-        } else {
-            locationFocusPending = true
-        }
+        locationHandle.SelectText(0, locationText.Length)
 
         Rebuild()
     }

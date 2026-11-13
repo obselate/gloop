@@ -132,13 +132,8 @@ private func RunBrowser(launch LaunchOptions) int32 {
         OnClosing: () -> view.CloseSafely(),
     }
 
-    view.Attach(window)
 
-    try {
-        Application.Run(window)
-    } finally {
-        view.Shutdown()
-    }
+    Application.Run(window)
 
     if launch.ChooserRequest != nil {
         try {

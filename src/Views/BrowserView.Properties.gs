@@ -135,7 +135,6 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            []KeyBinding{},
             Host,
             p,
             460

@@ -256,8 +256,7 @@ partial class BrowserView {
                 FocusFiles()
 
                 let state = paneViews[Model.ActiveIndex]
-                state.RevealPending = true
-                Host.Post(() -> RevealSelection(state))
+                RevealSelection(state)
 
                 return true
             }

@@ -28,8 +28,8 @@ partial class BrowserView {
         palette = Palette(settings.Theme, keyboardFocus)
 
         ApplyBackdrop()
-        Host.WheelScrollScale = float32(settings.ScrollSpeed)
-        Host.SmoothScrolling = settings.SmoothScrolling
+        this.Host.WheelScrollScale = settings.ScrollSpeed
+        this.Host.SmoothScrolling = settings.SmoothScrolling
 
         dialogError = ""
 

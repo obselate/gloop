@@ -225,12 +225,12 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            []KeyBinding{},
             Host,
             p,
             720,
             height < 600,
-            bulkBusy
+            bulkBusy,
+            initialFocus: DialogFocus()
         )
     }
 

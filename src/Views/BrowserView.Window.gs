@@ -51,10 +51,12 @@ partial class BrowserView {
 
     private func WindowResized(metrics WindowMetrics) {
         UpdateBackdropRegion()
+        if locationEditing && dialog == DialogKind.None && PaneWidth(Model.ActiveIndex) < 360 {
+            OpenDialog(DialogKind.OpenLocation, locationText)
+        }
     }
 
     private func WindowStateChanged(state WindowState) {
         UpdateBackdropRegion()
-        Rebuild()
     }
 }

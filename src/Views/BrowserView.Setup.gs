@@ -84,12 +84,12 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            []KeyBinding{},
             Host,
             p,
             480,
             true,
-            setupBusy
+            setupBusy,
+            initialFocus: setupChoiceHandle
         )
     }
 
