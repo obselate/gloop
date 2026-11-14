@@ -114,7 +114,7 @@ private func RunBrowser(launch LaunchOptions) int32 {
         settings.ShowHidden = true
     }
 
-    Window.ConfigureApplication("Gloop", CommandLine.AppVersion(), "io.github.obselate.gloop")
+    Application.Configure("Gloop", CommandLine.AppVersion(), "io.github.obselate.gloop")
 
     let view = BrowserView(settings, service, launch, loaded.Error)
     let parent = launch.ChooserRequest?.ParentWindow ?? ""
@@ -126,10 +126,8 @@ private func RunBrowser(launch LaunchOptions) int32 {
         ForeignParentHandle: parent,
         Modal: (launch.ChooserRequest?.Modal ?? false) && parent != "",
         NativeFileDropEnabled: launch.ChooserRequest == nil,
-        Width: BrowserView.DefaultWidth,
-        Height: BrowserView.DefaultHeight,
-        MinWidth: 600,
-        MinHeight: 400,
+        Size: LayoutSize(BrowserView.DefaultWidth, BrowserView.DefaultHeight),
+        MinSize: LayoutSize(600, 400),
         Root: view,
         OnClosing: () -> view.CloseSafely(),
     }
@@ -137,7 +135,7 @@ private func RunBrowser(launch LaunchOptions) int32 {
     view.Attach(window)
 
     try {
-        window.Run()
+        Application.Run(window)
     } finally {
         view.Shutdown()
     }

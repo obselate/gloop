@@ -84,7 +84,7 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            WidgetKeyBindings.Editing(window?.PlatformInput),
+            []KeyBinding{},
             Host,
             p,
             480,

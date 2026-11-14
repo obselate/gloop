@@ -29,7 +29,7 @@ partial class BrowserView {
             return
         }
 
-        if dialog == DialogKind.Preferences && Host.PlatformInput.Editor?.IsReadOnly == false
+        if dialog == DialogKind.Preferences && Host.Focus.Editor?.IsReadOnly == false
         && !e.Modifiers.Ctrl && !e.Modifiers.Alt && !e.Modifiers.Super
         && action != "FocusNext" && action != "FocusPrevious" && action != "Dismiss" {
             return
@@ -41,9 +41,9 @@ partial class BrowserView {
             } else if action == "Quit" {
                 Host.RequestClose()
             } else if action == "FocusNext" {
-                Host.PlatformInput.MoveFocus(true)
+                Host.Focus.Move(true)
             } else if action == "FocusPrevious" {
-                Host.PlatformInput.MoveFocus(false)
+                Host.Focus.Move(false)
             } else if action == "Open" && dialog == DialogKind.MoveToTrash {
                 SubmitDialog()
             } else if dialog == DialogKind.Shortcuts &&
@@ -66,7 +66,7 @@ partial class BrowserView {
                 return
             }
         } else {
-            let editor = Host.PlatformInput.Editor
+            let editor = Host.Focus.Editor
             let previewFocused = editor?.IsReadOnly == true
 
             if editor != nil && !previewFocused && action != "Dismiss" && action != "Quit" && action != "FocusLocation"
@@ -199,11 +199,11 @@ partial class BrowserView {
                 return true
             }
             case "FocusNext" {
-                Host.PlatformInput.MoveFocus(true)
+                Host.Focus.Move(true)
                 return true
             }
             case "FocusPrevious" {
-                Host.PlatformInput.MoveFocus(false)
+                Host.Focus.Move(false)
                 return true
             }
             case "NextPane" {
@@ -435,7 +435,7 @@ partial class BrowserView {
                             Super: super
                         },
                         Repeat: true,
-                        Action: () -> MoveFiles(action, ctrl, shift),
+                        OnPress: () -> MoveFiles(action, ctrl, shift),
                     }
                 )
             }

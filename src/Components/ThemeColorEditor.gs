@@ -19,9 +19,9 @@ open class ThemeColorEditor : Cell[ThemeColorEditorInput] {
             Gap: value.Gap,
             AccessibilityName: value.Role,
             FocusOutlineColor: value.FocusColor,
-            OnValueChanged: value.Change,
+            OnChange: value.Change,
             CreateRoot: (input, wheel, slider) -> Container{
-                Width: input.WheelSize,
+                Width: value.WheelSize,
                 Gap: input.Gap ?? 12,
                 AlignItems: AlignItems.Stretch,
                 Container{Handle: wheelHandle, OnFocus: (_) -> wheelHandle.ScrollIntoView(), wheel,},

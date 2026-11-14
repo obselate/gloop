@@ -109,7 +109,7 @@ partial class BrowserView : Cell {
                     if dialog == DialogKind.Rename ||
                         dialog == DialogKind.FilterFiles ||
                         dialog == DialogKind.OpenLocation {
-                        Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
+                        Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
                     }
                 }
             }
@@ -126,7 +126,7 @@ partial class BrowserView : Cell {
             if metrics.IsMounted && locationFocusPending {
                 locationFocusPending = false
                 locationHandle.Focus()
-                Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
+                Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
             }
         }
     }
@@ -147,8 +147,8 @@ partial class BrowserView : Cell {
             settings,
             () -> Changed(),
             () -> ResetTypeSelect(),
-            Math.Max(1, value.Width),
-            Math.Max(1, value.Height)
+            Math.Max(1, int32(value.Size.Width)),
+            Math.Max(1, int32(value.Size.Height))
         )
 
         SyncPaneViews()
@@ -364,7 +364,6 @@ partial class BrowserView : Cell {
             FontSize: 13,
             OnKeyDown: HandleKey,
             OnPointerDown: (_) -> SetKeyboardFocus(false),
-            KeyBindings: WidgetKeyBindings.Editing(window?.PlatformInput),
             Children: children.ToArray(),
         }
     }

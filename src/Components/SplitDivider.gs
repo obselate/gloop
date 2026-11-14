@@ -50,12 +50,11 @@ class SplitDivider {
                 Disabled: !enabled,
                 AccessibilityName: name,
                 OnChange: change,
-                CreateRoot: (_, root) -> {
+                ConfigureRoot: (_, root) -> {
                     root.FlexGrow = 1
                     root.FlexBasis = 0
-                    return root
                 },
-                CreateHandle: (_, divider) -> {
+                ConfigureHandle: (_, divider) -> {
                     divider.ZIndex = 2
                     divider.BackgroundColor = Color.Transparent
                     divider.BorderWidth = if !enabled {
@@ -66,8 +65,8 @@ class SplitDivider {
                         Edges{Top: 1}
                     }
                     divider.BorderColor = line ? palette.Border: Color.Transparent
-                    divider.Hover = Style{BorderColor: palette.Accent}
-                    divider.Focus = palette.FocusBorder()
+                    divider.HoverStyle = Style{BorderColor: palette.Accent}
+                    divider.FocusStyle = palette.FocusBorder()
                     if enabled {
                         divider.Children.Add(
                             Container{
@@ -101,7 +100,6 @@ class SplitDivider {
                             }
                         )
                     }
-                    return divider
                 },
             }
         )

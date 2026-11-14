@@ -230,7 +230,7 @@ partial class BrowserView {
                         Label: "Scroll speed",
                         ShowValue: true,
                         FormatValue: value -> value.ToString("0.##", CultureInfo.InvariantCulture) + "×",
-                        OnValueChanged: value -> {
+                        OnChange: value -> {
                             values.ScrollSpeed = value
                             ApplyPreferences()
                         },

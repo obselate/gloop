@@ -42,9 +42,9 @@ class PreferenceRow {
         internal func Toggle(label string, value bool, toggle Action, row ElementHandle, p Palette) Blob -> Build(
             label,
             ToggleSwitch{
-                Checked: value,
+                Value: value,
                 AccessibilityName: label,
-                OnClick: toggle,
+                OnChange: (_) -> toggle(),
                 OffTrackColor: p.Border,
                 OnTrackColor: p.Accent,
                 ThumbColor: p.Text,

@@ -75,12 +75,12 @@ partial class BrowserView {
             framebufferHeight
         ) {
             previewResizeTimer?.Dispose()
-            previewResizeTimer = Host.SetTimeout(
+            previewResizeTimer = Host.After(
+                PreviewResizeDelayMilliseconds,
                 () -> {
                     previewResizeTimer = nil
                     Model.Previews.RefreshPreviewBounds(framebufferWidth, framebufferHeight)
-                },
-                PreviewResizeDelayMilliseconds
+                }
             )
         }
     }

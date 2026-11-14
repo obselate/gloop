@@ -135,7 +135,7 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
-            WidgetKeyBindings.Editing(window?.PlatformInput),
+            []KeyBinding{},
             Host,
             p,
             460
@@ -161,7 +161,7 @@ partial class BrowserView {
             let checkbox = Checkbox{
                 Label: names[index],
                 AccessibilityName: label + " " + names[index].ToLowerInvariant(),
-                State: (propertiesInfo.Mode & bit) != UnixFileMode.None ?
+                Value: (propertiesInfo.Mode & bit) != UnixFileMode.None ?
                 AccessibilityChecked.True: AccessibilityChecked.False,
                 Disabled: disabled,
                 OnChange: state -> ChangePermission(bit, state == AccessibilityChecked.True),
@@ -174,7 +174,7 @@ partial class BrowserView {
                 CheckedBorderColor: disabled ? palette.Border: palette.Accent,
                 MarkColor: disabled ? palette.Muted: palette.Background,
             }.Build()
-            checkbox.Focus = palette.Ring(2, 2)
+            checkbox.FocusStyle = palette.Ring(2, 2)
             controls.Add(checkbox)
         }
 

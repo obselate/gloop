@@ -414,7 +414,7 @@ partial class BrowserView {
 
         if locationHandle.IsMounted {
             locationHandle.Focus()
-            Host.PlatformInput.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
+            Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
         } else {
             locationFocusPending = true
         }

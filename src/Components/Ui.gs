@@ -32,7 +32,7 @@ class Ui {
                 return Icon(icon, p.IconColor(icon), size)
             }
 
-            let scale = size / float64(folder.ViewBoxWidth)
+            let scale = size / folder.ViewBoxWidth
 
             return Shape{
                 Path: folder.PathForNode(1),
@@ -40,11 +40,8 @@ class Ui {
                 Height: size,
                 FlexShrink: 0,
                 Fit: ShapeFit.Contain,
-                Transform: PanelTransform{
-                    TranslateX: -float64(folder.ViewBoxX) * scale,
-                    TranslateY: -float64(folder.ViewBoxY) * scale,
-                },
-                BackgroundColor: p.Accent,
+                Transform: PanelTransform{TranslateX: -folder.ViewBoxX * scale, TranslateY: -folder.ViewBoxY * scale,},
+                Fill: VectorPaint(p.Accent),
                 Accessibility: Accessibility{Hidden: true},
             }
         }
@@ -185,8 +182,8 @@ class Ui {
                 } else {
                     p.Border
                 },
-                Hover: Style{Opacity: 0.82},
-                Focus: p.Ring(2, 2),
+                HoverStyle: Style{Opacity: 0.82},
+                FocusStyle: p.Ring(2, 2),
                 OnClick: action,
                 Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: label},
                 Text{
@@ -224,7 +221,7 @@ class Ui {
             MinThumbLength: 28,
             ReserveSpace: true,
             Track: Container{BackgroundColor: p.Hover},
-            Thumb: Container{BackgroundColor: p.Muted, BorderRadius: 3, Hover: Style{BackgroundColor: p.Accent},},
+            Thumb: Container{BackgroundColor: p.Muted, BorderRadius: 3, HoverStyle: Style{BackgroundColor: p.Accent},},
         }
 
         internal func Empty(icon string, title string, detail string, p Palette) Blob -> Container{
