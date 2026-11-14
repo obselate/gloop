@@ -101,7 +101,7 @@ partial class BrowserView {
                 if error != "" {
                     notice = error
                 }
-                viewRevision.Value++
+                Rebuild()
             }
         )
     }
@@ -119,7 +119,7 @@ partial class BrowserView {
             error -> {
                 if error != "" {
                     notice = error
-                    viewRevision.Value++
+                    Rebuild()
                 }
             }
         )

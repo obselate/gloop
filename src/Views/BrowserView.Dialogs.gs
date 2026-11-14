@@ -69,6 +69,7 @@ partial class BrowserView {
                 dialogHandle,
                 () -> CloseDialog(),
                 HandleKey,
+                []KeyBinding{},
                 Host,
                 p,
                 520
@@ -85,6 +86,7 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
+            []KeyBinding{},
             Host,
             p,
             if dialog == DialogKind.Preferences {
@@ -95,8 +97,7 @@ partial class BrowserView {
                 440
             },
             dialog == DialogKind.Preferences && height < 600,
-            maxHeight: dialog == DialogKind.Preferences ? 80: 88,
-            initialFocus: DialogFocus()
+            maxHeight: dialog == DialogKind.Preferences ? 80: 88
         )
     }
 
@@ -261,29 +262,14 @@ partial class BrowserView {
         )
     }
 
-    private func DialogFocus() ElementHandle -> switch dialog {
-        case DialogKind.DesktopSetup: setupChoiceHandle
-        case DialogKind.Preferences: dialogHandle
-        case DialogKind.Shortcuts: dialogHandle
-        case DialogKind.MoveToTrash: dialogHandle
-        case DialogKind.DeletePermanently: dialogHandle
-        case DialogKind.EmptyTrash: dialogHandle
-        case DialogKind.Bookmarks: dialogHandle
-        case DialogKind.Properties: dialogHandle
-        case DialogKind.ReplaceFile: dialogHandle
-        default: dialogInput
-    }
-
     private func OpenDialog(kind DialogKind, value string) {
         locationEditing = false
+        locationFocusPending = false
         dialog = kind
         dialogValue = value
         dialogError = ""
 
-        viewRevision.Value++
-        if kind == DialogKind.Rename || kind == DialogKind.FilterFiles || kind == DialogKind.OpenLocation {
-            dialogInput.SelectText(0, value.Length)
-        }
+        Rebuild()
     }
 
     private func CloseDialog() {
@@ -296,11 +282,13 @@ partial class BrowserView {
         CommitPreferenceBindings()
         Selection.CancelDescribe()
 
+        focusScope?.Dispose()
+        focusScope = nil
         dialog = DialogKind.None
         dialogError = ""
         preferenceInputs.Clear()
 
-        viewRevision.Value++
+        Rebuild()
 
         if shortcuts {
             FocusFiles()

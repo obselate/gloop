@@ -116,14 +116,14 @@ partial class BrowserView {
                 chooserError = notice
             }
 
-            viewRevision.Value++
+            Rebuild()
             return
         }
 
         notice = ""
 
         if InvokeNavigation(action) || InvokeView(action) || InvokeFileAction(action) {
-            viewRevision.Value++
+            Rebuild()
             return
         }
 
@@ -156,7 +156,7 @@ partial class BrowserView {
             }
         }
 
-        viewRevision.Value++
+        Rebuild()
     }
 
     private func InvokeNavigation(action string) bool {
@@ -256,7 +256,8 @@ partial class BrowserView {
                 FocusFiles()
 
                 let state = paneViews[Model.ActiveIndex]
-                RevealSelection(state)
+                state.RevealPending = true
+                Host.Post(() -> RevealSelection(state))
 
                 return true
             }
@@ -492,7 +493,7 @@ partial class BrowserView {
         }
 
         ChooserSelectionChanged()
-        viewRevision.Value++
+        Rebuild()
     }
 
     private func ListKey(e KeyEvent) {

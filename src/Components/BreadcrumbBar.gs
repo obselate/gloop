@@ -14,10 +14,8 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
     private let handles Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle](StringComparer.Ordinal)
     private let widths Dictionary[string, float64] = Dictionary[string, float64](StringComparer.Ordinal)
     private let more ElementHandle = ElementHandle()
-    private let measurements State[int32] = State[int32](0)
 
     protected override func Build(value BreadcrumbInput) Blob {
-        let _ = measurements.Value
         let p = value.Palette
         let names = List[string]()
         let paths = List[string]()
@@ -178,7 +176,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
 
                 if !widths.TryGetValue(destination, out var known) || Math.Abs(known - measured) > .5 {
                     widths[destination] = measured
-                    measurements.Value++
+                    Rebuild()
                 }
             }
         }

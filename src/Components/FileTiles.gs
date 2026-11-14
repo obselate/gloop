@@ -46,39 +46,28 @@ open class FileTiles : Cell[FileTableInput] {
             return root
         }
 
-        root.Children.Add(
-            Sized(
-                size -> {
-                    let room = Math.Max(0, size.Width - Padding - value.ScrollbarInset - 10)
-                    let columns = Math.Max(1, Math.Floor((room + Gap) / (TileWidth + Gap)))
-                    let tileWidth = room <= 0 ? TileWidth: Math.Max(
-                        1,
-                        Math.Floor((room - (columns - 1) * Gap) / columns)
-                    )
-                    let grid = VirtualItems(
-                        FileTileSource(value),
-                        tileWidth,
-                        TileHeight,
-                        item -> item.Entry.FullPath,
-                        item -> Tile(item, value)
-                    )
-                    grid.Handle = value.ViewportHandle
-                    grid.FlexGrow = 1
-                    grid.FlexBasis = 0
-                    grid.MinHeight = 0
-                    grid.MinWidth = 0
-                    grid.FlexDirection = FlexDirection.Row
-                    grid.FlexWrap = FlexWrap.Wrap
-                    grid.Gap = Gap
-                    grid.Padding = Edges{Left: Padding, Top: Padding, Right: value.ScrollbarInset + 10, Bottom: Padding}
-                    grid.OverflowX = Overflow.Hidden
-                    grid.OverflowY = Overflow.Scroll
-                    grid.ScrollbarY = Ui.ScrollbarStyle(p, value.ScrollbarInset)
-                    grid.ScrollbarVisibilityY = ScrollbarVisibility.Always
-                    return grid
-                }
-            ){.Flex: 1, .MinWidth: 0, .MinHeight: 0}
+        let grid = VirtualItems(
+            FileTileSource(value),
+            value.TileWidth,
+            TileHeight,
+            item -> item.Entry.FullPath,
+            item -> Tile(item, value)
         )
+        grid.Handle = value.ViewportHandle
+        grid.FlexGrow = 1
+        grid.FlexBasis = 0
+        grid.MinHeight = 0
+        grid.MinWidth = 0
+        grid.FlexDirection = FlexDirection.Row
+        grid.FlexWrap = FlexWrap.Wrap
+        grid.Gap = Gap
+        grid.Padding = Edges{Left: Padding, Top: Padding, Right: value.ScrollbarInset + 10, Bottom: Padding}
+        grid.OverflowX = Overflow.Hidden
+        grid.OverflowY = Overflow.Scroll
+        grid.ScrollbarY = Ui.ScrollbarStyle(p, value.ScrollbarInset)
+        grid.ScrollbarVisibilityY = ScrollbarVisibility.Always
+
+        root.Children.Add(grid)
 
         return root
     }

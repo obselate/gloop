@@ -11,7 +11,6 @@ partial class BrowserView : Cell {
     private let settings AppSettings
     private let settingsService SettingsService
     private let launch LaunchOptions
-    private let viewRevision State[int32] = State[int32](0)
     private var palette Palette
     private var keyboardFocus bool
     private var window Window?
@@ -31,6 +30,7 @@ partial class BrowserView : Cell {
     private let previewLineNumbersRow ElementHandle = ElementHandle()
     private let scrollSpeedRow ElementHandle = ElementHandle()
     private let themeEditorHandle ElementHandle = ElementHandle()
+    private var focusScope FocusScope?
     internal const DefaultWidth int32 = 1180
     internal const DefaultHeight int32 = 760
     private const SplitBreakpoint float64 = 660
@@ -38,18 +38,15 @@ partial class BrowserView : Cell {
     private const PaneMinimum float64 = 260
     private const VerticalPaneMinimum float64 = 120
     private const WorkspaceMinimum float64 = 560
-    private prop width float64 {
-        get -> Host.Size.Width
-    }
-    private prop height float64 {
-        get -> Host.Size.Height
-    }
+    private var width float64 = DefaultWidth
+    private var height float64 = DefaultHeight
     private var placesWidth float64 = 180
     private var paneRatio float64 = .5
     private var previewRatio float64 = .5
     private var splitPreviewRatio float64 = .67
     private var dropPath string = ""
     private var locationEditing bool
+    private var locationFocusPending bool
     private var locationText string = ""
     private var dialog DialogKind = DialogKind.None
     private var dialogValue string = ""
@@ -68,16 +65,73 @@ partial class BrowserView : Cell {
         palette = Palette(settings.Theme)
         notice = warning
 
+        rootHandle.MetricsChanged += (metrics) -> {
+            if metrics.IsMounted &&
+                (Math.Abs(width - metrics.ContentBox.Width) > 1 || Math.Abs(height - metrics.ContentBox.Height) > 1) {
+                width = metrics.ContentBox.Width
+                height = metrics.ContentBox.Height
+
+                if locationEditing && dialog == DialogKind.None && PaneWidth(Model.ActiveIndex) < 360 {
+                    OpenDialog(DialogKind.OpenLocation, locationText)
+                } else {
+                    Rebuild()
+                }
+            }
+        }
+
+        dialogHandle.MetricsChanged += (metrics) -> {
+            if metrics.IsMounted && focusScope == nil {
+                let textEntry = dialog != DialogKind.Preferences &&
+                    dialog != DialogKind.Shortcuts &&
+                    dialog != DialogKind.DesktopSetup &&
+                    dialog != DialogKind.MoveToTrash &&
+                    dialog != DialogKind.DeletePermanently &&
+                    dialog != DialogKind.EmptyTrash &&
+                    dialog != DialogKind.Bookmarks &&
+                    dialog != DialogKind.Properties &&
+                    dialog != DialogKind.ReplaceFile
+                focusScope = dialogHandle.BeginFocusScope(
+                    FocusScopeOptions{
+                        Modal: true,
+                        InitialFocus: if textEntry {
+                            dialogInput
+                        } else if dialog == DialogKind.DesktopSetup {
+                            setupChoiceHandle
+                        } else {
+                            dialogHandle
+                        },
+                    }
+                )
+
+                if textEntry {
+                    dialogInput.Focus()
+
+                    if dialog == DialogKind.Rename ||
+                        dialog == DialogKind.FilterFiles ||
+                        dialog == DialogKind.OpenLocation {
+                        Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
+                    }
+                }
+            }
+        }
+
         themeEditorHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && revealThemeEditor {
                 revealThemeEditor = false
                 themeEditorHandle.ScrollIntoView()
             }
         }
+
+        locationHandle.MetricsChanged += (metrics) -> {
+            if metrics.IsMounted && locationFocusPending {
+                locationFocusPending = false
+                locationHandle.Focus()
+                Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
+            }
+        }
     }
 
-    protected override func Mounted() {
-        let value = Host
+    internal func Attach(value Window) {
         window = value
         value.FocusChanged += DismissContextMenuOnBlur
         value.MetricsChanged += WindowResized
@@ -91,7 +145,7 @@ partial class BrowserView : Cell {
         browser = BrowserController(
             value,
             settings,
-            Changed,
+            () -> Changed(),
             () -> ResetTypeSelect(),
             Math.Max(1, int32(value.Size.Width)),
             Math.Max(1, int32(value.Size.Height))
@@ -105,13 +159,10 @@ partial class BrowserView : Cell {
         folderCounts = FolderCountService(
             value,
             error -> {
-                Post(
-                    () -> {
-                        if error != "" {
-                            Model.Status = error
-                        }
-                    }
-                )
+                if error != "" {
+                    Model.Status = error
+                }
+                Rebuild()
             }
         )
 
@@ -123,14 +174,11 @@ partial class BrowserView : Cell {
                 value,
                 settingsService,
                 error -> {
-                    Post(
-                        () -> {
-                            notice = error
-                            if dialog == DialogKind.Preferences {
-                                dialogError = error
-                            }
-                        }
-                    )
+                    notice = error
+                    if dialog == DialogKind.Preferences {
+                        dialogError = error
+                    }
+                    Rebuild()
                 }
             )
         }
@@ -147,7 +195,7 @@ partial class BrowserView : Cell {
         }
     }
 
-    protected override func Unmounting() {
+    internal func Shutdown() {
         if let attached = window {
             attached.FocusChanged -= DismissContextMenuOnBlur
             attached.MetricsChanged -= WindowResized
@@ -163,6 +211,8 @@ partial class BrowserView : Cell {
 
         CommitPreferenceBindings()
 
+        previewResizeTimer?.Dispose()
+        previewResizeTimer = nil
         settingsWriter?.Dispose()
         browser?.Dispose()
         thumbnails?.Dispose()
@@ -170,7 +220,7 @@ partial class BrowserView : Cell {
         selectionInfo?.Dispose()
     }
 
-    internal func CloseSafely() bool -> !setupBusy && (browser?.Operations.CloseSafely() ?? true)
+    internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
 
     private func PaneFocus(index int32) ElementHandle -> settings.ViewMode == ViewMode.Tiles ?
     paneViews[index].TileFocus: paneViews[index].ListFocus
@@ -191,6 +241,8 @@ partial class BrowserView : Cell {
         for index in paneViews.Count ... Model.Panes.Count {
             let state = BrowserPaneViewState(Model.Pane(index))
             paneViews.Add(state)
+            WatchList(state.ListViewport, state)
+            WatchList(state.TileViewport, state)
         }
     }
 
@@ -198,6 +250,16 @@ partial class BrowserView : Cell {
         get {
             guard let value = browser else {
                 throw InvalidOperationException("Browser is not attached")
+            }
+
+            return value
+        }
+    }
+
+    private prop Host Window {
+        get {
+            guard let value = window else {
+                throw InvalidOperationException("Window is not attached")
             }
 
             return value
@@ -233,7 +295,7 @@ partial class BrowserView : Cell {
             if Model.Operations.ReadyToClose {
                 Host.RequestClose()
             }
-            this.Host.Title = ChooserTitle()
+            Host.Title = ChooserTitle()
         }
 
         if let picker = chooser {
@@ -249,7 +311,7 @@ partial class BrowserView : Cell {
             }
         }
 
-        viewRevision.Value++
+        Rebuild()
 
         for state in paneViews {
             let pane = state.Pane
@@ -259,14 +321,14 @@ partial class BrowserView : Cell {
                 state.Selection = selection
 
                 if !pane.Refreshing {
-                    RevealSelection(state)
+                    state.RevealPending = true
+                    Host.Post(() -> RevealSelection(state))
                 }
             }
         }
     }
 
     override func Build() Blob {
-        let _ = viewRevision.Value
         if browser == nil {
             return Container{BackgroundColor: palette.Window}
         }
@@ -325,6 +387,7 @@ partial class BrowserView : Cell {
             },
             value -> {
                 paneRatio = value
+                Rebuild()
             },
             SplitUnit.Ratio,
             if BrowsingWidth() < SplitBreakpoint {
@@ -374,6 +437,7 @@ partial class BrowserView : Cell {
                 } else {
                     previewRatio = value
                 }
+                Rebuild()
             },
             SplitUnit.Ratio,
             SplitOrientation.Horizontal,
@@ -453,6 +517,7 @@ partial class BrowserView : Cell {
             },
             value -> {
                 placesWidth = value
+                Rebuild()
             },
             SplitUnit.Pixels,
             SplitOrientation.Horizontal,

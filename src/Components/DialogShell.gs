@@ -30,29 +30,21 @@ class DialogShell {
             handle ElementHandle,
             dismiss Action,
             keyDown Action[KeyEvent],
+            keys[]KeyBinding,
             window Window,
             p Palette,
             width float64 = 420,
             compact bool = false,
             dismissDisabled bool = false,
-            maxHeight float64 = 88,
-            initialFocus ElementHandle? = nil
-        ) Blob -> Portal{
+            maxHeight float64 = 88
+        ) Blob -> Container{
             Key: "dialog-overlay",
             Position: PositionType.Absolute,
             Left: 0,
             Right: 0,
             Top: 0,
             Bottom: 0,
-            FocusScope: FocusScopeOptions{Modal: true, InitialFocus: initialFocus ?? handle},
-            Scrim: p.Scrim,
-            AccessibilityRole: AccessibilityRole.Dialog,
-            AccessibilityName: stringTitle,
-            OnDismiss: reason -> {
-                if reason == PopupDismissReason.Escape && !dismissDisabled {
-                    dismiss()
-                }
-            },
+            BackgroundColor: p.Scrim,
             AlignItems: AlignItems.Center,
             JustifyContent: JustifyContent.Center,
             Container{
@@ -62,6 +54,7 @@ class DialogShell {
                 Width: width,
                 MaxWidth: Percent(92),
                 OnKeyDown: keyDown,
+                KeyBindings: keys,
                 MaxHeight: Percent(maxHeight),
                 Padding: if compact {
                     12
@@ -74,6 +67,7 @@ class DialogShell {
                     14
                 },
                 BasedOn: p.PopupStyle(),
+                Accessibility: Accessibility{Role: AccessibilityRole.Dialog, Name: stringTitle},
                 Container{
                     FlexDirection: FlexDirection.Row,
                     AlignItems: AlignItems.Center,

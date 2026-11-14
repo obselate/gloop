@@ -37,12 +37,12 @@ partial class BrowserView {
             early -> {
                 propertiesInfo = early
                 propertiesStage = 1
-                viewRevision.Value++
+                Rebuild()
             },
             result -> {
                 propertiesInfo = result
                 propertiesStage = 2
-                viewRevision.Value++
+                Rebuild()
             }
         )
 
@@ -135,6 +135,7 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
+            []KeyBinding{},
             Host,
             p,
             460
@@ -208,7 +209,7 @@ partial class BrowserView {
 
                 permissionError = result.Error == "" ?
                 "": "Change permissions failed for " + paths[0] + ": " + result.Error
-                viewRevision.Value++
+                Rebuild()
             },
             permission: bit,
             enabled: enabled

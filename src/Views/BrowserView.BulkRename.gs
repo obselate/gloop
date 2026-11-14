@@ -50,7 +50,7 @@ partial class BrowserView {
             dialogError = failure.Message
         }
 
-        viewRevision.Value++
+        Rebuild()
     }
 
     private func BulkField(label string, value string, change Action[string], handle ElementHandle? = nil) Blob {
@@ -222,12 +222,12 @@ partial class BrowserView {
             dialogHandle,
             () -> CloseDialog(),
             HandleKey,
+            []KeyBinding{},
             Host,
             p,
             720,
             height < 600,
-            bulkBusy,
-            initialFocus: DialogFocus()
+            bulkBusy
         )
     }
 
@@ -313,7 +313,7 @@ partial class BrowserView {
 
         if sources.Count == 0 {
             dialogError = "No names changed. Unchanged items are skipped."
-            viewRevision.Value++
+            Rebuild()
             return
         }
 

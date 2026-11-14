@@ -50,18 +50,16 @@ partial class BrowserView {
             keyboardFocus = value
             palette = Palette(settings.Theme, value)
 
-            viewRevision.Value++
+            Rebuild()
         }
     }
 
     private func WindowResized(metrics WindowMetrics) {
         UpdateBackdropRegion()
-        if locationEditing && dialog == DialogKind.None && PaneWidth(Model.ActiveIndex) < 360 {
-            OpenDialog(DialogKind.OpenLocation, locationText)
-        }
     }
 
     private func WindowStateChanged(state WindowState) {
         UpdateBackdropRegion()
+        Rebuild()
     }
 }

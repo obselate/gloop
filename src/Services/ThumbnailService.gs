@@ -10,7 +10,7 @@ import System.Threading
 class ThumbnailLease : IDisposable {
     internal let Owner ThumbnailService
     internal var Item ThumbnailItem?
-    private let data State[ThumbnailData]
+    internal let Invalidate Action
     internal let Key string
     internal let Entry FileEntry
     internal let Image bool
@@ -21,28 +21,23 @@ class ThumbnailLease : IDisposable {
     internal init(
         owner ThumbnailService,
         item ThumbnailItem?,
+        invalidate Action,
         key string,
         entry FileEntry,
         image bool,
-        edge int32,
-        waiting bool = false
+        edge int32
     ) {
         Owner = owner
         Item = item
+        Invalidate = invalidate
         Key = key
         Entry = entry
         Image = image
         Edge = edge
-        Waiting = waiting
-        data = State[ThumbnailData](owner.Read(this))
     }
 
     internal prop Data ThumbnailData {
-        get -> data.Value
-    }
-
-    internal func Refresh() {
-        data.Value = Owner.Read(this)
+        get -> Owner.Read(this)
     }
 
     /// Releases this visible item's demand.
@@ -104,7 +99,7 @@ class ThumbnailService : IDisposable {
         this.window = window
     }
 
-    internal func Acquire(entry FileEntry, maxEdge int32) ThumbnailLease {
+    internal func Acquire(entry FileEntry, maxEdge int32, invalidate Action) ThumbnailLease {
         let extension = Path.GetExtension(entry.Name).ToLowerInvariant()
         let image = FileKinds.IsImage(extension)
         let supported = !entry.IsDirectory &&
@@ -113,7 +108,7 @@ class ThumbnailService : IDisposable {
             (image || FileKinds.IsText(extension))
 
         if !supported || maxEdge <= 0 {
-            return ThumbnailLease(this, nil, "", entry, false, 0)
+            return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
         }
 
         let edge = Math.Min(maxEdge, MaximumEdgePixels)
@@ -139,7 +134,7 @@ class ThumbnailService : IDisposable {
                 if let current = item {
                     stamp++
                     current.Stamp = stamp
-                    let created = ThumbnailLease(this, current, key, entry, image, edge)
+                    let created = ThumbnailLease(this, current, invalidate, key, entry, image, edge)
                     current.Leases.Add(created)
                     lease = created
 
@@ -148,7 +143,8 @@ class ThumbnailService : IDisposable {
                         started = true
                     }
                 } else {
-                    let created = ThumbnailLease(this, nil, key, entry, image, edge, true)
+                    let created = ThumbnailLease(this, nil, invalidate, key, entry, image, edge)
+                    created.Waiting = true
                     waiting.Add(created)
                     lease = created
                 }
@@ -163,7 +159,7 @@ class ThumbnailService : IDisposable {
             return current
         }
 
-        return ThumbnailLease(this, nil, "", entry, false, 0)
+        return ThumbnailLease(this, nil, invalidate, "", entry, false, 0)
     }
 
     internal func Read(lease ThumbnailLease) ThumbnailData {
@@ -385,7 +381,7 @@ class ThumbnailService : IDisposable {
             }
         }
 
-        lease.Refresh()
+        lease.Invalidate()
     }
 
     private func makeRoom() {

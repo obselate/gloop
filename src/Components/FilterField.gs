@@ -4,7 +4,7 @@ import Goo
 import System
 
 open class FilterField : Cell[FilterFieldInput] {
-    private let focused State[bool] = State[bool](false)
+    private var focused bool
 
     protected override func Build(value FilterFieldInput) Blob {
         let p = value.Palette
@@ -17,9 +17,15 @@ open class FilterField : Cell[FilterFieldInput] {
             AlignItems: AlignItems.Center,
             Gap: 7,
             Padding: Edges{Left: 10, Right: 8},
-            BorderColor: focused.Value ? p.Accent: p.Border,
-            OnFocus: (_) -> focused.Value = true,
-            OnBlur: (_) -> focused.Value = false,
+            BorderColor: focused ? p.Accent: p.Border,
+            OnFocus: (_) -> {
+                focused = true
+                Rebuild()
+            },
+            OnBlur: (_) -> {
+                focused = false
+                Rebuild()
+            },
             OnPointerDown: e -> {
                 if e.Button == PointerButton.Primary && !e.IsFromInteractiveChild {
                     value.Handle.Focus()

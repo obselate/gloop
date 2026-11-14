@@ -15,6 +15,7 @@ internal data struct FileTableInput {
     var SizeText Func[FileEntry, string]
     var OnHeaderMenu Action[Point]
     var Tiles bool
+    var TileWidth float64
     var ScrollbarInset float64
     var WordWrap bool
     var Active bool
@@ -35,7 +36,7 @@ internal data struct FileTableInput {
     var DropPath string
     var OnClear Action
     var OnContextMenu Action[int32, Point]
-    var AcquireThumbnail Func[FileEntry, int32, ThumbnailLease]
+    var AcquireThumbnail Func[FileEntry, int32, Action, ThumbnailLease]
     var OnOpen Action
     var OnSort Action[SortColumn]
     var OnText Action[string]

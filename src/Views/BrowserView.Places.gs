@@ -49,7 +49,7 @@ partial class BrowserView {
                     Model.Navigate(path)
                     FocusFiles()
                 }
-                viewRevision.Value++
+                Rebuild()
             }
         )
     }
@@ -61,7 +61,7 @@ partial class BrowserView {
             volume,
             (_, error) -> {
                 notice = error
-                viewRevision.Value++
+                Rebuild()
             }
         )
     }

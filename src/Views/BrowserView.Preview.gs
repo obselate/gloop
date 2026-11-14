@@ -75,7 +75,7 @@ partial class BrowserView {
             framebufferHeight
         ) {
             previewResizeTimer?.Dispose()
-            previewResizeTimer = After(
+            previewResizeTimer = Host.After(
                 PreviewResizeDelayMilliseconds,
                 () -> {
                     previewResizeTimer = nil

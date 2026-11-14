@@ -15,6 +15,7 @@ class BrowserPaneViewState {
     internal let TileViewport ElementHandle = ElementHandle()
     internal var ColumnWidths Dictionary[string, float64] = Dictionary[string, float64]()
     internal var Selection string = ""
+    internal var RevealPending bool
 
     internal init(pane BrowserPane) {
         Pane = pane

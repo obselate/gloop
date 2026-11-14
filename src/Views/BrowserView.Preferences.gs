@@ -28,19 +28,19 @@ partial class BrowserView {
         palette = Palette(settings.Theme, keyboardFocus)
 
         ApplyBackdrop()
-        this.Host.WheelScrollScale = settings.ScrollSpeed
-        this.Host.SmoothScrolling = settings.SmoothScrolling
+        Host.WheelScrollScale = float32(settings.ScrollSpeed)
+        Host.SmoothScrolling = settings.SmoothScrolling
 
         dialogError = ""
 
         SavePreferences()
-        viewRevision.Value++
+        Rebuild()
     }
 
     private func SetPreferenceBinding(action string, value string) {
         preferenceInputs[action] = value
         dialogError = settings.ValidateBinding(action, value)
-        viewRevision.Value++
+        Rebuild()
     }
 
     private func CommitPreferenceBinding(action string) {
@@ -54,7 +54,7 @@ partial class BrowserView {
             SavePreferences()
         }
 
-        viewRevision.Value++
+        Rebuild()
     }
 
     private func CommitPreferenceBindings() {
@@ -124,7 +124,7 @@ partial class BrowserView {
                 () -> {
                     CommitPreferenceBindings()
                     preferenceTab = tab
-                    viewRevision.Value++
+                    Rebuild()
                 },
                 p,
                 preferenceTab == tab
@@ -323,7 +323,7 @@ partial class BrowserView {
                     if themeColorRole != selectedRole {
                         themeColorRole = selectedRole
                         revealThemeEditor = true
-                        viewRevision.Value++
+                        Rebuild()
                     }
                 },
                 p
