@@ -4,9 +4,9 @@
     "net10.0": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.31.0-rc.local.2, 0.31.0-rc.local.2]",
-        "resolved": "0.31.0-rc.local.2",
-        "contentHash": "I5/XafHek5ODqpEhPHuENkToHCCeo3RTaqd/dNxXs2OxoTj3VJhtGOsCXrDQPNnPC4om6XaiSbGAMntlG6bbTQ==",
+        "requested": "[0.31.0-rc.local.3, 0.31.0-rc.local.3]",
+        "resolved": "0.31.0-rc.local.3",
+        "contentHash": "0ndTOv3J2NvM5JZL7EpDoUqxOjhd15Awj3usXYG5LFXWQ/4pGPMAddLYmJE8eQfuRVGfgBUmqaqUUUIsvJAtHQ==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
           "Tmds.DBus.Protocol": "0.95.2",
@@ -15,11 +15,11 @@
       },
       "Goo.Widgets": {
         "type": "Direct",
-        "requested": "[0.22.0-rc.local.2, 0.22.0-rc.local.2]",
-        "resolved": "0.22.0-rc.local.2",
-        "contentHash": "Of35wTptUEFQk9tgHJQtEIGLlf6lFT/45Nm6zDzhwkDb+UmsHOF7G8CP6Hbq5boKJHR+EcrPS8o+ExcBozqilA==",
+        "requested": "[0.22.0-rc.local.3, 0.22.0-rc.local.3]",
+        "resolved": "0.22.0-rc.local.3",
+        "contentHash": "eNuhDrqg3Mnzh2W0RaZzGHPfCICz7kaUqiZwUE7x0HFfrzraLLiqxudpY6og4nAeDbD1Rp7p+alzqn0iO0X/RQ==",
         "dependencies": {
-          "Goo": "0.31.0-rc.local.2"
+          "Goo": "0.31.0-rc.local.3"
         }
       },
       "Microsoft.DotNet.ILCompiler": {
@@ -62,9 +62,9 @@
     "net10.0/linux-x64": {
       "Goo": {
         "type": "Direct",
-        "requested": "[0.31.0-rc.local.2, 0.31.0-rc.local.2]",
-        "resolved": "0.31.0-rc.local.2",
-        "contentHash": "I5/XafHek5ODqpEhPHuENkToHCCeo3RTaqd/dNxXs2OxoTj3VJhtGOsCXrDQPNnPC4om6XaiSbGAMntlG6bbTQ==",
+        "requested": "[0.31.0-rc.local.3, 0.31.0-rc.local.3]",
+        "resolved": "0.31.0-rc.local.3",
+        "contentHash": "0ndTOv3J2NvM5JZL7EpDoUqxOjhd15Awj3usXYG5LFXWQ/4pGPMAddLYmJE8eQfuRVGfgBUmqaqUUUIsvJAtHQ==",
         "dependencies": {
           "Hexa.NET.SDL3": "1.2.17",
           "Tmds.DBus.Protocol": "0.95.2",
