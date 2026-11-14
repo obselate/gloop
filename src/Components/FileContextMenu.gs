@@ -23,7 +23,7 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                 Width: 240,
                 MaxHeight: 420,
                 AccessibilityName: value.Name,
-                CreateRoot: (_, root) -> {
+                ConfigureRoot: (_, root) -> {
                     root.OnPointerUp = e -> {
                         if e.Button != PointerButton.Primary {
                             e.PreventDefault()
@@ -31,27 +31,24 @@ open class FileContextMenu : Cell[FileContextMenuInput] {
                             value.OnDismiss()
                         }
                     }
-                    return root
                 },
-                CreatePanel: (_, panel) -> {
+                ConfigurePanel: (_, panel) -> {
                     panel.Padding = 4
                     panel.BasedOn = p.PopupStyle()
                     panel.ScrollbarY = Ui.ScrollbarStyle(p)
-                    return panel
                 },
-                CreateItem: (_, item, row) -> {
+                ConfigureItem: (_, item, row) -> {
                     row.MinHeight = 28
                     row.Padding = Edges{Left: 8, Right: 8, Top: 4, Bottom: 4}
                     row.BorderRadius = 3
                     row.BackgroundColor = Color.Transparent
                     row.HoverStyle = Style{BackgroundColor: item.Disabled ? Color.Transparent: p.Selection}
                     row.FocusStyle = Style{BackgroundColor: p.Selection, BasedOn: p.Ring(-1)}
-                    return row
                 },
-                CreateSeparator: (_, _) -> Container{
-                    Height: 1,
-                    Margin: Edges{Top: 3, Bottom: 3, Left: 4, Right: 4},
-                    BackgroundColor: p.Border,
+                ConfigureSeparator: (_, _, separator) -> {
+                    separator.Height = 1
+                    separator.Margin = Edges{Top: 3, Bottom: 3, Left: 4, Right: 4}
+                    separator.BackgroundColor = p.Border
                 },
             }
         )

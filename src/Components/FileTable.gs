@@ -89,12 +89,11 @@ open class FileTable : Cell[FileTableInput] {
                     BorderWidth: Edges{Left: 1},
                     BorderColor: p.Border,
                 },
-                CreateResizeHandle: (_, _, handle) -> {
+                ConfigureResizeHandle: (_, _, handle) -> {
                     handle.HoverStyle = Style{BorderColor: p.Accent}
                     handle.FocusStyle = p.FocusBorder()
-                    return handle
                 },
-                CreateRoot: (_, root) -> BuildRoot(root, value),
+                ConfigureRoot: (_, root) -> ConfigureRoot(root, value),
                 CreateHeader: (_, column, _) -> BuildHeader(column, value),
                 CreateCell: (_, row, column, _) -> CellContent(
                     pane.VisibleEntries[indices[(row.Id ?? "")]],
@@ -103,7 +102,7 @@ open class FileTable : Cell[FileTableInput] {
                     value,
                     p
                 ),
-                CreateRow: (_, row, root) -> {
+                ConfigureRow: (_, row, root) -> {
                     let selectedRow = pane.SelectedPaths.Contains(row.Id ?? "")
                     let focused = pane.Selected >= 0 && pane.VisibleEntries[pane.Selected].FullPath == row.Id
                     root.OutlineWidth = if focused && value.Active && p.Keyboard {
@@ -120,7 +119,7 @@ open class FileTable : Cell[FileTableInput] {
                             p.Hover
                         }
                     }
-                    return FileTransferUi.Bind(root, pane.VisibleEntries[indices[(row.Id ?? "")]], value, clicks)
+                    FileTransferUi.Bind(root, pane.VisibleEntries[indices[(row.Id ?? "")]], value, clicks)
                 },
             }
         )
@@ -159,7 +158,7 @@ open class FileTable : Cell[FileTableInput] {
         return columns.ToArray()
     }
 
-    private func BuildRoot(root Container, value FileTableInput) Container {
+    private func ConfigureRoot(root Container, value FileTableInput) {
         root.FlexGrow = 1
         root.FlexBasis = 0
         root.BorderWidth = 0
@@ -167,7 +166,7 @@ open class FileTable : Cell[FileTableInput] {
         root.AutoFocus = value.AutoFocus
         root.KeyBindings = value.Keys
 
-        return FileTransferUi.Root(root, value, clicks)
+        FileTransferUi.Root(root, value, clicks)
     }
 
     private func BuildHeader(column DataGridColumn, value FileTableInput) Blob {

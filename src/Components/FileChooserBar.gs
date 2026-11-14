@@ -235,24 +235,21 @@ open class FileChooserBar : Cell[FileChooserBarInput] {
                 Placement: PopoverPlacement.TopStart,
                 Width: 210,
                 RowHeight: 30,
-                CreateTrigger: (_, row) -> {
+                ConfigureTrigger: (_, row) -> {
                     row.Height = 32
                     row.Padding = Edges{Left: 8, Right: 8}
                     row.BackgroundColor = p.Surface
                     row.BorderColor = p.Border
                     row.BorderRadius = 4
                     row.FocusStyle = p.FocusBorder()
-                    return row
                 },
-                CreatePopup: (_, panel) -> {
+                ConfigurePopup: (_, panel) -> {
                     panel.BasedOn = p.PopupStyle()
-                    return panel
                 },
-                CreateRow: (input, item, row) -> {
+                ConfigureRow: (input, item, row) -> {
                     row.BackgroundColor = input.SelectedId == item.Id ? p.Selection: Color.Transparent
                     row.OutlineColor = p.Accent
                     row.HoverStyle = Style{BackgroundColor: p.Selection}
-                    return row
                 },
             }
         )

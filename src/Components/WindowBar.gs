@@ -40,19 +40,19 @@ class WindowBar {
                     p
                 )
             },
-            CreateControl: (_, command, _, _) -> Button{
-                Width: ControlWidth,
-                Height: Ui.BarHeight,
-                Padding: 0,
-                BackgroundColor: Color.Transparent,
-                HoverStyle: Style{
+            ConfigureControl: (_, command, _, _, button) -> {
+                button.Width = ControlWidth
+                button.Height = Ui.BarHeight
+                button.Padding = 0
+                button.BackgroundColor = Color.Transparent
+                button.HoverStyle = Style{
                     BackgroundColor: if command == WindowChromeAction.Close {
                         p.Danger
                     } else {
                         p.ChromeHover
                     }
-                },
-                FocusStyle: p.Ring(-2),
+                }
+                button.FocusStyle = p.Ring(-2)
             },
         }.Build()
     }

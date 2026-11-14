@@ -99,19 +99,16 @@ partial class BrowserView {
                     OverlayHost: rootHandle,
                     Width: 160,
                     RowHeight: 30,
-                    CreateTrigger: (_, row) -> {
+                    ConfigureTrigger: (_, row) -> {
                         row.BasedOn = TextField.FieldStyle(p)
                         row.FocusStyle = p.FocusBorder()
-                        return row
                     },
-                    CreatePopup: (_, panel) -> {
+                    ConfigurePopup: (_, panel) -> {
                         panel.BasedOn = p.PopupStyle()
-                        return panel
                     },
-                    CreateRow: (input, item, row) -> {
+                    ConfigureRow: (input, item, row) -> {
                         row.BackgroundColor = input.SelectedId == item.Id ? p.Selection: Color.Transparent
                         row.HoverStyle = Style{BackgroundColor: p.Selection}
-                        return row
                     },
                 }
             ),

@@ -50,12 +50,11 @@ class SplitDivider {
                 Disabled: !enabled,
                 AccessibilityName: name,
                 OnChange: change,
-                CreateRoot: (_, root) -> {
+                ConfigureRoot: (_, root) -> {
                     root.FlexGrow = 1
                     root.FlexBasis = 0
-                    return root
                 },
-                CreateHandle: (_, divider) -> {
+                ConfigureHandle: (_, divider) -> {
                     divider.ZIndex = 2
                     divider.BackgroundColor = Color.Transparent
                     divider.BorderWidth = if !enabled {
@@ -101,7 +100,6 @@ class SplitDivider {
                             }
                         )
                     }
-                    return divider
                 },
             }
         )
