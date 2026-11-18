@@ -7,8 +7,8 @@ class FileKinds {
         internal const DirectoryMime string = "inode/directory"
 
         internal func IsImage(extension string, icon bool = false) bool -> switch extension {
-            case ".png" or ".jpg" or ".jpeg" or ".gif": true
-            case ".webp" or ".svg": icon
+            case ".png" or ".jpg" or ".jpeg" or ".jpe" or ".jfif" or ".gif": true
+            case ".webp" or ".svg" or ".bmp" or ".tif" or ".tiff": icon
             default: false
         }
 
@@ -38,6 +38,7 @@ class FileKinds {
                 case ".zip" or ".gz" or ".tgz" or ".tar" or ".7z" or ".xz": "folder_zip"
                 case ".mp3" or ".flac" or ".wav" or ".ogg": "audio_file"
                 case ".mp4" or ".mkv" or ".webm": "video_file"
+                case ".pdf" or ".docx" or ".odt": "description"
                 case ".gs" or ".cs" or ".rs" or ".go" or ".js" or ".ts" or ".py" or ".sh" or ".json": "code"
                 default: "draft"
             }

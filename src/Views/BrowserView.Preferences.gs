@@ -135,7 +135,7 @@ partial class BrowserView {
             tabs.Children.Add(button)
         }
 
-        return Container{
+        let content = Container{
             MinHeight: 0,
             FlexShrink: 1,
             Gap: if compact {
@@ -144,20 +144,26 @@ partial class BrowserView {
                 16
             },
             tabs,
-            Text{
-                Content: if preferenceTab == "Shortcuts" {
-                    "Press Enter or leave the field to apply a shortcut, such as Ctrl+S."
-                } else if preferenceTab == "Behavior" {
-                    "Adjust scrolling and text previews."
-                } else {
-                    "Choose a preset or edit Custom with the OKLCH wheel."
-                },
-                Color: p.Muted,
-                FontSize: 12,
-                TextWrap: TextWrap.Wrap,
-            },
-            DialogShell.ScrollColumn(rows.ToArray(), p),
         }
+
+        if preferenceTab != "Appearance" {
+            content.Children.Add(
+                Text{
+                    Content: if preferenceTab == "Shortcuts" {
+                        "Press Enter or leave the field to apply a shortcut, such as Ctrl+S."
+                    } else {
+                        "Adjust scrolling and text previews."
+                    },
+                    Color: p.Muted,
+                    FontSize: 12,
+                    TextWrap: TextWrap.Wrap,
+                }
+            )
+        }
+
+        content.Children.Add(DialogShell.ScrollColumn(rows.ToArray(), p))
+
+        return content
     }
 
     private func ShortcutRows(rows List[Blob], values AppSettings, p Palette) {
@@ -309,12 +315,34 @@ partial class BrowserView {
 
         if values.ThemeName == AppSettings.CustomThemeName {
             AppearanceColorRows(rows, values, p, compact)
+        } else {
+            rows.Add(
+                PreferenceRow.Build(
+                    "Replaces your saved Custom colors.",
+                    DialogButton(
+                        "Copy to Custom",
+                        () -> {
+                            values.CopyThemeToCustom()
+                            revealThemeEditor = true
+                            ApplyPreferences()
+                        },
+                        p
+                    ),
+                    p
+                )
+            )
         }
     }
 
     private func AppearanceColorRows(rows List[Blob], values AppSettings, p Palette, compact bool) {
         for role in ThemePresets.Roles() {
             let selectedRole = role
+            var handle ElementHandle? = nil
+
+            if role == themeColorRole {
+                handle = themeRoleHandle
+            }
+
             let roleRow = ThemeColorRole.Build(
                 role,
                 values.CustomTheme.ColorFor(role),
@@ -326,7 +354,8 @@ partial class BrowserView {
                         Rebuild()
                     }
                 },
-                p
+                p,
+                handle
             )
 
             if role == themeColorRole {

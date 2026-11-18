@@ -294,7 +294,7 @@ unsafe class FileChooserService {
     private func requireDirectory(path string, access int32) string {
         let fullPath = absolutePath(path)
 
-        if fileType(fullPath) != FileSystemService.DirectoryFileType {
+        if FileSystemService.FileType(fullPath) != FileSystemService.DirectoryFileType {
             throw IOException("Select an accessible folder: " + fullPath)
         }
 
@@ -306,7 +306,7 @@ unsafe class FileChooserService {
     private func requireFile(path string, access int32) string {
         let fullPath = absolutePath(path)
 
-        if fileType(fullPath) != FileSystemService.RegularFileType {
+        if FileSystemService.FileType(fullPath) != FileSystemService.RegularFileType {
             throw IOException("Select a regular file: " + fullPath)
         }
 
@@ -321,23 +321,6 @@ unsafe class FileChooserService {
         }
 
         return Path.GetFullPath(path)
-    }
-
-    private func fileType(path string) int32 {
-        let buffer *uint8 = stackalloc[FileSystemService.StatBufferSize]uint8
-        let pointer = IntPtr(buffer)
-
-        if FileSystemService.ReadStat(
-            FileSystemService.AtCurrentDirectory,
-            path,
-            0,
-            FileSystemService.StatType,
-            pointer
-        ) != 0 {
-            throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path)
-        }
-
-        return int32(Marshal.ReadInt16(pointer, 28)) & FileSystemService.FileTypeMask
     }
 
     private func requireAccess(path string, mode int32) {

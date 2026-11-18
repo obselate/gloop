@@ -46,6 +46,45 @@ class PreviewSidebar {
                 }
             }
 
+            if let vector = value.Preview.Vector {
+                return Container{
+                    FlexGrow: 1,
+                    FlexBasis: 0,
+                    MinWidth: 0,
+                    MinHeight: 0,
+                    BackgroundColor: p.Canvas,
+                    Container{
+                        Position: PositionType.Absolute,
+                        Left: 8,
+                        Right: 8,
+                        Top: 8,
+                        Bottom: 8,
+                        Sized(
+                            size -> {
+                                let scale = Math.Max(
+                                    0.0,
+                                    Math.Min(size.Width / vector.ViewBoxWidth, size.Height / vector.ViewBoxHeight)
+                                )
+                                return Container{
+                                    Width: Percent(100),
+                                    Height: Percent(100),
+                                    AlignItems: AlignItems.Center,
+                                    JustifyContent: JustifyContent.Center,
+                                    Container{
+                                        Width: vector.ViewBoxWidth * scale,
+                                        Height: vector.ViewBoxHeight * scale,
+                                        MinWidth: 0,
+                                        MinHeight: 0,
+                                        FlexShrink: 0,
+                                        vector.Render(),
+                                    },
+                                }
+                            }
+                        ){.Width: Percent(100), .Height: Percent(100), .MinWidth: 0, .MinHeight: 0},
+                    },
+                }
+            }
+
             if value.Preview.Kind == PreviewKind.Text {
                 return Cell.Mount[TextPreviewInput, TextPreview](
                     nil,

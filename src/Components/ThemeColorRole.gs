@@ -25,7 +25,7 @@ open class ThemeColorRole : Cell[ThemeColorRoleInput] {
             Ui.Label(value.Value, p.Muted, 11),
             value.Selected,
             value.Choose,
-            handle,
+            value.Handle ?? handle,
             p,
             38,
             10
@@ -33,10 +33,24 @@ open class ThemeColorRole : Cell[ThemeColorRoleInput] {
     }
 
     shared {
-        internal func Build(role string, color string, selected bool, choose Action, p Palette) Blob ->
-        Cell.Mount[ThemeColorRoleInput, ThemeColorRole](
+        internal func Build(
+            role string,
+            color string,
+            selected bool,
+            choose Action,
+            p Palette,
+            handle ElementHandle? = nil
+        ) Blob -> Cell
+            .Mount[ThemeColorRoleInput, ThemeColorRole](
             nil,
-            ThemeColorRoleInput{Role: role, Value: color, Selected: selected, Choose: choose, Palette: p}
+            ThemeColorRoleInput{
+                Role: role,
+                Value: color,
+                Selected: selected,
+                Choose: choose,
+                Palette: p,
+                Handle: handle
+            }
         )
     }
 }

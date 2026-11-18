@@ -10,7 +10,6 @@ internal data struct FileTableInput {
     var Host Window
     var Pane BrowserPane
     var Location LocationKind
-    var Compact bool
     var ShowType bool
     var SizeText Func[FileEntry, string]
     var OnHeaderMenu Action[Point]

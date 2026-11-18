@@ -285,13 +285,17 @@ class PreviewLoader {
 
                 if BeginImage(generation, cancellation) {
                     try {
-                        source = ImageSource.LoadThumbnail(
-                            data.Path,
-                            request.Width,
-                            request.Height,
-                            ThumbnailService.ImageLimits,
-                            cancellation.Token
-                        )
+                        source = if MediaPreview.Supports(Path.GetExtension(data.Path).ToLowerInvariant()) {
+                            MediaPreview.Load(data.Path, request.Width, request.Height, cancellation.Token)
+                        } else {
+                            ImageSource.LoadThumbnail(
+                                data.Path,
+                                request.Width,
+                                request.Height,
+                                ThumbnailService.ImageLimits,
+                                cancellation.Token
+                            )
+                        }
                     } finally {
                         FinishImage(cancellation)
                     }
@@ -321,12 +325,8 @@ class PreviewLoader {
             return
         }
 
-        try {
-            window.Post(() -> ApplyPreview(request, data, source))
-        } catch (failure InvalidOperationException) {
-            if let failedSource = source {
-                failedSource.Dispose()
-            }
+        if !window.Post(() -> ApplyPreview(request, data, source)) {
+            source?.Dispose()
         }
     }
 }

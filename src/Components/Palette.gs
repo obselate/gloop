@@ -92,11 +92,11 @@ class Palette {
         Blur = Glass ? 24: 0
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
 
-        let syntax = preset == "" ? nil: ThemePresets.Create(preset)
-        Keyword = Color.Parse(syntax?.Keyword ?? theme.Accent)
-        String = Color.Parse(syntax?.String ?? theme.Text)
-        Number = Color.Parse(syntax?.Number ?? theme.MutedText)
-        Type = Color.Parse(syntax?.Type ?? theme.Accent)
+        let syntax = theme.Keyword == "" && preset != "" ? ThemePresets.Create(preset): theme
+        Keyword = Color.Parse(syntax.Keyword == "" ? theme.Accent: syntax.Keyword)
+        String = Color.Parse(syntax.String == "" ? theme.Text: syntax.String)
+        Number = Color.Parse(syntax.Number == "" ? theme.MutedText: syntax.Number)
+        Type = Color.Parse(syntax.Type == "" ? theme.Accent: syntax.Type)
     }
 
     internal func Ring(offset float64 = 0, width float64 = 1) Style -> if Keyboard {

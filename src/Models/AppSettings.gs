@@ -193,6 +193,11 @@ internal class AppSettings {
         }
     }
 
+    internal func CopyThemeToCustom() {
+        CustomTheme.ApplyFrom(Theme)
+        ThemeName = CustomThemeName
+    }
+
     internal func SetCustomColor(role string, color string) {
         CustomTheme.SetColor(role, color)
         Theme.SetColor(role, color)

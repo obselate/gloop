@@ -135,7 +135,7 @@ partial class BrowserView {
                     Children: tools.ToArray(),
                 },
             },
-            PaneTable(index, pane, active, p, availableWidth < 600, location),
+            PaneTable(index, pane, active, p, location),
         }
     }
 
@@ -247,14 +247,7 @@ partial class BrowserView {
         toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * Ui.ToolSize + (tools.Count - 1) * Ui.ToolsGap
     }
 
-    private func PaneTable(
-        index int32,
-        pane BrowserPane,
-        active bool,
-        p Palette,
-        compact bool,
-        location LocationKind
-    ) Blob {
+    private func PaneTable(index int32, pane BrowserPane, active bool, p Palette, location LocationKind) Blob {
         let state = paneViews[index]
         let handle = PaneViewport(index)
 
@@ -265,7 +258,6 @@ partial class BrowserView {
                 WordWrap: settings.PreviewWordWrap,
                 Pane: pane,
                 Location: location,
-                Compact: compact,
                 ShowType: settings.ShowTypeColumn,
                 SizeText: entry -> pane.Kind == LocationKind.Archive && entry.IsDirectory ? "—": FileSizeText(entry),
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
