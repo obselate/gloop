@@ -313,10 +313,22 @@ partial class BrowserView : Cell {
             }
         }
 
-        Rebuild()
-
         for state in paneViews {
             let pane = state.Pane
+            if state.SortGeneration >= 0 {
+                let generation = state.SortGeneration
+                if pane.ViewGeneration != generation || settings.ViewMode != ViewMode.List {
+                    state.SortGeneration = -1
+                } else if !pane.Loading {
+                    state.SortGeneration = -1
+                    let viewport = state.ListViewport
+                    let offset = viewport.ScrollOffset
+                    if viewport.IsMounted && offset.Y > 0 {
+                        state.ListViewport = ElementHandle()
+                        WatchList(state.ListViewport, state, offset, generation)
+                    }
+                }
+            }
             let selection = pane.DirectoryPath + "\0" + pane.Selected.ToString()
 
             if state.Selection != selection {
@@ -328,6 +340,7 @@ partial class BrowserView : Cell {
                 }
             }
         }
+        Rebuild()
     }
 
     override func Build() Blob {

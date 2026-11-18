@@ -8,10 +8,16 @@ import System.Collections.Generic
 import System.IO
 
 partial class BrowserView {
-    private func WatchList(handle ElementHandle, state BrowserPaneViewState) {
+    private func WatchList(
+        handle ElementHandle,
+        state BrowserPaneViewState,
+        offset Point? = nil,
+        generation int32 = -1
+    ) {
         var viewport float64 = -1
         var scrollRange float64 = -1
         var room float64 = -1
+        var restore = offset
 
         handle.MetricsChanged += (metrics) -> {
             if !metrics.IsMounted {
@@ -19,6 +25,12 @@ partial class BrowserView {
                 scrollRange = -1
                 room = -1
                 return
+            }
+            if let saved = restore {
+                restore = nil
+                if state.Pane.ViewGeneration == generation && metrics.ScrollOffset != saved {
+                    handle.JumpTo(saved.X, saved.Y)
+                }
             }
 
             if room != metrics.ContentBox.Width {
@@ -321,7 +333,9 @@ partial class BrowserView {
                 },
                 OnSort: column -> {
                     Model.SetActive(index)
+                    state.RevealPending = false
                     Model.Sort(column)
+                    state.SortGeneration = pane.ViewGeneration
                     SavePreferences()
                 },
                 OnText: text -> {
