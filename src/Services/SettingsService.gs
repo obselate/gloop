@@ -245,6 +245,9 @@ internal class SettingsService {
         private func writeTheme(writer Utf8JsonWriter, name string, theme ThemePalette) {
             writer.WriteStartObject(name)
             writer.WriteBoolean("glass", theme.Glass)
+            if theme.GlassOpacity.HasValue {
+                writer.WriteNumber("glassOpacity", theme.GlassOpacity.Value)
+            }
             writer.WriteString("background", theme.Background)
             writer.WriteString("surface", theme.Surface)
             writer.WriteString("text", theme.Text)
@@ -331,6 +334,21 @@ internal class SettingsService {
                 }
                 if property.Name == "glass" {
                     theme.Glass = readBool(property.Value, name + ".glass")
+                    continue
+                }
+                if property.Name == "glassOpacity" {
+                    if property.Value.ValueKind == JsonValueKind.Null {
+                        theme.GlassOpacity = nil
+                    } else {
+                        var opacity int32 = 0
+                        if property.Value.ValueKind != JsonValueKind.Number
+                        || !property.Value.TryGetInt32(out opacity) || opacity < 0 || opacity > 100 {
+                            throw InvalidDataException(
+                                "Settings: field " + name + ".glassOpacity must be an integer between 0 and 100"
+                            )
+                        }
+                        theme.GlassOpacity = opacity
+                    }
                     continue
                 }
                 if property.Value.ValueKind != JsonValueKind.String {

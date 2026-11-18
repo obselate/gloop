@@ -248,12 +248,19 @@ internal class AppSettings {
         Theme.Glass = glass
     }
 
+    internal func SetCustomGlassOpacity(opacity int32) {
+        let value = Math.Clamp(opacity, 0, 100)
+        CustomTheme.GlassOpacity = value
+        Theme.GlassOpacity = value
+    }
+
     internal func SetCustomColor(role string, color string) {
         CustomTheme.SetColor(role, color)
         Theme.SetColor(role, color)
     }
 
     internal func ResolveTheme(hasThemeName bool, hasCustomTheme bool) {
+        let glassOpacity = Theme.GlassOpacity
         if isLegacyDefaultTheme(Theme) {
             Theme = ThemePalette()
         }
@@ -270,6 +277,8 @@ internal class AppSettings {
         if ThemePresets.Contains(ThemeName) {
             Theme = ThemePresets.Create(ThemeName)
         }
+
+        Theme.GlassOpacity = glassOpacity
 
         if !hasCustomTheme && ThemeName == CustomThemeName {
             CustomTheme.ApplyFrom(Theme)
@@ -486,6 +495,16 @@ internal class AppSettings {
 
             if !validTheme(settings.CustomTheme) {
                 return "Settings: field customTheme colors must be #RRGGBB"
+            }
+
+            if settings.Theme.GlassOpacity.HasValue
+            && (settings.Theme.GlassOpacity.Value < 0 || settings.Theme.GlassOpacity.Value > 100) {
+                return "Settings: field theme.glassOpacity must be between 0 and 100"
+            }
+
+            if settings.CustomTheme.GlassOpacity.HasValue
+            && (settings.CustomTheme.GlassOpacity.Value < 0 || settings.CustomTheme.GlassOpacity.Value > 100) {
+                return "Settings: field customTheme.glassOpacity must be between 0 and 100"
             }
 
             return ""
