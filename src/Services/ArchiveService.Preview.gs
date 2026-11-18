@@ -53,34 +53,37 @@ partial class ArchiveService {
                             throw OperationCanceledException()
                         }
                         let kind = bytes[offset + 156]
-                        if kind == 120 || kind == 103 || kind == 76 || kind == 75 {
-                            var checksum = 0
-                            for index in offset ... (offset + 512) {
-                                checksum += index >= offset + 148 && index < offset + 156 ? 32: int32(bytes[index])
-                            }
-                            let declared = ReadTarPreviewOctal(bytes, offset + 148, 8)
-                            if declared == int64(checksum) {
-                                let size = ReadTarPreviewOctal(bytes, offset + 124, 12)
-                                if size < 0 || size > data.Length - offset - 512 {
-                                    throw InvalidDataException("TAR metadata exceeds the bounded preview data.")
-                                }
-                            }
+                        let size = ReadTarPreviewOctal(bytes, offset + 124, 12)
+                        if size < 0 {
+                            throw InvalidDataException("TAR preview requires octal entry sizes.")
                         }
-                        offset += 512
+                        if size > data.Length - offset - 512 {
+                            if !limited {
+                                throw InvalidDataException("TAR entry is incomplete.")
+                            }
+                            if kind == 120 || kind == 103 || kind == 76 || kind == 75 {
+                                data.SetLength(offset)
+                            }
+                            break
+                        }
+                        offset += 512 + int32((size + 511) / 512) * 512
                     }
                     data.Position = 0
                     using let reader = TarReader(data, true)
-                    while let entry = reader.GetNextEntry() {
-                        if cancelled() {
-                            throw OperationCanceledException()
+                    try {
+                        while let entry = reader.GetNextEntry() {
+                            if cancelled() {
+                                throw OperationCanceledException()
+                            }
+                            AppendListingPreview(text, entry.Name, entry.Length)
+                            count++
+                            if count == 512 || text.Length >= 64000 {
+                                limited = true
+                                break
+                            }
                         }
-                        if count == 512 || text.Length >= 64000 {
-                            limited = true
-                            break
-                        }
-                        AppendListingPreview(text, entry.Name, entry.Length)
-                        count++
-                    }
+                    } catch (failure Exception) when limited &&
+                        (failure is EndOfStreamException || failure is ArgumentOutOfRangeException) { }
                 }
                 return PreviewData{
                     Kind: PreviewKind.Text,
