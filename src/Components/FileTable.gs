@@ -142,7 +142,7 @@ open class FileTable : Cell[FileTableInput] {
                     }
                 )
             }
-        ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 0, .MinHeight: 0, .Padding: Edges{Left: Ui.CardInset},}
+        ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 0, .MinHeight: 0}
     }
 
     private func UpdateRows(pane BrowserPane) {
@@ -183,7 +183,8 @@ open class FileTable : Cell[FileTableInput] {
         root.FlexBasis = 0
         root.BorderWidth = 0
         root.BorderRadius = 0
-        root.Margin = Edges{Right: right}
+        let rowInset = value.Palette.WidgetTheme.RowInset
+        root.Padding = Edges{Left: Ui.CardInset + rowInset, Right: right + rowInset}
         root.AutoFocus = value.AutoFocus
         root.KeyBindings = value.Keys
 
