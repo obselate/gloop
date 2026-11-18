@@ -70,7 +70,11 @@ class PreferenceRow {
                     ThumbBorderColor = p.Surface,
                     TrackThickness = 4,
                     ThumbSize = 14,
-                    FocusOutlineColor = p.Accent,
+                    BackgroundColor = Color.Transparent,
+                    ConfigureRoot = (_, root) -> {
+                        root.BorderRadius = p.WidgetTheme.ControlRadius
+                        root.FocusStyle = p.Ring()
+                    },
                 }
             ),
             p,

@@ -76,13 +76,21 @@ class Palette {
             HeadingFontFamily = "",
             PanelRadius = Ui.WindowRadius,
         }
-        let glassTheme = Glass ? colors.WithGlass(): colors
-        WidgetTheme = Glass &&
-            theme
-            .GlassOpacity
-            .HasValue ? glassTheme with{
-            GlassColor = (glassTheme.GlassColor ?? Background).WithAlpha(theme.GlassOpacity.Value / 100.0),
-        }: glassTheme
+        if Glass {
+            let glassTheme = colors.WithGlass()
+            let alpha = if let percent = theme.GlassOpacity {
+                percent / 100.0
+            } else {
+                float64((glassTheme.GlassColor ?? Background).A)
+            }
+            WidgetTheme = glassTheme with{
+                GlassColor = Background.WithAlpha(alpha),
+                OverlayColor = Surface.WithAlpha(alpha),
+                OverlayBlur = alpha < 1 ? glassTheme.OverlayBlur: 0,
+            }
+        } else {
+            WidgetTheme = colors
+        }
 
         Selection = Glass ? Accent.WithAlpha(dark ? .32: .2): Color.Parse(theme.Selection)
         Window = WidgetTheme.GlassColor ?? Background
@@ -94,7 +102,7 @@ class Palette {
         ChromeSelection = Glass ? Text.WithAlpha(.12): Selection
         Bar = Glass ? Color.Transparent: Surface
         Overlay = WidgetTheme.OverlayColor
-        Blur = Glass ? 24: 0
+        Blur = Glass ? WidgetTheme.OverlayBlur: 0
         Error = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Surface) ?? 0, 0x9F3545, 0xF0AF9D))
 
         let preset = theme.Keyword == "" ? ThemePresets.Match(theme): ""
