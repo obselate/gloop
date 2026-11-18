@@ -72,7 +72,7 @@ class PreferenceRow {
                     ThumbSize = 14,
                     BackgroundColor = Color.Transparent,
                     ConfigureRoot = (_, root) -> {
-                        root.BorderRadius = p.WidgetTheme.ControlRadius
+                        root.BorderRadius = p.WidgetTheme.ControlRadius ?? 6.0
                         root.FocusStyle = p.Ring()
                     },
                 }
