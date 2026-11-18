@@ -55,5 +55,27 @@ class PreferenceRow {
             p,
             row
         )
+
+        internal func Slider(key string, input SliderInput, row ElementHandle, p Palette) Blob -> Build(
+            "",
+            Cell.Mount[SliderInput, Goo.Widgets.Inputs.Slider](
+                key,
+                input with{
+                    ShowValue = true,
+                    LabelColor = p.Text,
+                    ValueColor = p.Muted,
+                    TrackColor = p.Border,
+                    FillColor = p.Accent,
+                    ThumbColor = p.Accent,
+                    ThumbBorderColor = p.Surface,
+                    TrackThickness = 4,
+                    ThumbSize = 14,
+                    FocusOutlineColor = p.Accent,
+                }
+            ),
+            p,
+            row,
+            true
+        ){.Padding: Edges{Left: 10, Right: 10, Top: 10, Bottom: 6}}
     }
 }

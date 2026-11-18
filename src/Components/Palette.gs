@@ -76,7 +76,13 @@ class Palette {
             HeadingFontFamily = "",
             PanelRadius = Ui.WindowRadius,
         }
-        WidgetTheme = Glass ? colors.WithGlass(): colors
+        let glassTheme = Glass ? colors.WithGlass(): colors
+        WidgetTheme = Glass &&
+            theme
+            .GlassOpacity
+            .HasValue ? glassTheme with{
+            GlassColor = (glassTheme.GlassColor ?? Background).WithAlpha(theme.GlassOpacity.Value / 100.0),
+        }: glassTheme
 
         Selection = Glass ? Accent.WithAlpha(dark ? .32: .2): Color.Parse(theme.Selection)
         Window = WidgetTheme.GlassColor ?? Background

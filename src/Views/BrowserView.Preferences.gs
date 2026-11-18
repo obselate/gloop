@@ -12,6 +12,7 @@ import System.IO
 
 partial class BrowserView {
     private let glassEffectRow ElementHandle = ElementHandle()
+    private let glassOpacityRow ElementHandle = ElementHandle()
 
     private func SavePreferences() {
         if chooser != nil {
@@ -225,38 +226,23 @@ partial class BrowserView {
             )
         )
         rows.Add(
-            PreferenceRow
-                .Build(
-                "",
-                Cell.Mount[SliderInput, Slider](
-                    "scroll-speed",
-                    SliderInput{
-                        Value: values.ScrollSpeed,
-                        Minimum: AppSettings.MinimumScrollSpeed,
-                        Maximum: AppSettings.MaximumScrollSpeed,
-                        Step: .25,
-                        Label: "Scroll speed",
-                        ShowValue: true,
-                        FormatValue: value -> value.ToString("0.##", CultureInfo.InvariantCulture) + "×",
-                        OnChange: value -> {
-                            values.ScrollSpeed = value
-                            ApplyPreferences()
-                        },
-                        LabelColor: p.Text,
-                        ValueColor: p.Muted,
-                        TrackColor: p.Border,
-                        FillColor: p.Accent,
-                        ThumbColor: p.Accent,
-                        ThumbBorderColor: p.Surface,
-                        TrackThickness: 4,
-                        ThumbSize: 14,
-                        FocusOutlineColor: p.Accent,
-                    }
-                ),
-                p,
+            PreferenceRow.Slider(
+                "scroll-speed",
+                SliderInput{
+                    Value: values.ScrollSpeed,
+                    Minimum: AppSettings.MinimumScrollSpeed,
+                    Maximum: AppSettings.MaximumScrollSpeed,
+                    Step: .25,
+                    Label: "Scroll speed",
+                    FormatValue: value -> value.ToString("0.##", CultureInfo.InvariantCulture) + "×",
+                    OnChange: value -> {
+                        values.ScrollSpeed = value
+                        ApplyPreferences()
+                    },
+                },
                 scrollSpeedRow,
-                true
-            ){.Padding: Edges{Left: 10, Right: 10, Top: 10, Bottom: 6}}
+                p
+            )
         )
     }
 
@@ -349,6 +335,28 @@ partial class BrowserView {
                 p
             )
         )
+
+        if values.CustomTheme.Glass {
+            rows.Add(
+                PreferenceRow.Slider(
+                    "glass-opacity",
+                    SliderInput{
+                        Value: Math.Round(float64(p.Window.A) * 100),
+                        Minimum: 0,
+                        Maximum: 100,
+                        Step: 1,
+                        Label: "Glass opacity",
+                        FormatValue: value -> value.ToString("0", CultureInfo.InvariantCulture) + "%",
+                        OnChange: value -> {
+                            values.SetCustomGlassOpacity(int32(value))
+                            ApplyPreferences()
+                        },
+                    },
+                    glassOpacityRow,
+                    p
+                )
+            )
+        }
 
         for role in ThemePresets.Roles() {
             let selectedRole = role
