@@ -313,10 +313,22 @@ partial class BrowserView : Cell {
             }
         }
 
-        Rebuild()
-
         for state in paneViews {
             let pane = state.Pane
+            if state.SortGeneration >= 0 {
+                let generation = state.SortGeneration
+                if pane.ViewGeneration != generation || settings.ViewMode != ViewMode.List {
+                    state.SortGeneration = -1
+                } else if !pane.Loading {
+                    state.SortGeneration = -1
+                    let viewport = state.ListViewport
+                    let offset = viewport.ScrollOffset
+                    if viewport.IsMounted && offset.Y > 0 {
+                        state.ListViewport = ElementHandle()
+                        WatchList(state.ListViewport, state, offset, generation)
+                    }
+                }
+            }
             let selection = pane.DirectoryPath + "\0" + pane.Selected.ToString()
 
             if state.Selection != selection {
@@ -328,6 +340,7 @@ partial class BrowserView : Cell {
                 }
             }
         }
+        Rebuild()
     }
 
     override func Build() Blob {
@@ -372,21 +385,15 @@ partial class BrowserView : Cell {
 
     private func BrowsingSplit(p Palette) Blob {
         let first = Pane(0)
-        var second Blob? = nil
-
-        if Model.Split {
-            second = Pane(1)
+        if !Model.Split {
+            return first
         }
 
         return SplitDivider.Build(
             "browser-split",
             first,
-            second,
-            if Model.Split {
-                paneRatio
-            } else {
-                1
-            },
+            Pane(1),
+            paneRatio,
             value -> {
                 paneRatio = value
                 Rebuild()
@@ -408,7 +415,7 @@ partial class BrowserView : Cell {
                 PaneMinimum
             },
             "Resize browsing panes",
-            Model.Split,
+            true,
             p
         )
     }
@@ -452,13 +459,16 @@ partial class BrowserView : Cell {
         workspace.Key = "workspace"
 
         let browserArea = Container{
-            BasedOn: p.Glass ? p.WidgetTheme.PanelStyle: Style{},
+            BackgroundColor: p.Canvas,
+            BorderColor: p.WidgetTheme.HairlineColor,
+            BorderWidth: p.Glass ? p.WidgetTheme.BorderWidth: 0,
+            BorderRadius: p.Glass ? Ui.WindowRadius: 0,
             Key: "browser-area",
             FlexGrow: 1,
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
-            MarginEnd: p.Glass ? Ui.CardInset: 0,
+            Margin: p.Glass ? Edges{Left: Ui.CardInset, Right: Ui.CardInset}: Edges{},
             Overflow: p.Glass ? Overflow.Hidden: Overflow.Visible,
             workspace,
         }
@@ -528,7 +538,7 @@ partial class BrowserView : Cell {
             "Resize places sidebar",
             width >= PlacesBreakpoint,
             p,
-            !p.Glass
+            false
         )
         main.Key = "main"
 

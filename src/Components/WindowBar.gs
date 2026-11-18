@@ -16,43 +16,29 @@ class WindowBar {
             BackgroundColor: p.Bar,
             ControlColor: p.Muted,
             HoverBackgroundColor: p.ChromeHover,
+            CloseHoverBackgroundColor: p.Danger,
             EnableDoubleClick: true,
-            CreateControlContent: (_, command) -> {
+            ConfigureControl: (_, command, icon, _, button) -> {
                 let name = command.ToString()
-                let icon = switch command {
-                    case WindowChromeAction.Minimize: "remove"
-                    case WindowChromeAction.Maximize: "crop_square"
-                    case WindowChromeAction.Restore: "filter_none"
-                    default: "close"
-                }
-                return Ui.HoverLabel(
-                    name,
-                    name,
-                    Container{
-                        Width: ControlWidth,
-                        Height: Ui.BarHeight,
-                        HitTestSelf: true,
-                        AlignItems: AlignItems.Center,
-                        JustifyContent: JustifyContent.Center,
-                        Ui.Icon(icon, p.Muted, 18),
-                    },
-                    window,
-                    p
-                )
-            },
-            ConfigureControl: (_, command, _, _, button) -> {
-                button.Width = ControlWidth
-                button.Height = Ui.BarHeight
-                button.Padding = 0
                 button.BackgroundColor = Color.Transparent
-                button.HoverStyle = Style{
-                    BackgroundColor: if command == WindowChromeAction.Close {
-                        p.Danger
-                    } else {
-                        p.ChromeHover
-                    }
-                }
                 button.FocusStyle = p.Ring(-2)
+                button.Children.Clear()
+                button.Children.Add(
+                    Ui.HoverLabel(
+                        name,
+                        name,
+                        Container{
+                            Width: ControlWidth,
+                            Height: Ui.BarHeight,
+                            HitTestSelf: true,
+                            AlignItems: AlignItems.Center,
+                            JustifyContent: JustifyContent.Center,
+                            icon,
+                        },
+                        window,
+                        p
+                    )
+                )
             },
         }.Build()
     }

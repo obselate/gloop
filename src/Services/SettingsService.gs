@@ -64,6 +64,36 @@ internal class SettingsService {
                     }
 
                     settings.ViewMode = AppSettings.ParseViewMode(property.Value.GetString() ?? "")
+                } else if property.Name == "sortColumn" {
+                    if property.Value.ValueKind != JsonValueKind.String {
+                        throw InvalidDataException("Settings: field sortColumn must be a string")
+                    }
+
+                    switch property.Value.GetString() {
+                        case "Name" {
+                            settings.SortColumn = SortColumn.Name
+                        }
+                        case "Size" {
+                            settings.SortColumn = SortColumn.Size
+                        }
+                        case "Modified" {
+                            settings.SortColumn = SortColumn.Modified
+                        }
+                        case "Kind" {
+                            settings.SortColumn = SortColumn.Kind
+                        }
+                        default {
+                            throw FormatException("Sort column must be Name, Size, Modified or Kind")
+                        }
+                    }
+                } else if property.Name == "sortNameDescending" {
+                    settings.SortNameDescending = readBool(property.Value, property.Name)
+                } else if property.Name == "sortSizeDescending" {
+                    settings.SortSizeDescending = readBool(property.Value, property.Name)
+                } else if property.Name == "sortModifiedDescending" {
+                    settings.SortModifiedDescending = readBool(property.Value, property.Name)
+                } else if property.Name == "sortKindDescending" {
+                    settings.SortKindDescending = readBool(property.Value, property.Name)
                 } else if property.Name == "smoothScrolling" {
                     settings.SmoothScrolling = readBool(property.Value, property.Name)
                 } else if property.Name == "scrollSpeed" {
@@ -148,6 +178,11 @@ internal class SettingsService {
                 writer.WriteBoolean("previewLineNumbers", settings.PreviewLineNumbers)
                 writer.WriteBoolean("splitView", settings.SplitView)
                 writer.WriteString("viewMode", settings.ViewMode == ViewMode.Tiles ? "tiles": "list")
+                writer.WriteString("sortColumn", settings.SortColumn.ToString())
+                writer.WriteBoolean("sortNameDescending", settings.SortNameDescending)
+                writer.WriteBoolean("sortSizeDescending", settings.SortSizeDescending)
+                writer.WriteBoolean("sortModifiedDescending", settings.SortModifiedDescending)
+                writer.WriteBoolean("sortKindDescending", settings.SortKindDescending)
                 writer.WriteBoolean("smoothScrolling", settings.SmoothScrolling)
                 writer.WriteNumber("scrollSpeed", settings.ScrollSpeed)
 
@@ -209,6 +244,7 @@ internal class SettingsService {
 
         private func writeTheme(writer Utf8JsonWriter, name string, theme ThemePalette) {
             writer.WriteStartObject(name)
+            writer.WriteBoolean("glass", theme.Glass)
             writer.WriteString("background", theme.Background)
             writer.WriteString("surface", theme.Surface)
             writer.WriteString("text", theme.Text)
@@ -293,6 +329,10 @@ internal class SettingsService {
                 if !seen.Add(property.Name) {
                     throw InvalidDataException("Settings: duplicate field " + name + "." + property.Name)
                 }
+                if property.Name == "glass" {
+                    theme.Glass = readBool(property.Value, name + ".glass")
+                    continue
+                }
                 if property.Value.ValueKind != JsonValueKind.String {
                     throw InvalidDataException("Settings: field " + name + "." + property.Name + " must be a string")
                 }
@@ -328,6 +368,10 @@ internal class SettingsService {
                 } else {
                     throw InvalidDataException("Settings: unknown field " + name + "." + property.Name)
                 }
+            }
+
+            if !seen.Contains("glass") {
+                theme.Glass = ThemePresets.Match(theme).StartsWith("Glass")
             }
         }
     }

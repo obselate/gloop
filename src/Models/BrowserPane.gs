@@ -24,7 +24,7 @@ class BrowserPane {
     internal var LoadGeneration int32
     internal var ViewGeneration int32
 
-    internal init() {
+    internal init(settings AppSettings) {
         DirectoryPath = ""
         Entries = List[FileEntry]()
         VisibleEntries = List[FileEntry]()
@@ -33,8 +33,8 @@ class BrowserPane {
         SelectionAnchorPath = ""
         PendingFocusPath = ""
         Filter = ""
-        SortColumn = SortColumn.Name
-        Descending = false
+        SortColumn = settings.SortColumn
+        Descending = settings.SortDescending(SortColumn)
         Loading = false
         Error = ""
         History = List[string]()
