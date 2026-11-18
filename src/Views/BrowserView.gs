@@ -385,21 +385,15 @@ partial class BrowserView : Cell {
 
     private func BrowsingSplit(p Palette) Blob {
         let first = Pane(0)
-        var second Blob? = nil
-
-        if Model.Split {
-            second = Pane(1)
+        if !Model.Split {
+            return first
         }
 
         return SplitDivider.Build(
             "browser-split",
             first,
-            second,
-            if Model.Split {
-                paneRatio
-            } else {
-                1
-            },
+            Pane(1),
+            paneRatio,
             value -> {
                 paneRatio = value
                 Rebuild()
@@ -421,7 +415,7 @@ partial class BrowserView : Cell {
                 PaneMinimum
             },
             "Resize browsing panes",
-            Model.Split,
+            true,
             p
         )
     }
