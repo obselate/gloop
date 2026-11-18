@@ -30,6 +30,7 @@ partial class BrowserView : Cell {
     private let previewLineNumbersRow ElementHandle = ElementHandle()
     private let scrollSpeedRow ElementHandle = ElementHandle()
     private let themeEditorHandle ElementHandle = ElementHandle()
+    private let themeRoleHandle ElementHandle = ElementHandle()
     private var focusScope FocusScope?
     internal const DefaultWidth int32 = 1180
     internal const DefaultHeight int32 = 760
@@ -118,6 +119,7 @@ partial class BrowserView : Cell {
         themeEditorHandle.MetricsChanged += (metrics) -> {
             if metrics.IsMounted && revealThemeEditor {
                 revealThemeEditor = false
+                themeRoleHandle.Focus()
                 themeEditorHandle.ScrollIntoView()
             }
         }

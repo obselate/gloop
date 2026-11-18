@@ -46,6 +46,17 @@ class PreviewSidebar {
                 }
             }
 
+            if let vector = value.Preview.Vector {
+                return Container{
+                    FlexGrow: 1,
+                    FlexBasis: 0,
+                    MinWidth: 0,
+                    MinHeight: 0,
+                    BackgroundColor: p.Canvas,
+                    Container{Position: PositionType.Absolute, Left: 8, Right: 8, Top: 8, Bottom: 8, vector.Render(),},
+                }
+            }
+
             if value.Preview.Kind == PreviewKind.Text {
                 return Cell.Mount[TextPreviewInput, TextPreview](
                     nil,

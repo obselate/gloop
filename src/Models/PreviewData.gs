@@ -1,5 +1,7 @@
 package gloop
 
+import Goo
+
 data struct PreviewData {
     internal var Kind PreviewKind = PreviewKind.None
     internal var Text string = ""
@@ -7,4 +9,5 @@ data struct PreviewData {
     internal var Error string = ""
     internal var Warning string = ""
     internal var Styles[]PreviewStyleSpan = []PreviewStyleSpan{}
+    internal var Vector VectorAsset?
 }

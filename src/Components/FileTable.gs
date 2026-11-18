@@ -9,6 +9,11 @@ import System.Collections.Generic
 open class FileTable : Cell[FileTableInput] {
     private let clicks FileClickState = FileClickState()
     internal const RowHeight float64 = 30
+    private const Inset float64 = 6
+    private const NameMinimum float64 = 150
+    private const ModifiedWidth float64 = 136
+    private const TypeWidth float64 = 104
+    private const SizeWidth float64 = 88
     private var entries List[FileEntry]?
     private var rows[]DataGridRow = []DataGridRow{}
     private var indices Dictionary[string, int32] = Dictionary[string, int32]()
@@ -29,102 +34,108 @@ open class FileTable : Cell[FileTableInput] {
 
         UpdateRows(pane)
 
-        let columns = BuildColumns(value)
+        let scrollbarY = Ui.ScrollbarStyle(p, value.ScrollbarInset)
         let selected = [pane.SelectedPaths.Count]string
         pane.SelectedPaths.CopyTo(selected)
 
-        let grid = Cell.Mount[DataGridInput, DataGrid](
-            "grid",
-            DataGridInput{
-                Columns: columns,
-                Rows: rows,
-                ColumnWidths: value.ColumnWidths,
-                FitColumnsToViewport: true,
-                OnFittedColumnWidthsChange: value.OnFittedColumnWidthsChange,
-                RootHandle: value.FocusHandle,
-                ViewportHandle: value.ViewportHandle,
-                UseDefaultKeyboard: false,
-                OnTextInput: value.OnText,
-                OnKeyDown: value.OnKey,
-                ScrollbarX: Ui.ScrollbarStyle(p),
-                ScrollbarVisibilityX: ScrollbarVisibility.Auto,
-                ScrollbarY: Ui.ScrollbarStyle(p, value.ScrollbarInset),
-                ScrollbarVisibilityY: ScrollbarVisibility.Always,
-                EmptyContent: Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly),
-                Selection: DataGridSelection.Multiple,
-                SelectedIds: selected,
-                ActiveRowId: if pane.Selected >= 0 && pane.Selected < pane.VisibleEntries.Count {
-                    pane.VisibleEntries[pane.Selected].FullPath
+        let grid = DataGridInput{
+            Rows: rows,
+            ColumnWidths: value.ColumnWidths,
+            FitColumnsToViewport: true,
+            OnFittedColumnWidthsChange: value.OnFittedColumnWidthsChange,
+            RootHandle: value.FocusHandle,
+            ViewportHandle: value.ViewportHandle,
+            UseDefaultKeyboard: false,
+            OnTextInput: value.OnText,
+            OnKeyDown: value.OnKey,
+            ScrollbarX: Ui.ScrollbarStyle(p),
+            ScrollbarVisibilityX: ScrollbarVisibility.Auto,
+            ScrollbarY: scrollbarY,
+            ScrollbarVisibilityY: ScrollbarVisibility.Always,
+            EmptyContent: Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly),
+            Selection: DataGridSelection.Multiple,
+            SelectedIds: selected,
+            ActiveRowId: if pane.Selected >= 0 && pane.Selected < pane.VisibleEntries.Count {
+                pane.VisibleEntries[pane.Selected].FullPath
+            } else {
+                nil
+            },
+            OnActiveRowChange: id -> {
+                if indices.TryGetValue(id, out var index) {
+                    value.OnFocusRow(index)
+                }
+            },
+            OnSelectionRequest: (id, ctrl, shift) -> {
+                if indices.TryGetValue(id, out var index) {
+                    FileTransferUi.Select(pane.VisibleEntries[index], index, value, clicks, ctrl, shift)
+                }
+            },
+            SortColumnId: ColumnId(pane.SortColumn),
+            SortDirection: if pane.Descending {
+                DataGridSort.Descending
+            } else {
+                DataGridSort.Ascending
+            },
+            OnSort: (column, _) -> value.OnSort(ColumnKind(column)),
+            Height: Percent(100),
+            RowHeight: RowHeight,
+            HeaderHeight: 28,
+            BackgroundColor: p.Canvas,
+            TextColor: p.Text,
+            SelectedColor: value.Active ? p.Selection: p.Hover,
+            FocusColor: p.Keyboard ? p.Accent: Color.Transparent,
+            AccessibilityName: "Files in " + pane.DirectoryPath,
+            HeaderStyle: Style{BackgroundColor: p.Canvas, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
+            ResizeHandleStyle: Style{
+                BackgroundColor: Color.Transparent,
+                BorderWidth: Edges{Left: 1},
+                BorderColor: p.Border,
+            },
+            ConfigureResizeHandle: (_, _, handle) -> {
+                handle.HoverStyle = Style{BorderColor: p.Accent}
+                handle.FocusStyle = p.FocusBorder()
+            },
+            ConfigureRoot: (_, root) -> ConfigureRoot(root, value),
+            CreateHeader: (_, column, _) -> BuildHeader(column, value),
+            CreateCell: (_, row, column, _) -> CellContent(
+                pane.VisibleEntries[indices[(row.Id ?? "")]],
+                (column.Id ?? ""),
+                pane.SelectedPaths.Contains(row.Id ?? ""),
+                value,
+                p
+            ),
+            ConfigureRow: (_, row, root) -> {
+                let selectedRow = pane.SelectedPaths.Contains(row.Id ?? "")
+                let focused = pane.Selected >= 0 && pane.VisibleEntries[pane.Selected].FullPath == row.Id
+                root.OutlineWidth = if focused && value.Active && p.Keyboard {
+                    1
                 } else {
-                    nil
-                },
-                OnActiveRowChange: id -> {
-                    if indices.TryGetValue(id, out var index) {
-                        value.OnFocusRow(index)
-                    }
-                },
-                OnSelectionRequest: (id, ctrl, shift) -> {
-                    if indices.TryGetValue(id, out var index) {
-                        FileTransferUi.Select(pane.VisibleEntries[index], index, value, clicks, ctrl, shift)
-                    }
-                },
-                SortColumnId: ColumnId(pane.SortColumn),
-                SortDirection: if pane.Descending {
-                    DataGridSort.Descending
-                } else {
-                    DataGridSort.Ascending
-                },
-                OnSort: (column, _) -> value.OnSort(ColumnKind(column)),
-                Height: Percent(100),
-                RowHeight: RowHeight,
-                HeaderHeight: 28,
-                BackgroundColor: p.Canvas,
-                TextColor: p.Text,
-                SelectedColor: value.Active ? p.Selection: p.Hover,
-                FocusColor: p.Keyboard ? p.Accent: Color.Transparent,
-                AccessibilityName: "Files in " + pane.DirectoryPath,
-                HeaderStyle: Style{BackgroundColor: p.Canvas, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
-                ResizeHandleStyle: Style{
-                    BackgroundColor: Color.Transparent,
-                    BorderWidth: Edges{Left: 1},
-                    BorderColor: p.Border,
-                },
-                ConfigureResizeHandle: (_, _, handle) -> {
-                    handle.HoverStyle = Style{BorderColor: p.Accent}
-                    handle.FocusStyle = p.FocusBorder()
-                },
-                ConfigureRoot: (_, root) -> ConfigureRoot(root, value),
-                CreateHeader: (_, column, _) -> BuildHeader(column, value),
-                CreateCell: (_, row, column, _) -> CellContent(
-                    pane.VisibleEntries[indices[(row.Id ?? "")]],
-                    (column.Id ?? ""),
-                    pane.SelectedPaths.Contains(row.Id ?? ""),
-                    value,
-                    p
-                ),
-                ConfigureRow: (_, row, root) -> {
-                    let selectedRow = pane.SelectedPaths.Contains(row.Id ?? "")
-                    let focused = pane.Selected >= 0 && pane.VisibleEntries[pane.Selected].FullPath == row.Id
-                    root.OutlineWidth = if focused && value.Active && p.Keyboard {
-                        1
+                    0
+                }
+                root.OutlineColor = p.Accent
+                root.BorderRadius = 6
+                root.HoverStyle = Style{
+                    BackgroundColor: if selectedRow {
+                        p.Selection
                     } else {
-                        0
+                        p.Hover
                     }
-                    root.OutlineColor = p.Accent
-                    root.BorderRadius = 6
-                    root.HoverStyle = Style{
-                        BackgroundColor: if selectedRow {
-                            p.Selection
-                        } else {
-                            p.Hover
-                        }
-                    }
-                    FileTransferUi.Bind(root, pane.VisibleEntries[indices[(row.Id ?? "")]], value, clicks)
-                },
-            }
-        )
+                }
+                FileTransferUi.Bind(root, pane.VisibleEntries[indices[(row.Id ?? "")]], value, clicks)
+            },
+        }
 
-        return Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, MinHeight: 0, Padding: Edges{Left: 6}, grid,}
+        return Sized(
+            size -> Cell.Mount[DataGridInput, DataGrid](
+                "grid",
+                grid with{
+                    Columns = BuildColumns(
+                        value,
+                        size.Width - Inset - 2 * p.WidgetTheme.RowInset - scrollbarY.Thickness - scrollbarY.Inset
+                    )
+                }
+            )
+        ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 0, .MinHeight: 0, .Padding: Edges{Left: Inset},}
     }
 
     private func UpdateRows(pane BrowserPane) {
@@ -141,19 +152,21 @@ open class FileTable : Cell[FileTableInput] {
         }
     }
 
-    private func BuildColumns(value FileTableInput)[]DataGridColumn {
+    private func BuildColumns(value FileTableInput, width float64)[]DataGridColumn {
         let columns = List[DataGridColumn]()
-        columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: 150, Sortable: true})
+        columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: NameMinimum, Sortable: true})
 
-        if !value.Compact {
-            columns.Add(DataGridColumn{Id: "modified", Label: "Modified", Width: 136, Minimum: 90, Sortable: true})
+        if width >= NameMinimum + ModifiedWidth + SizeWidth {
+            columns.Add(
+                DataGridColumn{Id: "modified", Label: "Modified", Width: ModifiedWidth, Minimum: 90, Sortable: true}
+            )
         }
 
-        if !value.Compact && value.ShowType {
-            columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: 104, Minimum: 70, Sortable: true})
+        if value.ShowType && width >= NameMinimum + ModifiedWidth + TypeWidth + SizeWidth {
+            columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: TypeWidth, Minimum: 70, Sortable: true})
         }
 
-        columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: 88, Minimum: 60, Sortable: true})
+        columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: SizeWidth, Minimum: 60, Sortable: true})
 
         return columns.ToArray()
     }

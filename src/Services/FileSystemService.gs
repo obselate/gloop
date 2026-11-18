@@ -2,6 +2,7 @@ package gloop
 
 import System
 import System.Collections.Generic
+import System.ComponentModel
 import System.Diagnostics
 import System.Globalization
 import System.IO
@@ -87,10 +88,23 @@ unsafe class FileSystemService {
                 return PreviewData{Kind: PreviewKind.Metadata, Text: "Folder", Path: fullPath}
             }
 
+            if FileType(fullPath, AtSymlinkNoFollow) != RegularFileType {
+                return PreviewData{Kind: PreviewKind.Metadata, Text: "Special file", Path: fullPath}
+            }
+
             let size = FileInfo(fullPath).Length
             let extension = Path.GetExtension(name).ToLowerInvariant()
 
-            if FileKinds.IsImage(extension) {
+            if ArchiveService.Supported(fullPath) {
+                return ArchiveService.ReadListingPreview(fullPath, cancelled)
+            }
+            if extension == ".docx" || extension == ".odt" {
+                return DocumentPreview.Read(fullPath, cancelled)
+            }
+            if extension == ".svg" {
+                return SvgPreview.Read(fullPath, cancelled)
+            }
+            if FileKinds.IsImage(extension) || MediaPreview.Supports(extension) {
                 return PreviewData{Kind: PreviewKind.Image, Text: FormatSize(size), Path: fullPath}
             }
             if !FileKinds.IsText(extension) && !hasTextPrefix(fullPath, size) {
@@ -289,6 +303,16 @@ unsafe class FileSystemService {
 
         @DllImport("libc", EntryPoint: "statx", CharSet: CharSet.Ansi, SetLastError: true)
         internal func ReadStat(directory int32, path string, flags int32, mask uint32, buffer IntPtr) int32;
+
+        internal func FileType(path string, flags int32 = 0) int32 {
+            let buffer *uint8 = stackalloc[StatBufferSize]uint8
+            let pointer = IntPtr(buffer)
+            if ReadStat(AtCurrentDirectory, path, flags, StatType, pointer) != 0 {
+                throw IOException(Win32Exception(Marshal.GetLastWin32Error()).Message + ": " + path)
+            }
+
+            return int32(Marshal.ReadInt16(pointer, 28)) & FileTypeMask
+        }
 
         internal func Exists(path string) bool {
             try {

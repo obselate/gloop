@@ -10,4 +10,5 @@ internal data struct ThemeColorRoleInput {
     var Selected bool
     var Choose Action
     var Palette Palette
+    var Handle ElementHandle?
 }

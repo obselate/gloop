@@ -216,6 +216,20 @@ internal class SettingsService {
             writer.WriteString("accent", theme.Accent)
             writer.WriteString("border", theme.Border)
             writer.WriteString("selection", theme.Selection)
+
+            if theme.Keyword != "" {
+                writer.WriteString("keyword", theme.Keyword)
+            }
+            if theme.String != "" {
+                writer.WriteString("string", theme.String)
+            }
+            if theme.Number != "" {
+                writer.WriteString("number", theme.Number)
+            }
+            if theme.Type != "" {
+                writer.WriteString("type", theme.Type)
+            }
+
             writer.WriteEndObject()
         }
 
@@ -303,6 +317,14 @@ internal class SettingsService {
                     theme.Border = color
                 } else if property.Name == "selection" {
                     theme.Selection = color
+                } else if property.Name == "keyword" {
+                    theme.Keyword = color
+                } else if property.Name == "string" {
+                    theme.String = color
+                } else if property.Name == "number" {
+                    theme.Number = color
+                } else if property.Name == "type" {
+                    theme.Type = color
                 } else {
                     throw InvalidDataException("Settings: unknown field " + name + "." + property.Name)
                 }
