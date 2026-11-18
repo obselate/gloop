@@ -41,10 +41,10 @@ class BrowserController {
         this.changed = changed
         this.resetTypeSelect = resetTypeSelect
 
-        Panes.Add(BrowserPane())
+        Panes.Add(BrowserPane(settings))
 
         if settings.SplitView {
-            Panes.Add(BrowserPane())
+            Panes.Add(BrowserPane(settings))
         }
 
         ActiveIndex = 0
@@ -350,7 +350,7 @@ class BrowserController {
 
         if Split {
             if Panes.Count < 2 {
-                let pane = BrowserPane()
+                let pane = BrowserPane(settings)
                 Panes.Add(pane)
                 Directories.AddPane(pane)
             }
@@ -443,14 +443,18 @@ class BrowserController {
             pane.Descending = !pane.Descending
         } else {
             pane.SortColumn = column
-            pane.Descending = false
+            pane.Descending = settings.SortDescending(column)
         }
+
+        settings.SortColumn = column
+        settings.SetSortDescending(column, pane.Descending)
 
         if pane.Loading && pane.Entries.Count == 0 {
             Notify()
             return
         }
 
+        pane.Refreshing = true
         Directories.RequestView(pane, pane.SelectionPath())
         Notify()
     }

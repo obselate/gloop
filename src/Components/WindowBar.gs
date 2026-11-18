@@ -17,14 +17,8 @@ class WindowBar {
             ControlColor: p.Muted,
             HoverBackgroundColor: p.ChromeHover,
             EnableDoubleClick: true,
-            CreateControlContent: (_, command) -> {
+            CreateControlContent: (icon, command) -> {
                 let name = command.ToString()
-                let icon = switch command {
-                    case WindowChromeAction.Minimize: "remove"
-                    case WindowChromeAction.Maximize: "crop_square"
-                    case WindowChromeAction.Restore: "filter_none"
-                    default: "close"
-                }
                 return Ui.HoverLabel(
                     name,
                     name,
@@ -34,7 +28,7 @@ class WindowBar {
                         HitTestSelf: true,
                         AlignItems: AlignItems.Center,
                         JustifyContent: JustifyContent.Center,
-                        Ui.Icon(icon, p.Muted, 18),
+                        icon,
                     },
                     window,
                     p

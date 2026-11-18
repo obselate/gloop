@@ -452,13 +452,16 @@ partial class BrowserView : Cell {
         workspace.Key = "workspace"
 
         let browserArea = Container{
-            BasedOn: p.Glass ? p.WidgetTheme.PanelStyle: Style{},
+            BackgroundColor: p.Canvas,
+            BorderColor: p.WidgetTheme.HairlineColor,
+            BorderWidth: p.Glass ? p.WidgetTheme.BorderWidth: 0,
+            BorderRadius: p.Glass ? Ui.WindowRadius: 0,
             Key: "browser-area",
             FlexGrow: 1,
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
-            MarginEnd: p.Glass ? Ui.CardInset: 0,
+            Margin: p.Glass ? Edges{Left: Ui.CardInset, Right: Ui.CardInset}: Edges{},
             Overflow: p.Glass ? Overflow.Hidden: Overflow.Visible,
             workspace,
         }
@@ -528,7 +531,7 @@ partial class BrowserView : Cell {
             "Resize places sidebar",
             width >= PlacesBreakpoint,
             p,
-            !p.Glass
+            false
         )
         main.Key = "main"
 

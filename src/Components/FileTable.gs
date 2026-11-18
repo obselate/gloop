@@ -9,7 +9,7 @@ import System.Collections.Generic
 open class FileTable : Cell[FileTableInput] {
     private let clicks FileClickState = FileClickState()
     internal const RowHeight float64 = 30
-    private const Inset float64 = 6
+    private const HeaderHeight float64 = 28
     private const NameMinimum float64 = 150
     private const ModifiedWidth float64 = 136
     private const TypeWidth float64 = 104
@@ -34,6 +34,7 @@ open class FileTable : Cell[FileTableInput] {
 
         UpdateRows(pane)
 
+        let scrollbarX = Ui.ScrollbarStyle(p)
         let scrollbarY = Ui.ScrollbarStyle(p, value.ScrollbarInset)
         let selected = [pane.SelectedPaths.Count]string
         pane.SelectedPaths.CopyTo(selected)
@@ -48,10 +49,9 @@ open class FileTable : Cell[FileTableInput] {
             UseDefaultKeyboard: false,
             OnTextInput: value.OnText,
             OnKeyDown: value.OnKey,
-            ScrollbarX: Ui.ScrollbarStyle(p),
+            ScrollbarX: scrollbarX,
             ScrollbarVisibilityX: ScrollbarVisibility.Auto,
             ScrollbarY: scrollbarY,
-            ScrollbarVisibilityY: ScrollbarVisibility.Always,
             EmptyContent: Empty(pane, p, value.Location, value.Choosing, value.DirectoriesOnly),
             Selection: DataGridSelection.Multiple,
             SelectedIds: selected,
@@ -79,23 +79,21 @@ open class FileTable : Cell[FileTableInput] {
             OnSort: (column, _) -> value.OnSort(ColumnKind(column)),
             Height: Percent(100),
             RowHeight: RowHeight,
-            HeaderHeight: 28,
+            HeaderHeight: HeaderHeight,
             BackgroundColor: p.Canvas,
             TextColor: p.Text,
             SelectedColor: value.Active ? p.Selection: p.Hover,
             FocusColor: p.Keyboard ? p.Accent: Color.Transparent,
             AccessibilityName: "Files in " + pane.DirectoryPath,
             HeaderStyle: Style{BackgroundColor: p.Canvas, BorderWidth: Edges{Bottom: 1}, BorderColor: p.Border},
-            ResizeHandleStyle: Style{
-                BackgroundColor: Color.Transparent,
-                BorderWidth: Edges{Left: 1},
-                BorderColor: p.Border,
-            },
             ConfigureResizeHandle: (_, _, handle) -> {
-                handle.HoverStyle = Style{BorderColor: p.Accent}
-                handle.FocusStyle = p.FocusBorder()
+                handle.BorderWidth = 0
+                handle.AlignItems = AlignItems.Center
+                handle.JustifyContent = JustifyContent.Center
+                handle.HoverStyle = Style{BackgroundColor: p.Hover}
+                handle.FocusStyle = p.Ring(-1)
+                handle.Children.Add(Container{Width: 1, Height: Percent(50), BackgroundColor: p.Border})
             },
-            ConfigureRoot: (_, root) -> ConfigureRoot(root, value),
             CreateHeader: (_, column, _) -> BuildHeader(column, value),
             CreateCell: (_, row, column, _) -> CellContent(
                 pane.VisibleEntries[indices[(row.Id ?? "")]],
@@ -126,16 +124,25 @@ open class FileTable : Cell[FileTableInput] {
         }
 
         return Sized(
-            size -> Cell.Mount[DataGridInput, DataGrid](
-                "grid",
-                grid with{
-                    Columns = BuildColumns(
-                        value,
-                        size.Width - Inset - 2 * p.WidgetTheme.RowInset - scrollbarY.Thickness - scrollbarY.Inset
-                    )
-                }
-            )
-        ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 0, .MinHeight: 0, .Padding: Edges{Left: Inset},}
+            size -> {
+                let scrolls = pane.VisibleEntries.Count * RowHeight >
+                size.Height - HeaderHeight - scrollbarX.Thickness - scrollbarX.Inset
+                let right = scrolls ? 0: Ui.CardInset
+                let gutter = scrolls ? scrollbarY.Thickness + scrollbarY.Inset: 0
+
+                return Cell.Mount[DataGridInput, DataGrid](
+                    "grid",
+                    grid with{
+                        Columns = BuildColumns(
+                            value,
+                            size.Width - Ui.CardInset - right - gutter - 2 * p.WidgetTheme.RowInset
+                        ),
+                        ScrollbarVisibilityY = scrolls ? ScrollbarVisibility.Always: ScrollbarVisibility.Hidden,
+                        ConfigureRoot = (_, root) -> ConfigureRoot(root, value, right),
+                    }
+                )
+            }
+        ){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 0, .MinHeight: 0, .Padding: Edges{Left: Ui.CardInset},}
     }
 
     private func UpdateRows(pane BrowserPane) {
@@ -171,11 +178,12 @@ open class FileTable : Cell[FileTableInput] {
         return columns.ToArray()
     }
 
-    private func ConfigureRoot(root Container, value FileTableInput) {
+    private func ConfigureRoot(root Container, value FileTableInput, right float64) {
         root.FlexGrow = 1
         root.FlexBasis = 0
         root.BorderWidth = 0
         root.BorderRadius = 0
+        root.Margin = Edges{Right: right}
         root.AutoFocus = value.AutoFocus
         root.KeyBindings = value.Keys
 

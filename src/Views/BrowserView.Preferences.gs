@@ -11,6 +11,8 @@ import System.Globalization
 import System.IO
 
 partial class BrowserView {
+    private let glassEffectRow ElementHandle = ElementHandle()
+
     private func SavePreferences() {
         if chooser != nil {
             return
@@ -335,6 +337,19 @@ partial class BrowserView {
     }
 
     private func AppearanceColorRows(rows List[Blob], values AppSettings, p Palette, compact bool) {
+        rows.Add(
+            PreferenceRow.Toggle(
+                "Glass effect",
+                values.CustomTheme.Glass,
+                () -> {
+                    values.SetCustomGlass(!values.CustomTheme.Glass)
+                    ApplyPreferences()
+                },
+                glassEffectRow,
+                p
+            )
+        )
+
         for role in ThemePresets.Roles() {
             let selectedRole = role
             var handle ElementHandle? = nil

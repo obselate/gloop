@@ -16,6 +16,11 @@ internal class AppSettings {
     internal var ViewMode ViewMode
     internal var SmoothScrolling bool
     internal var ScrollSpeed float64
+    internal var SortColumn SortColumn
+    internal var SortNameDescending bool
+    internal var SortSizeDescending bool = true
+    internal var SortModifiedDescending bool = true
+    internal var SortKindDescending bool
     internal let Keybindings Dictionary[string, string]
     internal let UnknownKeybindings Dictionary[string, string]
     internal let UnknownSettings Dictionary[string, JsonElement]
@@ -32,6 +37,7 @@ internal class AppSettings {
         PreviewLineNumbers = true
         SplitView = false
         ViewMode = ViewMode.List
+        SortColumn = SortColumn.Name
         SmoothScrolling = true
         ScrollSpeed = 1.5
         Theme = ThemePalette()
@@ -127,6 +133,11 @@ internal class AppSettings {
         ViewMode = source.ViewMode
         SmoothScrolling = source.SmoothScrolling
         ScrollSpeed = source.ScrollSpeed
+        SortColumn = source.SortColumn
+        SortNameDescending = source.SortNameDescending
+        SortSizeDescending = source.SortSizeDescending
+        SortModifiedDescending = source.SortModifiedDescending
+        SortKindDescending = source.SortKindDescending
         Theme.ApplyFrom(source.Theme)
         ThemeName = source.ThemeName
         CustomTheme.ApplyFrom(source.CustomTheme)
@@ -153,6 +164,40 @@ internal class AppSettings {
 
         for bookmark in source.Bookmarks {
             Bookmarks.Add(bookmark)
+        }
+    }
+
+    internal func SortDescending(column SortColumn) bool {
+        switch column {
+            case SortColumn.Size {
+                return SortSizeDescending
+            }
+            case SortColumn.Modified {
+                return SortModifiedDescending
+            }
+            case SortColumn.Kind {
+                return SortKindDescending
+            }
+            default {
+                return SortNameDescending
+            }
+        }
+    }
+
+    internal func SetSortDescending(column SortColumn, descending bool) {
+        switch column {
+            case SortColumn.Size {
+                SortSizeDescending = descending
+            }
+            case SortColumn.Modified {
+                SortModifiedDescending = descending
+            }
+            case SortColumn.Kind {
+                SortKindDescending = descending
+            }
+            default {
+                SortNameDescending = descending
+            }
         }
     }
 
@@ -196,6 +241,11 @@ internal class AppSettings {
     internal func CopyThemeToCustom() {
         CustomTheme.ApplyFrom(Theme)
         ThemeName = CustomThemeName
+    }
+
+    internal func SetCustomGlass(glass bool) {
+        CustomTheme.Glass = glass
+        Theme.Glass = glass
     }
 
     internal func SetCustomColor(role string, color string) {
@@ -356,6 +406,11 @@ internal class AppSettings {
         internal func Validate(settings AppSettings) string {
             if settings.ViewMode != ViewMode.List && settings.ViewMode != ViewMode.Tiles {
                 return "View mode must be list or tiles"
+            }
+
+            if settings.SortColumn != SortColumn.Name && settings.SortColumn != SortColumn.Size
+            && settings.SortColumn != SortColumn.Modified && settings.SortColumn != SortColumn.Kind {
+                return "Sort column must be Name, Size, Modified or Kind"
             }
 
             if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < MinimumScrollSpeed

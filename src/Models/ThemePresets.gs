@@ -41,7 +41,8 @@ internal class ThemePresets {
                     "#C3A6FF",
                     "#8FD694",
                     "#F0A56B",
-                    "#E8CF8A"
+                    "#E8CF8A",
+                    glass: true
                 )
             }
 
@@ -57,7 +58,8 @@ internal class ThemePresets {
                     "#71468C",
                     "#30672A",
                     "#805019",
-                    "#19666C"
+                    "#19666C",
+                    glass: true
                 )
             }
 
@@ -280,7 +282,8 @@ internal class ThemePresets {
             keyword string,
             syntaxString string,
             number string,
-            syntaxType string
+            syntaxType string,
+            glass bool = false
         ) ThemePalette {
             let theme = ThemePalette()
 
@@ -295,6 +298,7 @@ internal class ThemePresets {
             theme.String = syntaxString
             theme.Number = number
             theme.Type = syntaxType
+            theme.Glass = glass
 
             return theme
         }

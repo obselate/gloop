@@ -96,9 +96,8 @@ partial class BrowserView {
         let availableWidth = PaneWidth(index)
         let location = pane.Kind
         let tools = List[Blob]()
-        var toolsWidth = 0.0
 
-        PaneTools(index, pane, p, availableWidth, location, tools, ref toolsWidth)
+        PaneTools(index, pane, p, availableWidth, location, tools)
 
         return Container{
             Key: "pane-" + index.ToString(),
@@ -106,7 +105,7 @@ partial class BrowserView {
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
-            BorderWidth: Edges{Top: 2},
+            BorderWidth: Edges{Top: Model.Split ? 2: 0},
             BorderColor: if active && Model.Split {
                 p.Accent
             } else {
@@ -118,14 +117,20 @@ partial class BrowserView {
                 Key: "pane-header",
                 Height: chooser != nil ? 36: Ui.BarHeight,
                 FlexShrink: 0,
-                Padding: Edges{Left: 7, Right: 8},
-                Gap: 8,
+                Padding: Edges{Left: Ui.CardInset, Right: Ui.CardInset},
+                Gap: Ui.CardInset,
                 FlexDirection: FlexDirection.Row,
                 AlignItems: AlignItems.Center,
                 BorderWidth: Edges{Bottom: 1},
                 BorderColor: p.Border,
                 Opacity: Model.Split && !active ? .6: 1,
-                Location(index, Math.Max(0, availableWidth - 23 - toolsWidth)),
+                Sized(size -> Location(index, size.Width)){
+                    .FlexGrow: 1,
+                    .FlexBasis: 0,
+                    .MinWidth: 0,
+                    .Height: Percent(100),
+                    .JustifyContent: JustifyContent.Center
+                },
                 Container{
                     Key: "tools",
                     FlexDirection: FlexDirection.Row,
@@ -145,15 +150,10 @@ partial class BrowserView {
         p Palette,
         availableWidth float64,
         location LocationKind,
-        tools List[Blob],
-        ref toolsWidth float64
+        tools List[Blob]
     ) {
         if !Model.Split && availableWidth >= 560 {
-            toolsWidth = if width < 950 {
-                142
-            } else {
-                188
-            }
+            let filterWidth = width < 950 ? 142: 188
             tools.Add(
                 Cell.Mount[FilterFieldInput, FilterField](
                     nil,
@@ -161,7 +161,7 @@ partial class BrowserView {
                         Value: pane.Filter,
                         Handle: filterHandle,
                         Palette: p,
-                        Width: toolsWidth,
+                        Width: filterWidth,
                         OnChange: value -> Model.SetFilter(value),
                         OnSubmit: () -> FocusFiles(),
                     }
@@ -243,8 +243,6 @@ partial class BrowserView {
                 )
             )
         }
-
-        toolsWidth += (tools.Count - (toolsWidth > 0 ? 1: 0)) * Ui.ToolSize + (tools.Count - 1) * Ui.ToolsGap
     }
 
     private func PaneTable(index int32, pane BrowserPane, active bool, p Palette, location LocationKind) Blob {
@@ -324,6 +322,7 @@ partial class BrowserView {
                 OnSort: column -> {
                     Model.SetActive(index)
                     Model.Sort(column)
+                    SavePreferences()
                 },
                 OnText: text -> {
                     Model.SetActive(index)

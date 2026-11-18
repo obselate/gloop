@@ -40,7 +40,6 @@
     <GooMaterialIcon Include="content_cut" />
     <GooMaterialIcon Include="content_paste" />
     <GooMaterialIcon Include="create_new_folder" />
-    <GooMaterialIcon Include="crop_square" />
     <GooMaterialIcon Include="delete" />
     <GooMaterialIcon Include="delete_forever" />
     <GooMaterialIcon Include="description" />
@@ -49,7 +48,6 @@
     <GooMaterialIcon Include="draft" />
     <GooMaterialIcon Include="edit" />
     <GooMaterialIcon Include="eject" />
-    <GooMaterialIcon Include="filter_none" />
     <GooMaterialIcon Include="folder" />
     <GooMaterialIcon Include="folder_off" />
     <GooMaterialIcon Include="folder_open" />
@@ -67,7 +65,6 @@
     <GooMaterialIcon Include="open_in_new" />
     <GooMaterialIcon Include="preview" />
     <GooMaterialIcon Include="refresh" />
-    <GooMaterialIcon Include="remove" />
     <GooMaterialIcon Include="restore_from_trash" />
     <GooMaterialIcon Include="search" />
     <GooMaterialIcon Include="settings" />

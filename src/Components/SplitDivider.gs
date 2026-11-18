@@ -42,64 +42,14 @@ class SplitDivider {
                 } else {
                     0
                 },
-                HandleSize: if enabled {
-                    1
-                } else {
-                    0
-                },
+                HandleSize: enabled ? 8: 0,
+                HandleColor: enabled && line ? palette.Border: Color.Transparent,
                 Disabled: !enabled,
                 AccessibilityName: name,
                 OnChange: change,
                 ConfigureRoot: (_, root) -> {
                     root.FlexGrow = 1
                     root.FlexBasis = 0
-                },
-                ConfigureHandle: (_, divider) -> {
-                    divider.ZIndex = 2
-                    divider.BackgroundColor = Color.Transparent
-                    divider.BorderWidth = if !enabled {
-                        Edges{}
-                    } else if orientation == SplitOrientation.Horizontal {
-                        Edges{Left: 1}
-                    } else {
-                        Edges{Top: 1}
-                    }
-                    divider.BorderColor = line ? palette.Border: Color.Transparent
-                    divider.HoverStyle = Style{BorderColor: palette.Accent}
-                    divider.FocusStyle = palette.FocusBorder()
-                    if enabled {
-                        divider.Children.Add(
-                            Container{
-                                Position: PositionType.Absolute,
-                                Left: if orientation == SplitOrientation.Horizontal {
-                                    -3
-                                } else {
-                                    0
-                                },
-                                Right: if orientation == SplitOrientation.Horizontal {
-                                    -3
-                                } else {
-                                    0
-                                },
-                                Top: if orientation == SplitOrientation.Horizontal {
-                                    0
-                                } else {
-                                    -3
-                                },
-                                Bottom: if orientation == SplitOrientation.Horizontal {
-                                    0
-                                } else {
-                                    -3
-                                },
-                                HitTestSelf: true,
-                                Cursor: if orientation == SplitOrientation.Horizontal {
-                                    Cursor.ResizeHorizontal
-                                } else {
-                                    Cursor.ResizeVertical
-                                },
-                            }
-                        )
-                    }
                 },
             }
         )
