@@ -1,10 +1,10 @@
-<Project Sdk="Gsharp.NET.Sdk/0.5.698">
+<Project Sdk="Gsharp.NET.Sdk/0.5.803">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>gloop</RootNamespace>
     <AssemblyName>gloop</AssemblyName>
-    <Version>0.9.0</Version>
+    <Version>0.10.0</Version>
     <Product>Gloop</Product>
     <Description>A keyboard-first file manager for Linux and Wayland.</Description>
     <Authors>obselate</Authors>
@@ -30,11 +30,15 @@
     <GooMaterialIcon Include="arrow_forward" />
     <GooMaterialIcon Include="arrow_upward" />
     <GooMaterialIcon Include="audio_file" />
+    <GooMaterialIcon Include="blur_on" />
     <GooMaterialIcon Include="bookmark" />
     <GooMaterialIcon Include="bookmark_remove" />
     <GooMaterialIcon Include="bookmarks" />
     <GooMaterialIcon Include="check" />
+    <GooMaterialIcon Include="chevron_right" />
     <GooMaterialIcon Include="close" />
+    <GooMaterialIcon Include="cloud" />
+    <GooMaterialIcon Include="cloud_done" />
     <GooMaterialIcon Include="code" />
     <GooMaterialIcon Include="content_copy" />
     <GooMaterialIcon Include="content_cut" />
@@ -52,6 +56,7 @@
     <GooMaterialIcon Include="folder_off" />
     <GooMaterialIcon Include="folder_open" />
     <GooMaterialIcon Include="folder_zip" />
+    <GooMaterialIcon Include="format_list_numbered" />
     <GooMaterialIcon Include="grid_view" />
     <GooMaterialIcon Include="hard_drive" />
     <GooMaterialIcon Include="history" />
@@ -59,10 +64,13 @@
     <GooMaterialIcon Include="hourglass_empty" />
     <GooMaterialIcon Include="image" />
     <GooMaterialIcon Include="info" />
+    <GooMaterialIcon Include="keyboard" />
+    <GooMaterialIcon Include="layers" />
     <GooMaterialIcon Include="link" />
     <GooMaterialIcon Include="movie" />
     <GooMaterialIcon Include="music_note" />
     <GooMaterialIcon Include="open_in_new" />
+    <GooMaterialIcon Include="palette" />
     <GooMaterialIcon Include="preview" />
     <GooMaterialIcon Include="refresh" />
     <GooMaterialIcon Include="restore_from_trash" />
@@ -70,13 +78,16 @@
     <GooMaterialIcon Include="settings" />
     <GooMaterialIcon Include="splitscreen_vertical_add" />
     <GooMaterialIcon Include="terminal" />
+    <GooMaterialIcon Include="tune" />
     <GooMaterialIcon Include="usb" />
     <GooMaterialIcon Include="video_file" />
+    <GooMaterialIcon Include="view_column" />
     <GooMaterialIcon Include="view_list" />
     <GooMaterialIcon Include="visibility" />
     <GooMaterialIcon Include="visibility_off" />
+    <GooMaterialIcon Include="wrap_text" />
     <PackageReference Include="Tmds.DBus.Protocol" Version="[0.95.2]" />
-    <PackageReference Include="Goo" Version="[0.32.0]" />
-    <PackageReference Include="Goo.Widgets" Version="[0.23.0]" />
+    <PackageReference Include="Goo" Version="[0.32.10]" />
+    <PackageReference Include="Goo.Widgets" Version="[0.23.2]" />
   </ItemGroup>
 </Project>

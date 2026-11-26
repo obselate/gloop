@@ -24,8 +24,26 @@ partial class BrowserView {
                 AlignItems: AlignItems.Center,
                 FlexShrink: 0,
                 Gap: 3,
-                Ui.Tool("arrow_back", "Back", () -> Invoke("Back"), Host, p, false, !pane.CanBack()),
-                Ui.Tool("arrow_forward", "Forward", () -> Invoke("Forward"), Host, p, false, !pane.CanForward()),
+                Ui.Tool(
+                    "arrow_back",
+                    "Back",
+                    () -> Invoke("Back"),
+                    Host,
+                    p,
+                    false,
+                    !pane.CanBack(),
+                    shortcut: settings.ShortcutFor("Back")
+                ),
+                Ui.Tool(
+                    "arrow_forward",
+                    "Forward",
+                    () -> Invoke("Forward"),
+                    Host,
+                    p,
+                    false,
+                    !pane.CanForward(),
+                    shortcut: settings.ShortcutFor("Forward")
+                ),
                 Ui.Tool(
                     "arrow_upward",
                     "Parent folder",
@@ -33,7 +51,8 @@ partial class BrowserView {
                     Host,
                     p,
                     false,
-                    pane.DirectoryPath == "/"
+                    pane.DirectoryPath == "/",
+                    shortcut: settings.ShortcutFor("Parent")
                 ),
             },
             Container{FlexGrow: 1, MinWidth: 0},
@@ -43,7 +62,14 @@ partial class BrowserView {
                 FlexShrink: 0,
                 Gap: 3,
                 if width < PlacesBreakpoint {
-                    Ui.Tool("bookmarks", "Open bookmarks", () -> Invoke("OpenBookmarks"), Host, p)
+                    Ui.Tool(
+                        "bookmarks",
+                        "Open bookmarks",
+                        () -> Invoke("OpenBookmarks"),
+                        Host,
+                        p,
+                        shortcut: settings.ShortcutFor("OpenBookmarks")
+                    )
                 } else {
                     Container{}
                 },
@@ -59,13 +85,29 @@ partial class BrowserView {
                         Host,
                         p,
                         settings.IsBookmarked(pane.DirectoryPath),
-                        Model.InRecent
+                        Model.InRecent,
+                        shortcut: settings.ShortcutFor("ToggleBookmark")
                     )
                 } else {
                     Container{}
                 },
-                Ui.Tool("refresh", "Refresh", () -> Invoke("Refresh"), Host, p),
-                Ui.Tool("visibility", "Toggle preview", () -> Invoke("TogglePreview"), Host, p, Model.PreviewVisible),
+                Ui.Tool(
+                    "refresh",
+                    "Refresh",
+                    () -> Invoke("Refresh"),
+                    Host,
+                    p,
+                    shortcut: settings.ShortcutFor("Refresh")
+                ),
+                Ui.Tool(
+                    "visibility",
+                    "Toggle preview",
+                    () -> Invoke("TogglePreview"),
+                    Host,
+                    p,
+                    Model.PreviewVisible,
+                    shortcut: settings.ShortcutFor("TogglePreview")
+                ),
                 if chooser == nil {
                     Ui.Tool(
                         "splitscreen_vertical_add",
@@ -73,7 +115,8 @@ partial class BrowserView {
                         () -> Invoke("ToggleSplit"),
                         Host,
                         p,
-                        Model.Split
+                        Model.Split,
+                        shortcut: settings.ShortcutFor("ToggleSplit")
                     )
                 } else {
                     Container{}
@@ -84,7 +127,8 @@ partial class BrowserView {
                     () -> Invoke("ToggleHidden"),
                     Host,
                     p,
-                    settings.ShowHidden
+                    settings.ShowHidden,
+                    shortcut: settings.ShortcutFor("ToggleHidden")
                 ),
             },
             Container{Width: 1, Height: 20, Margin: Edges{Left: 8}, FlexShrink: 0, BackgroundColor: p.Border},
@@ -127,9 +171,9 @@ partial class BrowserView {
             AlignItems: AlignItems.Center,
             Padding: Edges{Left: 12, Right: 10},
             Gap: 14,
-            BorderWidth: Edges{Top: p.Glass ? 0: 1},
+            BorderWidth: Edges{Top: 1},
             BorderColor: p.Border,
-            BackgroundColor: p.Bar,
+            BackgroundColor: p.Canvas,
             Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Ui.Label(info, p.Muted, 11)},
         }
 

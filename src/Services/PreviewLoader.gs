@@ -277,7 +277,25 @@ class PreviewLoader {
         var source ImageSource?
 
         try {
-            let path = controller.Archives.Preview(request.Path, () -> !work.IsCurrent(generation))
+            var path = request.Path
+
+            if Locations.IsCloud(request.Path) {
+                let cloudErr = controller.GoogleDrive.DownloadForPreview(
+                    request.Path,
+                    "",
+                    () -> !work.IsCurrent(generation),
+                    out var cloudLocal
+                )
+
+                if cloudErr != "" {
+                    throw IOException(cloudErr)
+                }
+
+                path = cloudLocal
+            } else {
+                path = controller.Archives.Preview(request.Path, () -> !work.IsCurrent(generation))
+            }
+
             data = FileSystemService().ReadPreview(path, () -> !work.IsCurrent(generation))
 
             if data.Kind == PreviewKind.Image && work.IsCurrent(generation) {

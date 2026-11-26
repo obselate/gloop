@@ -7,8 +7,8 @@ class FileKinds {
         internal const DirectoryMime string = "inode/directory"
 
         internal func IsImage(extension string, icon bool = false) bool -> switch extension {
-            case ".png" or ".jpg" or ".jpeg" or ".jpe" or ".jfif" or ".gif": true
-            case ".webp" or ".svg" or ".bmp" or ".tif" or ".tiff": icon
+            case ".png" or ".jpg" or ".jpeg" or ".jpe" or ".jfif" or ".gif" or ".webp": true
+            case ".svg" or ".bmp" or ".tif" or ".tiff": icon
             default: false
         }
 

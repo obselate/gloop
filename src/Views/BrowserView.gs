@@ -49,6 +49,8 @@ partial class BrowserView : Cell {
     private var locationEditing bool
     private var locationFocusPending bool
     private var locationText string = ""
+    private var inlineFilterOpen bool
+    private var filterFocusPending bool
     private var dialog DialogKind = DialogKind.None
     private var dialogValue string = ""
     private var dialogError string = ""
@@ -63,7 +65,7 @@ partial class BrowserView : Cell {
         this.settings = settings
         settingsService = service
         this.launch = launch
-        palette = Palette(settings.Theme)
+        palette = Palette(settings.Theme, false, settings.RowDensity, settings.AlternatingRows)
         notice = warning
 
         rootHandle.MetricsChanged += (metrics) -> {
@@ -131,6 +133,13 @@ partial class BrowserView : Cell {
                 Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
             }
         }
+
+        filterHandle.MetricsChanged += (metrics) -> {
+            if metrics.IsMounted && filterFocusPending {
+                filterFocusPending = false
+                filterHandle.Focus()
+            }
+        }
     }
 
     internal func Attach(value Window) {
@@ -157,6 +166,9 @@ partial class BrowserView : Cell {
         value.MetricsChanged += PreviewWindowMetrics
 
         thumbnails = ThumbnailService(value)
+        if let thumb = thumbnails {
+            thumb.CloudProvider = Model.GoogleDrive
+        }
         selectionInfo = SelectionInfoService(value)
         folderCounts = FolderCountService(
             value,
@@ -220,6 +232,30 @@ partial class BrowserView : Cell {
         thumbnails?.Dispose()
         folderCounts?.Dispose()
         selectionInfo?.Dispose()
+    }
+
+    private func NavigateAndFocus(path string) {
+        Model.Navigate(path)
+        FocusFiles()
+    }
+
+    private func OpenPreferencesDefault() {
+        OpenPreferences()
+    }
+
+    private func OpenGoogleDrive() {
+        if Model.GoogleDrive.IsConfigured() {
+            Model.Navigate(Locations.GoogleDriveRoot)
+            FocusFiles()
+            return
+        }
+
+        OpenPreferences("Cloud")
+    }
+
+    private func OpenGoogleDriveTrash() {
+        Model.Navigate(Locations.GoogleDriveTrash)
+        FocusFiles()
     }
 
     internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
@@ -358,7 +394,9 @@ partial class BrowserView : Cell {
         chrome.Key = "window-bar"
         children.Add(chrome)
         children.Add(main)
-        children.Add(chooser != nil ? ChooserBar(): StatusBar())
+        if chooser != nil {
+            children.Add(ChooserBar())
+        }
 
         if dialog != DialogKind.None {
             children.Add(Dialog())
@@ -458,19 +496,23 @@ partial class BrowserView : Cell {
         )
         workspace.Key = "workspace"
 
+        let hasSidebar = width >= PlacesBreakpoint
         let browserArea = Container{
             BackgroundColor: p.Canvas,
-            BorderColor: p.WidgetTheme.HairlineColor,
-            BorderWidth: p.Glass ? p.WidgetTheme.BorderWidth: 0,
-            BorderRadius: p.Glass ? Ui.WindowRadius: 0,
+            BorderColor: p.Glass ? p.WidgetTheme.HairlineColor: p.Border,
+            BorderWidth: Edges{Top: 1, Left: hasSidebar ? 1: 0},
+            BorderTopLeftRadius: hasSidebar ? p.CardRadius: 0,
             Key: "browser-area",
             FlexGrow: 1,
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
-            Margin: p.Glass ? Edges{Left: Ui.CardInset, Right: Ui.CardInset}: Edges{},
-            Overflow: p.Glass ? Overflow.Hidden: Overflow.Visible,
+            Overflow: Overflow.Hidden,
             workspace,
+        }
+
+        if chooser == nil {
+            browserArea.Children.Add(StatusBar())
         }
 
         return browserArea
@@ -490,13 +532,14 @@ partial class BrowserView : Cell {
         var places Blob? = nil
 
         if width >= PlacesBreakpoint {
+            let cloudCfg = Model.GoogleDrive.ConfigSnapshot()
+            let cloudTotal = cloudCfg.IsSignedIn() ? cloudCfg.StorageLimit: int64(0)
+            let cloudFree = cloudTotal > 0 ? Math.Max(int64(0), cloudTotal - cloudCfg.StorageUsed): int64(0)
+
             places = PlacesSidebar.Build(
                 Model.ActivePane().DirectoryPath,
-                path -> {
-                    Model.Navigate(path)
-                    FocusFiles()
-                },
-                () -> OpenPreferences(),
+                NavigateAndFocus,
+                OpenPreferencesDefault,
                 settings.Bookmarks,
                 Host,
                 p,
@@ -514,7 +557,12 @@ partial class BrowserView : Cell {
                 EjectVolume,
                 Model.TrashDirectory,
                 Model.Places.TrashCount,
-                chooser == nil
+                chooser == nil,
+                Model.GoogleDrive.IsConfigured(),
+                OpenGoogleDrive,
+                cloudFree,
+                cloudTotal,
+                Model.GoogleDrive.IsSignedIn() ? OpenGoogleDriveTrash: nil
             )
         }
 

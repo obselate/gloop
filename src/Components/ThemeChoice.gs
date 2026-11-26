@@ -12,12 +12,12 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
 
         return ChoiceRow.Build(
             value.Name,
-            Ui.Label(value.Name, p.Text, 13, 500),
+            Ui.Label(value.Name, p.Text, 12.5, 500),
             Container{
-                Width: 20,
+                Width: 18,
                 FlexShrink: 0,
                 if value.Selected {
-                    Ui.Icon("check", p.Accent, 18)
+                    Ui.Icon("check", p.Accent, 16)
                 } else {
                     Container{}
                 },
@@ -42,7 +42,7 @@ open class ThemeChoice : Cell[ThemeChoiceInput] {
 
     private func Preview(p Palette) Blob {
         let frame = Container{
-            Width: 76,
+            Width: 64,
             Height: 30,
             FlexShrink: 0,
             BorderWidth: 1,

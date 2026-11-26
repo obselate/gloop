@@ -8,4 +8,5 @@ enum LocationKind {
     Recent;
     Trash;
     Archive;
+    Cloud;
 }

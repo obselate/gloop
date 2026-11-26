@@ -32,11 +32,32 @@ class PlacesSidebar {
             ejectVolume Action[Volume]? = nil,
             trashPath string = "",
             trashCount int32 = 0,
-            showVirtual bool = true
+            showVirtual bool = true,
+            cloudConnected bool = false,
+            openCloud Action? = nil,
+            cloudFreeBytes int64 = 0,
+            cloudTotalBytes int64 = 0,
+            openCloudTrash Action? = nil
         ) Blob {
             let places = List[Blob]()
 
-            BuildPlaces(places, path, navigate, p, standardPlaces, drop, dropPath, showVirtual, trashPath, trashCount)
+            BuildPlaces(
+                places,
+                path,
+                navigate,
+                p,
+                standardPlaces,
+                drop,
+                dropPath,
+                showVirtual,
+                trashPath,
+                trashCount,
+                cloudConnected,
+                openCloud,
+                cloudFreeBytes,
+                cloudTotalBytes,
+                openCloudTrash
+            )
 
             BuildBookmarks(
                 places,
@@ -95,7 +116,12 @@ class PlacesSidebar {
             dropPath string,
             showVirtual bool,
             trashPath string,
-            trashCount int32
+            trashCount int32,
+            cloudConnected bool,
+            openCloud Action?,
+            cloudFreeBytes int64,
+            cloudTotalBytes int64,
+            openCloudTrash Action?
         ) {
             places.Add(Ui.GroupGap())
 
@@ -134,6 +160,26 @@ class PlacesSidebar {
                     }
 
                     places.Add(Place("delete", "Trash", trashPath, path, navigate, p, trailing: count))
+                }
+
+                if let cloudAction = openCloud {
+                    let cloudTarget = Locations.IsCloud(path) && !Locations.IsCloudTrash(path)
+                    ? path
+                    : Locations.GoogleDriveRoot
+                    let cloudIcon = cloudConnected ? "cloud_done": "cloud"
+                    places.Add(Place(cloudIcon, "Google Drive", cloudTarget, path, _ -> cloudAction(), p))
+
+                    if cloudTotalBytes > 0 {
+                        places.Add(StorageMeter(cloudFreeBytes, cloudTotalBytes, p))
+                    }
+
+                    if cloudConnected {
+                        if let trashAction = openCloudTrash {
+                            places.Add(
+                                Place("delete", "Drive Trash", Locations.GoogleDriveTrash, path, _ -> trashAction(), p)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -241,6 +287,21 @@ class PlacesSidebar {
             places.Add(Ui.GroupGap())
             places.Add(Place("hard_drive", "File system", "/", path, navigate, p, drop, dropPath))
 
+            var rootFree int64 = 0
+            var rootTotal int64 = 0
+
+            for volume in volumes ?? List[Volume]() {
+                if volume.MountPath == "/" {
+                    rootFree = volume.FreeBytes
+                    rootTotal = volume.TotalBytes
+                    break
+                }
+            }
+
+            if rootTotal > 0 {
+                places.Add(StorageMeter(rootFree, rootTotal, p))
+            }
+
             for volume in volumes ?? List[Volume]() {
                 if volume.MountPath == "/" {
                     continue
@@ -276,6 +337,42 @@ class PlacesSidebar {
                         trailing: eject
                     )
                 )
+
+                if mounted && volume.TotalBytes > 0 {
+                    places.Add(StorageMeter(volume.FreeBytes, volume.TotalBytes, p))
+                }
+            }
+        }
+
+        private func StorageMeter(freeBytes int64, totalBytes int64, p Palette) Blob {
+            let clampedFree = Math.Max(int64(0), Math.Min(totalBytes, freeBytes))
+            let usedBytes = totalBytes - clampedFree
+            let ratio = float64(usedBytes) / float64(totalBytes)
+            let fillPercent = usedBytes > 0 ? Math.Max(2.0, Math.Min(100.0, ratio * 100.0)): 0.0
+            let fillColor = p.CapacityColor(ratio)
+            let captionColor = ratio >= 0.95 ? p.Critical: p.Muted
+            let label = FileSystemService.FormatSize(clampedFree) + " free / " + FileSystemService.FormatSize(
+                totalBytes
+            )
+
+            return Container{
+                FlexShrink: 0,
+                Padding: Edges{Left: 12, Right: 10, Top: 1, Bottom: 6},
+                Gap: 3,
+                Container{
+                    Width: Percent(100),
+                    Height: 4,
+                    BorderRadius: 2,
+                    BackgroundColor: p.Border.WithAlpha(0.65),
+                    OverflowX: Overflow.Hidden,
+                    Container{
+                        Height: Percent(100),
+                        Width: Percent(fillPercent),
+                        BorderRadius: 2,
+                        BackgroundColor: fillColor,
+                    },
+                },
+                Ui.Label(label, captionColor, 10.5),
             }
         }
 

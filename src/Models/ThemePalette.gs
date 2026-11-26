@@ -19,6 +19,7 @@ internal class ThemePalette {
     internal var Type string = ""
     internal var Glass bool = true
     internal var GlassOpacity int32?
+    internal var Fluent bool = false
 
     internal init() {
         Background = "#090B10"
@@ -52,6 +53,7 @@ internal class ThemePalette {
         Type = source.Type
         Glass = source.Glass
         GlassOpacity = source.GlassOpacity
+        Fluent = source.Fluent
     }
 
     internal func ColorFor(role string) string -> switch role {

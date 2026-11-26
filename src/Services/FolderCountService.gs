@@ -37,6 +37,10 @@ class FolderCountService {
     }
 
     internal func Count(entry FileEntry, showHidden bool) int32 {
+        if Locations.IsCloud(entry.FullPath) {
+            return -1
+        }
+
         let key = entry.FullPath + "\0" + entry.Modified.Ticks.ToString() + (showHidden ? "\0h": "")
         var started bool
 

@@ -48,8 +48,26 @@ internal class SettingsService {
 
                 if property.Name == "showHidden" {
                     settings.ShowHidden = readBool(property.Value, property.Name)
+                } else if property.Name == "showModifiedColumn" {
+                    settings.ShowModifiedColumn = readBool(property.Value, property.Name)
+                } else if property.Name == "showCreatedColumn" {
+                    settings.ShowCreatedColumn = readBool(property.Value, property.Name)
                 } else if property.Name == "showTypeColumn" {
                     settings.ShowTypeColumn = readBool(property.Value, property.Name)
+                } else if property.Name == "showExtensionColumn" {
+                    settings.ShowExtensionColumn = readBool(property.Value, property.Name)
+                } else if property.Name == "showPermissionsColumn" {
+                    settings.ShowPermissionsColumn = readBool(property.Value, property.Name)
+                } else if property.Name == "showSizeColumn" {
+                    settings.ShowSizeColumn = readBool(property.Value, property.Name)
+                } else if property.Name == "rowDensity" {
+                    if property.Value.ValueKind != JsonValueKind.String {
+                        throw InvalidDataException("Settings: field rowDensity must be a string")
+                    }
+
+                    settings.RowDensity = AppSettings.ParseRowDensity(property.Value.GetString() ?? "")
+                } else if property.Name == "alternatingRows" {
+                    settings.AlternatingRows = readBool(property.Value, property.Name)
                 } else if property.Name == "showPreview" {
                     settings.ShowPreview = readBool(property.Value, property.Name)
                 } else if property.Name == "previewWordWrap" {
@@ -79,11 +97,22 @@ internal class SettingsService {
                         case "Modified" {
                             settings.SortColumn = SortColumn.Modified
                         }
+                        case "Created" {
+                            settings.SortColumn = SortColumn.Created
+                        }
                         case "Kind" {
                             settings.SortColumn = SortColumn.Kind
                         }
+                        case "Extension" {
+                            settings.SortColumn = SortColumn.Extension
+                        }
+                        case "Permissions" {
+                            settings.SortColumn = SortColumn.Permissions
+                        }
                         default {
-                            throw FormatException("Sort column must be Name, Size, Modified or Kind")
+                            throw FormatException(
+                                "Sort column must be Name, Size, Modified, Created, Kind, Extension or Permissions"
+                            )
                         }
                     }
                 } else if property.Name == "sortNameDescending" {
@@ -92,8 +121,14 @@ internal class SettingsService {
                     settings.SortSizeDescending = readBool(property.Value, property.Name)
                 } else if property.Name == "sortModifiedDescending" {
                     settings.SortModifiedDescending = readBool(property.Value, property.Name)
+                } else if property.Name == "sortCreatedDescending" {
+                    settings.SortCreatedDescending = readBool(property.Value, property.Name)
                 } else if property.Name == "sortKindDescending" {
                     settings.SortKindDescending = readBool(property.Value, property.Name)
+                } else if property.Name == "sortExtensionDescending" {
+                    settings.SortExtensionDescending = readBool(property.Value, property.Name)
+                } else if property.Name == "sortPermissionsDescending" {
+                    settings.SortPermissionsDescending = readBool(property.Value, property.Name)
                 } else if property.Name == "smoothScrolling" {
                     settings.SmoothScrolling = readBool(property.Value, property.Name)
                 } else if property.Name == "scrollSpeed" {
@@ -172,7 +207,21 @@ internal class SettingsService {
 
                 writer.WriteStartObject()
                 writer.WriteBoolean("showHidden", settings.LaunchShowHiddenOriginal ?? settings.ShowHidden)
+                writer.WriteBoolean("showModifiedColumn", settings.ShowModifiedColumn)
+                writer.WriteBoolean("showCreatedColumn", settings.ShowCreatedColumn)
                 writer.WriteBoolean("showTypeColumn", settings.ShowTypeColumn)
+                writer.WriteBoolean("showExtensionColumn", settings.ShowExtensionColumn)
+                writer.WriteBoolean("showPermissionsColumn", settings.ShowPermissionsColumn)
+                writer.WriteBoolean("showSizeColumn", settings.ShowSizeColumn)
+                writer.WriteString(
+                    "rowDensity",
+                    switch settings.RowDensity {
+                        case RowDensity.Compact: "compact"
+                        case RowDensity.Spacious: "spacious"
+                        default: "comfortable"
+                    }
+                )
+                writer.WriteBoolean("alternatingRows", settings.AlternatingRows)
                 writer.WriteBoolean("showPreview", settings.ShowPreview)
                 writer.WriteBoolean("previewWordWrap", settings.PreviewWordWrap)
                 writer.WriteBoolean("previewLineNumbers", settings.PreviewLineNumbers)
@@ -182,7 +231,10 @@ internal class SettingsService {
                 writer.WriteBoolean("sortNameDescending", settings.SortNameDescending)
                 writer.WriteBoolean("sortSizeDescending", settings.SortSizeDescending)
                 writer.WriteBoolean("sortModifiedDescending", settings.SortModifiedDescending)
+                writer.WriteBoolean("sortCreatedDescending", settings.SortCreatedDescending)
                 writer.WriteBoolean("sortKindDescending", settings.SortKindDescending)
+                writer.WriteBoolean("sortExtensionDescending", settings.SortExtensionDescending)
+                writer.WriteBoolean("sortPermissionsDescending", settings.SortPermissionsDescending)
                 writer.WriteBoolean("smoothScrolling", settings.SmoothScrolling)
                 writer.WriteNumber("scrollSpeed", settings.ScrollSpeed)
 
@@ -245,6 +297,7 @@ internal class SettingsService {
         private func writeTheme(writer Utf8JsonWriter, name string, theme ThemePalette) {
             writer.WriteStartObject(name)
             writer.WriteBoolean("glass", theme.Glass)
+            writer.WriteBoolean("fluent", theme.Fluent)
             if theme.GlassOpacity.HasValue {
                 writer.WriteNumber("glassOpacity", theme.GlassOpacity.Value)
             }
@@ -334,6 +387,10 @@ internal class SettingsService {
                 }
                 if property.Name == "glass" {
                     theme.Glass = readBool(property.Value, name + ".glass")
+                    continue
+                }
+                if property.Name == "fluent" {
+                    theme.Fluent = readBool(property.Value, name + ".fluent")
                     continue
                 }
                 if property.Name == "glassOpacity" {

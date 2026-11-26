@@ -3,6 +3,8 @@ package gloop
 internal class ThemePresets {
     shared {
         internal func Names()[]string -> []string{
+            "Fluent Dark",
+            "Fluent Light",
             "Glass",
             "Glass Light",
             "Catppuccin Mocha",
@@ -29,6 +31,42 @@ internal class ThemePresets {
         }
 
         internal func Create(name string) ThemePalette {
+            if name == "Fluent Dark" {
+                return Make(
+                    "#202020",
+                    "#282828",
+                    "#FFFFFF",
+                    "#CECECE",
+                    "#60CDFF",
+                    "#3A3A3A",
+                    "#2B4658",
+                    "#C586C0",
+                    "#CE9178",
+                    "#B5CEA8",
+                    "#4EC9B0",
+                    glass: true,
+                    fluent: true
+                )
+            }
+
+            if name == "Fluent Light" {
+                return Make(
+                    "#F3F3F3",
+                    "#F9F9F9",
+                    "#1A1A1A",
+                    "#5F5F5F",
+                    "#005FB8",
+                    "#E2E2E2",
+                    "#D6E6F7",
+                    "#0000FF",
+                    "#A31515",
+                    "#098658",
+                    "#267F99",
+                    glass: true,
+                    fluent: true
+                )
+            }
+
             if name == "Glass" {
                 return Make(
                     "#090B10",
@@ -283,7 +321,8 @@ internal class ThemePresets {
             syntaxString string,
             number string,
             syntaxType string,
-            glass bool = false
+            glass bool = false,
+            fluent bool = false
         ) ThemePalette {
             let theme = ThemePalette()
 
@@ -299,6 +338,7 @@ internal class ThemePresets {
             theme.Number = number
             theme.Type = syntaxType
             theme.Glass = glass
+            theme.Fluent = fluent
 
             return theme
         }

@@ -18,9 +18,15 @@ unsafe class FileSystemService {
     private const TextProbeBytes int32 = 8192
     internal const BytesPerKiB int64 = 1024
     internal const BytesPerMiB int64 = 1048576
-    private const BytesPerGiB int64 = 1073741824
+    private const BytesPerKB int64 = 1000
 
-    internal func List(path string, kind LocationKind, atTrashRoot bool, showHidden bool) DirectorySnapshot {
+    internal func List(
+        path string,
+        kind LocationKind,
+        atTrashRoot bool,
+        showHidden bool,
+        includePermissions bool = false
+    ) DirectorySnapshot {
         let snapshot = DirectorySnapshot{DirectoryPath: path}
 
         if kind == LocationKind.Recent {
@@ -44,7 +50,7 @@ unsafe class FileSystemService {
             options.IgnoreInaccessible = false
             let enumeration = FileSystemEnumerable[FileEntry](
                 snapshot.DirectoryPath,
-                (ref raw FileSystemEntry) -> readEntry(ref raw, kinds),
+                (ref raw FileSystemEntry) -> readEntry(ref raw, kinds, includePermissions),
                 options
             )
 
@@ -341,44 +347,50 @@ unsafe class FileSystemService {
         }
 
         internal func FormatSize(size int64, rounded bool = false) string {
-            if size < BytesPerKiB {
+            if size < BytesPerKB {
                 return size.ToString() + " B"
             }
 
-            if size < BytesPerMiB {
-                let value = float64(size) / BytesPerKiB
-                return (rounded ? Math.Round(value): value).ToString(
-                    rounded ? "0": "0.0",
-                    CultureInfo.InvariantCulture
-                ) +
-                    " KiB"
+            let units = []string{"KB", "MB", "GB", "TB"}
+            var unitIndex = 0
+            var value = float64(size) / 1000.0
+
+            while unitIndex < units.Length - 1 && (rounded ? Math.Round(value): Math.Round(value, 1)) >= 1000.0 {
+                value /= 1000.0
+                unitIndex++
             }
 
-            if size < BytesPerGiB {
-                let value = float64(size) / BytesPerMiB
-                return (rounded ? Math.Round(value): value).ToString(
-                    rounded ? "0": "0.0",
-                    CultureInfo.InvariantCulture
-                ) +
-                    " MiB"
-            }
-
-            let value = float64(size) / BytesPerGiB
-
-            return (rounded ? Math.Round(value): value).ToString(rounded ? "0": "0.0", CultureInfo.InvariantCulture) +
-                " GiB"
+            let formatted = (rounded ? Math.Round(value): value).ToString(
+                rounded ? "0": "0.0",
+                CultureInfo.InvariantCulture
+            )
+            return formatted + " " + units[unitIndex]
         }
     }
 
-    private func readEntry(ref raw FileSystemEntry, kinds Dictionary[string, string]) FileEntry {
+    private func readEntry(
+        ref raw FileSystemEntry,
+        kinds Dictionary[string, string],
+        includePermissions bool
+    ) FileEntry {
         let name = raw.FileName.ToString()
-        var entry = FileEntry{Name: name, FullPath: raw.ToFullPath(), Kind: "File"}
+        let fullPath = raw.ToFullPath()
+        var entry = FileEntry{Name: name, FullPath: fullPath, Kind: "File"}
 
         try {
             let attributes = raw.Attributes
             entry.IsDirectory = attributes.HasFlag(FileAttributes.Directory)
             entry.IsSymlink = attributes.HasFlag(FileAttributes.ReparsePoint)
             entry.Modified = raw.LastWriteTimeUtc.LocalDateTime
+            entry.Created = raw.CreationTimeUtc.LocalDateTime
+
+            if includePermissions && OperatingSystem.IsLinux() {
+                try {
+                    entry.Permissions = formatPermissions(File.GetUnixFileMode(fullPath))
+                } catch (failure Exception) when failure is IOException || failure is UnauthorizedAccessException {
+                    entry.Permissions = "—"
+                }
+            }
 
             if entry.IsSymlink || entry.IsDirectory {
                 entry.Kind = FileKinds.EntryKind("", entry.IsDirectory, entry.IsSymlink)
@@ -402,6 +414,21 @@ unsafe class FileSystemService {
         return entry
     }
 
+    private func formatPermissions(mode UnixFileMode) string {
+        let bits = [9]char
+        bits[0] = mode.HasFlag(UnixFileMode.UserRead) ? 'r': '-'
+        bits[1] = mode.HasFlag(UnixFileMode.UserWrite) ? 'w': '-'
+        bits[2] = mode.HasFlag(UnixFileMode.UserExecute) ? 'x': '-'
+        bits[3] = mode.HasFlag(UnixFileMode.GroupRead) ? 'r': '-'
+        bits[4] = mode.HasFlag(UnixFileMode.GroupWrite) ? 'w': '-'
+        bits[5] = mode.HasFlag(UnixFileMode.GroupExecute) ? 'x': '-'
+        bits[6] = mode.HasFlag(UnixFileMode.OtherRead) ? 'r': '-'
+        bits[7] = mode.HasFlag(UnixFileMode.OtherWrite) ? 'w': '-'
+        bits[8] = mode.HasFlag(UnixFileMode.OtherExecute) ? 'x': '-'
+
+        return string(bits)
+    }
+
     private func compare(left FileEntry, right FileEntry, column SortColumn, descending bool) int32 {
         if left.IsDirectory != right.IsDirectory {
             return left.IsDirectory ? -1: 1
@@ -413,8 +440,14 @@ unsafe class FileSystemService {
             result = left.Size.CompareTo(right.Size)
         } else if column == SortColumn.Modified {
             result = left.Modified.CompareTo(right.Modified)
+        } else if column == SortColumn.Created {
+            result = left.Created.CompareTo(right.Created)
         } else if column == SortColumn.Kind {
             result = String.Compare(left.Kind, right.Kind, StringComparison.OrdinalIgnoreCase)
+        } else if column == SortColumn.Extension {
+            result = String.Compare(left.ExtensionText(), right.ExtensionText(), StringComparison.OrdinalIgnoreCase)
+        } else if column == SortColumn.Permissions {
+            result = String.Compare(left.Permissions, right.Permissions, StringComparison.Ordinal)
         } else {
             result = String.Compare(left.Name, right.Name, StringComparison.OrdinalIgnoreCase)
         }

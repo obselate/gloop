@@ -46,6 +46,11 @@ partial class BrowserView {
         }
 
         items.Add(ContextMenuItem("Trash", "Move to Trash", "delete"))
+
+        if Model.InCloud && !Model.InCloudTrash {
+            items.Add(ContextMenuItem("DeletePermanently", "Delete permanently", "delete_forever"))
+        }
+
         items.Add(MenuItem{Id: "trash-separator", Separator: true})
         items.Add(ContextMenuItem("OpenTerminal", "Open terminal here", "terminal"))
         items.Add(ContextMenuItem("Properties", "Properties", "info"))

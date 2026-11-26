@@ -90,14 +90,14 @@ partial class BrowserView {
             Host,
             p,
             if dialog == DialogKind.Preferences {
-                Math.Clamp(width - 80, 360, 600)
+                Math.Clamp(width - 64, 420, 760)
             } else if dialog == DialogKind.OpenLocation || dialog == DialogKind.Shortcuts {
                 520
             } else {
                 440
             },
             dialog == DialogKind.Preferences && height < 600,
-            maxHeight: dialog == DialogKind.Preferences ? 80: 88
+            maxHeight: dialog == DialogKind.Preferences ? 86: 88
         )
     }
 

@@ -36,7 +36,18 @@ partial class BrowserView {
             },
             WordWrap: settings.PreviewWordWrap,
             LineNumbers: settings.PreviewLineNumbers,
+            IsText: preview.Kind == PreviewKind.Text,
             Close: () -> Invoke("TogglePreview"),
+            OnOpen: () -> Invoke("Open"),
+            OnCopyPath: () -> Invoke("CopyPath"),
+            OnToggleWordWrap: () -> {
+                settings.PreviewWordWrap = !settings.PreviewWordWrap
+                SavePreferences()
+                Rebuild()
+            },
+            CloseShortcut: settings.ShortcutFor("TogglePreview"),
+            OpenShortcut: settings.ShortcutFor("Open"),
+            CopyPathShortcut: settings.ShortcutFor("CopyPath"),
         }
     }
 

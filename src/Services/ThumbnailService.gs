@@ -67,7 +67,7 @@ class ThumbnailItem {
 }
 
 class ThumbnailService : IDisposable {
-    private const MaximumEdgePixels int32 = 160
+    private const MaximumEdgePixels int32 = 256
     private const CacheItemLimit int32 = 128
     private const QueueLimit int32 = 64
     private const CacheByteLimit int64 = 16777216
@@ -239,12 +239,36 @@ class ThumbnailService : IDisposable {
         return nil
     }
 
+    internal var CloudProvider GoogleDriveService?
+
     internal func Process(item ThumbnailItem) {
         var result = ThumbnailData{}
         var loadedSource ImageSource?
         var completed bool
 
         try {
+            if Locations.IsCloud(item.Entry.FullPath) {
+                if let cloud = CloudProvider {
+                    if item.Image {
+                        let thumbPath = cloud.DownloadThumbnail(
+                            item.Entry.FullPath,
+                            () -> item.Cancellation?.IsCancellationRequested ?? false
+                        )
+
+                        if thumbPath != "" {
+                            let token = item.Cancellation?.Token ?? CancellationToken.None
+                            let src = ImageSource.LoadThumbnail(thumbPath, item.Edge, item.Edge, ImageLimits, token)
+                            loadedSource = src
+                            result = ThumbnailData{Kind: "image", Source: src}
+                        }
+                    }
+                }
+
+                completed = true
+                Complete(item, result)
+                return
+            }
+
             let info = FileInfo(item.Entry.FullPath)
 
             if info.Length == item.Entry.Size && info.LastWriteTime == item.Entry.Modified {

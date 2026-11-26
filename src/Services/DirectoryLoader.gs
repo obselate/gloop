@@ -157,6 +157,7 @@ class DirectoryLoader {
             Kind: kind,
             AtTrashRoot: atTrashRoot,
             ShowHidden: settings.ShowHidden,
+            IncludePermissions: settings.ShowPermissionsColumn,
             Mode: mode,
             HistoryIndex: historyIndex,
             SelectedPath: selectedPath,
@@ -345,9 +346,32 @@ class DirectoryLoader {
     }
 
     private func Load(queue LatestWork, generation int32, request DirectoryRequest) {
-        let snapshot = request.Kind == LocationKind.Archive
-        ? controller.Archives.ListArchive(request.Path, request.ShowHidden, () -> !queue.IsCurrent(generation))
-        : FileSystemService().List(request.Path, request.Kind, request.AtTrashRoot, request.ShowHidden)
+        var snapshot DirectorySnapshot
+
+        if request.Kind == LocationKind.Archive {
+            snapshot = controller.Archives.ListArchive(
+                request.Path,
+                request.ShowHidden,
+                () -> !queue.IsCurrent(generation)
+            )
+        } else if request.Kind == LocationKind.Cloud {
+            controller.GoogleDrive.RefreshAccountStatusIfStale(30)
+            controller.GoogleDrive.ListFolder(
+                request.Path,
+                request.ShowHidden,
+                out var cloudEntries,
+                out var cloudError
+            )
+            snapshot = DirectorySnapshot{DirectoryPath: request.Path, Entries: cloudEntries, Error: cloudError}
+        } else {
+            snapshot = FileSystemService().List(
+                request.Path,
+                request.Kind,
+                request.AtTrashRoot,
+                request.ShowHidden,
+                request.IncludePermissions
+            )
+        }
 
         if !queue.IsCurrent(generation) {
             return
@@ -378,6 +402,10 @@ class DirectoryLoader {
             visible = FileSystemService().Sort(request.Entries, request.Column, request.Descending)
         } else {
             let wildcard = request.Filter.Contains('*') || request.Filter.Contains('?')
+            let terms = wildcard ? []string{}: request.Filter.Split(
+                []char{' ', '\t'},
+                StringSplitOptions.RemoveEmptyEntries
+            )
             var count = 0
 
             for entry in request.Entries {
@@ -393,10 +421,17 @@ class DirectoryLoader {
                     }
                 }
 
-                let matches = if wildcard {
-                    FileSystemName.MatchesSimpleExpression(request.Filter.AsSpan(), entry.Name.AsSpan(), true)
+                var matches = true
+
+                if wildcard {
+                    matches = FileSystemName.MatchesSimpleExpression(request.Filter.AsSpan(), entry.Name.AsSpan(), true)
                 } else {
-                    entry.Name.Contains(request.Filter, StringComparison.OrdinalIgnoreCase)
+                    for term in terms {
+                        if !entry.Name.Contains(term, StringComparison.OrdinalIgnoreCase) {
+                            matches = false
+                            break
+                        }
+                    }
                 }
 
                 if matches {
