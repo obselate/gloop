@@ -48,7 +48,7 @@ partial class BrowserView {
     private func SetKeyboardFocus(value bool) {
         if keyboardFocus != value {
             keyboardFocus = value
-            palette = Palette(settings.Theme, value)
+            palette = Palette(settings.Theme, value, settings.RowDensity, settings.AlternatingRows)
 
             Rebuild()
         }

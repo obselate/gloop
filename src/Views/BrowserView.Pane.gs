@@ -57,24 +57,74 @@ partial class BrowserView {
         let p = palette
 
         if locationEditing && Model.ActiveIndex == index {
-            return TextField
-                .Build(
-                locationText,
-                value -> {
-                    locationText = value
-                    Rebuild()
+            return Container{
+                Key: "location-edit",
+                Width: crumbWidth,
+                Height: 30,
+                FlexShrink: 0,
+                FlexDirection: FlexDirection.Row,
+                AlignItems: AlignItems.Center,
+                Gap: 2,
+                Padding: Edges{Left: 8, Right: 3},
+                BackgroundColor: p.Surface,
+                BorderWidth: 1,
+                BorderColor: p.Accent,
+                BorderRadius: p.ControlRadius,
+                TextField
+                    .Build(
+                    locationText,
+                    value -> {
+                        locationText = value
+                        Rebuild()
+                    },
+                    value -> {
+                        locationEditing = false
+                        Model.Navigate(value)
+                        FocusFiles()
+                    },
+                    "Location",
+                    p,
+                    handle: locationHandle,
+                    fontSize: 12
+                ){
+                    .FlexGrow: 1,
+                    .FlexBasis: 0,
+                    .Height: 26,
+                    .Padding: 0,
+                    .BackgroundColor: Color.Transparent,
+                    .BorderWidth: 0,
+                    .OutlineWidth: 0,
+                    .FocusStyle: Style{BorderWidth: 0, OutlineWidth: 0},
                 },
-                value -> {
-                    locationEditing = false
-                    Model.Navigate(value)
-                    FocusFiles()
-                },
-                "Location",
-                p,
-                width: crumbWidth,
-                handle: locationHandle,
-                fontSize: 12
-            ){.Key: "location-edit"}
+                Ui.Tool(
+                    "check",
+                    "Open location",
+                    () -> {
+                        locationEditing = false
+                        Model.Navigate(locationText)
+                        FocusFiles()
+                    },
+                    Host,
+                    p,
+                    size: 24,
+                    iconSize: 15,
+                    shortcut: "Enter"
+                ),
+                Ui.Tool(
+                    "close",
+                    "Cancel",
+                    () -> {
+                        locationEditing = false
+                        FocusFiles()
+                        Rebuild()
+                    },
+                    Host,
+                    p,
+                    size: 24,
+                    iconSize: 15,
+                    shortcut: "Escape"
+                ),
+            }
         }
 
         return Cell.Mount[BreadcrumbInput, BreadcrumbBar](
@@ -96,6 +146,7 @@ partial class BrowserView {
                     Model.SetActive(index)
                     EditLocation()
                 },
+                EditShortcut: settings.ShortcutFor("FocusLocation"),
                 More: (paths, point) -> OpenPathMenu(index, paths, point),
             }
         )
@@ -127,7 +178,7 @@ partial class BrowserView {
             OnFocus: (_) -> Model.SetActive(index),
             Container{
                 Key: "pane-header",
-                Height: chooser != nil ? 36: Ui.BarHeight,
+                Height: chooser != nil ? 37: Ui.BarHeight + 1,
                 FlexShrink: 0,
                 Padding: Edges{Left: Ui.CardInset, Right: Ui.CardInset},
                 Gap: Ui.CardInset,
@@ -136,21 +187,46 @@ partial class BrowserView {
                 BorderWidth: Edges{Bottom: 1},
                 BorderColor: p.Border,
                 Opacity: Model.Split && !active ? .6: 1,
-                Sized(size -> Location(index, size.Width)){
-                    .FlexGrow: 1,
-                    .FlexBasis: 0,
-                    .MinWidth: 0,
-                    .Height: Percent(100),
-                    .JustifyContent: JustifyContent.Center
-                },
+                Sized(size -> Location(index, size.Width)){.FlexGrow: 1, .FlexBasis: 0, .MinWidth: 0, .Height: 30},
                 Container{
                     Key: "tools",
+                    Height: 30,
                     FlexDirection: FlexDirection.Row,
                     AlignItems: AlignItems.Center,
                     FlexShrink: 0,
                     Gap: Ui.ToolsGap,
                     Children: tools.ToArray(),
                 },
+            },
+            if active && (inlineFilterOpen || pane.Filter != "") && (Model.Split || availableWidth < 560) {
+                Container{
+                    Key: "inline-filter",
+                    Padding: Edges{Left: Ui.CardInset, Right: Ui.CardInset, Top: 6, Bottom: 6},
+                    BorderWidth: Edges{Bottom: 1},
+                    BorderColor: p.Border,
+                    Cell.Mount[FilterFieldInput, FilterField](
+                        nil,
+                        FilterFieldInput{
+                            Value: pane.Filter,
+                            Width: Percent(100),
+                            MatchCount: pane.VisibleEntries.Count,
+                            TotalCount: pane.Entries.Count,
+                            Handle: filterHandle,
+                            Window: Host,
+                            Palette: p,
+                            OnChange: value -> Model.SetFilter(value),
+                            OnClear: () -> {
+                                Model.SetFilter("")
+                                inlineFilterOpen = false
+                                FocusFiles()
+                            },
+                            OnMoveSelection: delta -> Model.MoveSelection(delta, false, false),
+                            OnSubmit: () -> FocusFiles(),
+                        }
+                    ),
+                }
+            } else {
+                Container{}
             },
             PaneTable(index, pane, active, p, location),
         }
@@ -165,16 +241,25 @@ partial class BrowserView {
         tools List[Blob]
     ) {
         if !Model.Split && availableWidth >= 560 {
-            let filterWidth = width < 950 ? 142: 188
+            let filterWidth = width < 950 ? 156: 210
             tools.Add(
                 Cell.Mount[FilterFieldInput, FilterField](
                     nil,
                     FilterFieldInput{
                         Value: pane.Filter,
+                        MatchCount: pane.VisibleEntries.Count,
+                        TotalCount: pane.Entries.Count,
                         Handle: filterHandle,
+                        Window: Host,
                         Palette: p,
                         Width: filterWidth,
                         OnChange: value -> Model.SetFilter(value),
+                        OnClear: () -> {
+                            Model.SetFilter("")
+                            inlineFilterOpen = false
+                            FocusFiles()
+                        },
+                        OnMoveSelection: delta -> Model.MoveSelection(delta, false, false),
                         OnSubmit: () -> FocusFiles(),
                     }
                 )
@@ -186,11 +271,18 @@ partial class BrowserView {
                     "Filter files",
                     () -> {
                         Model.SetActive(index)
-                        Invoke("FocusFilter")
+                        if inlineFilterOpen && pane.Filter == "" {
+                            inlineFilterOpen = false
+                            FocusFiles()
+                            Rebuild()
+                        } else {
+                            Invoke("FocusFilter")
+                        }
                     },
                     Host,
                     p,
-                    pane.Filter != ""
+                    inlineFilterOpen || pane.Filter != "",
+                    shortcut: settings.ShortcutFor("FocusFilter")
                 )
             )
         }
@@ -207,7 +299,8 @@ partial class BrowserView {
                     Host,
                     p,
                     false,
-                    location != LocationKind.Folder
+                    location != LocationKind.Folder,
+                    shortcut: settings.ShortcutFor("NewFolder")
                 )
             )
         }
@@ -222,7 +315,8 @@ partial class BrowserView {
                 },
                 Host,
                 p,
-                settings.ViewMode == ViewMode.List
+                settings.ViewMode == ViewMode.List,
+                shortcut: settings.ShortcutFor("ViewList")
             )
         )
         tools.Add(
@@ -235,7 +329,8 @@ partial class BrowserView {
                 },
                 Host,
                 p,
-                settings.ViewMode == ViewMode.Tiles
+                settings.ViewMode == ViewMode.Tiles,
+                shortcut: settings.ShortcutFor("ViewTiles")
             )
         )
 
@@ -251,7 +346,8 @@ partial class BrowserView {
                     Host,
                     p,
                     false,
-                    location == LocationKind.Recent
+                    location == LocationKind.Recent,
+                    shortcut: settings.ShortcutFor("OpenTerminalHere")
                 )
             )
         }
@@ -268,7 +364,12 @@ partial class BrowserView {
                 WordWrap: settings.PreviewWordWrap,
                 Pane: pane,
                 Location: location,
+                ShowModified: settings.ShowModifiedColumn,
+                ShowCreated: settings.ShowCreatedColumn,
                 ShowType: settings.ShowTypeColumn,
+                ShowExtension: settings.ShowExtensionColumn,
+                ShowPermissions: settings.ShowPermissionsColumn,
+                ShowSize: settings.ShowSizeColumn,
                 SizeText: entry -> pane.Kind == LocationKind.Archive && entry.IsDirectory ? "—": FileSizeText(entry),
                 OnHeaderMenu: point -> OpenColumnMenu(index, point),
                 Tiles: settings.ViewMode == ViewMode.Tiles,
@@ -381,7 +482,7 @@ partial class BrowserView {
             let rowHeight = if tiles {
                 FileTiles.TileHeight + FileTiles.Gap
             } else {
-                FileTable.RowHeight
+                palette.RowHeight
             }
             let top = row * rowHeight
             let bottom = top + if tiles {

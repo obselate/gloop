@@ -432,7 +432,10 @@ class BrowserController {
         if column != SortColumn.Name &&
             column != SortColumn.Size &&
             column != SortColumn.Modified &&
-            column != SortColumn.Kind {
+            column != SortColumn.Created &&
+            column != SortColumn.Kind &&
+            column != SortColumn.Extension &&
+            column != SortColumn.Permissions {
             return
         }
 

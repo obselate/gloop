@@ -143,8 +143,9 @@ partial class BrowserView {
 
                 if locationEditing {
                     locationEditing = false
-                } else if Model.ActivePane().Filter != "" {
+                } else if Model.ActivePane().Filter != "" || inlineFilterOpen {
                     Model.SetFilter("")
+                    inlineFilterOpen = false
                 } else if Model.PreviewVisible {
                     Model.TogglePreview()
                     SavePreferences()
@@ -190,10 +191,15 @@ partial class BrowserView {
                 return true
             }
             case "FocusFilter" {
-                if Model.Split || BrowsingWidth() < 560 {
-                    OpenDialog(DialogKind.FilterFiles, Model.ActivePane().Filter)
-                } else {
+                if !Model.Split && BrowsingWidth() >= 560 {
                     filterHandle.Focus()
+                } else {
+                    inlineFilterOpen = true
+                    if filterHandle.IsMounted {
+                        filterHandle.Focus()
+                    } else {
+                        filterFocusPending = true
+                    }
                 }
 
                 return true

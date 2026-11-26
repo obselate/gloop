@@ -8,7 +8,14 @@ import System.Text.Json
 internal class AppSettings {
     internal var ShowHidden bool
     internal var LaunchShowHiddenOriginal bool?
+    internal var ShowModifiedColumn bool = true
+    internal var ShowCreatedColumn bool
     internal var ShowTypeColumn bool
+    internal var ShowExtensionColumn bool
+    internal var ShowPermissionsColumn bool
+    internal var ShowSizeColumn bool = true
+    internal var RowDensity RowDensity
+    internal var AlternatingRows bool
     internal var ShowPreview bool
     internal var PreviewWordWrap bool
     internal var PreviewLineNumbers bool
@@ -20,7 +27,10 @@ internal class AppSettings {
     internal var SortNameDescending bool
     internal var SortSizeDescending bool = true
     internal var SortModifiedDescending bool = true
+    internal var SortCreatedDescending bool = true
     internal var SortKindDescending bool
+    internal var SortExtensionDescending bool
+    internal var SortPermissionsDescending bool
     internal let Keybindings Dictionary[string, string]
     internal let UnknownKeybindings Dictionary[string, string]
     internal let UnknownSettings Dictionary[string, JsonElement]
@@ -32,6 +42,7 @@ internal class AppSettings {
     internal init() {
         ShowHidden = false
         ShowTypeColumn = false
+        RowDensity = gloop.RowDensity.Comfortable
         ShowPreview = false
         PreviewWordWrap = true
         PreviewLineNumbers = true
@@ -110,6 +121,8 @@ internal class AppSettings {
         return normalized != "" && Bookmarks.Contains(normalized)
     }
 
+    internal func ShortcutFor(action string) string -> Keybindings.TryGetValue(action, out var value) ? value: ""
+
     internal func Clone() AppSettings {
         let copy = AppSettings()
 
@@ -125,7 +138,14 @@ internal class AppSettings {
 
         ShowHidden = source.ShowHidden
         LaunchShowHiddenOriginal = source.LaunchShowHiddenOriginal
+        ShowModifiedColumn = source.ShowModifiedColumn
+        ShowCreatedColumn = source.ShowCreatedColumn
         ShowTypeColumn = source.ShowTypeColumn
+        ShowExtensionColumn = source.ShowExtensionColumn
+        ShowPermissionsColumn = source.ShowPermissionsColumn
+        ShowSizeColumn = source.ShowSizeColumn
+        RowDensity = source.RowDensity
+        AlternatingRows = source.AlternatingRows
         ShowPreview = source.ShowPreview
         PreviewWordWrap = source.PreviewWordWrap
         PreviewLineNumbers = source.PreviewLineNumbers
@@ -137,7 +157,10 @@ internal class AppSettings {
         SortNameDescending = source.SortNameDescending
         SortSizeDescending = source.SortSizeDescending
         SortModifiedDescending = source.SortModifiedDescending
+        SortCreatedDescending = source.SortCreatedDescending
         SortKindDescending = source.SortKindDescending
+        SortExtensionDescending = source.SortExtensionDescending
+        SortPermissionsDescending = source.SortPermissionsDescending
         Theme.ApplyFrom(source.Theme)
         ThemeName = source.ThemeName
         CustomTheme.ApplyFrom(source.CustomTheme)
@@ -175,8 +198,17 @@ internal class AppSettings {
             case SortColumn.Modified {
                 return SortModifiedDescending
             }
+            case SortColumn.Created {
+                return SortCreatedDescending
+            }
             case SortColumn.Kind {
                 return SortKindDescending
+            }
+            case SortColumn.Extension {
+                return SortExtensionDescending
+            }
+            case SortColumn.Permissions {
+                return SortPermissionsDescending
             }
             default {
                 return SortNameDescending
@@ -192,8 +224,17 @@ internal class AppSettings {
             case SortColumn.Modified {
                 SortModifiedDescending = descending
             }
+            case SortColumn.Created {
+                SortCreatedDescending = descending
+            }
             case SortColumn.Kind {
                 SortKindDescending = descending
+            }
+            case SortColumn.Extension {
+                SortExtensionDescending = descending
+            }
+            case SortColumn.Permissions {
+                SortPermissionsDescending = descending
             }
             default {
                 SortNameDescending = descending
@@ -228,13 +269,30 @@ internal class AppSettings {
         CustomTheme = defaults.CustomTheme
     }
 
+    internal func ResetViewLayout() {
+        let defaults = AppSettings()
+
+        RowDensity = defaults.RowDensity
+        AlternatingRows = defaults.AlternatingRows
+        ShowModifiedColumn = defaults.ShowModifiedColumn
+        ShowCreatedColumn = defaults.ShowCreatedColumn
+        ShowTypeColumn = defaults.ShowTypeColumn
+        ShowExtensionColumn = defaults.ShowExtensionColumn
+        ShowPermissionsColumn = defaults.ShowPermissionsColumn
+        ShowSizeColumn = defaults.ShowSizeColumn
+    }
+
     internal func SelectTheme(name string) {
+        let glass = Theme.Glass
+        let opacity = Theme.GlassOpacity
         ThemeName = name
 
         if name == CustomThemeName {
             Theme.ApplyFrom(CustomTheme)
         } else {
             Theme = ThemePresets.Create(name)
+            Theme.Glass = name == "Glass" || name == "Glass Light" ? true: glass
+            Theme.GlassOpacity = opacity
         }
     }
 
@@ -243,15 +301,29 @@ internal class AppSettings {
         ThemeName = CustomThemeName
     }
 
-    internal func SetCustomGlass(glass bool) {
-        CustomTheme.Glass = glass
+    internal func SetGlass(glass bool) {
         Theme.Glass = glass
+
+        if ThemeName == CustomThemeName {
+            CustomTheme.Glass = glass
+        }
+    }
+
+    internal func SetGlassOpacity(opacity int32) {
+        let value = Math.Clamp(opacity, 0, 100)
+        Theme.GlassOpacity = value
+
+        if ThemeName == CustomThemeName {
+            CustomTheme.GlassOpacity = value
+        }
+    }
+
+    internal func SetCustomGlass(glass bool) {
+        SetGlass(glass)
     }
 
     internal func SetCustomGlassOpacity(opacity int32) {
-        let value = Math.Clamp(opacity, 0, 100)
-        CustomTheme.GlassOpacity = value
-        Theme.GlassOpacity = value
+        SetGlassOpacity(opacity)
     }
 
     internal func SetCustomColor(role string, color string) {
@@ -260,6 +332,7 @@ internal class AppSettings {
     }
 
     internal func ResolveTheme(hasThemeName bool, hasCustomTheme bool) {
+        let glass = Theme.Glass
         let glassOpacity = Theme.GlassOpacity
         if isLegacyDefaultTheme(Theme) {
             Theme = ThemePalette()
@@ -276,6 +349,7 @@ internal class AppSettings {
 
         if ThemePresets.Contains(ThemeName) {
             Theme = ThemePresets.Create(ThemeName)
+            Theme.Glass = glass
         }
 
         Theme.GlassOpacity = glassOpacity
@@ -412,14 +486,39 @@ internal class AppSettings {
             }
         }
 
+        internal func ParseRowDensity(value string) RowDensity {
+            switch value {
+                case "compact" {
+                    return RowDensity.Compact
+                }
+                case "comfortable" {
+                    return RowDensity.Comfortable
+                }
+                case "spacious" {
+                    return RowDensity.Spacious
+                }
+                default {
+                    throw FormatException("Row density must be compact, comfortable or spacious")
+                }
+            }
+        }
+
         internal func Validate(settings AppSettings) string {
             if settings.ViewMode != ViewMode.List && settings.ViewMode != ViewMode.Tiles {
                 return "View mode must be list or tiles"
             }
 
+            if settings.RowDensity != RowDensity.Compact
+            && settings.RowDensity != RowDensity.Comfortable
+            && settings.RowDensity != RowDensity.Spacious {
+                return "Row density must be compact, comfortable or spacious"
+            }
+
             if settings.SortColumn != SortColumn.Name && settings.SortColumn != SortColumn.Size
-            && settings.SortColumn != SortColumn.Modified && settings.SortColumn != SortColumn.Kind {
-                return "Sort column must be Name, Size, Modified or Kind"
+            && settings.SortColumn != SortColumn.Modified && settings.SortColumn != SortColumn.Created
+            && settings.SortColumn != SortColumn.Kind && settings.SortColumn != SortColumn.Extension
+            && settings.SortColumn != SortColumn.Permissions {
+                return "Sort column must be Name, Size, Modified, Created, Kind, Extension or Permissions"
             }
 
             if !Double.IsFinite(settings.ScrollSpeed) || settings.ScrollSpeed < MinimumScrollSpeed

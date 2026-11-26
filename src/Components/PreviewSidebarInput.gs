@@ -12,5 +12,12 @@ internal data struct PreviewSidebarInput {
     var Detail string
     var WordWrap bool
     var LineNumbers bool
+    var IsText bool
     var Close Action
+    var OnOpen Action
+    var OnCopyPath Action
+    var OnToggleWordWrap Action
+    var CloseShortcut string
+    var OpenShortcut string
+    var CopyPathShortcut string
 }

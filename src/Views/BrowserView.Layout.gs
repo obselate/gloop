@@ -77,7 +77,7 @@ partial class BrowserView {
         let rowHeight = if tiles {
             FileTiles.TileHeight + FileTiles.Gap
         } else {
-            FileTable.RowHeight
+            palette.RowHeight
         }
 
         return Math.Max(1, int32(Math.Floor(list.ContentBox.Height / rowHeight))) * if tiles {

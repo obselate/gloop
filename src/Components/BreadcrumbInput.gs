@@ -17,5 +17,6 @@ internal data struct BreadcrumbInput {
     var Palette Palette
     var Navigate Action[string]
     var Edit Action
+    var EditShortcut string
     var More Action[[]string, Point]
 }

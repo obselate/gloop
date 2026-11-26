@@ -9,9 +9,9 @@ import System.Linq
 
 open class FileTiles : Cell[FileTableInput] {
     private let clicks FileClickState = FileClickState()
-    internal const TileWidth float64 = 144
-    internal const TileHeight float64 = 156
-    internal const Gap float64 = 8
+    internal const TileWidth float64 = 152
+    internal const TileHeight float64 = 172
+    internal const Gap float64 = 10
     internal const Padding float64 = 12
 
     private var clickModifiers KeyModifiers
@@ -80,25 +80,36 @@ open class FileTiles : Cell[FileTableInput] {
         let tile = Container{
             Padding: 6,
             Gap: 5,
-            BorderRadius: 6,
+            BorderRadius: p.CardRadius,
+            BorderWidth: 1,
+            BorderColor: if selected || item.DropActive {
+                p.Accent
+            } else {
+                Color.Transparent
+            },
             BackgroundColor: if selected {
                 p.Selection
             } else {
                 Color.Transparent
             },
-            OutlineWidth: if focused && p.Keyboard || item.DropActive {
+            OutlineWidth: if focused && p.Keyboard && !selected && !item.DropActive {
                 1
             } else {
                 0
             },
             OutlineColor: p.Accent,
-            OutlineOffset: -1,
+            OutlineOffset: 1,
             HoverStyle: Style{
                 BackgroundColor: if selected {
                     p.Selection
                 } else {
                     p.Hover
-                }
+                },
+                BorderColor: if selected {
+                    p.Accent
+                } else {
+                    p.Border
+                },
             },
             OnPointerDown: e -> {
                 if e.Button == PointerButton.Primary {
@@ -128,13 +139,21 @@ open class FileTiles : Cell[FileTableInput] {
             Text{
                 Key: "name",
                 Content: FileTransferUi.Name(entry),
-                Height: 34,
-                FontSize: 13,
+                FontSize: p.FontSize - 0.5,
                 Color: p.Text,
                 TextAlign: TextAlign.Center,
                 TextWrap: TextWrap.Wrap,
                 TextTrimming: TextTrimming.Ellipsis,
                 TextMaxLines: 2,
+                MinWidth: 0,
+            },
+            Text{
+                Content: value.SizeText(entry),
+                FontSize: 10.5,
+                Color: p.Muted,
+                TextAlign: TextAlign.Center,
+                TextWrap: TextWrap.NoWrap,
+                TextTrimming: TextTrimming.Ellipsis,
                 MinWidth: 0,
             },
         }

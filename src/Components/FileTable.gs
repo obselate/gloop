@@ -8,11 +8,12 @@ import System.Collections.Generic
 
 open class FileTable : Cell[FileTableInput] {
     private let clicks FileClickState = FileClickState()
-    internal const RowHeight float64 = 30
-    private const HeaderHeight float64 = 28
     private const NameMinimum float64 = 150
     private const ModifiedWidth float64 = 136
+    private const CreatedWidth float64 = 136
     private const TypeWidth float64 = 104
+    private const ExtensionWidth float64 = 76
+    private const PermissionsWidth float64 = 96
     private const SizeWidth float64 = 88
     private var entries List[FileEntry]?
     private var rows[]DataGridRow = []DataGridRow{}
@@ -78,8 +79,8 @@ open class FileTable : Cell[FileTableInput] {
             },
             OnSort: (column, _) -> value.OnSort(ColumnKind(column)),
             Height: Percent(100),
-            RowHeight: RowHeight,
-            HeaderHeight: HeaderHeight,
+            RowHeight: p.RowHeight,
+            HeaderHeight: p.HeaderHeight,
             BackgroundColor: p.Canvas,
             TextColor: p.Text,
             SelectedColor: value.Active ? p.Selection: p.Hover,
@@ -90,7 +91,7 @@ open class FileTable : Cell[FileTableInput] {
                 handle.BorderWidth = 0
                 handle.AlignItems = AlignItems.Center
                 handle.JustifyContent = JustifyContent.Center
-                handle.HoverStyle = Style{BackgroundColor: p.Hover}
+                handle.HoverStyle = Style{BackgroundColor: p.Accent.WithAlpha(.25)}
                 handle.FocusStyle = p.Ring(-1)
                 handle.Children.Add(Container{Width: 1, Height: Percent(50), BackgroundColor: p.Border})
             },
@@ -103,7 +104,9 @@ open class FileTable : Cell[FileTableInput] {
                 p
             ),
             ConfigureRow: (_, row, root) -> {
-                let selectedRow = pane.SelectedPaths.Contains(row.Id ?? "")
+                let rowId = row.Id ?? ""
+                let rowIndex = indices.GetValueOrDefault(rowId, -1)
+                let selectedRow = pane.SelectedPaths.Contains(rowId)
                 let focused = pane.Selected >= 0 && pane.VisibleEntries[pane.Selected].FullPath == row.Id
                 root.OutlineWidth = if focused && value.Active && p.Keyboard {
                     1
@@ -111,7 +114,10 @@ open class FileTable : Cell[FileTableInput] {
                     0
                 }
                 root.OutlineColor = p.Accent
-                root.BorderRadius = 6
+                root.BorderRadius = p.ControlRadius
+                if !selectedRow && p.AlternatingRows && rowIndex >= 0 && rowIndex % 2 == 1 {
+                    root.BackgroundColor = p.RowStripe
+                }
                 root.HoverStyle = Style{
                     BackgroundColor: if selectedRow {
                         p.Selection
@@ -119,14 +125,14 @@ open class FileTable : Cell[FileTableInput] {
                         p.Hover
                     }
                 }
-                FileTransferUi.Bind(root, pane.VisibleEntries[indices[(row.Id ?? "")]], value, clicks)
+                FileTransferUi.Bind(root, pane.VisibleEntries[indices[rowId]], value, clicks)
             },
         }
 
         return Sized(
             size -> {
-                let scrolls = pane.VisibleEntries.Count * RowHeight >
-                size.Height - HeaderHeight - scrollbarX.Thickness - scrollbarX.Inset
+                let scrolls = pane.VisibleEntries.Count * p.RowHeight >
+                size.Height - p.HeaderHeight - scrollbarX.Thickness - scrollbarX.Inset
                 let right = scrolls ? 0: Ui.CardInset
                 let gutter = scrolls ? scrollbarY.Thickness + scrollbarY.Inset: 0
 
@@ -163,17 +169,50 @@ open class FileTable : Cell[FileTableInput] {
         let columns = List[DataGridColumn]()
         columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: NameMinimum, Sortable: true})
 
-        if width >= NameMinimum + ModifiedWidth + SizeWidth {
+        var used = NameMinimum
+
+        if value.ShowModified && used + ModifiedWidth <= width {
             columns.Add(
                 DataGridColumn{Id: "modified", Label: "Modified", Width: ModifiedWidth, Minimum: 90, Sortable: true}
             )
+            used += ModifiedWidth
         }
 
-        if value.ShowType && width >= NameMinimum + ModifiedWidth + TypeWidth + SizeWidth {
+        if value.ShowCreated && used + CreatedWidth <= width {
+            columns.Add(
+                DataGridColumn{Id: "created", Label: "Created", Width: CreatedWidth, Minimum: 90, Sortable: true}
+            )
+            used += CreatedWidth
+        }
+
+        if value.ShowType && used + TypeWidth <= width {
             columns.Add(DataGridColumn{Id: "kind", Label: "Type", Width: TypeWidth, Minimum: 70, Sortable: true})
+            used += TypeWidth
         }
 
-        columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: SizeWidth, Minimum: 60, Sortable: true})
+        if value.ShowExtension && used + ExtensionWidth <= width {
+            columns.Add(
+                DataGridColumn{Id: "extension", Label: "Ext", Width: ExtensionWidth, Minimum: 54, Sortable: true}
+            )
+            used += ExtensionWidth
+        }
+
+        if value.ShowPermissions && used + PermissionsWidth <= width {
+            columns.Add(
+                DataGridColumn{
+                    Id: "permissions",
+                    Label: "Permissions",
+                    Width: PermissionsWidth,
+                    Minimum: 82,
+                    Sortable: true
+                }
+            )
+            used += PermissionsWidth
+        }
+
+        if value.ShowSize && used + SizeWidth <= width {
+            columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: SizeWidth, Minimum: 60, Sortable: true})
+        }
 
         return columns.ToArray()
     }
@@ -230,27 +269,48 @@ open class FileTable : Cell[FileTableInput] {
 
     private func CellContent(entry FileEntry, column string, selected bool, value FileTableInput, p Palette) Blob {
         if column == "name" {
-            let label = Ui.Label(FileTransferUi.Name(entry), p.Text)
+            let label = Ui.Label(FileTransferUi.Name(entry), p.Text, p.FontSize)
             label.Key = "name"
 
-            return Container{
-                MinWidth: 0,
-                FlexDirection: FlexDirection.Row,
-                AlignItems: AlignItems.Center,
-                Gap: 8,
+            let row = Container{MinWidth: 0, FlexDirection: FlexDirection.Row, AlignItems: AlignItems.Center, Gap: 6,}
+
+            if !p.Fluent {
+                row.Children.Add(
+                    Container{
+                        Width: 3,
+                        Height: Math.Max(12, p.RowHeight - 14),
+                        FlexShrink: 0,
+                        BorderRadius: 2,
+                        BackgroundColor: selected && value.Active ? p.Accent: Color.Transparent,
+                    }
+                )
+            }
+
+            row.Children.Add(
                 Cell.Mount[FilePreviewInput, FilePreview](
                     "thumbnail",
                     FilePreviewInput{Entry: entry, Acquire: value.AcquireThumbnail, Tile: false, Palette: p}
-                ),
-                label,
-            }
+                )
+            )
+            row.Children.Add(label)
+
+            return row
         }
 
-        let today = column == "modified" && entry.Modified.Date == DateTime.Today
+        let today = (column == "modified" && entry.Modified.Date == DateTime.Today)
+        || (column == "created" && entry.Created.Date == DateTime.Today)
         let text = switch column {
             case "modified": FileEntry.FormatDate(entry.Modified, compact: true)
+            case "created": entry.Created == DateTime.MinValue ? "—": FileEntry.FormatDate(entry.Created, compact: true)
             case "kind": entry.Kind
+            case "extension": entry.ExtensionText()
+            case "permissions": entry.Permissions != "" ? entry.Permissions: "—"
             default: value.SizeText(entry)
+        }
+        let label = Ui.Label(text, selected || today ? p.Text: p.Muted, p.SecondaryFontSize)
+        if column == "permissions" {
+            label.FontFamily = "monospace"
+            label.FontSize = p.SecondaryFontSize - 0.5
         }
 
         return Container{
@@ -260,21 +320,27 @@ open class FileTable : Cell[FileTableInput] {
             } else {
                 AlignItems.FlexStart
             },
-            Ui.Label(text, selected || today ? p.Text: p.Muted, 12),
+            label,
         }
     }
 
     shared {
         private func ColumnKind(id string) SortColumn -> switch id {
             case "modified": SortColumn.Modified
+            case "created": SortColumn.Created
             case "kind": SortColumn.Kind
+            case "extension": SortColumn.Extension
+            case "permissions": SortColumn.Permissions
             case "size": SortColumn.Size
             default: SortColumn.Name
         }
 
         private func ColumnId(column SortColumn) string -> switch column {
             case SortColumn.Modified: "modified"
+            case SortColumn.Created: "created"
             case SortColumn.Kind: "kind"
+            case SortColumn.Extension: "extension"
+            case SortColumn.Permissions: "permissions"
             case SortColumn.Size: "size"
             default: "name"
         }

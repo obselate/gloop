@@ -67,9 +67,11 @@ class PreferenceRow {
                     TrackColor = p.Border,
                     FillColor = p.Accent,
                     ThumbColor = p.Accent,
-                    ThumbBorderColor = p.Surface,
-                    TrackThickness = 4,
-                    ThumbSize = 14,
+                    ThumbBorderWidth = 3,
+                    ThumbBorderColor = p.Text,
+                    ThumbStyle = Style{BoxShadow: BoxShadow{OffsetY: 1, Blur: 4, Color: p.Shadow.WithAlpha(.4)}},
+                    TrackThickness = 5,
+                    ThumbSize = 20,
                     BackgroundColor = Color.Transparent,
                     ConfigureRoot = (_, root) -> {
                         root.BorderRadius = p.WidgetTheme.ControlRadius ?? 6.0
@@ -80,6 +82,6 @@ class PreferenceRow {
             p,
             row,
             true
-        ){.Padding: Edges{Left: 10, Right: 10, Top: 10, Bottom: 6}}
+        ){.Padding: Edges{Left: 4, Right: 4, Top: 4, Bottom: 4}}
     }
 }

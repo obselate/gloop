@@ -8,6 +8,7 @@ import Goo.Widgets.Colors
 import Goo.Widgets.Icons
 import Goo.Widgets.Layout
 import System
+import System.Collections.Generic
 import System.IO
 import System.Text
 
@@ -54,10 +55,10 @@ class Ui {
             BorderColor: p.Border,
             BorderWidth: 1,
             Color: p.Text,
-            FontSize: 11,
-            Padding: Edges{Left: 9, Right: 9, Top: 6, Bottom: 6},
-            BorderRadius: 6,
-            BoxShadow: BoxShadow{OffsetY: 4, Blur: 12, Color: p.Shadow.WithAlpha(.5)},
+            FontSize: 11.5,
+            Padding: Edges{Left: 9, Right: 9, Top: 5, Bottom: 5},
+            BorderRadius: p.ControlRadius + 2,
+            BoxShadow: BoxShadow{OffsetY: 4, Blur: 14, Color: p.Shadow.WithAlpha(.45)},
         }
 
         internal func HoverLabel(
@@ -67,25 +68,43 @@ class Ui {
             window Window,
             p Palette,
             placement PortalPlacement = PortalPlacement.Bottom,
-            wrap bool = false
-        ) Blob -> Cell
-            .Mount[TooltipInput, Tooltip](
-            key,
-            TooltipInput{
-                Window: window,
-                Text: label,
-                Content: Text{
-                    Content: label,
-                    Color: p.Text,
-                    FontSize: 11,
-                    MaxWidth: wrap ? 320: default(Length),
-                    TextWrap: wrap ? TextWrap.Wrap: TextWrap.NoWrap,
-                },
-                Placement: placement,
-                BubbleStyle: BubbleStyle(p),
-                Target: target,
+            wrap bool = false,
+            shortcut string = ""
+        ) Blob {
+            let text = Text{
+                Content: label,
+                Color: p.Text,
+                FontSize: 11.5,
+                FontWeight: shortcut != "" ? 500: 400,
+                MaxWidth: wrap ? 320: default(Length),
+                TextWrap: wrap ? TextWrap.Wrap: TextWrap.NoWrap,
             }
-        )
+            let content Blob = if shortcut != "" {
+                Container{
+                    FlexDirection: FlexDirection.Row,
+                    AlignItems: AlignItems.Center,
+                    Gap: 8,
+                    text,
+                    KeyHint(shortcut, p),
+                }
+            } else {
+                text
+            }
+
+            return Cell.Mount[TooltipInput, Tooltip](
+                key,
+                TooltipInput{
+                    Window: window,
+                    Text: shortcut != "" ? label + " (" + shortcut + ")": label,
+                    Content: content,
+                    DelayMs: 320,
+                    Gap: 6,
+                    Placement: placement,
+                    BubbleStyle: BubbleStyle(p),
+                    Target: target,
+                }
+            )
+        }
 
         internal func ErrorText(value string, p Palette) Text -> Text{
             Content: value,
@@ -122,7 +141,8 @@ class Ui {
             disabled bool = false,
             size float64? = nil,
             iconSize float64 = 20,
-            hoverColor Color? = nil
+            hoverColor Color? = nil,
+            shortcut string = ""
         ) Container -> Container{
             Width: size ?? ToolSize,
             Height: size ?? ToolSize,
@@ -146,14 +166,15 @@ class Ui {
                     Disabled: disabled,
                     Width: size ?? ToolSize,
                     Height: size ?? ToolSize,
-                    BorderRadius: 6,
+                    BorderRadius: p.ControlRadius,
                     BackgroundColor: Color.Transparent,
                     ActiveBackgroundColor: p.ChromeSelection,
                     HoverBackgroundColor: hoverColor ?? p.ChromeHover,
                     FocusOutlineColor: p.Accent,
                 }.Build(),
                 window,
-                p
+                p,
+                shortcut: shortcut
             ),
         }
 
@@ -174,7 +195,7 @@ class Ui {
                 MinWidth: 0,
                 Height: 34,
                 Padding: Edges{Left: 14, Right: 14},
-                BorderRadius: 6,
+                BorderRadius: p.ControlRadius,
                 AlignItems: AlignItems.Center,
                 JustifyContent: JustifyContent.Center,
                 BackgroundColor: if primary {
@@ -182,13 +203,13 @@ class Ui {
                 } else {
                     p.Border
                 },
-                HoverStyle: Style{Opacity: 0.82},
+                HoverStyle: Style{Opacity: 0.85},
                 FocusStyle: p.Ring(2, 2),
                 OnClick: action,
                 Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: label},
                 Text{
                     Content: label,
-                    Color: primary ? p.Background: p.Text,
+                    Color: primary ? p.OnAccent: p.Text,
                     FontSize: 13,
                     FontWeight: 600,
                     Width: maxWidth.HasMagnitude ? Percent(100): default(Length),
@@ -203,6 +224,45 @@ class Ui {
             WidgetKeyBindings.BindActivation(button)
 
             return button
+        }
+
+        internal func SectionCard(title string, description string, children[]Blob, p Palette) Container {
+            let items = List[Blob]()
+
+            if title != "" {
+                let header = Container{Gap: 2}
+                header.Children.Add(Text{Content: title, Color: p.Text, FontSize: 13, FontWeight: 600})
+                if description != "" {
+                    header.Children.Add(
+                        Text{Content: description, Color: p.Muted, FontSize: 11.5, TextWrap: TextWrap.Wrap}
+                    )
+                }
+                items.Add(header)
+            }
+
+            for child in children {
+                items.Add(child)
+            }
+
+            return Container{
+                FlexShrink: 0,
+                Padding: 12,
+                Gap: 8,
+                BackgroundColor: p.SubtleSurface,
+                BorderWidth: 1,
+                BorderColor: p.Border,
+                BorderRadius: p.CardRadius,
+                Children: items.ToArray(),
+            }
+        }
+
+        internal func ColorDot(hex string, p Palette) Container -> Container{
+            Width: 12,
+            Height: 12,
+            BorderRadius: 6,
+            BorderWidth: 1,
+            BorderColor: p.Border,
+            BackgroundColor: Color.Parse(hex),
         }
 
         internal func KeyHint(key string, p Palette) Blob -> Container{

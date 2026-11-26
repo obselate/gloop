@@ -49,6 +49,8 @@ partial class BrowserView : Cell {
     private var locationEditing bool
     private var locationFocusPending bool
     private var locationText string = ""
+    private var inlineFilterOpen bool
+    private var filterFocusPending bool
     private var dialog DialogKind = DialogKind.None
     private var dialogValue string = ""
     private var dialogError string = ""
@@ -63,7 +65,7 @@ partial class BrowserView : Cell {
         this.settings = settings
         settingsService = service
         this.launch = launch
-        palette = Palette(settings.Theme)
+        palette = Palette(settings.Theme, false, settings.RowDensity, settings.AlternatingRows)
         notice = warning
 
         rootHandle.MetricsChanged += (metrics) -> {
@@ -129,6 +131,13 @@ partial class BrowserView : Cell {
                 locationFocusPending = false
                 locationHandle.Focus()
                 Host.Focus.Execute(TextCommand{Kind: TextCommandKind.SelectAll})
+            }
+        }
+
+        filterHandle.MetricsChanged += (metrics) -> {
+            if metrics.IsMounted && filterFocusPending {
+                filterFocusPending = false
+                filterHandle.Focus()
             }
         }
     }
@@ -358,7 +367,9 @@ partial class BrowserView : Cell {
         chrome.Key = "window-bar"
         children.Add(chrome)
         children.Add(main)
-        children.Add(chooser != nil ? ChooserBar(): StatusBar())
+        if chooser != nil {
+            children.Add(ChooserBar())
+        }
 
         if dialog != DialogKind.None {
             children.Add(Dialog())
@@ -458,19 +469,23 @@ partial class BrowserView : Cell {
         )
         workspace.Key = "workspace"
 
+        let hasSidebar = width >= PlacesBreakpoint
         let browserArea = Container{
             BackgroundColor: p.Canvas,
-            BorderColor: p.WidgetTheme.HairlineColor,
-            BorderWidth: p.Glass ? p.WidgetTheme.BorderWidth: 0,
-            BorderRadius: p.Glass ? Ui.WindowRadius: 0,
+            BorderColor: p.Glass ? p.WidgetTheme.HairlineColor: p.Border,
+            BorderWidth: Edges{Top: 1, Left: hasSidebar ? 1: 0},
+            BorderTopLeftRadius: hasSidebar ? p.CardRadius: 0,
             Key: "browser-area",
             FlexGrow: 1,
             FlexBasis: 0,
             MinWidth: 0,
             MinHeight: 0,
-            Margin: p.Glass ? Edges{Left: Ui.CardInset, Right: Ui.CardInset}: Edges{},
-            Overflow: p.Glass ? Overflow.Hidden: Overflow.Visible,
+            Overflow: Overflow.Hidden,
             workspace,
+        }
+
+        if chooser == nil {
+            browserArea.Children.Add(StatusBar())
         }
 
         return browserArea

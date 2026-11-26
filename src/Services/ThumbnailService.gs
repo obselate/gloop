@@ -67,7 +67,7 @@ class ThumbnailItem {
 }
 
 class ThumbnailService : IDisposable {
-    private const MaximumEdgePixels int32 = 160
+    private const MaximumEdgePixels int32 = 256
     private const CacheItemLimit int32 = 128
     private const QueueLimit int32 = 64
     private const CacheByteLimit int64 = 16777216

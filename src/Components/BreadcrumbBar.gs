@@ -10,7 +10,6 @@ import System.IO
 open class BreadcrumbBar : Cell[BreadcrumbInput] {
     private const SeparatorWidth float64 = 12
     private const MoreWidth float64 = 28
-    private const EditWidth float64 = 32
     private let handles Dictionary[string, ElementHandle] = Dictionary[string, ElementHandle](StringComparer.Ordinal)
     private let widths Dictionary[string, float64] = Dictionary[string, float64](StringComparer.Ordinal)
     private let more ElementHandle = ElementHandle()
@@ -29,7 +28,7 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         }
 
         let editable = value.Width >= 160
-        let available = value.Width - (editable ? EditWidth: 0)
+        let available = value.Width - 28
         var total = (names.Count - 1) * SeparatorWidth
 
         for index in 0 ... names.Count {
@@ -44,18 +43,30 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
 
         let children = List[Blob]()
 
+        children.Add(
+            Container{
+                Key: "root-icon",
+                Width: 20,
+                Height: 20,
+                FlexShrink: 0,
+                AlignItems: AlignItems.Center,
+                JustifyContent: JustifyContent.Center,
+                Ui.Icon(RootIcon(value.Kind), p.Muted, 15),
+            }
+        )
+
         if first > 0 {
             let hidden = paths.GetRange(0, first).ToArray()
             let button = Button{
                 Handle: more,
                 Width: MoreWidth,
-                Height: 26,
+                Height: 22,
                 FlexShrink: 0,
                 Padding: 0,
                 AlignItems: AlignItems.Center,
                 JustifyContent: JustifyContent.Center,
                 BackgroundColor: p.Hover,
-                BorderRadius: 4,
+                BorderRadius: Math.Max(2, p.ControlRadius - 2),
                 HoverStyle: Style{BackgroundColor: p.Border},
                 FocusStyle: p.Ring(-1),
                 OnClick: () -> value.More(
@@ -78,7 +89,8 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                         Width: SeparatorWidth,
                         FlexShrink: 0,
                         AlignItems: AlignItems.Center,
-                        Ui.Label("/", p.Muted, 12),
+                        JustifyContent: JustifyContent.Center,
+                        Ui.Icon("chevron_right", p.Muted.WithAlpha(.7), 14),
                     }
                 )
             }
@@ -89,17 +101,37 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
                     paths[index],
                     value,
                     index == names.Count - 1,
-                    available - (first > 0 ? MoreWidth + SeparatorWidth: 0),
+                    available - (first > 0 ? MoreWidth + SeparatorWidth: 0) - 24,
                     first == names.Count - 1
                 )
             )
         }
 
         if editable {
-            let edit = Ui.Tool("edit", "Edit location", value.Edit, value.Window, p)
-            edit.Key = "edit"
-            edit.Margin = Edges{Left: 2}
-            children.Add(edit)
+            let blank = Container{
+                Key: "edit-blank",
+                FlexGrow: 1,
+                FlexBasis: 0,
+                MinWidth: 12,
+                Height: 26,
+                HitTestSelf: true,
+                OnPointerDown: e -> {
+                    if e.Button == PointerButton.Primary {
+                        value.Edit()
+                        e.PreventDefault()
+                    }
+                },
+            }
+            children.Add(
+                Ui.HoverLabel(
+                    "edit-blank-tip",
+                    "Click to edit location",
+                    blank,
+                    value.Window,
+                    p,
+                    shortcut: value.EditShortcut
+                )
+            )
         }
 
         return Container{
@@ -109,9 +141,30 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
             FlexShrink: 0,
             FlexDirection: FlexDirection.Row,
             AlignItems: AlignItems.Center,
+            Padding: Edges{Left: 6, Right: 6},
+            Gap: 1,
+            HitTestSelf: true,
+            OnPointerDown: e -> {
+                if editable && e.Button == PointerButton.Primary && !e.IsFromInteractiveChild {
+                    value.Edit()
+                    e.PreventDefault()
+                }
+            },
+            BackgroundColor: p.SubtleSurface,
+            BorderWidth: 1,
+            BorderColor: p.Border,
+            BorderRadius: p.ControlRadius,
+            HoverStyle: Style{BorderColor: p.Muted.WithAlpha(.45)},
             OverflowX: Overflow.Hidden,
             Children: children.ToArray(),
         }
+    }
+
+    private func RootIcon(kind LocationKind) string -> switch kind {
+        case LocationKind.Recent: "history"
+        case LocationKind.Trash: "delete"
+        case LocationKind.Archive: "folder_zip"
+        default: "folder"
     }
 
     private func BuildSegments(value BreadcrumbInput, names List[string], paths List[string]) {
@@ -183,27 +236,20 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
 
         let button = Button{
             Handle: handle,
-            Height: 26,
+            Height: 22,
             MinWidth: 0,
             MaxWidth: last ? Math.Max(0, room): 220,
             FlexShrink: alone ? 1: 0,
-            Padding: Edges{Left: 5, Right: 5},
+            Padding: Edges{Left: 6, Right: 6},
             AlignItems: AlignItems.Center,
             JustifyContent: JustifyContent.Center,
             BackgroundColor: Color.Transparent,
-            BorderRadius: 4,
+            BorderRadius: Math.Max(2, p.ControlRadius - 2),
             HoverStyle: Style{BackgroundColor: p.Hover},
             FocusStyle: p.Ring(-1),
             OnClick: () -> value.Navigate(destination),
             Accessibility: Accessibility{Role: AccessibilityRole.Button, Name: "Open " + destination},
-            Container{
-                MinWidth: 0,
-                FlexShrink: 1,
-                Padding: Edges{Top: 4, Bottom: 2},
-                BorderWidth: Edges{Bottom: last ? 2: 0},
-                BorderColor: p.Accent,
-                Ui.Label(label, last ? p.Text: p.Muted, 13, last ? 600: 400),
-            },
+            Ui.Label(label, last ? p.Text: p.Muted, p.SecondaryFontSize, last ? 600: 400),
         }
 
         WidgetKeyBindings.BindActivation(button)

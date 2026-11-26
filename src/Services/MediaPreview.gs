@@ -18,18 +18,7 @@ unsafe class MediaPreview {
         private const MaximumMemoryBytes uint64 = 536870912
 
         internal func Supports(extension string) bool -> extension.ToLowerInvariant() is
-        ".pdf" or
-            ".mp4" or
-            ".mkv" or
-            ".webm" or
-            ".wav" or
-            ".flac" or
-            ".mp3" or
-            ".ogg" or
-            ".webp" or
-            ".bmp" or
-            ".tif" or
-            ".tiff"
+        ".pdf" or ".mp4" or ".mkv" or ".webm" or ".wav" or ".flac" or ".mp3" or ".ogg" or ".bmp" or ".tif" or ".tiff"
 
         internal func Load(path string, width int32, height int32, token CancellationToken) ImageSource {
             token.ThrowIfCancellationRequested()
@@ -77,7 +66,6 @@ unsafe class MediaPreview {
                     case ".wav": "wav"
                     case ".flac": "flac"
                     case ".mp3": "mp3"
-                    case ".webp": "webp_pipe"
                     case ".bmp": "bmp_pipe"
                     case ".tif" or ".tiff": "tiff_pipe"
                     default: "ogg"

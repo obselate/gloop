@@ -114,7 +114,7 @@ partial class BrowserView {
         let columns = tiles ? TileColumns(index): 1
         let selected = Math.Max(0, pane.Selected)
         let row = selected / columns
-        let rowHeight = tiles ? FileTiles.TileHeight + FileTiles.Gap: FileTable.RowHeight
+        let rowHeight = tiles ? FileTiles.TileHeight + FileTiles.Gap: palette.RowHeight
         let x = bounds.X + 12 + (tiles ? selected % columns * (TileWidth(index) + FileTiles.Gap): 0)
         let y = bounds.Y + (tiles ? 12: 0) + row * rowHeight - viewport.ScrollOffset.Y + rowHeight / 2
 
@@ -151,17 +151,12 @@ partial class BrowserView {
         let count = Model.ActivePane().SelectedPaths.Count
 
         if contextMenuColumns {
-            items.Add(
-                FileContextMenu.Item(
-                    "ToggleTypeColumn",
-                    "Type column",
-                    "view_list",
-                    "",
-                    palette,
-                    false,
-                    settings.ShowTypeColumn
-                )
-            )
+            items.Add(ColumnToggleItem("Modified", settings.ShowModifiedColumn))
+            items.Add(ColumnToggleItem("Created", settings.ShowCreatedColumn))
+            items.Add(ColumnToggleItem("Type", settings.ShowTypeColumn))
+            items.Add(ColumnToggleItem("Extension", settings.ShowExtensionColumn))
+            items.Add(ColumnToggleItem("Permissions", settings.ShowPermissionsColumn))
+            items.Add(ColumnToggleItem("Size", settings.ShowSizeColumn))
         } else if contextMenuPaths.Length > 0 {
             for path in contextMenuPaths {
                 items.Add(
@@ -220,6 +215,8 @@ partial class BrowserView {
                                 notice = settingsWriter?.RemoveBookmark(settings, bookmark) ?? ""
                                 FocusFiles()
                                 Rebuild()
+                            } else if action.StartsWith("ToggleColumn:", StringComparison.Ordinal) {
+                                ToggleColumn(action.Substring(13))
                             } else if action.StartsWith("Navigate:", StringComparison.Ordinal) {
                                 Model.Navigate(action.Substring(9))
                                 FocusFiles()
@@ -272,4 +269,36 @@ partial class BrowserView {
         disabled || !(chooser?.Allows(action) ?? true) || !Model.CanRun(action),
         checked
     )
+
+    private func ColumnToggleItem(label string, checked bool) MenuItem -> FileContextMenu.Item(
+        "ToggleColumn:" + label,
+        label,
+        "view_column",
+        "",
+        palette,
+        false,
+        checked
+    )
+
+    private func ToggleColumn(name string) {
+        if name == "Modified" {
+            settings.ShowModifiedColumn = !settings.ShowModifiedColumn
+        } else if name == "Created" {
+            settings.ShowCreatedColumn = !settings.ShowCreatedColumn
+        } else if name == "Type" {
+            settings.ShowTypeColumn = !settings.ShowTypeColumn
+        } else if name == "Extension" {
+            settings.ShowExtensionColumn = !settings.ShowExtensionColumn
+        } else if name == "Permissions" {
+            settings.ShowPermissionsColumn = !settings.ShowPermissionsColumn
+            if settings.ShowPermissionsColumn {
+                Model.Directories.RefreshLoadedPanes()
+            }
+        } else if name == "Size" {
+            settings.ShowSizeColumn = !settings.ShowSizeColumn
+        }
+
+        SavePreferences()
+        Rebuild()
+    }
 }
