@@ -411,6 +411,7 @@ partial class BrowserView : Cell {
             Width: Percent(100),
             Height: Percent(100),
             MinHeight: 0,
+            BorderRadius: rounded ? Ui.WindowRadius: 0,
             Overflow: rounded ? Overflow.Hidden: Overflow.Visible,
             Color: p.Text,
             FontFamily: "sans-serif, Noto Sans CJK",
