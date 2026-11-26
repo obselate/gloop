@@ -18,7 +18,7 @@ unsafe class FileSystemService {
     private const TextProbeBytes int32 = 8192
     internal const BytesPerKiB int64 = 1024
     internal const BytesPerMiB int64 = 1048576
-    private const BytesPerGiB int64 = 1073741824
+    private const BytesPerKB int64 = 1000
 
     internal func List(
         path string,
@@ -347,32 +347,24 @@ unsafe class FileSystemService {
         }
 
         internal func FormatSize(size int64, rounded bool = false) string {
-            if size < BytesPerKiB {
+            if size < BytesPerKB {
                 return size.ToString() + " B"
             }
 
-            if size < BytesPerMiB {
-                let value = float64(size) / BytesPerKiB
-                return (rounded ? Math.Round(value): value).ToString(
-                    rounded ? "0": "0.0",
-                    CultureInfo.InvariantCulture
-                ) +
-                    " KiB"
+            let units = []string{"KB", "MB", "GB", "TB"}
+            var unitIndex = 0
+            var value = float64(size) / 1000.0
+
+            while unitIndex < units.Length - 1 && (rounded ? Math.Round(value): Math.Round(value, 1)) >= 1000.0 {
+                value /= 1000.0
+                unitIndex++
             }
 
-            if size < BytesPerGiB {
-                let value = float64(size) / BytesPerMiB
-                return (rounded ? Math.Round(value): value).ToString(
-                    rounded ? "0": "0.0",
-                    CultureInfo.InvariantCulture
-                ) +
-                    " MiB"
-            }
-
-            let value = float64(size) / BytesPerGiB
-
-            return (rounded ? Math.Round(value): value).ToString(rounded ? "0": "0.0", CultureInfo.InvariantCulture) +
-                " GiB"
+            let formatted = (rounded ? Math.Round(value): value).ToString(
+                rounded ? "0": "0.0",
+                CultureInfo.InvariantCulture
+            )
+            return formatted + " " + units[unitIndex]
         }
     }
 
