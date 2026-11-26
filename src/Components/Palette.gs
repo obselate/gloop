@@ -52,6 +52,8 @@ class Palette {
     internal let Keyboard bool
     internal let WidgetTheme Theme
     internal let Danger Color = Color.Parse("#9F3545")
+    internal let Warning Color
+    internal let Critical Color
     internal let Scrim Color
     internal let Shadow Color = Color.Black
     internal let GlassGradient LinearGradient = LinearGradient(Color.Parse("#2B6FD6"), Color.Parse("#D43C8C"))
@@ -108,6 +110,8 @@ class Palette {
         Border = Color.Parse(theme.Border)
 
         let dark = Background.R + Background.G + Background.B < Text.R + Text.G + Text.B
+        Warning = Color.Parse(dark ? "#E5A93C": "#C77D00")
+        Critical = Color.Parse(dark ? "#E5484D": "#C62828")
         Scrim = Color.Black.WithAlpha(dark ? .55: .2)
         OnAccent = ColorMath.GooColor(ColorMath.Foreground(ColorMath.ParseHex(theme.Accent) ?? 0, 0x111111, 0xFFFFFF))
         let baseTheme = Fluent ? Theme.Fluent: (dark ? Theme.Ink: Theme.Bone)
@@ -177,6 +181,23 @@ class Palette {
         Style{BorderColor: Accent}
     } else {
         Style{}
+    }
+
+    internal func CapacityColor(usedRatio float64) Color {
+        if usedRatio < 0.75 {
+            return Accent
+        }
+
+        if usedRatio >= 0.95 {
+            return Critical
+        }
+
+        let t = (usedRatio - 0.75) / 0.20
+        return Color.Rgb(
+            int32(Math.Round((Warning.R + (Critical.R - Warning.R) * t) * 255.0)),
+            int32(Math.Round((Warning.G + (Critical.G - Warning.G) * t) * 255.0)),
+            int32(Math.Round((Warning.B + (Critical.B - Warning.B) * t) * 255.0))
+        )
     }
 
     internal func IconColor(icon string) Color -> switch icon {

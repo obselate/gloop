@@ -518,6 +518,10 @@ partial class BrowserView : Cell {
         var places Blob? = nil
 
         if width >= PlacesBreakpoint {
+            let cloudCfg = Model.GoogleDrive.ConfigSnapshot()
+            let cloudTotal = cloudCfg.IsSignedIn() ? cloudCfg.StorageLimit: int64(0)
+            let cloudFree = cloudTotal > 0 ? Math.Max(int64(0), cloudTotal - cloudCfg.StorageUsed): int64(0)
+
             places = PlacesSidebar.Build(
                 Model.ActivePane().DirectoryPath,
                 path -> {
@@ -544,7 +548,9 @@ partial class BrowserView : Cell {
                 Model.Places.TrashCount,
                 chooser == nil,
                 Model.GoogleDrive.IsConfigured(),
-                () -> OpenGoogleDrive()
+                () -> OpenGoogleDrive(),
+                cloudFree,
+                cloudTotal
             )
         }
 
