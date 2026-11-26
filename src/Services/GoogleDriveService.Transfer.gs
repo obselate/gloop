@@ -80,8 +80,8 @@ internal partial class GoogleDriveService {
         using let multipart = MultipartContent("related", boundary)
         let metaContent = StringContent(metadataJson, Encoding.UTF8, "application/json")
         multipart.Add(metaContent)
-        let fileBytes = File.ReadAllBytes(localPath)
-        let fileContent = ByteArrayContent(fileBytes)
+        using let fileStream = File.OpenRead(localPath)
+        let fileContent = StreamContent(fileStream)
         fileContent.Headers.ContentType = MediaTypeHeaderValue("application/octet-stream")
         multipart.Add(fileContent)
 

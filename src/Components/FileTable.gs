@@ -18,6 +18,9 @@ open class FileTable : Cell[FileTableInput] {
     private var entries List[FileEntry]?
     private var rows[]DataGridRow = []DataGridRow{}
     private var indices Dictionary[string, int32] = Dictionary[string, int32]()
+    private var cachedColumns[]?DataGridColumn
+    private var cachedColumnWidth float64 = -1
+    private var cachedColumnMask int32 = -1
 
     protected override func Build(value FileTableInput) Blob {
         if value.Tiles {
@@ -166,6 +169,19 @@ open class FileTable : Cell[FileTableInput] {
     }
 
     private func BuildColumns(value FileTableInput, width float64)[]DataGridColumn {
+        let mask = (value.ShowModified ? 1: 0) |
+        (value.ShowCreated ? 2: 0) |
+        (value.ShowType ? 4: 0) |
+        (value.ShowExtension ? 8: 0) |
+        (value.ShowPermissions ? 16: 0) |
+        (value.ShowSize ? 32: 0)
+
+        if let existing = cachedColumns {
+            if cachedColumnMask == mask && Math.Abs(cachedColumnWidth - width) < 0.5 {
+                return existing
+            }
+        }
+
         let columns = List[DataGridColumn]()
         columns.Add(DataGridColumn{Id: "name", Label: "Name", Minimum: NameMinimum, Sortable: true})
 
@@ -214,7 +230,11 @@ open class FileTable : Cell[FileTableInput] {
             columns.Add(DataGridColumn{Id: "size", Label: "Size", Width: SizeWidth, Minimum: 60, Sortable: true})
         }
 
-        return columns.ToArray()
+        let built = columns.ToArray()
+        cachedColumns = built
+        cachedColumnMask = mask
+        cachedColumnWidth = width
+        return built
     }
 
     private func ConfigureRoot(root Container, value FileTableInput, right float64) {

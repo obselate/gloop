@@ -21,7 +21,7 @@ internal partial class GoogleDriveService {
         _store = CloudCredentialStore()
         _config = _store.Load()
         _cacheDir = Path.Combine(Path.GetTempPath(), "gloop-cloud-cache")
-        _http.Timeout = TimeSpan.FromSeconds(45)
+        _http.Timeout = TimeSpan.FromMinutes(15)
     }
 
     internal func ConfigSnapshot() GoogleDriveConfig {

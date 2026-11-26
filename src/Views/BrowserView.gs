@@ -234,6 +234,15 @@ partial class BrowserView : Cell {
         selectionInfo?.Dispose()
     }
 
+    private func NavigateAndFocus(path string) {
+        Model.Navigate(path)
+        FocusFiles()
+    }
+
+    private func OpenPreferencesDefault() {
+        OpenPreferences()
+    }
+
     private func OpenGoogleDrive() {
         if Model.GoogleDrive.IsConfigured() {
             Model.Navigate(Locations.GoogleDriveRoot)
@@ -242,6 +251,11 @@ partial class BrowserView : Cell {
         }
 
         OpenPreferences("Cloud")
+    }
+
+    private func OpenGoogleDriveTrash() {
+        Model.Navigate(Locations.GoogleDriveTrash)
+        FocusFiles()
     }
 
     internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
@@ -524,11 +538,8 @@ partial class BrowserView : Cell {
 
             places = PlacesSidebar.Build(
                 Model.ActivePane().DirectoryPath,
-                path -> {
-                    Model.Navigate(path)
-                    FocusFiles()
-                },
-                () -> OpenPreferences(),
+                NavigateAndFocus,
+                OpenPreferencesDefault,
                 settings.Bookmarks,
                 Host,
                 p,
@@ -548,13 +559,10 @@ partial class BrowserView : Cell {
                 Model.Places.TrashCount,
                 chooser == nil,
                 Model.GoogleDrive.IsConfigured(),
-                () -> OpenGoogleDrive(),
+                OpenGoogleDrive,
                 cloudFree,
                 cloudTotal,
-                Model.GoogleDrive.IsSignedIn() ? () -> {
-                    Model.Navigate(Locations.GoogleDriveTrash)
-                    FocusFiles()
-                }: nil
+                Model.GoogleDrive.IsSignedIn() ? OpenGoogleDriveTrash: nil
             )
         }
 
