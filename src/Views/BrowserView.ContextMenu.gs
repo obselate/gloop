@@ -175,17 +175,29 @@ partial class BrowserView {
 
             items.Add(ContextMenuItem("NewFolder", "New folder", "create_new_folder"))
             FolderMenuItems(items)
-        } else if Model.InTrashView {
+        } else if Model.InTrashView || Model.InCloudTrash {
             if count > 0 {
-                items.Add(ContextMenuItem("Open", "Open", "open_in_new"))
+                if !Model.InCloudTrash {
+                    items.Add(ContextMenuItem("Open", "Open", "open_in_new"))
+                }
+
                 items.Add(ContextMenuItem("CopyPath", "Copy path", "link"))
                 items.Add(MenuItem{Id: "open-separator", Separator: true})
                 items.Add(ContextMenuItem("Restore", "Restore", "restore_from_trash"))
                 items.Add(ContextMenuItem("DeletePermanently", "Delete permanently", "delete_forever"))
-                items.Add(MenuItem{Id: "properties-separator", Separator: true})
-                items.Add(ContextMenuItem("Properties", "Properties", "info"))
+
+                if !Model.InCloudTrash {
+                    items.Add(MenuItem{Id: "properties-separator", Separator: true})
+                    items.Add(ContextMenuItem("Properties", "Properties", "info"))
+                }
             } else {
-                items.Add(ContextMenuItem("EmptyTrash", "Empty Trash", "delete_forever"))
+                items.Add(
+                    ContextMenuItem(
+                        "EmptyTrash",
+                        Model.InCloudTrash ? "Empty Drive Trash": "Empty Trash",
+                        "delete_forever"
+                    )
+                )
                 items.Add(MenuItem{Id: "trash-separator", Separator: true})
                 FolderMenuItems(items)
             }

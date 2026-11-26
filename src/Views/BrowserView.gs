@@ -550,7 +550,11 @@ partial class BrowserView : Cell {
                 Model.GoogleDrive.IsConfigured(),
                 () -> OpenGoogleDrive(),
                 cloudFree,
-                cloudTotal
+                cloudTotal,
+                Model.GoogleDrive.IsSignedIn() ? () -> {
+                    Model.Navigate(Locations.GoogleDriveTrash)
+                    FocusFiles()
+                }: nil
             )
         }
 

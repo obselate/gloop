@@ -355,6 +355,7 @@ class DirectoryLoader {
                 () -> !queue.IsCurrent(generation)
             )
         } else if request.Kind == LocationKind.Cloud {
+            controller.GoogleDrive.RefreshAccountStatusIfStale(30)
             controller.GoogleDrive.ListFolder(
                 request.Path,
                 request.ShowHidden,

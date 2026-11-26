@@ -359,14 +359,16 @@ partial class BrowserView {
                 return true
             }
             case "DeletePermanently" {
-                if Model.AtTrashRoot && Model.ActivePane().SelectedPaths.Count > 0 {
+                if (Model.AtTrashRoot || Model.InCloud) && Model.ActivePane().SelectedPaths.Count > 0 {
                     OpenDialog(DialogKind.DeletePermanently, Model.ActivePane().SelectionSummary())
                 }
 
                 return true
             }
             case "EmptyTrash" {
-                if Model.AtTrashRoot && Model.Places.TrashCount > 0 {
+                if Model.InCloudTrash && Model.ActivePane().Entries.Count > 0 {
+                    OpenDialog(DialogKind.EmptyTrash, "all trashed items in Google Drive")
+                } else if Model.AtTrashRoot && Model.Places.TrashCount > 0 {
                     OpenDialog(
                         DialogKind.EmptyTrash,
                         Model.Places.TrashCount == 1 ? "1 item": "all " + Model.Places.TrashCount.ToString() + " items"

@@ -8,9 +8,15 @@ class Locations {
         internal const Recent string = "recent:"
         internal const GoogleDriveScheme string = "gdrive://"
         internal const GoogleDriveRoot string = "gdrive://root"
+        internal const GoogleDriveTrash string = "gdrive://trash"
 
         internal func IsCloud(path string) bool -> path != nil && path.Trim().StartsWith(
             GoogleDriveScheme,
+            StringComparison.OrdinalIgnoreCase
+        )
+
+        internal func IsCloudTrash(path string) bool -> IsCloud(path) && CloudId(path).Equals(
+            "trash",
             StringComparison.OrdinalIgnoreCase
         )
 
@@ -31,6 +37,10 @@ class Locations {
         internal func DisplayName(path string, home string) string {
             if path == Recent {
                 return "Recent"
+            }
+
+            if IsCloudTrash(path) {
+                return "Drive Trash"
             }
 
             if IsCloud(path) {
@@ -71,6 +81,7 @@ class Locations {
 
             if IsCloud(path) {
                 fullPath = CloudPath(CloudId(path))
+                atTrashRoot = IsCloudTrash(fullPath)
                 return LocationKind.Cloud
             }
 

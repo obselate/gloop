@@ -91,6 +91,10 @@ class BrowserController {
         get -> ActivePane().Kind == LocationKind.Cloud
     }
 
+    internal prop InCloudTrash bool {
+        get -> InCloud && Locations.IsCloudTrash(ActivePane().DirectoryPath)
+    }
+
     internal prop AtTrashRoot bool {
         get -> ActivePane().AtTrashRoot
     }
@@ -137,6 +141,18 @@ class BrowserController {
         }
 
         if ActivePane().Kind == LocationKind.Cloud {
+            if InCloudTrash {
+                if action == "Restore" || action == "DeletePermanently" || action == "CopyPath" {
+                    return !empty
+                }
+
+                if action == "EmptyTrash" {
+                    return ActivePane().Entries.Count > 0
+                }
+
+                return false
+            }
+
             if action == "OpenTerminal" ||
                 action == "OpenTerminalHere" ||
                 action == "Properties" ||
@@ -144,14 +160,20 @@ class BrowserController {
                 action == "Extract" ||
                 action == "Compress" ||
                 action == "Restore" ||
-                action == "DeletePermanently" ||
                 action == "EmptyTrash" ||
                 action == "ToggleBookmark" {
                 return false
             }
 
             return !empty ||
-                (action != "CopyPath" && action != "Rename" && action != "Trash" && action != "Copy" && action != "Cut")
+                (
+                action != "CopyPath" &&
+                    action != "Rename" &&
+                    action != "Trash" &&
+                    action != "DeletePermanently" &&
+                    action != "Copy" &&
+                    action != "Cut"
+            )
         }
 
         if ActivePane().DirectoryPath == "" || ActivePane().Error != "" {
@@ -524,7 +546,7 @@ class BrowserController {
 
         if clipboardPaths.Count == 0 ||
             destination == "" ||
-            (ActivePane().Kind != LocationKind.Folder && ActivePane().Kind != LocationKind.Cloud) {
+            (ActivePane().Kind != LocationKind.Folder && (ActivePane().Kind != LocationKind.Cloud || InCloudTrash)) {
             return
         }
 
@@ -584,7 +606,9 @@ class BrowserController {
     }
 
     internal func EmptyTrash() {
-        if AtTrashRoot {
+        if InCloudTrash {
+            Operations.StartOperation(OperationKind.Empty, Locations.GoogleDriveTrash, "", "")
+        } else if AtTrashRoot {
             Operations.StartOperation(OperationKind.Empty, TrashDirectory, "", "")
         }
     }
@@ -618,7 +642,11 @@ class BrowserController {
     }
 
     private func TrashOperation(kind OperationKind) {
-        if !AtTrashRoot {
+        if !AtTrashRoot && !InCloud {
+            return
+        }
+
+        if kind == OperationKind.Restore && !AtTrashRoot && !InCloudTrash {
             return
         }
 

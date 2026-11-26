@@ -36,7 +36,8 @@ class PlacesSidebar {
             cloudConnected bool = false,
             openCloud Action? = nil,
             cloudFreeBytes int64 = 0,
-            cloudTotalBytes int64 = 0
+            cloudTotalBytes int64 = 0,
+            openCloudTrash Action? = nil
         ) Blob {
             let places = List[Blob]()
 
@@ -54,7 +55,8 @@ class PlacesSidebar {
                 cloudConnected,
                 openCloud,
                 cloudFreeBytes,
-                cloudTotalBytes
+                cloudTotalBytes,
+                openCloudTrash
             )
 
             BuildBookmarks(
@@ -118,7 +120,8 @@ class PlacesSidebar {
             cloudConnected bool,
             openCloud Action?,
             cloudFreeBytes int64,
-            cloudTotalBytes int64
+            cloudTotalBytes int64,
+            openCloudTrash Action?
         ) {
             places.Add(Ui.GroupGap())
 
@@ -160,12 +163,22 @@ class PlacesSidebar {
                 }
 
                 if let cloudAction = openCloud {
-                    let cloudTarget = Locations.IsCloud(path) ? path: Locations.GoogleDriveRoot
+                    let cloudTarget = Locations.IsCloud(path) && !Locations.IsCloudTrash(path)
+                    ? path
+                    : Locations.GoogleDriveRoot
                     let cloudIcon = cloudConnected ? "cloud_done": "cloud"
                     places.Add(Place(cloudIcon, "Google Drive", cloudTarget, path, _ -> cloudAction(), p))
 
                     if cloudTotalBytes > 0 {
                         places.Add(StorageMeter(cloudFreeBytes, cloudTotalBytes, p))
+                    }
+
+                    if cloudConnected {
+                        if let trashAction = openCloudTrash {
+                            places.Add(
+                                Place("delete", "Drive Trash", Locations.GoogleDriveTrash, path, _ -> trashAction(), p)
+                            )
+                        }
                     }
                 }
             }

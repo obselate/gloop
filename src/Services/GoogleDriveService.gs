@@ -15,6 +15,7 @@ internal partial class GoogleDriveService {
     private let _metaCache Dictionary[string, DriveItemMeta] = Dictionary[string, DriveItemMeta](StringComparer.Ordinal)
     private let _cacheDir string
     private var _config GoogleDriveConfig
+    private var _lastAboutRefreshUnix int64 = 0
 
     internal init() {
         _store = CloudCredentialStore()
@@ -96,10 +97,28 @@ internal partial class GoogleDriveService {
             _store.Save(working)
             lock _sync {
                 _config = working
+                _lastAboutRefreshUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             }
         }
 
         return aboutErr
+    }
+
+    internal func RefreshAccountStatusIfStale(minIntervalSeconds int64) {
+        if !IsSignedIn() {
+            return
+        }
+
+        let now = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+        var stale = false
+
+        lock _sync {
+            stale = now - _lastAboutRefreshUnix >= minIntervalSeconds
+        }
+
+        if stale {
+            RefreshAccountStatus()
+        }
     }
 
     internal func Disconnect() string {
@@ -134,6 +153,13 @@ internal partial class GoogleDriveService {
 
     internal func BreadcrumbChain(path string) List[KeyValuePair[string, string]] {
         let result = List[KeyValuePair[string, string]]()
+        result.Add(KeyValuePair[string, string](Locations.GoogleDriveRoot, "Google Drive"))
+
+        if Locations.IsCloudTrash(path) {
+            result.Add(KeyValuePair[string, string](Locations.GoogleDriveTrash, "Drive Trash"))
+            return result
+        }
+
         let rootId = ConfigSnapshot().EffectiveRootId()
         var currentId = ResolveFolderId(path)
         let reversed = List[KeyValuePair[string, string]]()
@@ -151,8 +177,6 @@ internal partial class GoogleDriveService {
             guardCount++
         }
 
-        result.Add(KeyValuePair[string, string](Locations.GoogleDriveRoot, "Google Drive"))
-
         var i = reversed.Count - 1
 
         while i >= 0 {
@@ -164,6 +188,10 @@ internal partial class GoogleDriveService {
     }
 
     internal func ParentPath(path string) string {
+        if Locations.IsCloudTrash(path) {
+            return Locations.GoogleDriveRoot
+        }
+
         let rootId = ConfigSnapshot().EffectiveRootId()
         let currentId = ResolveFolderId(path)
 
@@ -189,8 +217,9 @@ internal partial class GoogleDriveService {
             return false
         }
 
-        let folderId = ResolveFolderId(path)
-        let query = "'" + EscapeQuery(folderId) + "' in parents and trashed = false"
+        let inTrash = Locations.IsCloudTrash(path)
+        let folderId = inTrash ? "": ResolveFolderId(path)
+        let query = inTrash ? "trashed = true": "'" + EscapeQuery(folderId) + "' in parents and trashed = false"
         var pageToken = ""
 
         while true {
@@ -245,7 +274,14 @@ internal partial class GoogleDriveService {
         return true
     }
 
-    internal func CreateFolder(parentPath string, name string) string {
+    internal func CreateFolder(parentPath string, name string) string -> CreateFolderReturningId(
+        parentPath,
+        name,
+        out var createdId
+    )
+
+    internal func CreateFolderReturningId(parentPath string, name string, out folderId string) string {
+        folderId = ""
         var err = ""
         let config = PrepareConfig(out err)
 
@@ -267,6 +303,11 @@ internal partial class GoogleDriveService {
                 response.StatusCode
             )
         }
+
+        try {
+            using let doc = JsonDocument.Parse(body)
+            folderId = ReadString(doc.RootElement, "id", "")
+        } catch { }
 
         return ""
     }
@@ -338,6 +379,122 @@ internal partial class GoogleDriveService {
 
         if !response.IsSuccessStatusCode {
             return "Could not copy item: " + GoogleDriveAuthService.ExtractApiError(body, response.StatusCode)
+        }
+
+        return ""
+    }
+
+    internal func MoveCloudToCloud(sourceCloudPath string, targetParentCloudPath string) string {
+        var err = ""
+        let config = PrepareConfig(out err)
+
+        if err != "" {
+            return err
+        }
+
+        let sourceId = Locations.CloudId(sourceCloudPath)
+        let targetId = ResolveFolderId(targetParentCloudPath)
+        let meta = EnsureMeta(sourceId, config)
+        let oldParent = meta != nil ? meta.ParentId: ""
+
+        if oldParent == targetId {
+            return ""
+        }
+
+        var url = GoogleDriveAuthService.ApiBaseUrl() + "/files/" + Uri.EscapeDataString(sourceId) +
+            "?addParents=" +
+            Uri.EscapeDataString(targetId)
+
+        if oldParent != "" {
+            url += "&removeParents=" + Uri.EscapeDataString(oldParent)
+        }
+
+        url = AppendApiKey(url, config)
+        using let request = CreateAuthorizedRequest(HttpMethod.Patch, url, config)
+        request.Content = StringContent("{}", Encoding.UTF8, "application/json")
+        using let response = _http.Send(request)
+        let body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+
+        if !response.IsSuccessStatusCode {
+            return "Could not move item: " + GoogleDriveAuthService.ExtractApiError(body, response.StatusCode)
+        }
+
+        lock _sync {
+            _metaCache.Remove(sourceId)
+        }
+
+        return ""
+    }
+
+    internal func Restore(cloudPath string) string {
+        var err = ""
+        let config = PrepareConfig(out err)
+
+        if err != "" {
+            return err
+        }
+
+        let fileId = Locations.CloudId(cloudPath)
+        let url = AppendApiKey(GoogleDriveAuthService.ApiBaseUrl() + "/files/" + Uri.EscapeDataString(fileId), config)
+        using let request = CreateAuthorizedRequest(HttpMethod.Patch, url, config)
+        request.Content = StringContent("{\"trashed\":false}", Encoding.UTF8, "application/json")
+        using let response = _http.Send(request)
+        let body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+
+        if !response.IsSuccessStatusCode {
+            return "Could not restore item: " + GoogleDriveAuthService.ExtractApiError(body, response.StatusCode)
+        }
+
+        return ""
+    }
+
+    internal func DeletePermanently(cloudPath string) string {
+        var err = ""
+        let config = PrepareConfig(out err)
+
+        if err != "" {
+            return err
+        }
+
+        let fileId = Locations.CloudId(cloudPath)
+        let url = AppendApiKey(GoogleDriveAuthService.ApiBaseUrl() + "/files/" + Uri.EscapeDataString(fileId), config)
+        using let request = CreateAuthorizedRequest(HttpMethod.Delete, url, config)
+        using let response = _http.Send(request)
+        let body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+
+        if !response.IsSuccessStatusCode {
+            return "Could not delete item permanently: " + GoogleDriveAuthService.ExtractApiError(
+                body,
+                response.StatusCode
+            )
+        }
+
+        lock _sync {
+            _metaCache.Remove(fileId)
+        }
+
+        return ""
+    }
+
+    internal func EmptyTrash() string {
+        var err = ""
+        let config = PrepareConfig(out err)
+
+        if err != "" {
+            return err
+        }
+
+        let url = AppendApiKey(GoogleDriveAuthService.ApiBaseUrl() + "/files/trash", config)
+        using let request = CreateAuthorizedRequest(HttpMethod.Delete, url, config)
+        using let response = _http.Send(request)
+        let body = response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+
+        if !response.IsSuccessStatusCode {
+            return "Could not empty Drive Trash: " + GoogleDriveAuthService.ExtractApiError(body, response.StatusCode)
+        }
+
+        lock _sync {
+            _metaCache.Clear()
         }
 
         return ""

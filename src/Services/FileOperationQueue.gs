@@ -103,7 +103,7 @@ class FileOperationQueue {
         }
 
         let kind = Locations.Resolve(destination, controller.TrashDirectory, out var fullPath, out var atTrashRoot)
-        return kind == LocationKind.Folder || kind == LocationKind.Cloud
+        return kind == LocationKind.Folder || (kind == LocationKind.Cloud && !Locations.IsCloudTrash(fullPath))
     }
 
     internal func Drop(sources List[string], destination string, copy bool) {
@@ -392,6 +392,7 @@ func fileOperationWorker(window Window, queue FileOperationQueue, archives Archi
         let results = List[OperationResult](request.Sources.Count)
         let operations = FileOperationService()
         let trash = TrashService()
+        var refreshCloudQuota = false
 
         for index in 0 ... request.Sources.Count {
             let source = request.Sources[index]
@@ -400,6 +401,16 @@ func fileOperationWorker(window Window, queue FileOperationQueue, archives Archi
             try {
                 if Locations.IsCloud(source) || Locations.IsCloud(request.Destination) {
                     result = runCloudOperation(request, source, drive)
+
+                    if request.Kind == OperationKind.CreateFolder ||
+                        request.Kind == OperationKind.Copy ||
+                        request.Kind == OperationKind.Move ||
+                        request.Kind == OperationKind.Trash ||
+                        request.Kind == OperationKind.Restore ||
+                        request.Kind == OperationKind.Delete ||
+                        request.Kind == OperationKind.Empty {
+                        refreshCloudQuota = true
+                    }
                 } else {
                     result = switch request.Kind {
                         case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
@@ -440,6 +451,10 @@ func fileOperationWorker(window Window, queue FileOperationQueue, archives Archi
             }
         }
 
+        if refreshCloudQuota && drive.IsSignedIn() {
+            drive.RefreshAccountStatus()
+        }
+
         try {
             window.Post(() -> queue.CompleteOperation(request, results))
         } catch (failure InvalidOperationException) { }
@@ -457,25 +472,38 @@ func runCloudOperation(request OperationRequest, source string, drive GoogleDriv
     } else if request.Kind == OperationKind.Trash {
         err = drive.Trash(source)
         finalPath = ""
+    } else if request.Kind == OperationKind.Restore {
+        err = drive.Restore(source)
+        finalPath = ""
+    } else if request.Kind == OperationKind.Delete {
+        err = drive.DeletePermanently(source)
+        finalPath = ""
+    } else if request.Kind == OperationKind.Empty {
+        err = drive.EmptyTrash()
+        finalPath = ""
     } else if request.Kind == OperationKind.Copy || request.Kind == OperationKind.Move {
         let srcCloud = Locations.IsCloud(source)
         let dstCloud = Locations.IsCloud(request.Destination)
 
         if srcCloud && dstCloud {
-            err = drive.CopyCloudToCloud(source, request.Destination, "")
+            err = request.Kind == OperationKind.Move
+            ? drive.MoveCloudToCloud(source, request.Destination)
+            : drive.CopyCloudPath(source, request.Destination)
         } else if srcCloud && !dstCloud {
             let meta = drive.GetCachedMeta(Locations.CloudId(source))
             let name = meta != nil ? meta.Name: Locations.CloudId(source)
             finalPath = Path.Combine(request.Destination, name)
-            err = drive.DownloadTo(source, finalPath, nil)
+            err = drive.DownloadPath(source, request.Destination, nil)
         } else if !srcCloud && dstCloud {
-            err = drive.UploadFrom(source, request.Destination, Path.GetFileName(source), nil)
+            err = drive.UploadPath(source, request.Destination, nil)
             finalPath = request.Destination
         }
 
-        if err == "" && request.Kind == OperationKind.Move {
+        if err == "" && request.Kind == OperationKind.Move && !(srcCloud && dstCloud) {
             if srcCloud {
                 err = drive.Trash(source)
+            } else if Directory.Exists(source) {
+                Directory.Delete(source, true)
             } else if File.Exists(source) {
                 File.Delete(source)
             }
