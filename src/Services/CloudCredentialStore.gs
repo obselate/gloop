@@ -57,10 +57,10 @@ internal class CloudCredentialStore {
             }
 
             let tempPath = FilePath + ".tmp"
-            using let stream = File.Create(tempPath)
+            using let buffer = MemoryStream()
             let options = JsonWriterOptions()
             options.Indented = true
-            using let writer = Utf8JsonWriter(stream, options)
+            using let writer = Utf8JsonWriter(buffer, options)
 
             writer.WriteStartObject()
             writer.WriteString("clientId", config.ClientId ?? "")
@@ -76,7 +76,7 @@ internal class CloudCredentialStore {
             writer.WriteNumber("storageLimit", config.StorageLimit)
             writer.WriteEndObject()
             writer.Flush()
-            stream.Dispose()
+            File.WriteAllBytes(tempPath, buffer.ToArray())
 
             if OperatingSystem.IsLinux() {
                 File.SetUnixFileMode(tempPath, UnixFileMode.UserRead | UnixFileMode.UserWrite)
