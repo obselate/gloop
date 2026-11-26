@@ -37,7 +37,7 @@ partial class BrowserView {
                     Minimum: 0,
                     Maximum: 100,
                     Step: 5,
-                    Label: "Glass opacity",
+                    AccessibilityName: "Glass opacity",
                     FormatValue: value -> value.ToString("0", CultureInfo.InvariantCulture) + "%",
                     OnChange: value -> {
                         values.SetGlassOpacity(int32(value))
@@ -49,30 +49,40 @@ partial class BrowserView {
             )
             glassItems.Add(
                 Container{
-                    FlexDirection: FlexDirection.Row,
-                    AlignItems: AlignItems.FlexEnd,
-                    Gap: 8,
-                    OpacityStepperButton(
-                        "−",
-                        "Decrease opacity by 5%",
-                        currentOpacity <= 0,
-                        () -> {
-                            values.SetGlassOpacity(Math.Max(0, currentOpacity - 5))
-                            ApplyPreferences()
-                        },
-                        p
-                    ),
-                    Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, slider},
-                    OpacityStepperButton(
-                        "+",
-                        "Increase opacity by 5%",
-                        currentOpacity >= 100,
-                        () -> {
-                            values.SetGlassOpacity(Math.Min(100, currentOpacity + 5))
-                            ApplyPreferences()
-                        },
-                        p
-                    ),
+                    FlexShrink: 0,
+                    Gap: 6,
+                    Container{
+                        FlexDirection: FlexDirection.Row,
+                        AlignItems: AlignItems.Center,
+                        Container{FlexGrow: 1, FlexBasis: 0, Ui.Label("Glass opacity", p.Text, 13),},
+                        Ui.Label(currentOpacity.ToString("0", CultureInfo.InvariantCulture) + "%", p.Muted, 12),
+                    },
+                    Container{
+                        FlexDirection: FlexDirection.Row,
+                        AlignItems: AlignItems.Center,
+                        Gap: 8,
+                        OpacityStepperButton(
+                            "−",
+                            "Decrease opacity by 5%",
+                            currentOpacity <= 0,
+                            () -> {
+                                values.SetGlassOpacity(Math.Max(0, currentOpacity - 5))
+                                ApplyPreferences()
+                            },
+                            p
+                        ),
+                        Container{FlexGrow: 1, FlexBasis: 0, MinWidth: 0, Padding: Edges{Left: 10, Right: 10}, slider,},
+                        OpacityStepperButton(
+                            "+",
+                            "Increase opacity by 5%",
+                            currentOpacity >= 100,
+                            () -> {
+                                values.SetGlassOpacity(Math.Min(100, currentOpacity + 5))
+                                ApplyPreferences()
+                            },
+                            p
+                        ),
+                    },
                 }
             )
         }

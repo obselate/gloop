@@ -130,6 +130,18 @@ class Palette {
             Controls = Fluent ? ControlStyle.Fluent: ControlStyle.Standard,
             Selection = Fluent ? SelectionStyle.Indicator: baseTheme.Selection,
             TransitionMs = Fluent ? 83.0: baseTheme.TransitionMs,
+            Variant = nil,
+            RaisedColor = Surface,
+            FieldColor = Surface,
+            SunkenColor = Background,
+            HoverColor = Text.WithAlpha(dark ? .08: .06),
+            PressedColor = Text.WithAlpha(dark ? .12: .10),
+            ActiveColor = Text.WithAlpha(dark ? .10: .08),
+            StrongBorderColor = Muted.WithAlpha(.55),
+            InputBorderColor = Border,
+            FocusColor = Accent,
+            OnAccentColor = OnAccent,
+            DisabledTextColor = Muted.WithAlpha(.5),
         }
         if Glass {
             let glassTheme = colors.WithGlass()

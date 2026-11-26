@@ -61,21 +61,22 @@ class PreferenceRow {
             Cell.Mount[SliderInput, Goo.Widgets.Inputs.Slider](
                 key,
                 input with{
-                    ShowValue = true,
                     LabelColor = p.Text,
                     ValueColor = p.Muted,
                     TrackColor = p.Border,
                     FillColor = p.Accent,
                     ThumbColor = p.Accent,
                     ThumbBorderWidth = 3,
-                    ThumbBorderColor = p.Text,
-                    ThumbStyle = Style{BoxShadow: BoxShadow{OffsetY: 1, Blur: 4, Color: p.Shadow.WithAlpha(.4)}},
+                    ThumbBorderColor = p.WidgetTheme.RaisedColor,
+                    ThumbStyle = Style{BoxShadow: BoxShadow{OffsetY: 1, Blur: 3, Color: p.Shadow.WithAlpha(.28)}},
                     TrackThickness = 5,
                     ThumbSize = 20,
                     BackgroundColor = Color.Transparent,
                     ConfigureRoot = (_, root) -> {
                         root.BorderRadius = p.WidgetTheme.ControlRadius ?? 6.0
-                        root.FocusStyle = Style{OutlineColor: p.Accent, OutlineWidth: 1, OutlineOffset: -1}
+                        root.HoverStyle = Style{BackgroundColor: Color.Transparent}
+                        root.ActiveStyle = Style{BackgroundColor: Color.Transparent}
+                        root.FocusStyle = p.Ring(-1)
                     },
                 }
             ),

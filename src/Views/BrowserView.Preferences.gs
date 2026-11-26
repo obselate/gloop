@@ -379,6 +379,7 @@ partial class BrowserView {
                             Maximum: AppSettings.MaximumScrollSpeed,
                             Step: .25,
                             Label: "Scroll speed",
+                            ShowValue: true,
                             FormatValue: value -> value.ToString("0.##", CultureInfo.InvariantCulture) + "×",
                             OnChange: value -> {
                                 values.ScrollSpeed = value
