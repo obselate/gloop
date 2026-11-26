@@ -19,4 +19,5 @@ internal data struct BreadcrumbInput {
     var Edit Action
     var EditShortcut string
     var More Action[[]string, Point]
+    var CloudSegments IReadOnlyList[KeyValuePair[string, string]]?
 }

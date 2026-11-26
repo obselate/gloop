@@ -10,9 +10,33 @@ partial class BrowserView {
     }
 
     private func SpaceStatus() Blob? {
+        if width < 760 || Model.InRecent {
+            return nil
+        }
+
+        if Model.InCloud {
+            let cfg = Model.GoogleDrive.ConfigSnapshot()
+            let label = if cfg.StorageLimit > 0 {
+                FileSystemService.FormatSize(cfg.StorageUsed) + " of " + FileSystemService.FormatSize(cfg.StorageLimit)
+            } else if !string.IsNullOrWhiteSpace(cfg.AccountEmail) {
+                cfg.AccountEmail
+            } else {
+                "Google Drive"
+            }
+
+            return Container{
+                FlexDirection: FlexDirection.Row,
+                AlignItems: AlignItems.Center,
+                FlexShrink: 0,
+                Gap: 5,
+                Ui.Icon("cloud_done", palette.Muted, 14),
+                Ui.Label(label, palette.Muted, 11),
+            }
+        }
+
         let space = Model.Places.Space
 
-        if width < 760 || space.TotalBytes <= 0 || Model.InRecent {
+        if space.TotalBytes <= 0 {
             return nil
         }
 

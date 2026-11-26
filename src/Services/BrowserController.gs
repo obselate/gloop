@@ -22,6 +22,7 @@ class BrowserController {
     internal let Operations FileOperationQueue
     internal let Previews PreviewLoader
     internal let Archives ArchiveService = ArchiveService()
+    internal let GoogleDrive GoogleDriveService = GoogleDriveService()
     private let resetTypeSelect Action
     private let clipboardPaths List[string]
     private var clipboardCut bool
@@ -86,6 +87,10 @@ class BrowserController {
         get -> ActivePane().Kind == LocationKind.Trash
     }
 
+    internal prop InCloud bool {
+        get -> ActivePane().Kind == LocationKind.Cloud
+    }
+
     internal prop AtTrashRoot bool {
         get -> ActivePane().AtTrashRoot
     }
@@ -129,6 +134,24 @@ class BrowserController {
 
         if InRecent {
             return !empty || (action != "CopyPath" && action != "Properties")
+        }
+
+        if ActivePane().Kind == LocationKind.Cloud {
+            if action == "OpenTerminal" ||
+                action == "OpenTerminalHere" ||
+                action == "Properties" ||
+                action == "BulkRename" ||
+                action == "Extract" ||
+                action == "Compress" ||
+                action == "Restore" ||
+                action == "DeletePermanently" ||
+                action == "EmptyTrash" ||
+                action == "ToggleBookmark" {
+                return false
+            }
+
+            return !empty ||
+                (action != "CopyPath" && action != "Rename" && action != "Trash" && action != "Copy" && action != "Cut")
         }
 
         if ActivePane().DirectoryPath == "" || ActivePane().Error != "" {
@@ -197,6 +220,16 @@ class BrowserController {
 
         if InRecent {
             Navigate(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile))
+            return
+        }
+
+        if ActivePane().Kind == LocationKind.Cloud {
+            let cloudParent = GoogleDrive.ParentPath(path)
+
+            if cloudParent != path {
+                Directories.NavigateTo(cloudParent, ActivePane(), DirectoryMode.Push, -1, path)
+            }
+
             return
         }
 
@@ -489,7 +522,9 @@ class BrowserController {
     internal func Paste() {
         let destination = ActivePane().DirectoryPath
 
-        if clipboardPaths.Count == 0 || destination == "" || ActivePane().Kind != LocationKind.Folder {
+        if clipboardPaths.Count == 0 ||
+            destination == "" ||
+            (ActivePane().Kind != LocationKind.Folder && ActivePane().Kind != LocationKind.Cloud) {
             return
         }
 
@@ -569,6 +604,7 @@ class BrowserController {
         Directories.Close()
         Operations.Close()
         Previews.Close()
+        GoogleDrive.Dispose()
     }
 
     internal func CompleteClipboardMove(request OperationRequest, results List[OperationResult]) {

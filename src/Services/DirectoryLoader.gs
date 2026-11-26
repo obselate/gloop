@@ -346,15 +346,31 @@ class DirectoryLoader {
     }
 
     private func Load(queue LatestWork, generation int32, request DirectoryRequest) {
-        let snapshot = request.Kind == LocationKind.Archive
-        ? controller.Archives.ListArchive(request.Path, request.ShowHidden, () -> !queue.IsCurrent(generation))
-        : FileSystemService().List(
-            request.Path,
-            request.Kind,
-            request.AtTrashRoot,
-            request.ShowHidden,
-            request.IncludePermissions
-        )
+        var snapshot DirectorySnapshot
+
+        if request.Kind == LocationKind.Archive {
+            snapshot = controller.Archives.ListArchive(
+                request.Path,
+                request.ShowHidden,
+                () -> !queue.IsCurrent(generation)
+            )
+        } else if request.Kind == LocationKind.Cloud {
+            controller.GoogleDrive.ListFolder(
+                request.Path,
+                request.ShowHidden,
+                out var cloudEntries,
+                out var cloudError
+            )
+            snapshot = DirectorySnapshot{DirectoryPath: request.Path, Entries: cloudEntries, Error: cloudError}
+        } else {
+            snapshot = FileSystemService().List(
+                request.Path,
+                request.Kind,
+                request.AtTrashRoot,
+                request.ShowHidden,
+                request.IncludePermissions
+            )
+        }
 
         if !queue.IsCurrent(generation) {
             return

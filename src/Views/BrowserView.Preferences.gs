@@ -83,16 +83,19 @@ partial class BrowserView {
         }
     }
 
-    private func OpenPreferences() {
+    private func OpenPreferences(tab string = "Appearance") {
         if chooser != nil {
             return
         }
 
         preferenceInputs.Clear()
         shortcutFilter = ""
-        preferenceTab = "Appearance"
+        preferenceTab = tab
         themeColorRole = "Background"
         revealThemeEditor = false
+        cloudInputsLoaded = false
+        cloudStatusMessage = ""
+        cloudErrorMessage = ""
 
         OpenDialog(DialogKind.Preferences, "")
     }
@@ -106,6 +109,15 @@ partial class BrowserView {
             settings.ResetViewLayout()
         } else if preferenceTab == "Behavior" {
             settings.ResetBehavior()
+        } else if preferenceTab == "Cloud" {
+            Model.GoogleDrive.Disconnect()
+            cloudClientId = ""
+            cloudClientSecret = ""
+            cloudApiKey = ""
+            cloudRootFolderId = "root"
+            Model.GoogleDrive.UpdateSettings("", "", "", "root")
+            cloudStatusMessage = "Disconnected and cleared Google Drive credentials."
+            cloudErrorMessage = ""
         } else {
             settings.ResetAppearance()
             themeColorRole = "Background"
@@ -127,6 +139,8 @@ partial class BrowserView {
             LayoutRows(rows, values, p)
         } else if preferenceTab == "Behavior" {
             BehaviorRows(rows, values, p)
+        } else if preferenceTab == "Cloud" {
+            CloudRows(rows, p)
         } else {
             AppearanceRows(rows, values, p, compact)
         }
@@ -152,8 +166,8 @@ partial class BrowserView {
 
     private func PreferenceNavSidebar(p Palette) Blob {
         let items = List[Blob]()
-        let tabs = []string{"Appearance", "Layout", "Behavior", "Shortcuts"}
-        let icons = []string{"palette", "view_column", "tune", "keyboard"}
+        let tabs = []string{"Appearance", "Layout", "Behavior", "Cloud", "Shortcuts"}
+        let icons = []string{"palette", "view_column", "tune", "cloud", "keyboard"}
 
         for index in 0 ... tabs.Length {
             let tab = tabs[index]
@@ -186,7 +200,7 @@ partial class BrowserView {
     private func PreferenceTabStrip(p Palette) Blob {
         let tabs = Container{FlexDirection: FlexDirection.Row, Gap: 6}
 
-        for name in[]string{"Appearance", "Layout", "Behavior", "Shortcuts"} {
+        for name in[]string{"Appearance", "Layout", "Behavior", "Cloud", "Shortcuts"} {
             let tab = name
             let button = DialogButton(tab, () -> SelectPreferenceTab(tab), p, preferenceTab == tab)
             button.FlexGrow = 1

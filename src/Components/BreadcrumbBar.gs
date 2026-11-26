@@ -164,10 +164,26 @@ open class BreadcrumbBar : Cell[BreadcrumbInput] {
         case LocationKind.Recent: "history"
         case LocationKind.Trash: "delete"
         case LocationKind.Archive: "folder_zip"
+        case LocationKind.Cloud: "cloud_done"
         default: "folder"
     }
 
     private func BuildSegments(value BreadcrumbInput, names List[string], paths List[string]) {
+        if value.Kind == LocationKind.Cloud {
+            if let segments = value.CloudSegments {
+                for seg in segments {
+                    paths.Add(seg.Key)
+                    names.Add(seg.Value)
+                }
+
+                return
+            }
+
+            names.Add("Google Drive")
+            paths.Add(Locations.GoogleDriveRoot)
+            return
+        }
+
         var destination = "/"
         var rest = value.Path
 

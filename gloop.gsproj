@@ -37,6 +37,8 @@
     <GooMaterialIcon Include="check" />
     <GooMaterialIcon Include="chevron_right" />
     <GooMaterialIcon Include="close" />
+    <GooMaterialIcon Include="cloud" />
+    <GooMaterialIcon Include="cloud_done" />
     <GooMaterialIcon Include="code" />
     <GooMaterialIcon Include="content_copy" />
     <GooMaterialIcon Include="content_cut" />

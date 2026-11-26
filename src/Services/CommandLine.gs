@@ -82,6 +82,12 @@ internal class CommandLine {
                 return options
             }
 
+            if Locations.IsCloud(path) {
+                options.DirectoryPath = Locations.CloudPath(Locations.CloudId(path))
+
+                return options
+            }
+
             try {
                 let fullPath = Path.GetFullPath(path == "" ? ".": path)
 

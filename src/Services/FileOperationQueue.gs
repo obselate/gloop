@@ -57,6 +57,19 @@ class FileOperationQueue {
             return false
         }
 
+        if pane.Kind == LocationKind.Cloud &&
+            (
+            action == "BulkRename" ||
+                action == "Extract" ||
+                action == "Compress" ||
+                action == "Properties" ||
+                action == "OpenTerminal" ||
+                action == "OpenTerminalHere" ||
+                action == "ToggleBookmark"
+        ) {
+            return false
+        }
+
         if action == "Rename" || action == "BulkRename" {
             return pane.Kind != LocationKind.Trash && pane.SelectedPaths.Count > 0 && AcceptingOperations
         }
@@ -84,15 +97,14 @@ class FileOperationQueue {
         controller
         .Pane(paneIndex).Kind != LocationKind.Trash && controller.Pane(paneIndex).Kind != LocationKind.Archive
 
-    internal func CanDrop(destination string) bool -> AcceptingOperations && controller.Archives.Source(
-        destination
-    ) == "" &&
-        Locations.Resolve(
-        destination,
-        controller.TrashDirectory,
-        out var fullPath,
-        out var atTrashRoot
-    ) == LocationKind.Folder
+    internal func CanDrop(destination string) bool {
+        if !AcceptingOperations || controller.Archives.Source(destination) != "" {
+            return false
+        }
+
+        let kind = Locations.Resolve(destination, controller.TrashDirectory, out var fullPath, out var atTrashRoot)
+        return kind == LocationKind.Folder || kind == LocationKind.Cloud
+    }
 
     internal func Drop(sources List[string], destination string, copy bool) {
         if CanDrop(destination) && sources.Count > 0 {
@@ -284,7 +296,7 @@ class FileOperationQueue {
         if admission == OperationAdmission.StartWorker {
             let queue = this
             let owner = window
-            go fileOperationWorker(owner, queue, controller.Archives)
+            go fileOperationWorker(owner, queue, controller.Archives, controller.GoogleDrive)
         }
     }
 
@@ -375,7 +387,7 @@ class FileOperationQueue {
         kind == OperationKind.Delete
 }
 
-func fileOperationWorker(window Window, queue FileOperationQueue, archives ArchiveService) {
+func fileOperationWorker(window Window, queue FileOperationQueue, archives ArchiveService, drive GoogleDriveService) {
     while let request = queue.Take() {
         let results = List[OperationResult](request.Sources.Count)
         let operations = FileOperationService()
@@ -386,24 +398,32 @@ func fileOperationWorker(window Window, queue FileOperationQueue, archives Archi
             var result OperationResult
 
             try {
-                result = switch request.Kind {
-                    case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
-                    case OperationKind.Rename: operations.Rename(source, request.Name)
-                    case OperationKind.BulkRename: operations.Rename(source, request.Names[index])
-                    case OperationKind.Copy: operations.Copy(source, request.Destination)
-                    case OperationKind.Move: operations.Move(source, request.Destination)
-                    case OperationKind.Trash: trash.Trash(source)
-                    case OperationKind.Restore: trash.Restore(source)
-                    case OperationKind.Delete: trash.Delete(source)
-                    case OperationKind.Empty: trash.Empty()
-                    case OperationKind.Permissions: PropertiesService.SetPermission(
-                        source,
-                        request.Permission,
-                        request.Enabled
-                    )
-                    case OperationKind.Extract: archives.Extract(source, request.Destination)
-                    case OperationKind.Compress: archives.Compress(request.Sources, request.Destination, request.Name)
-                    default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
+                if Locations.IsCloud(source) || Locations.IsCloud(request.Destination) {
+                    result = runCloudOperation(request, source, drive)
+                } else {
+                    result = switch request.Kind {
+                        case OperationKind.CreateFolder: operations.CreateFolder(source, request.Name)
+                        case OperationKind.Rename: operations.Rename(source, request.Name)
+                        case OperationKind.BulkRename: operations.Rename(source, request.Names[index])
+                        case OperationKind.Copy: operations.Copy(source, request.Destination)
+                        case OperationKind.Move: operations.Move(source, request.Destination)
+                        case OperationKind.Trash: trash.Trash(source)
+                        case OperationKind.Restore: trash.Restore(source)
+                        case OperationKind.Delete: trash.Delete(source)
+                        case OperationKind.Empty: trash.Empty()
+                        case OperationKind.Permissions: PropertiesService.SetPermission(
+                            source,
+                            request.Permission,
+                            request.Enabled
+                        )
+                        case OperationKind.Extract: archives.Extract(source, request.Destination)
+                        case OperationKind.Compress: archives.Compress(
+                            request.Sources,
+                            request.Destination,
+                            request.Name
+                        )
+                        default: throw Exception("Unknown file operation kind: " + request.Kind.ToString())
+                    }
                 }
             } catch (failure Exception) {
                 result = OperationResult{Source: source, FinalPath: "", Error: failure.Message}
@@ -424,4 +444,45 @@ func fileOperationWorker(window Window, queue FileOperationQueue, archives Archi
             window.Post(() -> queue.CompleteOperation(request, results))
         } catch (failure InvalidOperationException) { }
     }
+}
+
+func runCloudOperation(request OperationRequest, source string, drive GoogleDriveService) OperationResult {
+    var err = ""
+    var finalPath = source
+
+    if request.Kind == OperationKind.CreateFolder {
+        err = drive.CreateFolder(source, request.Name)
+    } else if request.Kind == OperationKind.Rename {
+        err = drive.Rename(source, request.Name)
+    } else if request.Kind == OperationKind.Trash {
+        err = drive.Trash(source)
+        finalPath = ""
+    } else if request.Kind == OperationKind.Copy || request.Kind == OperationKind.Move {
+        let srcCloud = Locations.IsCloud(source)
+        let dstCloud = Locations.IsCloud(request.Destination)
+
+        if srcCloud && dstCloud {
+            err = drive.CopyCloudToCloud(source, request.Destination, "")
+        } else if srcCloud && !dstCloud {
+            let meta = drive.GetCachedMeta(Locations.CloudId(source))
+            let name = meta != nil ? meta.Name: Locations.CloudId(source)
+            finalPath = Path.Combine(request.Destination, name)
+            err = drive.DownloadTo(source, finalPath, nil)
+        } else if !srcCloud && dstCloud {
+            err = drive.UploadFrom(source, request.Destination, Path.GetFileName(source), nil)
+            finalPath = request.Destination
+        }
+
+        if err == "" && request.Kind == OperationKind.Move {
+            if srcCloud {
+                err = drive.Trash(source)
+            } else if File.Exists(source) {
+                File.Delete(source)
+            }
+        }
+    } else {
+        err = "Operation " + request.Kind.ToString() + " is not supported on Google Drive."
+    }
+
+    return OperationResult{Source: source, FinalPath: finalPath, Error: err}
 }

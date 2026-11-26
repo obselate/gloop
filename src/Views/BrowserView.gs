@@ -166,6 +166,9 @@ partial class BrowserView : Cell {
         value.MetricsChanged += PreviewWindowMetrics
 
         thumbnails = ThumbnailService(value)
+        if let thumb = thumbnails {
+            thumb.CloudProvider = Model.GoogleDrive
+        }
         selectionInfo = SelectionInfoService(value)
         folderCounts = FolderCountService(
             value,
@@ -229,6 +232,16 @@ partial class BrowserView : Cell {
         thumbnails?.Dispose()
         folderCounts?.Dispose()
         selectionInfo?.Dispose()
+    }
+
+    private func OpenGoogleDrive() {
+        if Model.GoogleDrive.IsConfigured() {
+            Model.Navigate(Locations.GoogleDriveRoot)
+            FocusFiles()
+            return
+        }
+
+        OpenPreferences("Cloud")
     }
 
     internal func CloseSafely() bool -> !setupBusy && Model.Operations.CloseSafely()
@@ -529,7 +542,9 @@ partial class BrowserView : Cell {
                 EjectVolume,
                 Model.TrashDirectory,
                 Model.Places.TrashCount,
-                chooser == nil
+                chooser == nil,
+                Model.GoogleDrive.IsConfigured(),
+                () -> OpenGoogleDrive()
             )
         }
 

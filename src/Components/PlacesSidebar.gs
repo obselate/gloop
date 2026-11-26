@@ -32,11 +32,26 @@ class PlacesSidebar {
             ejectVolume Action[Volume]? = nil,
             trashPath string = "",
             trashCount int32 = 0,
-            showVirtual bool = true
+            showVirtual bool = true,
+            cloudConnected bool = false,
+            openCloud Action? = nil
         ) Blob {
             let places = List[Blob]()
 
-            BuildPlaces(places, path, navigate, p, standardPlaces, drop, dropPath, showVirtual, trashPath, trashCount)
+            BuildPlaces(
+                places,
+                path,
+                navigate,
+                p,
+                standardPlaces,
+                drop,
+                dropPath,
+                showVirtual,
+                trashPath,
+                trashCount,
+                cloudConnected,
+                openCloud
+            )
 
             BuildBookmarks(
                 places,
@@ -95,7 +110,9 @@ class PlacesSidebar {
             dropPath string,
             showVirtual bool,
             trashPath string,
-            trashCount int32
+            trashCount int32,
+            cloudConnected bool,
+            openCloud Action?
         ) {
             places.Add(Ui.GroupGap())
 
@@ -134,6 +151,12 @@ class PlacesSidebar {
                     }
 
                     places.Add(Place("delete", "Trash", trashPath, path, navigate, p, trailing: count))
+                }
+
+                if let cloudAction = openCloud {
+                    let cloudTarget = Locations.IsCloud(path) ? path: Locations.GoogleDriveRoot
+                    let cloudIcon = cloudConnected ? "cloud_done": "cloud"
+                    places.Add(Place(cloudIcon, "Google Drive", cloudTarget, path, _ -> cloudAction(), p))
                 }
             }
         }

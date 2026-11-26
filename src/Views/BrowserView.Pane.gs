@@ -148,6 +148,9 @@ partial class BrowserView {
                 },
                 EditShortcut: settings.ShortcutFor("FocusLocation"),
                 More: (paths, point) -> OpenPathMenu(index, paths, point),
+                CloudSegments: pane.Kind == LocationKind.Cloud ? Model.GoogleDrive.BreadcrumbChain(
+                    pane.DirectoryPath
+                ): nil,
             }
         )
     }

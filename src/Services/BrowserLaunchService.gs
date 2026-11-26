@@ -30,6 +30,14 @@ internal class BrowserLaunchService {
                 controller.Previews.RequestReload()
                 controller.Previews.QueuePreview()
             }
+        } else if controller.ActivePane().Kind == LocationKind.Cloud {
+            let owner = window
+            let launches = this
+            let drive = controller.GoogleDrive
+            let cloudPath = entry.FullPath
+            let name = entry.Name
+
+            go browserOpenCloud(owner, launches, drive, cloudPath, name)
         } else if !controller.InTrashView {
             let owner = window
             let launches = this
@@ -85,6 +93,26 @@ func browserOpen(window Window, launches BrowserLaunchService, path string) {
         error = FileSystemService().Open(path)
     } catch (failure Exception) {
         error = "Open failed for " + path + ": " + failure.Message
+    }
+
+    try {
+        window.Post(() -> launches.CompleteOpen(error))
+    } catch (failure InvalidOperationException) { }
+}
+
+func browserOpenCloud(
+    window Window,
+    launches BrowserLaunchService,
+    drive GoogleDriveService,
+    path string,
+    name string
+) {
+    var error string
+
+    try {
+        error = drive.OpenItem(path, name)
+    } catch (failure Exception) {
+        error = "Open failed for " + name + ": " + failure.Message
     }
 
     try {
